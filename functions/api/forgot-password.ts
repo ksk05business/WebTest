@@ -6,9 +6,7 @@ interface Env {
 }
 
 const OTP_TTL_MINUTES = 10;
-// TODO: yourdomain.com を wrangler で email sending を有効化した実際のドメインに差し替えてください
-// (npx wrangler login → npx wrangler email sending enable yourdomain.com)
-const FROM_ADDRESS = "noreply@yourdomain.com";
+const FROM_ADDRESS = "noreply@shukatsu-webtest.com";
 
 type ForgotPasswordBody = {
   email?: unknown;
