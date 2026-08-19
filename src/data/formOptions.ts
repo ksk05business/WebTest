@@ -1,3 +1,6 @@
+export const GRADUATION_YEARS = Array.from({ length: 10 }, (_, i) => 2026 + i);
+export const GRADUATION_MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+
 export const FACULTY_TYPES = [
   "文系学部",
   "理系学部",

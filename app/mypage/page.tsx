@@ -1,0 +1,295 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { DashboardHeader } from "@/src/components/DashboardHeader";
+import { UniversityField } from "@/src/components/UniversityField";
+import { IndustrySelect } from "@/src/components/IndustrySelect";
+import { FACULTY_TYPES, GRADUATION_MONTHS, GRADUATION_YEARS } from "@/src/data/formOptions";
+
+const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
+
+type Profile = {
+  last_name: string;
+  first_name: string;
+  last_name_romaji: string;
+  first_name_romaji: string;
+  email: string;
+  faculty_type: string;
+  university: string;
+  industry_first: string;
+  industry_second: string;
+  industry_third: string;
+  graduation_year: number;
+  graduation_month: number;
+};
+
+export default function MyPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastNameRomaji, setLastNameRomaji] = useState("");
+  const [firstNameRomaji, setFirstNameRomaji] = useState("");
+  const [facultyType, setFacultyType] = useState("");
+  const [university, setUniversity] = useState("");
+  const [industryFirst, setIndustryFirst] = useState("");
+  const [industrySecond, setIndustrySecond] = useState("");
+  const [industryThird, setIndustryThird] = useState("");
+  const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
+  const [graduationMonth, setGraduationMonth] = useState("3");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("spiUser");
+    if (!raw) {
+      router.replace("/login");
+      return;
+    }
+    const user = JSON.parse(raw) as { email?: string };
+    if (!user.email) {
+      router.replace("/login");
+      return;
+    }
+
+    fetch(`/api/me?email=${encodeURIComponent(user.email)}`)
+      .then((res) => res.json())
+      .then((data: Profile & { error?: string }) => {
+        if (data.error) {
+          setError(data.error);
+          return;
+        }
+        setEmail(data.email);
+        setLastName(data.last_name);
+        setFirstName(data.first_name);
+        setLastNameRomaji(data.last_name_romaji);
+        setFirstNameRomaji(data.first_name_romaji);
+        setFacultyType(data.faculty_type);
+        setUniversity(data.university);
+        setIndustryFirst(data.industry_first);
+        setIndustrySecond(data.industry_second);
+        setIndustryThird(data.industry_third);
+        setGraduationYear(String(data.graduation_year));
+        setGraduationMonth(String(data.graduation_month));
+      })
+      .catch(() => setError("プロフィールの取得に失敗しました"))
+      .finally(() => setLoading(false));
+  }, [router]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    if (
+      !lastName.trim() ||
+      !firstName.trim() ||
+      !lastNameRomaji.trim() ||
+      !firstNameRomaji.trim() ||
+      !facultyType ||
+      !university ||
+      !industryFirst ||
+      !industrySecond ||
+      !industryThird
+    ) {
+      setError("すべての項目を入力してください");
+      return;
+    }
+    if (!ROMAJI_PATTERN.test(lastNameRomaji.trim()) || !ROMAJI_PATTERN.test(firstNameRomaji.trim())) {
+      setError("Last Name / First Nameは半角アルファベットで入力してください");
+      return;
+    }
+    if (
+      industryFirst === industrySecond ||
+      industryFirst === industryThird ||
+      industrySecond === industryThird
+    ) {
+      setError("第一〜第三志望の業界はそれぞれ異なるものを選択してください");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          lastName,
+          firstName,
+          lastNameRomaji,
+          firstNameRomaji,
+          facultyType,
+          university,
+          industryFirst,
+          industrySecond,
+          industryThird,
+          graduationYear: Number(graduationYear),
+          graduationMonth: Number(graduationMonth),
+        }),
+      });
+      let data: { error?: string; name?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        // API側からJSON以外の応答が返ってきた場合
+      }
+      if (!res.ok || !data.name) {
+        setError(data.error ?? `更新に失敗しました（status: ${res.status}）`);
+        return;
+      }
+      localStorage.setItem("spiUser", JSON.stringify({ name: data.name, email }));
+      setSuccess(true);
+    } catch {
+      setError("通信エラーが発生しました。時間をおいて再度お試しください。");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen">
+      <DashboardHeader />
+
+      <main className="mx-auto flex max-w-md flex-col gap-6 px-6 py-10">
+        <h1 className="text-2xl font-bold text-gray-900">マイページ</h1>
+
+        {loading ? (
+          <p className="text-sm text-gray-500">読み込み中...</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              メールアドレス
+              <input
+                type="email"
+                value={email}
+                disabled
+                className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-gray-500"
+              />
+              <span className="text-xs text-gray-400">
+                メールアドレスの変更は現在サポートしていません
+              </span>
+            </label>
+
+            <div className="flex gap-2">
+              <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+                苗字
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                />
+              </label>
+              <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+                名前
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                />
+              </label>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-gray-500">アルファベット表記</p>
+              <div className="flex gap-2">
+                <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+                  Last Name
+                  <input
+                    type="text"
+                    value={lastNameRomaji}
+                    onChange={(e) => setLastNameRomaji(e.target.value)}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+                  First Name
+                  <input
+                    type="text"
+                    value={firstNameRomaji}
+                    onChange={(e) => setFirstNameRomaji(e.target.value)}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              大学名
+              <UniversityField value={university} onChange={setUniversity} />
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              学部・区分
+              <select
+                value={facultyType}
+                onChange={(e) => setFacultyType(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              >
+                <option value="">選択してください</option>
+                {FACULTY_TYPES.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-medium text-gray-700">志望業界（第一〜第三志望）</p>
+              <IndustrySelect label="第一志望" value={industryFirst} onChange={setIndustryFirst} />
+              <IndustrySelect label="第二志望" value={industrySecond} onChange={setIndustrySecond} />
+              <IndustrySelect label="第三志望" value={industryThird} onChange={setIndustryThird} />
+            </div>
+
+            <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              卒業年月
+              <div className="flex gap-2">
+                <select
+                  value={graduationYear}
+                  onChange={(e) => setGraduationYear(e.target.value)}
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                >
+                  {GRADUATION_YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}年
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={graduationMonth}
+                  onChange={(e) => setGraduationMonth(e.target.value)}
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                >
+                  {GRADUATION_MONTHS.map((m) => (
+                    <option key={m} value={m}>
+                      {m}月
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+            {success && (
+              <p className="text-sm font-medium text-green-600">保存しました。</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="mt-2 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {saving ? "保存中..." : "保存する"}
+            </button>
+          </form>
+        )}
+      </main>
+    </div>
+  );
+}
