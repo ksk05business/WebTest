@@ -23,6 +23,18 @@
 - 同意・撤回は`consent_events`テーブルに履歴として記録する（個人情報保護法29条の第三者提供記録の裏付けとして）。
 - `app/terms/page.tsx`・`app/privacy/page.tsx`は弁護士レビュー前提の下書き。実際に第三者提供を開始する前に、文面と事業モデル（職業紹介事業許可の要否を含む）について弁護士のレビューを必ず受けること。
 
+## スカウト機能・問題DBのスキーマ（schema.sql、API未実装）
+
+`schema.sql`に以下を追加済み。**API・フロントエンドはまだ実装していない**（スキーマ定義のみ）。
+
+- `company_profiles`: 企業アカウント。職業安定法上「募集情報等提供事業」として運営する前提（`provider_business_type`）。なりすまし対策として`approved`が1になるまで候補者閲覧・スカウト送信はさせない設計にすること。
+- `scouts`: スカウト本体。**2段階開示フラグ`is_anonymous`**が要。企業は`users.scout_consent = 1`の学生の匿名属性（`university_category` / `faculty_type` / `industry_first`〜`third` / `exam_results.deviation_score`）のみを見て匿名スカウトを送る。学生が`status='accepted'`で承諾したときに限り`is_anonymous`を0にし、そのスカウトについてのみ氏名・メールを開示する。運営側で手動マッチングや推薦は行わない（システムが状態遷移を処理するのみ）。
+- `exam_results`: 模試結果のサーバー側記録。現状フロントは`localStorage`の`spiResult`/`spiResultHistory`にしか結果を持たないため、スカウト機能を実装する際は`/test`側から本テーブルへの書き込みAPIが別途必要。
+- `users.university_category`: 匿名開示用の大学区分（大学名そのものは開示しない）。カテゴリのマッピングロジックは未実装。
+- `questions` / `question_choices`: D1ベースの問題バンク（分野・難易度・オリジナリティメモ・レビューステータス付き）。**現状`/test`は`src/data/questions.ts`のTS配列を使い続けており、このテーブルへの移行・読み込みAPIはまだ実装していない**。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
+
+**本番D1へは`schema.sql`の再実行だけでは`users.university_category`は追加されない**（`users`テーブルは既に存在するため`CREATE TABLE IF NOT EXISTS`がno-opになる）。追加するには一度だけ次を実行する必要がある: `wrangler d1 execute webtest-db --remote --command "ALTER TABLE users ADD COLUMN university_category TEXT"`。新規テーブル（`company_profiles`, `scouts`, `exam_results`, `questions`, `question_choices`）は`schema.sql`の再実行で作成される。
+
 # 応答・進め方のルール
 
 - ユーザーへの応答は常に日本語で行う。
