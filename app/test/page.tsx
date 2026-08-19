@@ -13,9 +13,18 @@ export default function TestPage() {
   const [answered, setAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [score, setScore] = useState(0);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const question = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
+
+  useEffect(() => {
+    if (!localStorage.getItem("spiUser")) {
+      router.replace("/login");
+      return;
+    }
+    setAuthChecked(true);
+  }, [router]);
 
   // reset timer whenever we move to a new question
   useEffect(() => {
@@ -24,14 +33,14 @@ export default function TestPage() {
 
   // countdown
   useEffect(() => {
-    if (answered) return;
+    if (!authChecked || answered) return;
     if (timeLeft <= 0) {
       setAnswered(true);
       return;
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(id);
-  }, [timeLeft, answered]);
+  }, [timeLeft, answered, authChecked]);
 
   function handleSelect(label: string) {
     if (answered) return;
@@ -57,6 +66,10 @@ export default function TestPage() {
   }
 
   const isCorrect = selected === question.answer;
+
+  if (!authChecked) {
+    return null;
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
