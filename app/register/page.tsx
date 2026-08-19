@@ -253,9 +253,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-gray-500">
-            アルファベット表記（英語版サイトで使用します）
-          </p>
+          <p className="text-xs text-gray-500">アルファベット表記</p>
           <div className="flex gap-2">
             <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
               Last Name
