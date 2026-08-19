@@ -213,17 +213,18 @@ export default function RegisterPage() {
           graduationMonth: Number(graduationMonth),
         }),
       });
-      let data: { error?: string } = {};
+      let data: { error?: string; name?: string } = {};
       try {
         data = await res.json();
       } catch {
         // API側からJSON以外の応答が返ってきた場合（例: エンドポイント未配信）
       }
-      if (!res.ok) {
+      if (!res.ok || !data.name) {
         setError(data.error ?? `登録に失敗しました（status: ${res.status}）`);
         return;
       }
-      router.push("/login");
+      localStorage.setItem("spiUser", JSON.stringify({ name: data.name, email }));
+      router.push("/dashboard");
     } catch {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
@@ -309,8 +310,17 @@ export default function RegisterPage() {
             type="password"
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            className={`rounded-lg border px-3 py-2 text-gray-900 ${
+              passwordConfirm && password !== passwordConfirm
+                ? "border-red-400"
+                : "border-gray-300"
+            }`}
           />
+          {passwordConfirm && password !== passwordConfirm && (
+            <p className="text-xs font-medium text-red-600">
+              パスワードが一致しません。もう一度正しいパスワードを入力してください。
+            </p>
+          )}
         </label>
 
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
@@ -373,7 +383,7 @@ export default function RegisterPage() {
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || (passwordConfirm !== "" && password !== passwordConfirm)}
           className="mt-2 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {submitting ? "登録中..." : "登録する"}

@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [loggedInName, setLoggedInName] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,29 +38,12 @@ export default function LoginPage() {
         return;
       }
       localStorage.setItem("spiUser", JSON.stringify({ name: data.name, email }));
-      setLoggedInName(data.name);
+      router.push("/dashboard");
     } catch {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
       setSubmitting(false);
     }
-  }
-
-  if (loggedInName) {
-    return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="text-lg font-semibold text-gray-900">
-          ようこそ、{loggedInName}さん
-        </p>
-        <p className="text-gray-600">ログインに成功しました。</p>
-        <Link
-          href="/"
-          className="rounded-full bg-blue-600 px-8 py-3 font-semibold text-white shadow hover:bg-blue-700"
-        >
-          トップページへ
-        </Link>
-      </main>
-    );
   }
 
   return (

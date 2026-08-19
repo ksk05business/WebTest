@@ -53,10 +53,14 @@ export default function TestPage() {
 
   function handleNext() {
     if (isLast) {
-      localStorage.setItem(
-        "spiResult",
-        JSON.stringify({ score, total: questions.length })
-      );
+      const total = questions.length;
+      localStorage.setItem("spiResult", JSON.stringify({ score, total }));
+
+      const rawHistory = localStorage.getItem("spiResultHistory");
+      const history = rawHistory ? JSON.parse(rawHistory) : [];
+      history.push({ score, total, date: new Date().toISOString() });
+      localStorage.setItem("spiResultHistory", JSON.stringify(history.slice(-20)));
+
       router.push("/result");
       return;
     }

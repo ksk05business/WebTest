@@ -117,5 +117,5 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     )
     .run();
 
-  return Response.json({ ok: true });
+  return Response.json({ ok: true, name: `${lastName} ${firstName}` });
 };

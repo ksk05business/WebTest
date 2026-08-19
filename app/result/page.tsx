@@ -58,8 +58,8 @@ export default function ResultPage() {
       >
         もう一度挑戦する
       </Link>
-      <Link href="/" className="text-sm text-gray-500 underline">
-        トップに戻る
+      <Link href="/dashboard" className="text-sm text-gray-500 underline">
+        ダッシュボードに戻る
       </Link>
     </main>
   );
