@@ -11,7 +11,8 @@ type LoginBody = {
 
 type UserRow = {
   id: number;
-  name: string;
+  last_name: string;
+  first_name: string;
   password_hash: string;
   password_salt: string;
 };
@@ -31,7 +32,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const user = await context.env.DB.prepare(
-    "SELECT id, name, password_hash, password_salt FROM users WHERE email = ?"
+    "SELECT id, last_name, first_name, password_hash, password_salt FROM users WHERE email = ?"
   )
     .bind(email)
     .first<UserRow>();
@@ -45,5 +46,5 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "メールアドレスまたはパスワードが違います" }, { status: 401 });
   }
 
-  return Response.json({ ok: true, name: user.name });
+  return Response.json({ ok: true, name: `${user.last_name} ${user.first_name}` });
 };

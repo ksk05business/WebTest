@@ -5,7 +5,10 @@ interface Env {
 }
 
 type RegisterBody = {
-  name?: unknown;
+  lastName?: unknown;
+  firstName?: unknown;
+  lastNameRomaji?: unknown;
+  firstNameRomaji?: unknown;
   email?: unknown;
   password?: unknown;
   facultyType?: unknown;
@@ -26,7 +29,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const {
-    name,
+    lastName,
+    firstName,
+    lastNameRomaji,
+    firstNameRomaji,
     email,
     password,
     facultyType,
@@ -39,8 +45,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   } = body;
 
   if (
-    typeof name !== "string" ||
-    !name.trim() ||
+    typeof lastName !== "string" ||
+    !lastName.trim() ||
+    typeof firstName !== "string" ||
+    !firstName.trim() ||
+    typeof lastNameRomaji !== "string" ||
+    !lastNameRomaji.trim() ||
+    typeof firstNameRomaji !== "string" ||
+    !firstNameRomaji.trim() ||
     typeof email !== "string" ||
     !email.trim() ||
     typeof password !== "string" ||
@@ -83,12 +95,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   await context.env.DB.prepare(
     `INSERT INTO users
-      (name, email, password_hash, password_salt, faculty_type, university,
-       industry_first, industry_second, industry_third, graduation_year, graduation_month)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      (last_name, first_name, last_name_romaji, first_name_romaji, email, password_hash, password_salt,
+       faculty_type, university, industry_first, industry_second, industry_third, graduation_year, graduation_month)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   )
     .bind(
-      name,
+      lastName,
+      firstName,
+      lastNameRomaji,
+      firstNameRomaji,
       email,
       hash,
       salt,

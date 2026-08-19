@@ -1,4 +1,4 @@
-// 主要大学（国公立・私立）を五十音順に配置。「海外大学」は呼び出し側で先頭に付与する。
+// 主要大学（国公立・私立）を五十音順に配置。「その他国内大学」「海外大学」は呼び出し側で末尾に付与する。
 export const UNIVERSITIES: string[] = [
   "愛知学院大学",
   "愛知教育大学",
@@ -64,11 +64,10 @@ export const UNIVERSITIES: string[] = [
   "津田塾大学",
   "電気通信大学",
   "東海大学",
-  "東京大学",
-  "東京医科歯科大学",
+  "東京科学大学",
   "東京外国語大学",
   "東京学芸大学",
-  "東京工業大学",
+  "東京大学",
   "東京都立大学",
   "東京理科大学",
   "東北大学",
@@ -99,4 +98,6 @@ export const UNIVERSITIES: string[] = [
   "早稲田大学",
 ];
 
+export const OTHER_DOMESTIC_UNIVERSITY = "その他国内大学";
 export const OVERSEAS_UNIVERSITY = "海外大学";
+export const MANUAL_ENTRY_UNIVERSITIES = [OTHER_DOMESTIC_UNIVERSITY, OVERSEAS_UNIVERSITY];

@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FACULTY_TYPES, INDUSTRY_GROUPS } from "@/src/data/formOptions";
-import { OVERSEAS_UNIVERSITY, UNIVERSITIES } from "@/src/data/universities";
+import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 
-const UNIVERSITY_OPTIONS = [OVERSEAS_UNIVERSITY, ...UNIVERSITIES];
+const UNIVERSITY_OPTIONS = [...UNIVERSITIES, ...MANUAL_ENTRY_UNIVERSITIES];
 const GRADUATION_YEARS = Array.from({ length: 10 }, (_, i) => 2026 + i);
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
 function IndustrySelect({
   label,
@@ -49,8 +50,34 @@ function UniversityField({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const [manualLabel, setManualLabel] = useState<string | null>(null);
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
+
+  if (manualLabel) {
+    return (
+      <div className="flex flex-col gap-1">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={`${manualLabel}の大学名を入力してください`}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            setManualLabel(null);
+            setQuery("");
+            onChange("");
+          }}
+          className="self-start text-xs text-blue-600 underline"
+        >
+          一覧から選び直す
+        </button>
+      </div>
+    );
+  }
 
   const filtered =
     query.trim() === ""
@@ -82,6 +109,12 @@ function UniversityField({
               <button
                 type="button"
                 onMouseDown={() => {
+                  if (MANUAL_ENTRY_UNIVERSITIES.includes(u)) {
+                    setManualLabel(u);
+                    onChange("");
+                    setOpen(false);
+                    return;
+                  }
                   onChange(u);
                   setQuery(u);
                   setOpen(false);
@@ -100,9 +133,13 @@ function UniversityField({
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastNameRomaji, setLastNameRomaji] = useState("");
+  const [firstNameRomaji, setFirstNameRomaji] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [facultyType, setFacultyType] = useState("");
   const [university, setUniversity] = useState("");
   const [industryFirst, setIndustryFirst] = useState("");
@@ -118,9 +155,13 @@ export default function RegisterPage() {
     setError(null);
 
     if (
-      !name.trim() ||
+      !lastName.trim() ||
+      !firstName.trim() ||
+      !lastNameRomaji.trim() ||
+      !firstNameRomaji.trim() ||
       !email.trim() ||
       !password ||
+      !passwordConfirm ||
       !facultyType ||
       !university ||
       !industryFirst ||
@@ -130,8 +171,16 @@ export default function RegisterPage() {
       setError("すべての項目を入力してください");
       return;
     }
+    if (!ROMAJI_PATTERN.test(lastNameRomaji.trim()) || !ROMAJI_PATTERN.test(firstNameRomaji.trim())) {
+      setError("Last Name / First Nameは半角アルファベットで入力してください");
+      return;
+    }
     if (password.length < 8) {
       setError("パスワードは8文字以上で入力してください");
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setError("パスワードが一致しません");
       return;
     }
     if (
@@ -149,7 +198,10 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
+          lastName,
+          firstName,
+          lastNameRomaji,
+          firstNameRomaji,
           email,
           password,
           facultyType,
@@ -179,15 +231,54 @@ export default function RegisterPage() {
       <h1 className="text-2xl font-bold text-gray-900">会員登録</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-          名前
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
-          />
-        </label>
+        <div className="flex gap-2">
+          <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+            苗字
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            />
+          </label>
+          <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+            名前
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-gray-500">
+            アルファベット表記（英語版サイトで使用します）
+          </p>
+          <div className="flex gap-2">
+            <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+              Last Name
+              <input
+                type="text"
+                value={lastNameRomaji}
+                onChange={(e) => setLastNameRomaji(e.target.value)}
+                placeholder="Yamada"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+              First Name
+              <input
+                type="text"
+                value={firstNameRomaji}
+                onChange={(e) => setFirstNameRomaji(e.target.value)}
+                placeholder="Taro"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              />
+            </label>
+          </div>
+        </div>
 
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
           メールアドレス
@@ -205,6 +296,16 @@ export default function RegisterPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+          パスワード（確認用）
+          <input
+            type="password"
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
             className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
           />
         </label>
