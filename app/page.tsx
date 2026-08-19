@@ -18,6 +18,9 @@ export default function Home() {
         >
           SPI非言語 練習スタート
         </Link>
+        <Link href="/register" className="text-sm text-blue-50 underline">
+          会員登録はこちら
+        </Link>
       </div>
     </main>
   );

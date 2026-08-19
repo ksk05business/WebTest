@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "spi-mock-app",
+  "compatibility_date": "2026-08-19",
+  "pages_build_output_dir": "out",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "spi_mock_app_db",
+      "database_id": "REPLACE_WITH_WRANGLER_D1_CREATE_ID"
+    }
+  ]
+}
