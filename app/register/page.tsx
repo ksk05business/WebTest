@@ -213,9 +213,14 @@ export default function RegisterPage() {
           graduationMonth: Number(graduationMonth),
         }),
       });
-      const data = await res.json();
+      let data: { error?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        // API側からJSON以外の応答が返ってきた場合（例: エンドポイント未配信）
+      }
       if (!res.ok) {
-        setError(data.error ?? "登録に失敗しました");
+        setError(data.error ?? `登録に失敗しました（status: ${res.status}）`);
         return;
       }
       router.push("/login");
@@ -309,6 +314,11 @@ export default function RegisterPage() {
         </label>
 
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+          大学名
+          <UniversityField value={university} onChange={setUniversity} />
+        </label>
+
+        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
           学部・区分
           <select
             value={facultyType}
@@ -322,11 +332,6 @@ export default function RegisterPage() {
               </option>
             ))}
           </select>
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-          大学名
-          <UniversityField value={university} onChange={setUniversity} />
         </label>
 
         <div className="flex flex-col gap-3">

@@ -26,9 +26,14 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "ログインに失敗しました");
+      let data: { error?: string; name?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        // API側からJSON以外の応答が返ってきた場合（例: エンドポイント未配信）
+      }
+      if (!res.ok || !data.name) {
+        setError(data.error ?? `ログインに失敗しました（status: ${res.status}）`);
         return;
       }
       localStorage.setItem("spiUser", JSON.stringify({ name: data.name, email }));
