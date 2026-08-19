@@ -6,8 +6,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "spi_mock_app_db",
-      "database_id": "REPLACE_WITH_WRANGLER_D1_CREATE_ID"
+      "database_name": "webtest-db",
+      "database_id": "REPLACE_WITH_ACTUAL_WEBTEST_DB_ID"
     }
   ],
   "send_email": [
