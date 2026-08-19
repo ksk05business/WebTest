@@ -10,7 +10,9 @@ type RegisterBody = {
   password?: unknown;
   facultyType?: unknown;
   university?: unknown;
-  industry?: unknown;
+  industryFirst?: unknown;
+  industrySecond?: unknown;
+  industryThird?: unknown;
   graduationYear?: unknown;
   graduationMonth?: unknown;
 };
@@ -29,7 +31,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     password,
     facultyType,
     university,
-    industry,
+    industryFirst,
+    industrySecond,
+    industryThird,
     graduationYear,
     graduationMonth,
   } = body;
@@ -45,12 +49,27 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     !facultyType ||
     typeof university !== "string" ||
     !university ||
-    typeof industry !== "string" ||
-    !industry ||
+    typeof industryFirst !== "string" ||
+    !industryFirst ||
+    typeof industrySecond !== "string" ||
+    !industrySecond ||
+    typeof industryThird !== "string" ||
+    !industryThird ||
     typeof graduationYear !== "number" ||
     typeof graduationMonth !== "number"
   ) {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
+  }
+
+  if (
+    industryFirst === industrySecond ||
+    industryFirst === industryThird ||
+    industrySecond === industryThird
+  ) {
+    return Response.json(
+      { error: "第一〜第三志望の業界はそれぞれ異なるものを選択してください" },
+      { status: 400 }
+    );
   }
 
   const existing = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
@@ -64,10 +83,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   await context.env.DB.prepare(
     `INSERT INTO users
-      (name, email, password_hash, password_salt, faculty_type, university, industry, graduation_year, graduation_month)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      (name, email, password_hash, password_salt, faculty_type, university,
+       industry_first, industry_second, industry_third, graduation_year, graduation_month)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   )
-    .bind(name, email, hash, salt, facultyType, university, industry, graduationYear, graduationMonth)
+    .bind(
+      name,
+      email,
+      hash,
+      salt,
+      facultyType,
+      university,
+      industryFirst,
+      industrySecond,
+      industryThird,
+      graduationYear,
+      graduationMonth
+    )
     .run();
 
   return Response.json({ ok: true });

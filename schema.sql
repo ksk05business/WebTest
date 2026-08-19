@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS users (
   password_salt TEXT NOT NULL,
   faculty_type TEXT NOT NULL,
   university TEXT NOT NULL,
-  industry TEXT NOT NULL,
+  industry_first TEXT NOT NULL,
+  industry_second TEXT NOT NULL,
+  industry_third TEXT NOT NULL,
   graduation_year INTEGER NOT NULL,
   graduation_month INTEGER NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))

@@ -3,13 +3,44 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FACULTY_TYPES, INDUSTRIES } from "@/src/data/formOptions";
+import { FACULTY_TYPES, INDUSTRY_GROUPS } from "@/src/data/formOptions";
 import { OVERSEAS_UNIVERSITY, UNIVERSITIES } from "@/src/data/universities";
 
 const UNIVERSITY_OPTIONS = [OVERSEAS_UNIVERSITY, ...UNIVERSITIES];
-const CURRENT_YEAR = new Date().getFullYear();
-const GRADUATION_YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR + i);
+const GRADUATION_YEARS = Array.from({ length: 10 }, (_, i) => 2026 + i);
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+function IndustrySelect({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+      >
+        <option value="">選択してください</option>
+        {INDUSTRY_GROUPS.map((group) => (
+          <optgroup key={group.label} label={group.label}>
+            {group.options.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 function UniversityField({
   value,
@@ -74,7 +105,9 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [facultyType, setFacultyType] = useState("");
   const [university, setUniversity] = useState("");
-  const [industry, setIndustry] = useState("");
+  const [industryFirst, setIndustryFirst] = useState("");
+  const [industrySecond, setIndustrySecond] = useState("");
+  const [industryThird, setIndustryThird] = useState("");
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
   const [error, setError] = useState<string | null>(null);
@@ -84,12 +117,29 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
 
-    if (!name.trim() || !email.trim() || !password || !facultyType || !university || !industry) {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password ||
+      !facultyType ||
+      !university ||
+      !industryFirst ||
+      !industrySecond ||
+      !industryThird
+    ) {
       setError("すべての項目を入力してください");
       return;
     }
     if (password.length < 8) {
       setError("パスワードは8文字以上で入力してください");
+      return;
+    }
+    if (
+      industryFirst === industrySecond ||
+      industryFirst === industryThird ||
+      industrySecond === industryThird
+    ) {
+      setError("第一〜第三志望の業界はそれぞれ異なるものを選択してください");
       return;
     }
 
@@ -104,7 +154,9 @@ export default function RegisterPage() {
           password,
           facultyType,
           university,
-          industry,
+          industryFirst,
+          industrySecond,
+          industryThird,
           graduationYear: Number(graduationYear),
           graduationMonth: Number(graduationMonth),
         }),
@@ -178,21 +230,12 @@ export default function RegisterPage() {
           <UniversityField value={university} onChange={setUniversity} />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-          志望業界
-          <select
-            value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
-          >
-            <option value="">選択してください</option>
-            {INDUSTRIES.map((i) => (
-              <option key={i} value={i}>
-                {i}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-gray-700">志望業界（第一〜第三志望）</p>
+          <IndustrySelect label="第一志望" value={industryFirst} onChange={setIndustryFirst} />
+          <IndustrySelect label="第二志望" value={industrySecond} onChange={setIndustrySecond} />
+          <IndustrySelect label="第三志望" value={industryThird} onChange={setIndustryThird} />
+        </div>
 
         <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
           卒業年月
