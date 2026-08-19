@@ -15,6 +15,7 @@ type UserProfile = {
   industry_third: string;
   graduation_year: number;
   graduation_month: number;
+  scout_consent: number;
 };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -26,7 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const user = await context.env.DB.prepare(
     `SELECT last_name, first_name, last_name_romaji, first_name_romaji, email,
             faculty_type, university, industry_first, industry_second, industry_third,
-            graduation_year, graduation_month
+            graduation_year, graduation_month, scout_consent
      FROM users WHERE email = ?`
   )
     .bind(email)

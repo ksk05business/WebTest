@@ -12,7 +12,16 @@
 
 ## メール送信（パスワード再設定）に関する前提
 
-`functions/api/forgot-password.ts`は`env.EMAIL.send()`（Cloudflare Email Sending の`send_email`バインディング）でOTPメールを送る。これは**実際に所有し、Cloudflareで送信有効化（`wrangler email sending enable <domain>`）したドメイン**が無いと本番では送れない。現状`FROM_ADDRESS`はプレースホルダー（`noreply@yourdomain.com`）なので、本番運用前に実ドメインへ差し替えて有効化すること。ローカル`wrangler pages dev`では実送信されない（未有効化のためエラーになるかログ出力のみ）が、OTPはハッシュ化してD1に保存されるだけなので、送信の成否に関わらずAPI自体は正常応答する。動作確認時にOTPの値を見たい場合は`forgot-password.ts`に一時的に`console.log`を仕込み、`wrangler pages dev`のログで確認してからコミット前に必ず削除すること（実際にこの手順で検証済み）。
+`functions/api/forgot-password.ts`は`env.EMAIL.send()`（Cloudflare Email Sending の`send_email`バインディング）でOTPメールを送る設計だが、**`send_email`はCloudflare Pagesプロジェクトの設定検証で現状拒否される**（`wrangler pages deploy`が「Configuration file for Pages projects does not support "send_email"」で失敗した実例あり）ため、`wrangler.jsonc`からは`send_email`を削除済み。そのため現状`context.env.EMAIL`はバインドされておらず、メール送信はtry/catchで握りつぶされて常に失敗する（OTP自体はD1に正しく保存されるためAPI応答自体は成功する）。実際にメールを送るには、Workersバインディングではなく**REST API**（APIトークンをPages Secretとして設定し`fetch`で呼ぶ方式）に書き換える必要がある。動作確認時にOTPの値を見たい場合は`forgot-password.ts`に一時的に`console.log`を仕込み、`wrangler pages dev`のログで確認してからコミット前に必ず削除すること（実際にこの手順で検証済み）。
+
+## スカウト（第三者提供）機能の同意設計に関する重要な注意
+
+将来的に学生の成績・個人情報を提携企業（就活エージェント等）へスカウト目的で提供し、その対価を収益源とする計画がある。個人情報保護法上、第三者提供には本人の明確な同意が必須であり、リクナビ内定辞退率問題（2019年）を直接の教訓として、以下の設計方針を必ず守ること。
+
+- 「利用規約・プライバシーポリシーへの同意」（`agreedTerms`、必須）と「スカウト目的での第三者提供への同意」（`scoutConsent`、任意・デフォルトOFF）は**チェックボックスを分離**し、後者を本サービス利用の必須条件にしない。
+- スカウト同意は`/mypage`からいつでも撤回できるようにする（`functions/api/consent.ts`）。
+- 同意・撤回は`consent_events`テーブルに履歴として記録する（個人情報保護法29条の第三者提供記録の裏付けとして）。
+- `app/terms/page.tsx`・`app/privacy/page.tsx`は弁護士レビュー前提の下書き。実際に第三者提供を開始する前に、文面と事業モデル（職業紹介事業許可の要否を含む）について弁護士のレビューを必ず受けること。
 
 # 応答・進め方のルール
 
@@ -51,4 +60,6 @@
 - `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。試験終了時に`spiResult`（直近結果）と`spiResultHistory`（履歴、末尾に追記）の両方を更新する。
 - `app/result/page.tsx`: クライアントコンポーネント。`localStorage` の `spiResult` を読み、スコアと評価コメント、収益化バナー枠、`/dashboard`への導線を表示。
 - `app/forgot-password/page.tsx`: クライアントコンポーネント。メール送信→OTP入力＋新パスワード設定の2ステップ。`/api/forgot-password`と`/api/reset-password`を呼ぶ。
-- `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）を担当。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。
+- `app/mypage/page.tsx`: プロフィール編集に加え、スカウト同意（`scout_consent`）のON/OFFトグルを持つ（`/api/consent`を呼ぶ、プロフィール更新フォームとは別送信）。
+- `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
+- `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）を担当。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。

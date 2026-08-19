@@ -22,6 +22,7 @@ type Profile = {
   industry_third: string;
   graduation_year: number;
   graduation_month: number;
+  scout_consent: number;
 };
 
 export default function MyPage() {
@@ -42,6 +43,9 @@ export default function MyPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [scoutConsent, setScoutConsent] = useState(false);
+  const [consentSaving, setConsentSaving] = useState(false);
+  const [consentMessage, setConsentMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -74,6 +78,7 @@ export default function MyPage() {
         setIndustryThird(data.industry_third);
         setGraduationYear(String(data.graduation_year));
         setGraduationMonth(String(data.graduation_month));
+        setScoutConsent(Boolean(data.scout_consent));
       })
       .catch(() => setError("プロフィールの取得に失敗しました"))
       .finally(() => setLoading(false));
@@ -147,6 +152,30 @@ export default function MyPage() {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleScoutConsentChange(next: boolean) {
+    setScoutConsent(next);
+    setConsentSaving(true);
+    setConsentMessage(null);
+    try {
+      const res = await fetch("/api/consent", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, scoutConsent: next }),
+      });
+      if (!res.ok) {
+        setScoutConsent(!next);
+        setConsentMessage("更新に失敗しました。時間をおいて再度お試しください。");
+        return;
+      }
+      setConsentMessage(next ? "スカウト目的での情報提供に同意しました。" : "同意を撤回しました。");
+    } catch {
+      setScoutConsent(!next);
+      setConsentMessage("通信エラーが発生しました。時間をおいて再度お試しください。");
+    } finally {
+      setConsentSaving(false);
     }
   }
 
@@ -288,6 +317,29 @@ export default function MyPage() {
               {saving ? "保存中..." : "保存する"}
             </button>
           </form>
+        )}
+
+        {!loading && (
+          <div className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <h2 className="text-sm font-semibold text-gray-900">スカウト目的でのデータ共有</h2>
+            <label className="flex items-start gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={scoutConsent}
+                disabled={consentSaving}
+                onChange={(e) => handleScoutConsentChange(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span>
+                成績・大学名・志望業界などの情報を、提携する就活エージェント・企業からのスカウト目的で共有することに同意します（任意）。詳しくは
+                <a href="/terms" target="_blank" className="text-blue-600 underline">
+                  利用規約
+                </a>
+                をご確認ください。
+              </span>
+            </label>
+            {consentMessage && <p className="text-xs text-gray-600">{consentMessage}</p>}
+          </div>
         )}
       </main>
     </div>

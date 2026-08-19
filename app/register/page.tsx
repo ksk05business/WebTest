@@ -25,6 +25,8 @@ export default function RegisterPage() {
   const [industryThird, setIndustryThird] = useState("");
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
+  const [agreedTerms, setAgreedTerms] = useState(false);
+  const [scoutConsent, setScoutConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,6 +49,10 @@ export default function RegisterPage() {
       !industryThird
     ) {
       setError("すべての項目を入力してください");
+      return;
+    }
+    if (!agreedTerms) {
+      setError("利用規約・プライバシーポリシーへの同意が必要です");
       return;
     }
     if (!ROMAJI_PATTERN.test(lastNameRomaji.trim()) || !ROMAJI_PATTERN.test(firstNameRomaji.trim())) {
@@ -89,6 +95,8 @@ export default function RegisterPage() {
           industryThird,
           graduationYear: Number(graduationYear),
           graduationMonth: Number(graduationMonth),
+          agreedTerms,
+          scoutConsent,
         }),
       });
       let data: { error?: string; name?: string } = {};
@@ -257,11 +265,46 @@ export default function RegisterPage() {
           </div>
         </div>
 
+        <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={agreedTerms}
+              onChange={(e) => setAgreedTerms(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span>
+              <Link href="/terms" target="_blank" className="text-blue-600 underline">
+                利用規約
+              </Link>
+              および
+              <Link href="/privacy" target="_blank" className="text-blue-600 underline">
+                プライバシーポリシー
+              </Link>
+              に同意します（必須）
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={scoutConsent}
+              onChange={(e) => setScoutConsent(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span>
+              成績・大学名・志望業界などの情報を、提携する就活エージェント・企業からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。同意はいつでもマイページから撤回できます。
+            </span>
+          </label>
+        </div>
+
         {error && <p className="text-sm font-medium text-red-600">{error}</p>}
 
         <button
           type="submit"
-          disabled={submitting || (passwordConfirm !== "" && password !== passwordConfirm)}
+          disabled={
+            submitting || !agreedTerms || (passwordConfirm !== "" && password !== passwordConfirm)
+          }
           className="mt-2 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {submitting ? "登録中..." : "登録する"}
