@@ -88,6 +88,11 @@ export default function LoginPage() {
           会員登録
         </Link>
       </p>
+      <p className="text-center text-sm text-gray-600">
+        <Link href="/forgot-password" className="text-blue-600 underline">
+          パスワードをお忘れですか？
+        </Link>
+      </p>
     </main>
   );
 }

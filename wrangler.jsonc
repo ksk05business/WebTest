@@ -9,5 +9,10 @@
       "database_name": "spi_mock_app_db",
       "database_id": "REPLACE_WITH_WRANGLER_D1_CREATE_ID"
     }
+  ],
+  "send_email": [
+    {
+      "name": "EMAIL"
+    }
   ]
 }

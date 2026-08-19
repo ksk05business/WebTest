@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS users (
   industry_third TEXT NOT NULL,
   graduation_year INTEGER NOT NULL,
   graduation_month INTEGER NOT NULL,
+  reset_otp_hash TEXT,
+  reset_otp_salt TEXT,
+  reset_otp_expires_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
