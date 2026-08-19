@@ -50,7 +50,9 @@ CREATE TABLE IF NOT EXISTS exam_results (
   test_type TEXT NOT NULL DEFAULT 'spi', -- 'spi' | 'tamatebako' | 'tgweb' | 'gab' | 'cgab' | 'cab'
   score INTEGER NOT NULL,
   total INTEGER NOT NULL,
-  deviation_score REAL, -- 偏差値。母集団の平均・標準偏差がある程度貯まってからバッチ等で算出する想定のためNULL許容
+  accuracy_rate REAL NOT NULL, -- 正答率 (score / total)
+  deviation_score REAL, -- 偏差値。同一test_typeの過去の受験結果を母集団として算出（サンプルが少ない場合は50固定）
+  category_scores_json TEXT, -- 分野別スコア。 {"非言語-損益算": {"correct":1,"total":2}, ...} 形式のJSON文字列
   taken_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );

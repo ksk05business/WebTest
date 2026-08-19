@@ -7,6 +7,11 @@ import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { TEST_TYPES } from "@/src/data/testTypes";
 
 type ResultEntry = { score: number; total: number; date: string };
+type ExamSummary = {
+  attemptCount: number;
+  latestDeviationScore: number | null;
+  bestAccuracyRate: number | null;
+};
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -21,6 +26,7 @@ export default function DashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [userName, setUserName] = useState("");
   const [history, setHistory] = useState<ResultEntry[]>([]);
+  const [examSummary, setExamSummary] = useState<ExamSummary | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -28,7 +34,7 @@ export default function DashboardPage() {
       router.replace("/login");
       return;
     }
-    const user = JSON.parse(raw) as { name?: string };
+    const user = JSON.parse(raw) as { name?: string; email?: string };
     setUserName(user.name ?? "");
 
     const rawHistory = localStorage.getItem("spiResultHistory");
@@ -36,6 +42,17 @@ export default function DashboardPage() {
       setHistory((JSON.parse(rawHistory) as ResultEntry[]).slice().reverse());
     }
     setAuthChecked(true);
+
+    if (user.email) {
+      fetch(`/api/exam-results?email=${encodeURIComponent(user.email)}`)
+        .then((res) => res.json())
+        .then((data: ExamSummary & { error?: string }) => {
+          if (!data.error) setExamSummary(data);
+        })
+        .catch(() => {
+          // 成績サマリーの取得に失敗してもダッシュボード自体は表示する
+        });
+    }
   }, [router]);
 
   if (!authChecked) {
@@ -76,6 +93,32 @@ export default function DashboardPage() {
 
         <div className="flex flex-col gap-3">
           <h2 className="text-lg font-bold text-gray-900">自分の成績</h2>
+
+          {examSummary && examSummary.attemptCount > 0 && (
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg border border-gray-200 bg-white p-3 text-center">
+                <p className="text-xs text-gray-500">最新の偏差値</p>
+                <p className="text-xl font-bold text-blue-700">
+                  {examSummary.latestDeviationScore !== null
+                    ? examSummary.latestDeviationScore.toFixed(1)
+                    : "-"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-3 text-center">
+                <p className="text-xs text-gray-500">最高正答率</p>
+                <p className="text-xl font-bold text-blue-700">
+                  {examSummary.bestAccuracyRate !== null
+                    ? `${Math.round(examSummary.bestAccuracyRate * 100)}%`
+                    : "-"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white p-3 text-center">
+                <p className="text-xs text-gray-500">受験回数</p>
+                <p className="text-xl font-bold text-blue-700">{examSummary.attemptCount}</p>
+              </div>
+            </div>
+          )}
+
           {history.length === 0 ? (
             <p className="text-sm text-gray-500">まだ受験履歴がありません。</p>
           ) : (

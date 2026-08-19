@@ -14,6 +14,7 @@ export default function TestPage() {
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [score, setScore] = useState(0);
   const [authChecked, setAuthChecked] = useState(false);
+  const [results, setResults] = useState<{ category: string; correct: boolean }[]>([]);
 
   const question = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
@@ -36,22 +37,25 @@ export default function TestPage() {
     if (!authChecked || answered) return;
     if (timeLeft <= 0) {
       setAnswered(true);
+      setResults((r) => [...r, { category: question.category, correct: false }]);
       return;
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(id);
-  }, [timeLeft, answered, authChecked]);
+  }, [timeLeft, answered, authChecked, question]);
 
   function handleSelect(label: string) {
     if (answered) return;
     setSelected(label);
     setAnswered(true);
-    if (label === question.answer) {
+    const isCorrectAnswer = label === question.answer;
+    setResults((r) => [...r, { category: question.category, correct: isCorrectAnswer }]);
+    if (isCorrectAnswer) {
       setScore((s) => s + 1);
     }
   }
 
-  function handleNext() {
+  async function handleNext() {
     if (isLast) {
       const total = questions.length;
       localStorage.setItem("spiResult", JSON.stringify({ score, total }));
@@ -60,6 +64,28 @@ export default function TestPage() {
       const history = rawHistory ? JSON.parse(rawHistory) : [];
       history.push({ score, total, date: new Date().toISOString() });
       localStorage.setItem("spiResultHistory", JSON.stringify(history.slice(-20)));
+
+      const categoryScores: Record<string, { correct: number; total: number }> = {};
+      for (const r of results) {
+        const entry = categoryScores[r.category] ?? { correct: 0, total: 0 };
+        entry.total += 1;
+        if (r.correct) entry.correct += 1;
+        categoryScores[r.category] = entry;
+      }
+
+      try {
+        const rawUser = localStorage.getItem("spiUser");
+        const email = rawUser ? (JSON.parse(rawUser) as { email?: string }).email : undefined;
+        if (email) {
+          await fetch("/api/exam-results", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, testType: "spi", score, total, categoryScores }),
+          });
+        }
+      } catch {
+        // D1保存に失敗してもlocalStorageには結果があるため、結果表示自体は継続する
+      }
 
       router.push("/result");
       return;

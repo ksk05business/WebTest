@@ -6,6 +6,7 @@ export type TableBlock = {
 
 export type Question = {
   id: number;
+  category: string;
   title?: string;
   text: string;
   tables?: TableBlock[];
@@ -17,6 +18,7 @@ export type Question = {
 export const questions: Question[] = [
   {
     id: 1,
+    category: "非言語-損益算",
     text: "定価2000円の商品を3割引で売ったところ、原価に対して2割の利益が出た。この商品の原価はいくらか。",
     choices: [
       { label: "A", text: "1000円" },
@@ -34,6 +36,7 @@ export const questions: Question[] = [
   },
   {
     id: 2,
+    category: "非言語-推論",
     text: "A, B, C, D の4人が徒競走をした。Aは Bより先にゴールし、Cは Aより先にゴールした。Dは Bより後にゴールした。このとき、必ず正しいといえるのはどれか。",
     choices: [
       { label: "A", text: "Cが1位である" },
@@ -53,6 +56,7 @@ export const questions: Question[] = [
   },
   {
     id: 3,
+    category: "非言語-損益算",
     text: "原価800円の商品に4割の利益を見込んで定価をつけたが、売れなかったため定価の2割引で販売した。この商品の利益（円）はいくらか。",
     choices: [
       { label: "A", text: "48円" },
@@ -70,6 +74,7 @@ export const questions: Question[] = [
   },
   {
     id: 4,
+    category: "非言語-資料の読み取り",
     title: "料金表の読み取り（宅配便）",
     text: "ある運送会社は、料金が荷物の重さによって決まっている。各重さによる配送料金は以下の表の通りである。\n\n重さ18kgのものと、35kgのものをそれぞれ一つずつ配送を頼んだ場合、料金はいくらになるか。",
     tables: [
@@ -96,6 +101,7 @@ export const questions: Question[] = [
   },
   {
     id: 5,
+    category: "非言語-資料の読み取り",
     title: "資料解釈（複数表の比較）",
     text: "都市P、Q、Rの1年間の図書館利用者数を調べた。\n表1は年齢別に利用者数を集計したもの、表2は都市P、Q、Rにおけるそれぞれの利用者数の割合を示したものである。\n13歳から18歳の割合が最も高い都市はどれか。",
     tables: [

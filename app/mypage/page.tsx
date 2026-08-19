@@ -46,6 +46,11 @@ export default function MyPage() {
   const [scoutConsent, setScoutConsent] = useState(false);
   const [consentSaving, setConsentSaving] = useState(false);
   const [consentMessage, setConsentMessage] = useState<string | null>(null);
+  const [examSummary, setExamSummary] = useState<{
+    attemptCount: number;
+    latestDeviationScore: number | null;
+    bestAccuracyRate: number | null;
+  } | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -58,6 +63,15 @@ export default function MyPage() {
       router.replace("/login");
       return;
     }
+
+    fetch(`/api/exam-results?email=${encodeURIComponent(user.email)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) setExamSummary(data);
+      })
+      .catch(() => {
+        // 成績サマリーの取得に失敗してもマイページ自体は表示する
+      });
 
     fetch(`/api/me?email=${encodeURIComponent(user.email)}`)
       .then((res) => res.json())
@@ -185,6 +199,24 @@ export default function MyPage() {
 
       <main className="mx-auto flex max-w-md flex-col gap-6 px-6 py-10">
         <h1 className="text-2xl font-bold text-gray-900">マイページ</h1>
+
+        {examSummary && examSummary.attemptCount > 0 && (
+          <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+            模試の成績: 最新偏差値{" "}
+            <span className="font-bold text-blue-700">
+              {examSummary.latestDeviationScore !== null
+                ? examSummary.latestDeviationScore.toFixed(1)
+                : "-"}
+            </span>
+            ／最高正答率{" "}
+            <span className="font-bold text-blue-700">
+              {examSummary.bestAccuracyRate !== null
+                ? `${Math.round(examSummary.bestAccuracyRate * 100)}%`
+                : "-"}
+            </span>
+            （受験{examSummary.attemptCount}回）
+          </p>
+        )}
 
         {loading ? (
           <p className="text-sm text-gray-500">読み込み中...</p>

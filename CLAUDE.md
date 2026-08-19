@@ -29,11 +29,17 @@
 
 - `company_profiles`: 企業アカウント。職業安定法上「募集情報等提供事業」として運営する前提（`provider_business_type`）。なりすまし対策として`approved`が1になるまで候補者閲覧・スカウト送信はさせない設計にすること。
 - `scouts`: スカウト本体。**2段階開示フラグ`is_anonymous`**が要。企業は`users.scout_consent = 1`の学生の匿名属性（`university_category` / `faculty_type` / `industry_first`〜`third` / `exam_results.deviation_score`）のみを見て匿名スカウトを送る。学生が`status='accepted'`で承諾したときに限り`is_anonymous`を0にし、そのスカウトについてのみ氏名・メールを開示する。運営側で手動マッチングや推薦は行わない（システムが状態遷移を処理するのみ）。
-- `exam_results`: 模試結果のサーバー側記録。現状フロントは`localStorage`の`spiResult`/`spiResultHistory`にしか結果を持たないため、スカウト機能を実装する際は`/test`側から本テーブルへの書き込みAPIが別途必要。
+- `exam_results`: 模試結果のサーバー側記録。**書き込み・読み取りAPIは実装済み**（`functions/api/exam-results.ts`、下記参照）。
 - `users.university_category`: 匿名開示用の大学区分（大学名そのものは開示しない）。カテゴリのマッピングロジックは未実装。
 - `questions` / `question_choices`: D1ベースの問題バンク（分野・難易度・オリジナリティメモ・レビューステータス付き）。**現状`/test`は`src/data/questions.ts`のTS配列を使い続けており、このテーブルへの移行・読み込みAPIはまだ実装していない**。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
-**本番D1へは`schema.sql`の再実行だけでは`users.university_category`は追加されない**（`users`テーブルは既に存在するため`CREATE TABLE IF NOT EXISTS`がno-opになる）。追加するには一度だけ次を実行する必要がある: `wrangler d1 execute webtest-db --remote --command "ALTER TABLE users ADD COLUMN university_category TEXT"`。新規テーブル（`company_profiles`, `scouts`, `exam_results`, `questions`, `question_choices`）は`schema.sql`の再実行で作成される。
+**本番D1へは`schema.sql`の再実行だけでは`users.university_category`は追加されない**（`users`テーブルは既に存在するため`CREATE TABLE IF NOT EXISTS`がno-opになる）。追加するには一度だけ次を実行する必要がある: `wrangler d1 execute webtest-db --remote --command "ALTER TABLE users ADD COLUMN university_category TEXT"`。新規テーブル（`company_profiles`, `scouts`, `exam_results`, `questions`, `question_choices`）は`schema.sql`の再実行で作成される。**`exam_results`が既に本番に作成済みの場合、`accuracy_rate`/`category_scores_json`列も同様にALTER TABLEが必要**（`ALTER TABLE exam_results ADD COLUMN accuracy_rate REAL NOT NULL DEFAULT 0; ALTER TABLE exam_results ADD COLUMN category_scores_json TEXT;`）。
+
+## 模試結果のD1保存（`functions/api/exam-results.ts`）
+
+- POST: `{email, testType?, score, total, categoryScores?}`を受け取り、`users`をemailで引いて`exam_results`に保存する。`test_type`ごとに**その回より前の全受験者の正答率**を母集団として偏差値を算出する（サンプル2件未満または標準偏差0の場合は50固定）。過去の受験結果の偏差値は遡って再計算しない簡易実装。
+- GET: `?email=`で受験履歴（最大20件、新しい順）・最新偏差値・最高正答率・受験回数を返す。`app/dashboard/page.tsx`と`app/mypage/page.tsx`の両方がこれを叩いて表示している。
+- `app/test/page.tsx`は`src/data/questions.ts`の`Question.category`（分野）ごとに正誤を集計し、試験終了時に`categoryScores`として送信する。localStorageへの保存（`spiResult`/`spiResultHistory`）は従来通り維持しており、D1保存が失敗しても結果画面表示は継続する（fire-and-forgetでtry/catch）。
 
 # 応答・進め方のルール
 
@@ -52,7 +58,7 @@
 
 # TypeScript規約
 
-- `src/data/questions.ts` の `Question` / `TableBlock` 型を正とし、問題データはこの型に準拠させる。
+- `src/data/questions.ts` の `Question` / `TableBlock` 型を正とし、問題データはこの型に準拠させる。`category`は分野別成績集計（`exam_results.category_scores_json`）に使うため、新しい問題を追加する際は必ず設定する。
 - 選択肢ラベルは `"A" | "B" | "C" | "D" | "E"` のUnion型で管理する（`string`型で緩めない）。
 - `any` は使わない。表データ（`TableBlock.rows`）のセル値は `string | number` とする。
 - 新しい問題データを追加する際は、既存の `id` と重複しないようにする（現在 id 1〜5 まで使用済み）。
@@ -68,10 +74,10 @@
 - `app/page.tsx`: サーバーコンポーネントのまま維持（`"use client"` 不要）。キャッチコピーと「新規登録」「ログイン」への導線。
 - `app/register/page.tsx`: クライアントコンポーネント。会員登録フォーム。`/api/register`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
 - `app/login/page.tsx`: クライアントコンポーネント。ログインフォーム。`/api/login`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
-- `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。`/test`への導線と、`localStorage`の`spiResultHistory`（過去の受験結果、最大20件）を一覧表示する。
-- `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。試験終了時に`spiResult`（直近結果）と`spiResultHistory`（履歴、末尾に追記）の両方を更新する。
+- `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。`/test`への導線、`/api/exam-results`から取得した成績サマリー（最新偏差値・最高正答率・受験回数）、`localStorage`の`spiResultHistory`（過去の受験結果、最大20件）を表示する。
+- `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。試験終了時に`spiResult`/`spiResultHistory`（localStorage）を更新しつつ、`/api/exam-results`にもPOSTしてD1へ保存する（失敗しても結果画面表示は継続）。
 - `app/result/page.tsx`: クライアントコンポーネント。`localStorage` の `spiResult` を読み、スコアと評価コメント、収益化バナー枠、`/dashboard`への導線を表示。
 - `app/forgot-password/page.tsx`: クライアントコンポーネント。メール送信→OTP入力＋新パスワード設定の2ステップ。`/api/forgot-password`と`/api/reset-password`を呼ぶ。
-- `app/mypage/page.tsx`: プロフィール編集に加え、スカウト同意（`scout_consent`）のON/OFFトグルを持つ（`/api/consent`を呼ぶ、プロフィール更新フォームとは別送信）。
+- `app/mypage/page.tsx`: プロフィール編集・スカウト同意トグル（`/api/consent`）に加え、`/api/exam-results`から取得した成績サマリーを表示する。
 - `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
-- `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）を担当。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。
+- `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）・模試結果の保存/取得（`exam-results.ts`）を担当。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。
