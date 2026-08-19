@@ -9,10 +9,5 @@
       "database_name": "webtest-db",
       "database_id": "f5ecd161-b535-4c0a-8606-39c0d79b3346"
     }
-  ],
-  "send_email": [
-    {
-      "name": "EMAIL"
-    }
   ]
 }
