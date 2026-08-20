@@ -35,16 +35,18 @@
 
 ## スカウト機能・問題DBのスキーマ（schema.sql）
 
-- `company_profiles`: 企業アカウント。職業安定法上「募集情報等提供事業」として運営する前提（`provider_business_type`）。`approved = 1`になるまで候補者閲覧・スカウト送信ができない。**現状、企業の自己登録UI/ログインは未実装**。企業アカウントは`INSERT INTO company_profiles (..., approved)`で運営が直接作成する運用（`approved`を1にしないと`/api/company/scouts`が403を返す）。
-- `scouts`: スカウト本体。**2段階開示フラグ`is_anonymous`**。企業は`users.scout_consent = 1`の学生の匿名属性（`university_category` / `faculty_type` / `industry_first`〜`third` / `exam_results.deviation_score`）のみを見て匿名スカウトを送る（`is_anonymous=1`で作成）。学生が`/mypage`で「承諾」した場合のみ`status='accepted'`かつ`is_anonymous=0`に更新し、そのスカウトに限り氏名・メールが開示される想定。「辞退」は`status='declined'`のまま`is_anonymous`は1を維持し開示しない。運営は手動マッチング・推薦を行わず、システムが状態遷移を処理するのみ。**現状、承諾済みスカウトの実名を企業側が取得するAPIは未実装**（`scouts.is_anonymous=0`であることのDB上の整合性のみ確認済み）。
+- `company_profiles`: 企業アカウント。職業安定法上「募集情報等提供事業」として運営する前提（`provider_business_type`）。`approved = 1`になるまで候補者閲覧・スカウト送信・スカウト履歴閲覧ができない。**企業の自己登録UIはまだ無く**、アカウントは`INSERT INTO company_profiles (..., approved)`で運営が直接作成する運用（パスワードは`functions/_lib/password.ts`のPBKDF2ハッシュで手動生成する必要がある）。ログイン画面（`/company/login`）・API（`functions/api/company/login.ts`）は実装済み。
+- `scouts`: スカウト本体。**2段階開示フラグ`is_anonymous`**。企業は`users.scout_consent = 1`の学生の匿名属性（`university_category` / `faculty_type` / `industry_first`〜`third` / `exam_results.deviation_score`）のみを見て匿名スカウトを送る（`is_anonymous=1`で作成）。学生が`/mypage`で「承諾」した場合のみ`status='accepted'`かつ`is_anonymous=0`に更新し、そのスカウトに限り氏名・メールが開示される想定。「辞退」は`status='declined'`のまま`is_anonymous`は1を維持し開示しない。運営は手動マッチング・推薦を行わず、システムが状態遷移を処理するのみ。企業側が承諾済みスカウトの実名を取得するAPI（`functions/api/company/sent-scouts.ts`）も実装済み。
 - `exam_results`: 模試結果のサーバー側記録。書き込み・読み取りAPI実装済み（`functions/api/exam-results.ts`）。
-- `users.university_category`: 匿名開示用の大学区分（大学名そのものは開示しない）。**カテゴリのマッピングロジックは未実装**のため、現状は常にNULL（企業側候補者検索のレスポンスでも`universityCategory: null`になる）。
+- `users.university_category`: 匿名開示用の大学区分（大学名そのものは開示しない）。`src/data/universityCategories.ts`の`getUniversityCategory()`で大学名からマッピングし、`register.ts`・`me.ts`のPUTで自動的に算出・保存する（実装済み）。7区分（旧帝大・難関国立 / 早慶上智・難関私立 / MARCH・関関同立 / その他国公立 / その他私立 / 海外大学 / その他国内大学）。既存ユーザー分は登録・プロフィール更新のタイミングでしか埋まらないため、古いレコードはNULLの可能性がある。
 - `questions` / `question_choices`: D1ベースの問題バンク（分野・難易度・オリジナリティメモ・レビューステータス付き）。**現状`/test`は`src/data/questions.ts`のTS配列を使い続けており、このテーブルへの移行・読み込みAPIはまだ実装していない**。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
 ## スカウトAPI
 
 - `functions/api/scouts.ts`（学生向け・emailで本人確認）: GET `?email=`で自分宛のスカウト一覧（企業名・メッセージ・状態は常に見える。企業に自分の実名が開示されているかは`isAnonymous`で判定）。PUT `{email, scoutId, action:'accept'|'decline'}`で応答（`status='sent'`のものにしか作用しない）。
-- `functions/api/company/scouts.ts`（企業向け・`companyEmail`で本人確認、`approved=1`必須）: GET `?companyEmail=`で`scout_consent=1`の学生を匿名属性のみで一覧取得（氏名・メール等は一切含まない、`(SELECT ... ORDER BY taken_at DESC LIMIT 1)`の相関サブクエリで学生ごとの直近偏差値を取得）。POST `{companyEmail, studentId, message?}`でスカウト送信（`status='sent'`の重複送信は409で拒否）。
+- `functions/api/company/login.ts`: 企業ログイン（email/password、PBKDF2検証）。`approved=false`でもログイン自体は成功させ、`/company/dashboard`側で「承認待ち」表示に留める（候補者検索・スカウト送信・履歴閲覧のAPI側で`approved`を強制する設計）。
+- `functions/api/company/scouts.ts`（企業向け・`companyEmail`で本人確認、`approved=1`必須）: GET `?companyEmail=`で`scout_consent=1`の学生を匿名属性のみで一覧取得（氏名・メール等は一切含まない）。`universityCategory`/`facultyType`/`industry`（第一〜第三志望のいずれかに一致）/`minDeviation`のクエリパラメータでフィルタ可能。POST `{companyEmail, studentId, message?}`でスカウト送信（`status='sent'`の重複送信は409で拒否）。
+- `functions/api/company/sent-scouts.ts`（企業向け・`approved=1`必須）: GET `?companyEmail=`で自社が送信した全スカウトを返す。`is_anonymous=0`（学生承諾済み）の行だけ`lastName`/`firstName`/`email`をSQLのCASE式で開示し、それ以外は`null`。
 - `app/register/page.tsx`のスカウト同意チェックボックスは**デフォルトOFFを維持**（第三者提供の同意をデフォルトON・「登録により同意したとみなす」形にするのは個人情報保護法27条の同意要件・リクナビ事件の教訓に照らして避けた。ユーザーの明示的な判断でこの方針とした）。チェックボックス直下と`/terms#scout`に2段階開示の説明文を明記している。
 
 **本番D1へは`schema.sql`の再実行だけでは`users.university_category`は追加されない**（`users`テーブルは既に存在するため`CREATE TABLE IF NOT EXISTS`がno-opになる）。追加するには一度だけ次を実行する必要がある: `wrangler d1 execute webtest-db --remote --command "ALTER TABLE users ADD COLUMN university_category TEXT"`。新規テーブル（`company_profiles`, `scouts`, `exam_results`, `questions`, `question_choices`）は`schema.sql`の再実行で作成される。**`exam_results`が既に本番に作成済みの場合、`accuracy_rate`/`category_scores_json`列も同様にALTER TABLEが必要**（`ALTER TABLE exam_results ADD COLUMN accuracy_rate REAL NOT NULL DEFAULT 0; ALTER TABLE exam_results ADD COLUMN category_scores_json TEXT;`）。
@@ -94,4 +96,6 @@
 - `app/forgot-password/page.tsx`: クライアントコンポーネント。メール送信→OTP入力＋新パスワード設定の2ステップ。`/api/forgot-password`と`/api/reset-password`を呼ぶ。
 - `app/mypage/page.tsx`: プロフィール編集・スカウト同意トグル（`/api/consent`）・成績サマリー（`/api/exam-results`）に加え、`/api/scouts`から取得した「届いたスカウト」一覧と承諾/辞退ボタンを表示する。
 - `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
-- `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）・模試結果の保存/取得（`exam-results.ts`）を担当。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。
+- `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。
+- `app/company/dashboard/page.tsx`: 企業向けダッシュボード。ログイン必須（`spiCompanyUser`が無ければ`/company/login`へリダイレクト）。`approved=false`の場合は承認待ち表示のみ。承認済みなら大学区分・文理・志望業界・偏差値下限でのフィルタ検索（`/api/company/scouts`）、候補者ごとのメッセージ付きスカウト送信、送信済みスカウトの状態・開示情報一覧（`/api/company/sent-scouts`）を表示する。
+- `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）・模試結果の保存/取得（`exam-results.ts`）・スカウト応答（`scouts.ts`）を担当。`functions/api/company/*.ts`は企業向け（ログイン・候補者検索・スカウト送信・送信済み一覧）。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。

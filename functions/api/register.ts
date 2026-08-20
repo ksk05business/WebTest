@@ -1,4 +1,5 @@
 import { hashPassword } from "../_lib/password";
+import { getUniversityCategory } from "../../src/data/universityCategories";
 
 interface Env {
   DB: D1Database;
@@ -101,13 +102,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const { hash, salt } = await hashPassword(password);
+  const universityCategory = getUniversityCategory(university);
 
   const inserted = await context.env.DB.prepare(
     `INSERT INTO users
       (last_name, first_name, last_name_romaji, first_name_romaji, email, password_hash, password_salt,
-       faculty_type, university, industry_first, industry_second, industry_third, graduation_year, graduation_month,
-       terms_agreed_at, scout_consent)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)
+       faculty_type, university, university_category, industry_first, industry_second, industry_third,
+       graduation_year, graduation_month, terms_agreed_at, scout_consent)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)
      RETURNING id`
   )
     .bind(
@@ -120,6 +122,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       salt,
       facultyType,
       university,
+      universityCategory,
       industryFirst,
       industrySecond,
       industryThird,

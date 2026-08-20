@@ -27,8 +27,10 @@ type CandidateRow = {
 
 // 候補者の匿名検索。scout_consent = 1 の学生のみを対象とし、
 // 大学区分・文理・志望業界・直近偏差値のみを返す（氏名・メールアドレス等は一切含めない）。
+// クエリパラメータ: universityCategory, facultyType, industry（第一〜第三志望のいずれかに一致）, minDeviation
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const companyEmail = new URL(context.request.url).searchParams.get("companyEmail");
+  const params = new URL(context.request.url).searchParams;
+  const companyEmail = params.get("companyEmail");
   if (!companyEmail) {
     return Response.json({ error: "companyEmailが指定されていません" }, { status: 400 });
   }
@@ -44,6 +46,34 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     );
   }
 
+  const universityCategory = params.get("universityCategory");
+  const facultyType = params.get("facultyType");
+  const industry = params.get("industry");
+  const minDeviationRaw = params.get("minDeviation");
+  const minDeviation = minDeviationRaw !== null ? Number(minDeviationRaw) : null;
+
+  const conditions = ["u.scout_consent = 1"];
+  const binds: (string | number)[] = [];
+
+  if (universityCategory) {
+    conditions.push("u.university_category = ?");
+    binds.push(universityCategory);
+  }
+  if (facultyType) {
+    conditions.push("u.faculty_type = ?");
+    binds.push(facultyType);
+  }
+  if (industry) {
+    conditions.push("(u.industry_first = ? OR u.industry_second = ? OR u.industry_third = ?)");
+    binds.push(industry, industry, industry);
+  }
+  if (minDeviation !== null && !Number.isNaN(minDeviation)) {
+    conditions.push(
+      `(SELECT e.deviation_score FROM exam_results e WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) >= ?`
+    );
+    binds.push(minDeviation);
+  }
+
   const rows = await context.env.DB.prepare(
     `SELECT
         u.id AS student_id,
@@ -55,8 +85,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         (SELECT e.deviation_score FROM exam_results e
           WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) AS latest_deviation_score
      FROM users u
-     WHERE u.scout_consent = 1`
-  ).all<CandidateRow>();
+     WHERE ${conditions.join(" AND ")}
+     ORDER BY u.id DESC`
+  )
+    .bind(...binds)
+    .all<CandidateRow>();
 
   return Response.json({
     candidates: (rows.results ?? []).map((r) => ({

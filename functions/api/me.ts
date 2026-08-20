@@ -1,3 +1,5 @@
+import { getUniversityCategory } from "../../src/data/universityCategories";
+
 interface Env {
   DB: D1Database;
 }
@@ -119,7 +121,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   const result = await context.env.DB.prepare(
     `UPDATE users SET
       last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
-      faculty_type = ?, university = ?, industry_first = ?, industry_second = ?, industry_third = ?,
+      faculty_type = ?, university = ?, university_category = ?, industry_first = ?, industry_second = ?, industry_third = ?,
       graduation_year = ?, graduation_month = ?
      WHERE email = ?`
   )
@@ -130,6 +132,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       firstNameRomaji,
       facultyType,
       university,
+      getUniversityCategory(university),
       industryFirst,
       industrySecond,
       industryThird,
