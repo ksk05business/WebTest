@@ -1,4 +1,4 @@
-import { OTHER_DOMESTIC_UNIVERSITY, OVERSEAS_UNIVERSITY } from "./universities";
+import { OVERSEAS_UNIVERSITY } from "./universities";
 
 // 就活の学歴フィルタで一般的に使われる大学群の通称にもとづく区分。
 // 参考: 旧帝一科(旧帝一工の東工大→東京科学大学統合後の呼称) / TOCKY(筑波・お茶の水・千葉・神戸・横浜国立)
@@ -140,6 +140,7 @@ const CATEGORY_MAP: Record<string, (typeof UNIVERSITY_CATEGORIES)[number]> = {
 
 export function getUniversityCategory(university: string): string {
   if (university === OVERSEAS_UNIVERSITY) return "海外大学";
-  if (university === OTHER_DOMESTIC_UNIVERSITY) return "その他私立大学";
+  // 手動入力大学（一覧に無い大学）は本来フロント側から明示的な区分（manualUniversityCategory）が
+  // 渡される想定。ここに来るのはそのヒントが無い場合の保険的なフォールバックのみ。
   return CATEGORY_MAP[university] ?? "その他私立大学";
 }

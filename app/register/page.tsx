@@ -20,6 +20,7 @@ export default function RegisterPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [facultyType, setFacultyType] = useState("");
   const [university, setUniversity] = useState("");
+  const [manualUniversityCategory, setManualUniversityCategory] = useState<string | null>(null);
   const [industryFirst, setIndustryFirst] = useState("");
   const [industrySecond, setIndustrySecond] = useState("");
   const [industryThird, setIndustryThird] = useState("");
@@ -90,6 +91,7 @@ export default function RegisterPage() {
           password,
           facultyType,
           university,
+          manualUniversityCategory,
           industryFirst,
           industrySecond,
           industryThird,
@@ -211,7 +213,11 @@ export default function RegisterPage() {
 
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
           大学名
-          <UniversityField value={university} onChange={setUniversity} />
+          <UniversityField
+            value={university}
+            onChange={setUniversity}
+            onManualCategoryChange={setManualUniversityCategory}
+          />
         </label>
 
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">

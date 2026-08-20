@@ -102,6 +102,13 @@ export const UNIVERSITIES: string[] = [
   "早稲田大学",
 ];
 
-export const OTHER_DOMESTIC_UNIVERSITY = "その他国内大学";
+export const OTHER_PUBLIC_UNIVERSITY = "その他国公立大学";
+export const OTHER_PRIVATE_UNIVERSITY = "その他私立大学";
 export const OVERSEAS_UNIVERSITY = "海外大学";
-export const MANUAL_ENTRY_UNIVERSITIES = [OTHER_DOMESTIC_UNIVERSITY, OVERSEAS_UNIVERSITY];
+// これらを選択すると手動入力欄に切り替わる。選んだ項目がそのまま大学区分（university_category）として
+// 使われるため、一覧に無い大学の学生も正しい区分でスカウト検索に載る。
+export const MANUAL_ENTRY_UNIVERSITIES = [
+  OTHER_PUBLIC_UNIVERSITY,
+  OTHER_PRIVATE_UNIVERSITY,
+  OVERSEAS_UNIVERSITY,
+];

@@ -1,5 +1,6 @@
 import { hashPassword } from "../_lib/password";
 import { getUniversityCategory } from "../../src/data/universityCategories";
+import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
 
 interface Env {
   DB: D1Database;
@@ -14,6 +15,7 @@ type RegisterBody = {
   password?: unknown;
   facultyType?: unknown;
   university?: unknown;
+  manualUniversityCategory?: unknown;
   industryFirst?: unknown;
   industrySecond?: unknown;
   industryThird?: unknown;
@@ -40,6 +42,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     password,
     facultyType,
     university,
+    manualUniversityCategory,
     industryFirst,
     industrySecond,
     industryThird,
@@ -102,7 +105,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const { hash, salt } = await hashPassword(password);
-  const universityCategory = getUniversityCategory(university);
+  const universityCategory =
+    typeof manualUniversityCategory === "string" &&
+    (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(manualUniversityCategory)
+      ? manualUniversityCategory
+      : getUniversityCategory(university);
 
   const inserted = await context.env.DB.prepare(
     `INSERT INTO users

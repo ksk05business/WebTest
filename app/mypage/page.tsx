@@ -6,6 +6,7 @@ import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { UniversityField } from "@/src/components/UniversityField";
 import { IndustrySelect } from "@/src/components/IndustrySelect";
 import { FACULTY_TYPES, GRADUATION_MONTHS, GRADUATION_YEARS } from "@/src/data/formOptions";
+import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -17,6 +18,7 @@ type Profile = {
   email: string;
   faculty_type: string;
   university: string;
+  university_category: string | null;
   industry_first: string;
   industry_second: string;
   industry_third: string;
@@ -44,6 +46,7 @@ export default function MyPage() {
   const [firstNameRomaji, setFirstNameRomaji] = useState("");
   const [facultyType, setFacultyType] = useState("");
   const [university, setUniversity] = useState("");
+  const [manualUniversityCategory, setManualUniversityCategory] = useState<string | null>(null);
   const [industryFirst, setIndustryFirst] = useState("");
   const [industrySecond, setIndustrySecond] = useState("");
   const [industryThird, setIndustryThird] = useState("");
@@ -101,6 +104,13 @@ export default function MyPage() {
         setFirstNameRomaji(data.first_name_romaji);
         setFacultyType(data.faculty_type);
         setUniversity(data.university);
+        if (
+          data.university_category &&
+          (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(data.university_category) &&
+          !(UNIVERSITIES as string[]).includes(data.university)
+        ) {
+          setManualUniversityCategory(data.university_category);
+        }
         setIndustryFirst(data.industry_first);
         setIndustrySecond(data.industry_second);
         setIndustryThird(data.industry_third);
@@ -157,6 +167,7 @@ export default function MyPage() {
           firstNameRomaji,
           facultyType,
           university,
+          manualUniversityCategory,
           industryFirst,
           industrySecond,
           industryThird,
@@ -330,7 +341,12 @@ export default function MyPage() {
 
             <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
               大学名
-              <UniversityField value={university} onChange={setUniversity} />
+              <UniversityField
+                value={university}
+                onChange={setUniversity}
+                onManualCategoryChange={setManualUniversityCategory}
+                initialManualCategory={manualUniversityCategory}
+              />
             </label>
 
             <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">

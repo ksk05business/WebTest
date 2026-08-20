@@ -8,11 +8,18 @@ const UNIVERSITY_OPTIONS = [...UNIVERSITIES, ...MANUAL_ENTRY_UNIVERSITIES];
 export function UniversityField({
   value,
   onChange,
+  onManualCategoryChange,
+  initialManualCategory,
 }: {
   value: string;
   onChange: (value: string) => void;
+  // 手動入力（その他国公立大学/その他私立大学/海外大学）を選んだ場合に、選んだ区分を
+  // 親コンポーネントへ伝える。大学名一覧から選び直した場合はnullを渡す。
+  onManualCategoryChange?: (category: string | null) => void;
+  // マイページ等、既に手動入力の大学区分が保存されている場合の初期表示用。
+  initialManualCategory?: string | null;
 }) {
-  const [manualLabel, setManualLabel] = useState<string | null>(null);
+  const [manualLabel, setManualLabel] = useState<string | null>(initialManualCategory ?? null);
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
 
@@ -22,6 +29,10 @@ export function UniversityField({
   useEffect(() => {
     if (value) setQuery(value);
   }, [value]);
+
+  useEffect(() => {
+    if (initialManualCategory) setManualLabel(initialManualCategory);
+  }, [initialManualCategory]);
 
   if (manualLabel) {
     return (
@@ -39,6 +50,7 @@ export function UniversityField({
             setManualLabel(null);
             setQuery("");
             onChange("");
+            onManualCategoryChange?.(null);
           }}
           className="self-start text-xs text-blue-600 underline"
         >
@@ -81,11 +93,13 @@ export function UniversityField({
                   if (MANUAL_ENTRY_UNIVERSITIES.includes(u)) {
                     setManualLabel(u);
                     onChange("");
+                    onManualCategoryChange?.(u);
                     setOpen(false);
                     return;
                   }
                   onChange(u);
                   setQuery(u);
+                  onManualCategoryChange?.(null);
                   setOpen(false);
                 }}
                 className="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-blue-50"

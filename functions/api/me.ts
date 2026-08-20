@@ -1,4 +1,5 @@
 import { getUniversityCategory } from "../../src/data/universityCategories";
+import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
 
 interface Env {
   DB: D1Database;
@@ -12,6 +13,7 @@ type UserProfile = {
   email: string;
   faculty_type: string;
   university: string;
+  university_category: string | null;
   industry_first: string;
   industry_second: string;
   industry_third: string;
@@ -28,7 +30,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const user = await context.env.DB.prepare(
     `SELECT last_name, first_name, last_name_romaji, first_name_romaji, email,
-            faculty_type, university, industry_first, industry_second, industry_third,
+            faculty_type, university, university_category, industry_first, industry_second, industry_third,
             graduation_year, graduation_month, scout_consent
      FROM users WHERE email = ?`
   )
@@ -50,6 +52,9 @@ type UpdateBody = {
   firstNameRomaji?: unknown;
   facultyType?: unknown;
   university?: unknown;
+  // 一覧に無い大学を手動入力した場合に、フロントで選ばれた区分
+  // （その他国公立大学/その他私立大学/海外大学）をそのまま受け取る。
+  manualUniversityCategory?: unknown;
   industryFirst?: unknown;
   industrySecond?: unknown;
   industryThird?: unknown;
@@ -73,6 +78,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     firstNameRomaji,
     facultyType,
     university,
+    manualUniversityCategory,
     industryFirst,
     industrySecond,
     industryThird,
@@ -118,6 +124,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     );
   }
 
+  const universityCategory =
+    typeof manualUniversityCategory === "string" &&
+    (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(manualUniversityCategory)
+      ? manualUniversityCategory
+      : getUniversityCategory(university);
+
   const result = await context.env.DB.prepare(
     `UPDATE users SET
       last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
@@ -132,7 +144,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       firstNameRomaji,
       facultyType,
       university,
-      getUniversityCategory(university),
+      universityCategory,
       industryFirst,
       industrySecond,
       industryThird,
