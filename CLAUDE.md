@@ -6,6 +6,12 @@
 画面は `/`（トップ）、`/register`（会員登録）、`/login`（ログイン）、`/dashboard`（ログイン後のホーム、ログイン必須）、`/test`（試験実行、ログイン必須）、`/result`（結果表示）。
 登録・ログインに成功すると`localStorage`の`spiUser`にセットし、そのまま`/dashboard`へ遷移する（別途ログインを挟まない）。
 
+## 本番D1のスキーマドリフトに注意（実際に発生した障害）
+
+`schema.sql`の`CREATE TABLE IF NOT EXISTS`は既存テーブルには効かないため、コードで新しいカラムを参照し始めても本番D1には反映されず、テーブルは作られるがカラムが古いまま、という状態になりやすい。2026-08-20に実際にこれで障害が発生した：`users.terms_agreed_at`と`users.scout_consent`が本番`users`テーブルに存在しないまま`functions/api/register.ts`・`functions/api/consent.ts`がこれらを参照しており、新規登録は他カラムのおかげで見かけ上動いていたが（実際は登録自体が失敗していた可能性が高い）、マイページのスカウト同意更新は500エラーで「更新に失敗しました」となっていた。`ALTER TABLE users ADD COLUMN ...`で復旧済み。
+
+**教訓**: `schema.sql`のCREATE TABLE文にカラムを追加・変更したら、必ず`npx wrangler d1 execute webtest-db --remote --command "PRAGMA table_info(<table>)"`で本番の実カラムと突き合わせ、足りなければその場で`ALTER TABLE`を実行すること。「言われたら次回直す」ではなく、スキーマ変更のたびに本番との差分確認をワークフローに組み込む。このセッションでは`wrangler d1 execute --remote`が認証済みで実行できたため、気づいた時点で直接修正して検証まで行った。
+
 ## 開発サーバーに関する重要な注意
 
 `npm run dev`（`next dev`）は **`functions/` 配下のAPI（`/api/register`, `/api/login`等）を配信しない**。フロントエンドのUI・レイアウト確認だけなら`next dev`で十分だが、会員登録・ログインなど`fetch("/api/...")`を伴う動作確認をする場合は必ず **`npm run pages:dev`**（`next build && wrangler pages dev out`）を使うこと。これを守らないと`/api/register`が404になり、フロント側では「通信エラー」という紛らわしいメッセージになる（実際にこの不具合が一度発生している）。
