@@ -25,6 +25,15 @@ type Profile = {
   scout_consent: number;
 };
 
+type ScoutItem = {
+  id: number;
+  companyName: string;
+  message: string | null;
+  status: string;
+  isAnonymous: boolean;
+  createdAt: string;
+};
+
 export default function MyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -51,6 +60,9 @@ export default function MyPage() {
     latestDeviationScore: number | null;
     bestAccuracyRate: number | null;
   } | null>(null);
+  const [scouts, setScouts] = useState<ScoutItem[]>([]);
+  const [scoutActionId, setScoutActionId] = useState<number | null>(null);
+  const [scoutError, setScoutError] = useState<string | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -72,6 +84,8 @@ export default function MyPage() {
       .catch(() => {
         // 成績サマリーの取得に失敗してもマイページ自体は表示する
       });
+
+    loadScouts(user.email);
 
     fetch(`/api/me?email=${encodeURIComponent(user.email)}`)
       .then((res) => res.json())
@@ -166,6 +180,39 @@ export default function MyPage() {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
       setSaving(false);
+    }
+  }
+
+  function loadScouts(userEmail: string) {
+    fetch(`/api/scouts?email=${encodeURIComponent(userEmail)}`)
+      .then((res) => res.json())
+      .then((data: { scouts?: ScoutItem[]; error?: string }) => {
+        if (data.scouts) setScouts(data.scouts);
+      })
+      .catch(() => {
+        // スカウト一覧の取得に失敗してもマイページ自体は表示する
+      });
+  }
+
+  async function handleScoutAction(scoutId: number, action: "accept" | "decline") {
+    setScoutActionId(scoutId);
+    setScoutError(null);
+    try {
+      const res = await fetch("/api/scouts", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, scoutId, action }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setScoutError(data.error ?? "更新に失敗しました。時間をおいて再度お試しください。");
+        return;
+      }
+      loadScouts(email);
+    } catch {
+      setScoutError("通信エラーが発生しました。時間をおいて再度お試しください。");
+    } finally {
+      setScoutActionId(null);
     }
   }
 
@@ -349,6 +396,63 @@ export default function MyPage() {
               {saving ? "保存中..." : "保存する"}
             </button>
           </form>
+        )}
+
+        {!loading && (
+          <div className="flex flex-col gap-3">
+            <h2 className="text-lg font-bold text-gray-900">届いたスカウト</h2>
+            {scoutError && <p className="text-sm font-medium text-red-600">{scoutError}</p>}
+            {scouts.length === 0 ? (
+              <p className="text-sm text-gray-500">まだスカウトは届いていません。</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {scouts.map((s) => (
+                  <div key={s.id} className="rounded-lg border border-gray-200 bg-white p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-gray-900">{s.companyName}</p>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          s.status === "accepted"
+                            ? "bg-green-100 text-green-700"
+                            : s.status === "declined"
+                            ? "bg-gray-100 text-gray-500"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {s.status === "sent" ? "未対応" : s.status === "accepted" ? "承諾済み" : "辞退済み"}
+                      </span>
+                    </div>
+                    {s.message && <p className="mt-2 text-sm text-gray-700">{s.message}</p>}
+                    <p className="mt-2 text-xs text-gray-400">
+                      {s.isAnonymous
+                        ? "承諾するまで、あなたの氏名・メールアドレスはこの企業に開示されません。"
+                        : "承諾済み：この企業にはあなたの氏名・メールアドレスが開示されています。"}
+                    </p>
+                    {s.status === "sent" && (
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          type="button"
+                          disabled={scoutActionId === s.id}
+                          onClick={() => handleScoutAction(s.id, "accept")}
+                          className="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          承諾する
+                        </button>
+                        <button
+                          type="button"
+                          disabled={scoutActionId === s.id}
+                          onClick={() => handleScoutAction(s.id, "decline")}
+                          className="rounded-full border border-gray-300 px-4 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          辞退する
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {!loading && (

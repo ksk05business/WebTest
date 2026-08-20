@@ -1,0 +1,139 @@
+interface Env {
+  DB: D1Database;
+}
+
+type CompanyRow = { id: number; approved: number };
+
+async function getApprovedCompany(
+  db: D1Database,
+  companyEmail: string
+): Promise<CompanyRow | null> {
+  const company = await db
+    .prepare("SELECT id, approved FROM company_profiles WHERE email = ?")
+    .bind(companyEmail)
+    .first<CompanyRow>();
+  return company;
+}
+
+type CandidateRow = {
+  student_id: number;
+  university_category: string | null;
+  faculty_type: string;
+  industry_first: string;
+  industry_second: string;
+  industry_third: string;
+  latest_deviation_score: number | null;
+};
+
+// 候補者の匿名検索。scout_consent = 1 の学生のみを対象とし、
+// 大学区分・文理・志望業界・直近偏差値のみを返す（氏名・メールアドレス等は一切含めない）。
+export const onRequestGet: PagesFunction<Env> = async (context) => {
+  const companyEmail = new URL(context.request.url).searchParams.get("companyEmail");
+  if (!companyEmail) {
+    return Response.json({ error: "companyEmailが指定されていません" }, { status: 400 });
+  }
+
+  const company = await getApprovedCompany(context.env.DB, companyEmail);
+  if (!company) {
+    return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });
+  }
+  if (!company.approved) {
+    return Response.json(
+      { error: "このアカウントはまだ運営の承認待ちのため候補者を閲覧できません" },
+      { status: 403 }
+    );
+  }
+
+  const rows = await context.env.DB.prepare(
+    `SELECT
+        u.id AS student_id,
+        u.university_category,
+        u.faculty_type,
+        u.industry_first,
+        u.industry_second,
+        u.industry_third,
+        (SELECT e.deviation_score FROM exam_results e
+          WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) AS latest_deviation_score
+     FROM users u
+     WHERE u.scout_consent = 1`
+  ).all<CandidateRow>();
+
+  return Response.json({
+    candidates: (rows.results ?? []).map((r) => ({
+      studentId: r.student_id,
+      universityCategory: r.university_category,
+      facultyType: r.faculty_type,
+      industryFirst: r.industry_first,
+      industrySecond: r.industry_second,
+      industryThird: r.industry_third,
+      latestDeviationScore: r.latest_deviation_score,
+    })),
+  });
+};
+
+type SendScoutBody = {
+  companyEmail?: unknown;
+  studentId?: unknown;
+  message?: unknown;
+};
+
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  let body: SendScoutBody;
+  try {
+    body = await context.request.json();
+  } catch {
+    return Response.json({ error: "不正なリクエストです" }, { status: 400 });
+  }
+
+  const { companyEmail, studentId, message } = body;
+  if (
+    typeof companyEmail !== "string" ||
+    !companyEmail.trim() ||
+    typeof studentId !== "number" ||
+    (message !== undefined && typeof message !== "string")
+  ) {
+    return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
+  }
+
+  const company = await getApprovedCompany(context.env.DB, companyEmail);
+  if (!company) {
+    return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });
+  }
+  if (!company.approved) {
+    return Response.json(
+      { error: "このアカウントはまだ運営の承認待ちのためスカウトを送信できません" },
+      { status: 403 }
+    );
+  }
+
+  const student = await context.env.DB.prepare(
+    "SELECT id FROM users WHERE id = ? AND scout_consent = 1"
+  )
+    .bind(studentId)
+    .first<{ id: number }>();
+  if (!student) {
+    return Response.json(
+      { error: "対象の学生が見つからないか、スカウトを受け付けていません" },
+      { status: 404 }
+    );
+  }
+
+  const existing = await context.env.DB.prepare(
+    "SELECT id FROM scouts WHERE company_id = ? AND student_id = ? AND status = 'sent'"
+  )
+    .bind(company.id, studentId)
+    .first();
+  if (existing) {
+    return Response.json({ error: "この候補者には既にスカウトを送信済みです" }, { status: 409 });
+  }
+
+  // is_anonymous = 1 で作成。学生が承諾するまで、企業はこの学生の氏名・連絡先を一切取得できない。
+  await context.env.DB.prepare(
+    `INSERT INTO scouts (company_id, student_id, is_anonymous, status, message)
+     VALUES (?, ?, 1, 'sent', ?)`
+  )
+    .bind(company.id, studentId, message ?? null)
+    .run();
+
+  return Response.json({ ok: true });
+};

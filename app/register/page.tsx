@@ -293,9 +293,28 @@ export default function RegisterPage() {
               className="mt-0.5"
             />
             <span>
-              成績・大学名・志望業界などの情報を、提携する就活エージェント・企業からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。同意はいつでもマイページから撤回できます。
+              成績・大学区分・志望業界などの情報を、提携する就活エージェント・企業からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。
             </span>
           </label>
+          <div className="ml-6 rounded-md bg-white p-3 text-xs text-gray-600">
+            <p className="font-semibold text-gray-700">2段階開示の仕組み</p>
+            <ul className="mt-1 list-disc space-y-1 pl-4">
+              <li>
+                同意しても、氏名・メールアドレスなどご本人を特定できる情報は企業に一切開示されません。企業に見えるのは大学区分・文理・志望業界・模試の偏差値など匿名化された情報のみです。
+              </li>
+              <li>
+                企業から匿名スカウトが届いた場合、内容を確認したうえで「承諾」した場合に限り、その企業にのみ氏名・メールアドレスが開示されます。「辞退」すれば開示されません。
+              </li>
+              <li>この同意はいつでもマイページから撤回できます（撤回後は新たなスカウト対象になりません）。</li>
+            </ul>
+            <p className="mt-1">
+              詳しくは
+              <Link href="/terms#scout" target="_blank" className="text-blue-600 underline">
+                利用規約（第5条）
+              </Link>
+              をご確認ください。
+            </p>
+          </div>
         </div>
 
         {error && <p className="text-sm font-medium text-red-600">{error}</p>}
