@@ -2,7 +2,10 @@ import { hashPassword } from "../_lib/password";
 
 interface Env {
   DB: D1Database;
-  EMAIL: SendEmail;
+  // Cloudflare Email Sending用のAPIトークン（Account > Email Sending > Edit 権限）。
+  // Pages Functionsは send_email バインディングに対応していないため、REST API経由で送信する。
+  EMAIL_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
 }
 
 const OTP_TTL_MINUTES = 10;
@@ -15,6 +18,36 @@ type ForgotPasswordBody = {
 function generateOtp(): string {
   const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
   return n.toString().padStart(6, "0");
+}
+
+async function sendOtpEmail(env: Env, email: string, otp: string): Promise<void> {
+  if (!env.EMAIL_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID) {
+    console.error("EMAIL_API_TOKEN / CLOUDFLARE_ACCOUNT_ID is not configured");
+    return;
+  }
+
+  const res = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/email/sending/send`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.EMAIL_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to: email,
+        from: { address: FROM_ADDRESS, name: "SPIナビ" },
+        subject: "【SPIナビ】パスワード再設定用のワンタイムパスワード",
+        text: `パスワード再設定用のワンタイムパスワードは ${otp} です。\n有効期限は発行から${OTP_TTL_MINUTES}分間です。\n心当たりがない場合はこのメールを破棄してください。`,
+        html: `<p>パスワード再設定用のワンタイムパスワードは <strong>${otp}</strong> です。</p><p>有効期限は発行から${OTP_TTL_MINUTES}分間です。</p><p>心当たりがない場合はこのメールを破棄してください。</p>`,
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.error("Email Sending API request failed", res.status, body);
+  }
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -53,13 +86,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     .run();
 
   try {
-    await context.env.EMAIL.send({
-      to: email,
-      from: { email: FROM_ADDRESS, name: "SPIナビ" },
-      subject: "【SPIナビ】パスワード再設定用のワンタイムパスワード",
-      text: `パスワード再設定用のワンタイムパスワードは ${otp} です。\n有効期限は発行から${OTP_TTL_MINUTES}分間です。\n心当たりがない場合はこのメールを破棄してください。`,
-      html: `<p>パスワード再設定用のワンタイムパスワードは <strong>${otp}</strong> です。</p><p>有効期限は発行から${OTP_TTL_MINUTES}分間です。</p><p>心当たりがない場合はこのメールを破棄してください。</p>`,
-    });
+    await sendOtpEmail(context.env, email, otp);
   } catch (err) {
     console.error("Failed to send password reset email", err);
   }
