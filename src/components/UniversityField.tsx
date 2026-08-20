@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 
 const UNIVERSITY_OPTIONS = [...UNIVERSITIES, ...MANUAL_ENTRY_UNIVERSITIES];
@@ -15,6 +15,13 @@ export function UniversityField({
   const [manualLabel, setManualLabel] = useState<string | null>(null);
   const [query, setQuery] = useState(value);
   const [open, setOpen] = useState(false);
+
+  // 非同期取得（マイページのプロフィール読み込みなど）でvalueが後から確定するケースに対応。
+  // ユーザーが検索文字を入力した際はonChange("")で一旦valueが空になるため、
+  // value が空のときは同期しない（入力中の文字がリセットされてしまうのを防ぐ）。
+  useEffect(() => {
+    if (value) setQuery(value);
+  }, [value]);
 
   if (manualLabel) {
     return (

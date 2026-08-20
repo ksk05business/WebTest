@@ -29,15 +29,23 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
   }
 
-  await context.env.DB.prepare("UPDATE users SET scout_consent = ? WHERE id = ?")
-    .bind(scoutConsent ? 1 : 0, user.id)
-    .run();
+  try {
+    await context.env.DB.prepare("UPDATE users SET scout_consent = ? WHERE id = ?")
+      .bind(scoutConsent ? 1 : 0, user.id)
+      .run();
 
-  await context.env.DB.prepare(
-    `INSERT INTO consent_events (user_id, consent_type, granted) VALUES (?, 'scout', ?)`
-  )
-    .bind(user.id, scoutConsent ? 1 : 0)
-    .run();
+    await context.env.DB.prepare(
+      `INSERT INTO consent_events (user_id, consent_type, granted) VALUES (?, 'scout', ?)`
+    )
+      .bind(user.id, scoutConsent ? 1 : 0)
+      .run();
+  } catch (err) {
+    console.error("Failed to update scout consent", err);
+    return Response.json(
+      { error: "データベースの更新に失敗しました。管理者にお問い合わせください。" },
+      { status: 500 }
+    );
+  }
 
   return Response.json({ ok: true, scoutConsent });
 };

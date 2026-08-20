@@ -226,9 +226,10 @@ export default function MyPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, scoutConsent: next }),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setScoutConsent(!next);
-        setConsentMessage("更新に失敗しました。時間をおいて再度お試しください。");
+        setConsentMessage(data.error ?? `更新に失敗しました（status: ${res.status}）`);
         return;
       }
       setConsentMessage(next ? "スカウト目的での情報提供に同意しました。" : "同意を撤回しました。");
