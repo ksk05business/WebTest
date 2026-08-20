@@ -18,7 +18,11 @@
 
 ## メール送信（パスワード再設定）に関する前提
 
-`functions/api/forgot-password.ts`は`env.EMAIL.send()`（Cloudflare Email Sending の`send_email`バインディング）でOTPメールを送る設計だが、**`send_email`はCloudflare Pagesプロジェクトの設定検証で現状拒否される**（`wrangler pages deploy`が「Configuration file for Pages projects does not support "send_email"」で失敗した実例あり）ため、`wrangler.jsonc`からは`send_email`を削除済み。そのため現状`context.env.EMAIL`はバインドされておらず、メール送信はtry/catchで握りつぶされて常に失敗する（OTP自体はD1に正しく保存されるためAPI応答自体は成功する）。実際にメールを送るには、Workersバインディングではなく**REST API**（APIトークンをPages Secretとして設定し`fetch`で呼ぶ方式）に書き換える必要がある。動作確認時にOTPの値を見たい場合は`forgot-password.ts`に一時的に`console.log`を仕込み、`wrangler pages dev`のログで確認してからコミット前に必ず削除すること（実際にこの手順で検証済み）。
+`send_email`バインディング（Workers用）は**Cloudflare Pagesプロジェクトの設定検証で拒否される**（`wrangler pages deploy`が「Configuration file for Pages projects does not support "send_email"」で失敗した実例あり）ため使用不可。`functions/api/forgot-password.ts`は**Cloudflare Email SendingのREST API**（`fetch`＋Bearerトークン、`env.EMAIL_API_TOKEN`と`env.CLOUDFLARE_ACCOUNT_ID`を使用）でOTPメールを送信する。`CLOUDFLARE_ACCOUNT_ID`は`wrangler.jsonc`の`vars`に平文で設定済み（機密情報ではない）。**`EMAIL_API_TOKEN`はPages Secretとして未設定**（`wrangler pages secret put EMAIL_API_TOKEN --project-name=webtest`で設定する必要がある。トークン値は対話プロンプトで入力させ、絶対にコマンド引数や会話に直接書かない）。トークンが無い場合やドメインが未オンボードの場合は`sendOtpEmail`内でエラーがログに出るだけで、OTP自体はD1に正しく保存されメールだけ届かない（API応答は成功のまま）。
+
+**ドメインのオンボード（`wrangler email sending enable shukatsu-webtest.com`）はこのセッションのOAuthトークンでは`Unauthorized [code: 2036]`で失敗する**（`wrangler email sending list/dns get/enable`いずれも同様、beta CLIコマンドの権限制約と思われる）。ダッシュボード（Compute & AI > Email Service > Email Sending > Onboard Domain）からの手動オンボードが必要。APIトークンの作成（Account > Email Sending > Edit権限）もダッシュボード側の操作が必要。
+
+動作確認時にOTPの値を見たい場合は`forgot-password.ts`に一時的に`console.log`を仕込み、`wrangler pages dev`のログで確認してからコミット前に必ず削除すること（実際にこの手順で検証済み）。
 
 ## スカウト（第三者提供）機能の同意設計に関する重要な注意
 
