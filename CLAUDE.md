@@ -99,3 +99,7 @@
 - `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。
 - `app/company/dashboard/page.tsx`: 企業向けダッシュボード。ログイン必須（`spiCompanyUser`が無ければ`/company/login`へリダイレクト）。`approved=false`の場合は承認待ち表示のみ。承認済みなら大学区分・文理・志望業界・偏差値下限でのフィルタ検索（`/api/company/scouts`）、候補者ごとのメッセージ付きスカウト送信、送信済みスカウトの状態・開示情報一覧（`/api/company/sent-scouts`）を表示する。
 - `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）・模試結果の保存/取得（`exam-results.ts`）・スカウト応答（`scouts.ts`）を担当。`functions/api/company/*.ts`は企業向け（ログイン・候補者検索・スカウト送信・送信済み一覧）。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。
+
+## 志望業界の分類（`src/data/formOptions.ts`）
+
+学生が選びやすく・企業とのマッチング率を上げるため、2026-08-20に**10グループ・計43業種（`INDUSTRY_GROUPS`）から大分類10種類のフラットな配列（`INDUSTRIES`）に変更**した。`IndustrySelect`は単純な`<select>`に、企業ダッシュボードのフィルタも汎用`CheckboxGroup`に統一されている。**この変更前に登録された既存ユーザーの`industry_first/second/third`には旧分類の値が残る**（マイページの`<select>`ではどの選択肢にも一致せず空欄表示になる）。汎用の自動移行スクリプトは書いていない（変更時点で本番の実ユーザーは1件のみだったため、そのレコードだけ手動で新分類に更新した）。旧→新のおおまかな対応は: コンサル系→「コンサル・シンクタンク」、金融系（外資/日系問わず）→「金融（銀行・証券・保険・投資）」、メーカー系→「メーカー（自動車・食品・化学・製薬等）」、商社→「商社（総合・専門）」、IT・通信系→「IT・通信・Web」、マスコミ・広告系→「マスコミ・広告・出版」、不動産・建設系→「不動産・建設・デベロッパー」、公的機関→「公的機関・公務員」、それ以外のサービス系（運輸・エネルギー・人材・旅行・小売等）→「サービス・インフラ（運輸・エネルギー・人材・旅行等）」。

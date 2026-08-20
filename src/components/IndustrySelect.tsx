@@ -1,6 +1,6 @@
 "use client";
 
-import { INDUSTRY_GROUPS } from "@/src/data/formOptions";
+import { INDUSTRIES } from "@/src/data/formOptions";
 
 export function IndustrySelect({
   label,
@@ -20,14 +20,10 @@ export function IndustrySelect({
         className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
       >
         <option value="">選択してください</option>
-        {INDUSTRY_GROUPS.map((group) => (
-          <optgroup key={group.label} label={group.label}>
-            {group.options.map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </optgroup>
+        {INDUSTRIES.map((i) => (
+          <option key={i} value={i}>
+            {i}
+          </option>
         ))}
       </select>
     </label>

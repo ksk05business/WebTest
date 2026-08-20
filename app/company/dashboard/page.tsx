@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
-import { FACULTY_TYPES, INDUSTRY_GROUPS } from "@/src/data/formOptions";
+import { FACULTY_TYPES, INDUSTRIES } from "@/src/data/formOptions";
 import { UNIVERSITY_CATEGORIES } from "@/src/data/universityCategories";
 
 function toggleValue(values: string[], value: string): string[] {
@@ -34,39 +34,6 @@ function CheckboxGroup({
             />
             {o}
           </label>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function IndustryCheckboxGroup({
-  selected,
-  onChange,
-}: {
-  selected: string[];
-  onChange: (values: string[]) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-1 text-sm font-medium text-gray-700 sm:col-span-2">
-      志望業界
-      <div className="flex max-h-40 flex-col gap-2 overflow-y-auto rounded-lg border border-gray-300 bg-white p-2">
-        {INDUSTRY_GROUPS.map((group) => (
-          <div key={group.label}>
-            <p className="text-xs font-semibold text-gray-500">{group.label}</p>
-            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
-              {group.options.map((o) => (
-                <label key={o} className="flex items-center gap-1 text-sm font-normal text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(o)}
-                    onChange={() => onChange(toggleValue(selected, o))}
-                  />
-                  {o}
-                </label>
-              ))}
-            </div>
-          </div>
         ))}
       </div>
     </div>
@@ -253,7 +220,12 @@ export default function CompanyDashboardPage() {
                   onChange={setFacultyTypes}
                 />
 
-                <IndustryCheckboxGroup selected={industries} onChange={setIndustries} />
+                <CheckboxGroup
+                  label="志望業界（複数選択可）"
+                  options={INDUSTRIES}
+                  selected={industries}
+                  onChange={setIndustries}
+                />
 
                 <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
                   SPI偏差値（以上）
