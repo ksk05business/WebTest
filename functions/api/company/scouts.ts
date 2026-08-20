@@ -25,9 +25,15 @@ type CandidateRow = {
   latest_deviation_score: number | null;
 };
 
+// 複数値をIN句用のプレースホルダ文字列に変換する（例: 3件なら "?,?,?"）
+function placeholders(values: string[]): string {
+  return values.map(() => "?").join(",");
+}
+
 // 候補者の匿名検索。scout_consent = 1 の学生のみを対象とし、
 // 大学区分・文理・志望業界・直近偏差値のみを返す（氏名・メールアドレス等は一切含めない）。
-// クエリパラメータ: universityCategory, facultyType, industry（第一〜第三志望のいずれかに一致）, minDeviation
+// クエリパラメータ（いずれも同名パラメータを複数指定すると複数選択=OR条件になる）:
+//   universityCategory, facultyType, industry（第一〜第三志望のいずれかに一致）, minDeviation
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const params = new URL(context.request.url).searchParams;
   const companyEmail = params.get("companyEmail");
@@ -46,26 +52,29 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     );
   }
 
-  const universityCategory = params.get("universityCategory");
-  const facultyType = params.get("facultyType");
-  const industry = params.get("industry");
+  const universityCategories = params.getAll("universityCategory").filter(Boolean);
+  const facultyTypes = params.getAll("facultyType").filter(Boolean);
+  const industries = params.getAll("industry").filter(Boolean);
   const minDeviationRaw = params.get("minDeviation");
   const minDeviation = minDeviationRaw !== null ? Number(minDeviationRaw) : null;
 
   const conditions = ["u.scout_consent = 1"];
   const binds: (string | number)[] = [];
 
-  if (universityCategory) {
-    conditions.push("u.university_category = ?");
-    binds.push(universityCategory);
+  if (universityCategories.length > 0) {
+    conditions.push(`u.university_category IN (${placeholders(universityCategories)})`);
+    binds.push(...universityCategories);
   }
-  if (facultyType) {
-    conditions.push("u.faculty_type = ?");
-    binds.push(facultyType);
+  if (facultyTypes.length > 0) {
+    conditions.push(`u.faculty_type IN (${placeholders(facultyTypes)})`);
+    binds.push(...facultyTypes);
   }
-  if (industry) {
-    conditions.push("(u.industry_first = ? OR u.industry_second = ? OR u.industry_third = ?)");
-    binds.push(industry, industry, industry);
+  if (industries.length > 0) {
+    const ph = placeholders(industries);
+    conditions.push(
+      `(u.industry_first IN (${ph}) OR u.industry_second IN (${ph}) OR u.industry_third IN (${ph}))`
+    );
+    binds.push(...industries, ...industries, ...industries);
   }
   if (minDeviation !== null && !Number.isNaN(minDeviation)) {
     conditions.push(

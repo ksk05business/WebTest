@@ -3,9 +3,75 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
-import { IndustrySelect } from "@/src/components/IndustrySelect";
-import { FACULTY_TYPES } from "@/src/data/formOptions";
+import { FACULTY_TYPES, INDUSTRY_GROUPS } from "@/src/data/formOptions";
 import { UNIVERSITY_CATEGORIES } from "@/src/data/universityCategories";
+
+function toggleValue(values: string[], value: string): string[] {
+  return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
+}
+
+function CheckboxGroup({
+  label,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  options: readonly string[];
+  selected: string[];
+  onChange: (values: string[]) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+      {label}
+      <div className="flex max-h-32 flex-col gap-1 overflow-y-auto rounded-lg border border-gray-300 bg-white p-2">
+        {options.map((o) => (
+          <label key={o} className="flex items-center gap-2 text-sm font-normal text-gray-700">
+            <input
+              type="checkbox"
+              checked={selected.includes(o)}
+              onChange={() => onChange(toggleValue(selected, o))}
+            />
+            {o}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IndustryCheckboxGroup({
+  selected,
+  onChange,
+}: {
+  selected: string[];
+  onChange: (values: string[]) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 text-sm font-medium text-gray-700 sm:col-span-2">
+      志望業界
+      <div className="flex max-h-40 flex-col gap-2 overflow-y-auto rounded-lg border border-gray-300 bg-white p-2">
+        {INDUSTRY_GROUPS.map((group) => (
+          <div key={group.label}>
+            <p className="text-xs font-semibold text-gray-500">{group.label}</p>
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+              {group.options.map((o) => (
+                <label key={o} className="flex items-center gap-1 text-sm font-normal text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(o)}
+                    onChange={() => onChange(toggleValue(selected, o))}
+                  />
+                  {o}
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 type Candidate = {
   studentId: number;
@@ -46,9 +112,9 @@ export default function CompanyDashboardPage() {
   const [companyName, setCompanyName] = useState("");
   const [approved, setApproved] = useState(false);
 
-  const [universityCategory, setUniversityCategory] = useState("");
-  const [facultyType, setFacultyType] = useState("");
-  const [industry, setIndustry] = useState("");
+  const [universityCategories, setUniversityCategories] = useState<string[]>([]);
+  const [facultyTypes, setFacultyTypes] = useState<string[]>([]);
+  const [industries, setIndustries] = useState<string[]>([]);
   const [minDeviation, setMinDeviation] = useState("");
 
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
@@ -99,9 +165,9 @@ export default function CompanyDashboardPage() {
     setSearching(true);
     try {
       const params = new URLSearchParams({ companyEmail });
-      if (universityCategory) params.set("universityCategory", universityCategory);
-      if (facultyType) params.set("facultyType", facultyType);
-      if (industry) params.set("industry", industry);
+      universityCategories.forEach((v) => params.append("universityCategory", v));
+      facultyTypes.forEach((v) => params.append("facultyType", v));
+      industries.forEach((v) => params.append("industry", v));
       if (minDeviation) params.set("minDeviation", minDeviation);
 
       const res = await fetch(`/api/company/scouts?${params.toString()}`);
@@ -173,39 +239,21 @@ export default function CompanyDashboardPage() {
                 onSubmit={handleSearch}
                 className="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2"
               >
-                <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-                  大学区分
-                  <select
-                    value={universityCategory}
-                    onChange={(e) => setUniversityCategory(e.target.value)}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
-                  >
-                    <option value="">指定しない</option>
-                    {UNIVERSITY_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <CheckboxGroup
+                  label="大学区分（複数選択可）"
+                  options={UNIVERSITY_CATEGORIES}
+                  selected={universityCategories}
+                  onChange={setUniversityCategories}
+                />
 
-                <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-                  学部・区分（文理）
-                  <select
-                    value={facultyType}
-                    onChange={(e) => setFacultyType(e.target.value)}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
-                  >
-                    <option value="">指定しない</option>
-                    {FACULTY_TYPES.map((f) => (
-                      <option key={f} value={f}>
-                        {f}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <CheckboxGroup
+                  label="学部・区分（文理、複数選択可）"
+                  options={FACULTY_TYPES}
+                  selected={facultyTypes}
+                  onChange={setFacultyTypes}
+                />
 
-                <IndustrySelect label="志望業界" value={industry} onChange={setIndustry} />
+                <IndustryCheckboxGroup selected={industries} onChange={setIndustries} />
 
                 <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
                   SPI偏差値（以上）
