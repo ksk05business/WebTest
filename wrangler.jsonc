@@ -9,8 +9,5 @@
       "database_name": "webtest-db",
       "database_id": "f5ecd161-b535-4c0a-8606-39c0d79b3346"
     }
-  ],
-  "vars": {
-    "CLOUDFLARE_ACCOUNT_ID": "7a0c2541345c7e1f1f145e0049d27324"
-  }
+  ]
 }

@@ -21,6 +21,14 @@ function generateOtp(): string {
 }
 
 async function sendOtpEmail(env: Env, email: string, otp: string): Promise<void> {
+  // デバッグ用: キーが環境に存在するかのみを出力する（トークン文字列自体は絶対に出力しない）。
+  console.log(
+    "[forgot-password] EMAIL_API_TOKEN present:",
+    Boolean(env.EMAIL_API_TOKEN),
+    "CLOUDFLARE_ACCOUNT_ID present:",
+    Boolean(env.CLOUDFLARE_ACCOUNT_ID)
+  );
+
   if (!env.EMAIL_API_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID) {
     console.error("EMAIL_API_TOKEN / CLOUDFLARE_ACCOUNT_ID is not configured");
     return;
