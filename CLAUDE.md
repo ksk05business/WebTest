@@ -43,6 +43,10 @@
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
+## LPの危機感訴求セクション・無料訴求の調整（2026-08-21）
+
+ヒーロー直下に「危機感訴求」セクション（`app/page.tsx`）を追加した。他セクションの青〜紫グラデーションとは対照的に`bg-gray-900`のダーク背景＋赤系アクセント（`AlertTriangle`アイコン、赤〜アンバーのグラデーションテキスト、赤系CTAボタン）にして視覚的に警告色として際立たせている。「学生は完全無料」バナーからは運営モデルの説明文（「企業からのスカウト掲載料で運営されているため〜」）を完全に削除し、「学生は完全無料（全機能￥0）」の一文のみを大きく強調する形に変更した。バッジ文言も「SP/PC対応」→「スマホ / PC対応」に微調整した。
+
 ## サービス名リブランディング「SPIナビ」→「Webテストナビ」（2026-08-21）
 
 ヘッダーロゴ（`DashboardHeader`/`CompanyHeader`/`AuthLayout`）、フッター（`Footer`）、`app/layout.tsx`のmetadata（title/description/OGP/Twitterカード）、パスワード再設定メールの送信者名・件名（`functions/api/forgot-password.ts`）、利用規約第1条・第2条（`app/terms/page.tsx`）を「Webテストナビ」に統一した。`app/privacy/page.tsx`には元々サービス名の直書きが無かったため変更不要（確認済み）。**`localStorage`のキー名`spiUser`/`spiCompanyUser`、`wrangler.jsonc`の`"name": "spi-mock-app"`、Cloudflare Pagesのプロジェクト名`webtest`は、ユーザーに見えない内部識別子のため意図的に変更していない**（特に`wrangler.jsonc`の`name`やCloudflareのプロジェクト名を変えるとデプロイ先のバインディングが変わりかねないため触らないこと）。

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  AlertTriangle,
   BarChart3,
   Brain,
   CheckCircle2,
@@ -16,7 +17,7 @@ import { TEST_TYPES } from "@/src/data/testTypes";
 
 const BADGES = [
   { icon: Clock, text: "登録3分" },
-  { icon: Smartphone, text: "SP/PC対応" },
+  { icon: Smartphone, text: "スマホ / PC対応" },
   { icon: ShieldCheck, text: "2段階開示で安心" },
 ];
 
@@ -150,6 +151,45 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 危機感訴求 */}
+      <section className="relative overflow-hidden bg-gray-900 px-6 py-16 text-center sm:py-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: "radial-gradient(circle, #f87171 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-red-600/20 blur-3xl"
+        />
+
+        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5">
+          <span className="flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-1.5 text-xs font-bold text-red-400 ring-1 ring-red-500/30">
+            <AlertTriangle className="h-4 w-4" />
+            就活生への警告
+          </span>
+          <h2 className="text-balance text-2xl font-bold leading-snug text-white sm:text-3xl">
+            どんなに志望度が高くても、
+            <br />
+            <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">
+              Webテストで落とされたら面接すら受けられない。
+            </span>
+          </h2>
+          <p className="text-balance text-sm leading-relaxed text-gray-300 sm:text-base">
+            選考の最初の壁であるWebテスト。対策を後回しにしていると「足切り」に遭い、自分自身の強みや思いをアピールする面接の場にすらたどり着けません。ライバルが対策を始める前に、今すぐスコアを底上げしましょう。
+          </p>
+          <Link
+            href="/register"
+            className="mt-2 rounded-full bg-gradient-to-r from-red-500 to-amber-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-900/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            手遅れになる前に【無料】で対策を始める
+          </Link>
+        </div>
+      </section>
+
       {/* 対応Webテスト網羅 */}
       <section className="px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
@@ -189,13 +229,11 @@ export default function Home() {
       </section>
 
       {/* 安心感バナー */}
-      <section className="border-y border-gray-100 bg-blue-50/60 px-6 py-8">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
-          <p className="text-sm font-semibold text-blue-900 sm:text-base">
-            なぜ完全無料？
-            <span className="ml-1 font-normal text-blue-700">
-              企業からのスカウト掲載料で運営されているため、学生に費用は一切かかりません。
-            </span>
+      <section className="border-y border-gray-100 bg-blue-50/60 px-6 py-10">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
+          <p className="text-balance text-xl font-extrabold text-blue-900 sm:text-2xl">
+            学生は完全無料
+            <span className="ml-1.5 text-blue-600">（全機能￥0）</span>
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {BADGES.map((b) => (
