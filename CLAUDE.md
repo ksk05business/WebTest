@@ -43,6 +43,26 @@
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
+## 成績ダッシュボード・エビングハウス反復復習機能（2026-08-21）
+
+**成績ダッシュボード**（`src/components/PerformanceDashboard.tsx`、`/mypage`から`email`を渡して描画）: サマリーカード（最高偏差値・直近偏差値・累計受検回数・評価ランクS〜D）、偏差値推移の折れ線グラフ（`recharts`を新規導入。`ResponsiveContainer`+`LineChart`、`app/layout.tsx`同様`"use client"`コンポーネント内でのみ使用）、カテゴリ別（言語/非言語/構造的把握）の正解率・偏差値バーと得意分野/弱点タグを表示する。復習リマインドカード（`今日復習すべき問題（N件）`、`GET /api/review`の件数がベース）もこのコンポーネント内にまとめて置いた。
+
+**カテゴリ別偏差値の算出方法**: `functions/api/exam-results.ts`のGETで、`questions`テーブルから`DISTINCT category, sub_category`を取得して小分類→大分類（`non_verbal`/`verbal`/`structural`）の対応表を作り、ユーザー自身の`category_scores_json`履歴（直近20件）をこの対応表で大分類ごとに集計する。母集団は「直近500件の`exam_results.category_scores_json`を同じ対応表で大分類ごとにバケット化した、受験ごとの正答率のリスト」とし、既存の`calculateDeviationScore()`（母集団の平均・標準偏差との比較）をそのまま流用して大分類別の偏差値を出す。**全体の偏差値と同じ「簡易実装」であり、サンプルが少ない/母集団が無い場合は50固定になる**（既存の全体偏差値ロジックと同じ制約）。`GET /api/exam-results`のレスポンスに`bestDeviationScore`・`categoryBreakdown`（`{category, correct, total, accuracyRate, deviationScore}[]`）を追加した。評価ランク（S〜D）は`latestDeviationScore`からクライアント側（`PerformanceDashboard`の`getRank()`）で算出しており、サーバー側には持たない。
+
+**エビングハウスの忘却曲線に基づく反復復習**: `user_question_reviews`テーブル（`schema.sql`）を新設。ユーザー×問題ごとに1行のみ保持し、復習のたびに`review_stage`（完了済み復習回数、0〜4）と`next_review_at`を上書き更新する方式（履歴は積まない）。スケジュールは`functions/_lib/reviewSchedule.ts`の`nextIntervalDaysAfterStage()`に集約: キュー追加時（stage0）→1日後に1回目、1回目正解（stage1）→3日後に2回目、2回目正解（stage2）→7日後に3回目、3回目正解（stage3）→14日後に4回目、4回目正解（stage4）で`status='mastered'`となり出題対象から外れる。不正解の場合は`review_stage`を0に戻し`status='active'`のまま翌日（+1日）に再スケジュールする（mastered済みの問題を後で間違えた場合も同様にreactivateされる）。
+
+**言語カテゴリのみを対象とする理由と実装**: ユーザー要求「言語・知識系問題向けに」に対応するため、`/test`（`functions/api/exam-results.ts`のPOST）で間違えた問題のうち`questions.category = 'verbal'`のものだけを復習キューへ`INSERT ... ON CONFLICT(user_id, question_id) DO UPDATE`でupsertする（`enqueueWrongVerbalAnswers()`）。この判定はクライアントを信用せず、サーバー側で`questionId`から`questions`テーブルを再照会して行う。**この機能が実際に動作を確認できるよう、`verbal`カテゴリの問題が1問も無かった当初のシードデータに、`POST /api/admin/questions`で語彙問題を2問追加した**（ローカル・本番とも）。
+
+**`/test`側の変更**: 回答結果`results`ステートに`questionId`を追加し（既存の`category`/`correct`はそのまま）、`POST /api/exam-results`のボディに`answers: {questionId, correct}[]`を追加で送るようにした（`categoryScores`の集計ロジック自体は変更していない）。
+
+**新規API**:
+- `GET /api/review?email=`: `status='active'`かつ`next_review_at <= now`の復習対象を`next_review_at`昇順で返す。DB行→クライアント形状への変換は`functions/_lib/questionFormat.ts`の`toClientQuestion()`（`functions/api/questions.ts`と共通化）を再利用している。
+- `POST /api/review`: `{email, reviewId, result: 'correct'|'incorrect'}`。`reviewId`の所有者（`user_id`）を検証してから更新する。
+
+**`/review`ページ**（`app/review/page.tsx`）: 認証チェック後に`GET /api/review`で当日分を取得し、1問1答形式（タイマー無し）で出題する。回答するたびに即座に`POST /api/review`を送るため、セッションを離脱しても進捗は保存される。0件の場合と全問終了後の完了画面をそれぞれ用意した。
+
+ユーザー要求では`/api/mypage`という新エンドポイント名が示されていたが、既存の`GET /api/exam-results`が既にほぼ同じ情報（偏差値推移履歴・受験回数）を返していたため、そこにカテゴリ別内訳とベスト偏差値を追加する形で拡張した（重複するDB往復・エンドポイントを増やさないための判断）。「今日復習が必要な問題数」は`GET /api/review`の配列長をそのままカウントとして`PerformanceDashboard`側で使っており、専用のカウント返却フィールドは設けていない。
+
 ## 問題データのD1移行（2026-08-21）
 
 `src/data/questions.ts`にハードコードしていたSPI問題を`questions`テーブル（D1）へ完全移行した。旧`questions`/`question_choices`テーブル（未使用・0件）は`DROP TABLE`してから作り直した（本番D1へも同様に適用済み、実データが無かったため安全に実施できた）。
@@ -126,7 +146,8 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 - `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。認証確認後に`GET /api/questions`から問題セットを取得する（`src/data/questions.ts`の静的配列は2026-08-21に廃止、型定義のみ残存）。試験終了時に`spiResult`/`spiResultHistory`（localStorage）を更新しつつ、`/api/exam-results`にもPOSTしてD1へ保存する（失敗しても結果画面表示は継続）。
 - `app/result/page.tsx`: クライアントコンポーネント。`localStorage` の `spiResult` を読み、スコアと評価コメント、収益化バナー枠、`/dashboard`への導線を表示。
 - `app/forgot-password/page.tsx`: クライアントコンポーネント。メール送信→OTP入力＋新パスワード設定の2ステップ。`/api/forgot-password`と`/api/reset-password`を呼ぶ。
-- `app/mypage/page.tsx`: プロフィール編集・スカウト同意トグル（`/api/consent`）・成績サマリー（`/api/exam-results`）に加え、`/api/scouts`から取得した「届いたスカウト」一覧と承諾/辞退ボタンを表示する。
+- `app/mypage/page.tsx`: プロフィール編集・スカウト同意トグル（`/api/consent`）・成績ダッシュボード（`src/components/PerformanceDashboard.tsx`、偏差値推移グラフ・カテゴリ別分析・復習リマインドカード）に加え、`/api/scouts`から取得した「届いたスカウト」一覧と承諾/辞退ボタンを表示する。
+- `app/review/page.tsx`: エビングハウスの忘却曲線に基づく反復復習モード。`GET /api/review`で当日分を取得し、1問1答形式で出題・`POST /api/review`で結果を即時送信する。
 - `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
 - `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。
 - `app/company/dashboard/page.tsx`: 企業向けダッシュボード。ログイン必須（`spiCompanyUser`が無ければ`/company/login`へリダイレクト）。`approved=false`の場合は承認待ち表示のみ。承認済みなら大学区分・文理・志望業界・希望職種・偏差値下限でのフィルタ検索（`/api/company/scouts`のGET）を行い、候補者カードの「スカウトを送信する」ボタンから`ScoutSendModal`を開いて送信する（POSTも同エンドポイント）。

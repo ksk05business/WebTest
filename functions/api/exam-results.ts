@@ -1,8 +1,12 @@
+import { INITIAL_REVIEW_INTERVAL_DAYS, daysFromNowModifier } from "../_lib/reviewSchedule";
+
 interface Env {
   DB: D1Database;
 }
 
 type CategoryScores = Record<string, { correct: number; total: number }>;
+
+type AnswerInput = { questionId: number; correct: boolean };
 
 type PostBody = {
   email?: unknown;
@@ -10,6 +14,7 @@ type PostBody = {
   score?: unknown;
   total?: unknown;
   categoryScores?: unknown;
+  answers?: unknown;
 };
 
 function isCategoryScores(value: unknown): value is CategoryScores {
@@ -20,6 +25,17 @@ function isCategoryScores(value: unknown): value is CategoryScores {
       v !== null &&
       typeof (v as { correct?: unknown }).correct === "number" &&
       typeof (v as { total?: unknown }).total === "number"
+  );
+}
+
+function isAnswers(value: unknown): value is AnswerInput[] {
+  if (!Array.isArray(value)) return false;
+  return value.every(
+    (v) =>
+      typeof v === "object" &&
+      v !== null &&
+      typeof (v as { questionId?: unknown }).questionId === "number" &&
+      typeof (v as { correct?: unknown }).correct === "boolean"
   );
 }
 
@@ -36,6 +52,33 @@ function calculateDeviationScore(rate: number, priorRates: number[]): number {
   return 50 + (10 * (rate - mean)) / stddev;
 }
 
+// 言語（verbal）カテゴリの問題を間違えた場合、忘却曲線に基づく復習キューへ追加/リセットする。
+// 既に復習キューにある問題（mastered済みも含む）は、間違えた時点でstage0・翌日復習にリセットする。
+async function enqueueWrongVerbalAnswers(db: D1Database, userId: number, answers: AnswerInput[]) {
+  const wrongIds = answers.filter((a) => !a.correct).map((a) => a.questionId);
+  if (wrongIds.length === 0) return;
+
+  const placeholders = wrongIds.map(() => "?").join(",");
+  const verbalQuestions = await db
+    .prepare(`SELECT id FROM questions WHERE id IN (${placeholders}) AND category = 'verbal'`)
+    .bind(...wrongIds)
+    .all<{ id: number }>();
+
+  const modifier = daysFromNowModifier(INITIAL_REVIEW_INTERVAL_DAYS);
+  for (const q of verbalQuestions.results ?? []) {
+    await db
+      .prepare(
+        `INSERT INTO user_question_reviews (user_id, question_id, review_stage, status, last_result, next_review_at)
+         VALUES (?, ?, 0, 'active', 'incorrect', datetime('now', ?))
+         ON CONFLICT(user_id, question_id) DO UPDATE SET
+           review_stage = 0, status = 'active', last_result = 'incorrect',
+           next_review_at = datetime('now', ?), updated_at = datetime('now')`
+      )
+      .bind(userId, q.id, modifier, modifier)
+      .run();
+  }
+}
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   let body: PostBody;
   try {
@@ -44,7 +87,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { email, score, total, categoryScores } = body;
+  const { email, score, total, categoryScores, answers } = body;
   const testType = typeof body.testType === "string" && body.testType ? body.testType : "spi";
 
   if (
@@ -55,7 +98,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     total <= 0 ||
     score < 0 ||
     score > total ||
-    (categoryScores !== undefined && !isCategoryScores(categoryScores))
+    (categoryScores !== undefined && !isCategoryScores(categoryScores)) ||
+    (answers !== undefined && !isAnswers(answers))
   ) {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
   }
@@ -92,6 +136,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     )
     .run();
 
+  if (answers) {
+    await enqueueWrongVerbalAnswers(context.env.DB, user.id, answers);
+  }
+
   return Response.json({ ok: true, deviationScore, accuracyRate });
 };
 
@@ -104,6 +152,22 @@ type ExamResultRow = {
   category_scores_json: string | null;
   taken_at: string;
 };
+
+const BROAD_CATEGORIES = ["verbal", "non_verbal", "structural"] as const;
+
+function bucketBySubCategory(
+  scores: CategoryScores,
+  subToBroad: Record<string, string>
+): Record<string, { correct: number; total: number }> {
+  const out: Record<string, { correct: number; total: number }> = {};
+  for (const [sub, v] of Object.entries(scores)) {
+    const broad = subToBroad[sub] ?? "non_verbal";
+    if (!out[broad]) out[broad] = { correct: 0, total: 0 };
+    out[broad].correct += v.correct;
+    out[broad].total += v.total;
+  }
+  return out;
+}
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const email = new URL(context.request.url).searchParams.get("email");
@@ -135,14 +199,74 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     takenAt: r.taken_at,
   }));
 
-  const latestDeviationScore = history[0]?.deviationScore ?? null;
+  const deviationScores = history
+    .map((h) => h.deviationScore)
+    .filter((d): d is number => d !== null);
+  const latestDeviationScore = deviationScores[0] ?? null;
+  const bestDeviationScore = deviationScores.length > 0 ? Math.max(...deviationScores) : null;
   const bestAccuracyRate =
     history.length > 0 ? Math.max(...history.map((h) => h.accuracyRate)) : null;
+
+  // 問題の大分類（category: non_verbal/verbal/structural）と小分類（sub_category）の対応表を作り、
+  // category_scores_json（小分類キー）を大分類ごとに集計する。カテゴリ別の正解率・偏差値表示に使う。
+  const categoryRows = await context.env.DB.prepare(
+    "SELECT DISTINCT category, sub_category FROM questions"
+  ).all<{ category: string; sub_category: string }>();
+  const subToBroad: Record<string, string> = {};
+  for (const r of categoryRows.results ?? []) {
+    subToBroad[r.sub_category] = r.category;
+  }
+
+  // 母集団（全ユーザーの過去の受験ごとの大分類別正答率）を集める。直近500件までに抑える簡易実装。
+  const allScoreRows = await context.env.DB.prepare(
+    "SELECT category_scores_json FROM exam_results WHERE category_scores_json IS NOT NULL ORDER BY taken_at DESC LIMIT 500"
+  ).all<{ category_scores_json: string }>();
+  const populationByBroad: Record<string, number[]> = {};
+  for (const row of allScoreRows.results ?? []) {
+    try {
+      const parsed: CategoryScores = JSON.parse(row.category_scores_json);
+      const bucketed = bucketBySubCategory(parsed, subToBroad);
+      for (const [broad, v] of Object.entries(bucketed)) {
+        if (v.total > 0) {
+          (populationByBroad[broad] ??= []).push(v.correct / v.total);
+        }
+      }
+    } catch {
+      // 壊れたJSONはスキップ
+    }
+  }
+
+  // このユーザー自身の累計（直近20件分）を大分類ごとに集計する。
+  const userTotalsByBroad: Record<string, { correct: number; total: number }> = {};
+  for (const h of history) {
+    if (!h.categoryScores) continue;
+    const bucketed = bucketBySubCategory(h.categoryScores, subToBroad);
+    for (const [broad, v] of Object.entries(bucketed)) {
+      const entry = (userTotalsByBroad[broad] ??= { correct: 0, total: 0 });
+      entry.correct += v.correct;
+      entry.total += v.total;
+    }
+  }
+
+  const categoryBreakdown = BROAD_CATEGORIES.map((broad) => {
+    const totals = userTotalsByBroad[broad] ?? { correct: 0, total: 0 };
+    const rate = totals.total > 0 ? totals.correct / totals.total : null;
+    const deviation = rate !== null ? calculateDeviationScore(rate, populationByBroad[broad] ?? []) : null;
+    return {
+      category: broad,
+      correct: totals.correct,
+      total: totals.total,
+      accuracyRate: rate,
+      deviationScore: deviation,
+    };
+  });
 
   return Response.json({
     history,
     attemptCount: history.length,
     latestDeviationScore,
+    bestDeviationScore,
     bestAccuracyRate,
+    categoryBreakdown,
   });
 };

@@ -14,6 +14,7 @@ import {
 } from "@/src/data/formOptions";
 import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
+import { PerformanceDashboard } from "@/src/components/PerformanceDashboard";
 import {
   ScoutDetailModal,
   SCOUT_STATUS_LABEL,
@@ -45,6 +46,7 @@ type Profile = {
 export default function MyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
   const [email, setEmail] = useState("");
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -65,11 +67,6 @@ export default function MyPage() {
   const [scoutConsent, setScoutConsent] = useState(false);
   const [consentSaving, setConsentSaving] = useState(false);
   const [consentMessage, setConsentMessage] = useState<string | null>(null);
-  const [examSummary, setExamSummary] = useState<{
-    attemptCount: number;
-    latestDeviationScore: number | null;
-    bestAccuracyRate: number | null;
-  } | null>(null);
   const [scouts, setScouts] = useState<ScoutItem[]>([]);
   const [scoutError, setScoutError] = useState<string | null>(null);
   const [selectedScoutId, setSelectedScoutId] = useState<number | null>(null);
@@ -88,14 +85,7 @@ export default function MyPage() {
       return;
     }
 
-    fetch(`/api/exam-results?email=${encodeURIComponent(user.email)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.error) setExamSummary(data);
-      })
-      .catch(() => {
-        // 成績サマリーの取得に失敗してもマイページ自体は表示する
-      });
+    setUserEmail(user.email);
 
     loadScouts(user.email);
 
@@ -296,23 +286,7 @@ export default function MyPage() {
       <main className="mx-auto flex max-w-md flex-col gap-6 px-6 py-10">
         <h1 className="text-2xl font-bold text-gray-900">マイページ</h1>
 
-        {examSummary && examSummary.attemptCount > 0 && (
-          <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-            模試の成績: 最新偏差値{" "}
-            <span className="font-bold text-blue-700">
-              {examSummary.latestDeviationScore !== null
-                ? examSummary.latestDeviationScore.toFixed(1)
-                : "-"}
-            </span>
-            ／最高正答率{" "}
-            <span className="font-bold text-blue-700">
-              {examSummary.bestAccuracyRate !== null
-                ? `${Math.round(examSummary.bestAccuracyRate * 100)}%`
-                : "-"}
-            </span>
-            （受験{examSummary.attemptCount}回）
-          </p>
-        )}
+        {userEmail && <PerformanceDashboard email={userEmail} />}
 
         {loading ? (
           <p className="text-sm text-gray-500">読み込み中...</p>

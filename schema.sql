@@ -142,3 +142,30 @@ CREATE TABLE IF NOT EXISTS questions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_questions_category_status ON questions(category, status);
+
+-- ============================================================
+-- エビングハウスの忘却曲線に基づく反復復習キュー
+-- 言語（verbal）カテゴリの問題を間違えた際に自動追加される。ユーザー×問題ごとに1行のみ保持し、
+-- 復習の正解/不正解のたびに review_stage / next_review_at を更新していく（履歴は積まない）。
+-- スケジュール: 初回追加→1日後に復習1回目。以後、正解するたびに次の間隔（3日→7日→14日）で
+-- 次回復習日を設定し、review_stage 4到達（4回目復習に正解）で status='mastered'として出題対象から外す。
+-- 不正解の場合は review_stage を0に戻し、翌日（+1日）に再度復習させる。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS user_question_reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  review_stage INTEGER NOT NULL DEFAULT 0, -- 完了済みの復習回数（0〜4）
+  status TEXT NOT NULL DEFAULT 'active', -- 'active' | 'mastered'
+  last_result TEXT, -- 直近の復習結果 'correct' | 'incorrect'（未復習ならNULL）
+  next_review_at TEXT NOT NULL, -- 次回復習予定日時
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_question_reviews_user_question
+  ON user_question_reviews(user_id, question_id);
+CREATE INDEX IF NOT EXISTS idx_user_question_reviews_due
+  ON user_question_reviews(user_id, status, next_review_at);

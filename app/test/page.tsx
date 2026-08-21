@@ -16,7 +16,9 @@ export default function TestPage() {
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [score, setScore] = useState(0);
   const [authChecked, setAuthChecked] = useState(false);
-  const [results, setResults] = useState<{ category: string; correct: boolean }[]>([]);
+  const [results, setResults] = useState<
+    { questionId: number; category: string; correct: boolean }[]
+  >([]);
 
   const question = questions?.[currentIndex];
   const isLast = questions !== null && currentIndex === questions.length - 1;
@@ -53,7 +55,7 @@ export default function TestPage() {
     if (!authChecked || answered || !question) return;
     if (timeLeft <= 0) {
       setAnswered(true);
-      setResults((r) => [...r, { category: question.category, correct: false }]);
+      setResults((r) => [...r, { questionId: question.id, category: question.category, correct: false }]);
       return;
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
@@ -65,7 +67,10 @@ export default function TestPage() {
     setSelected(label);
     setAnswered(true);
     const isCorrectAnswer = label === question.answer;
-    setResults((r) => [...r, { category: question.category, correct: isCorrectAnswer }]);
+    setResults((r) => [
+      ...r,
+      { questionId: question.id, category: question.category, correct: isCorrectAnswer },
+    ]);
     if (isCorrectAnswer) {
       setScore((s) => s + 1);
     }
@@ -93,10 +98,11 @@ export default function TestPage() {
         const rawUser = localStorage.getItem("spiUser");
         const email = rawUser ? (JSON.parse(rawUser) as { email?: string }).email : undefined;
         if (email) {
+          const answers = results.map((r) => ({ questionId: r.questionId, correct: r.correct }));
           await fetch("/api/exam-results", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, testType: "spi", score, total, categoryScores }),
+            body: JSON.stringify({ email, testType: "spi", score, total, categoryScores, answers }),
           });
         }
       } catch {
