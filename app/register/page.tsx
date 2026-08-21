@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { GraduationCap, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import {
   DEFAULT_DESIRED_OCCUPATIONS,
   DESIRED_OCCUPATIONS,
@@ -14,8 +15,13 @@ import {
 import { IndustrySelect } from "@/src/components/IndustrySelect";
 import { UniversityField } from "@/src/components/UniversityField";
 import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
+import { AuthLayout } from "@/src/components/AuthLayout";
+import { IconInput } from "@/src/components/IconInput";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
+
+const SELECT_CLASS =
+  "rounded-xl border border-gray-300 px-3 py-2.5 text-gray-900 transition-all duration-150 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -136,27 +142,25 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-900">会員登録</h1>
-
+    <AuthLayout title="会員登録" subtitle="無料で登録して模試とスカウトをはじめよう">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex gap-2">
-          <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+          <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium text-gray-700">
             苗字
-            <input
+            <IconInput
+              icon={User}
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
             />
           </label>
-          <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+          <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium text-gray-700">
             名前
-            <input
+            <IconInput
+              icon={User}
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
             />
           </label>
         </div>
@@ -164,60 +168,64 @@ export default function RegisterPage() {
         <div className="flex flex-col gap-2">
           <p className="text-xs text-gray-500">アルファベット表記</p>
           <div className="flex gap-2">
-            <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+            <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium text-gray-700">
               Last Name
               <input
                 type="text"
                 value={lastNameRomaji}
                 onChange={(e) => setLastNameRomaji(e.target.value)}
                 placeholder="Yamada"
-                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                className={`w-full ${SELECT_CLASS}`}
               />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
+            <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium text-gray-700">
               First Name
               <input
                 type="text"
                 value={firstNameRomaji}
                 onChange={(e) => setFirstNameRomaji(e.target.value)}
                 placeholder="Taro"
-                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                className={`w-full ${SELECT_CLASS}`}
               />
             </label>
           </div>
         </div>
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           メールアドレス
-          <input
+          <IconInput
+            icon={Mail}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            placeholder="you@example.com"
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           パスワード（8文字以上）
-          <input
+          <IconInput
+            icon={Lock}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            placeholder="••••••••"
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           パスワード（確認用）
-          <input
+          <IconInput
+            icon={Lock}
             type="password"
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            className={`rounded-lg border px-3 py-2 text-gray-900 ${
+            placeholder="••••••••"
+            className={
               passwordConfirm && password !== passwordConfirm
-                ? "border-red-400"
-                : "border-gray-300"
-            }`}
+                ? "border-red-400 focus:border-red-500 focus:ring-red-500/10"
+                : ""
+            }
           />
           {passwordConfirm && password !== passwordConfirm && (
             <p className="text-xs font-medium text-red-600">
@@ -226,8 +234,11 @@ export default function RegisterPage() {
           )}
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-          大学名
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
+          <span className="flex items-center gap-1.5">
+            <GraduationCap className="h-4 w-4 text-gray-400" />
+            大学名
+          </span>
           <UniversityField
             value={university}
             onChange={setUniversity}
@@ -235,12 +246,12 @@ export default function RegisterPage() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           学部・区分
           <select
             value={facultyType}
             onChange={(e) => setFacultyType(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            className={SELECT_CLASS}
           >
             <option value="">選択してください</option>
             {FACULTY_TYPES.map((f) => (
@@ -266,13 +277,13 @@ export default function RegisterPage() {
           max={MAX_DESIRED_OCCUPATIONS}
         />
 
-        <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+        <div className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           卒業年月
           <div className="flex gap-2">
             <select
               value={graduationYear}
               onChange={(e) => setGraduationYear(e.target.value)}
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              className={`flex-1 ${SELECT_CLASS}`}
             >
               {GRADUATION_YEARS.map((y) => (
                 <option key={y} value={y}>
@@ -283,7 +294,7 @@ export default function RegisterPage() {
             <select
               value={graduationMonth}
               onChange={(e) => setGraduationMonth(e.target.value)}
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              className={`flex-1 ${SELECT_CLASS}`}
             >
               {GRADUATION_MONTHS.map((m) => (
                 <option key={m} value={m}>
@@ -294,13 +305,13 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
           <label className="flex items-start gap-2 text-sm text-gray-700">
             <input
               type="checkbox"
               checked={agreedTerms}
               onChange={(e) => setAgreedTerms(e.target.checked)}
-              className="mt-0.5"
+              className="mt-0.5 h-4 w-4 accent-blue-600"
             />
             <span>
               <Link href="/terms" target="_blank" className="text-blue-600 underline">
@@ -319,14 +330,17 @@ export default function RegisterPage() {
               type="checkbox"
               checked={scoutConsent}
               onChange={(e) => setScoutConsent(e.target.checked)}
-              className="mt-0.5"
+              className="mt-0.5 h-4 w-4 accent-blue-600"
             />
             <span>
               成績・大学区分・志望業界などの情報を、提携する就活エージェント・企業からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。
             </span>
           </label>
-          <div className="ml-6 rounded-md bg-white p-3 text-xs text-gray-600">
-            <p className="font-semibold text-gray-700">2段階開示の仕組み</p>
+          <div className="ml-6 flex flex-col gap-1 rounded-lg bg-white p-3 text-xs text-gray-600">
+            <p className="flex items-center gap-1.5 font-semibold text-gray-700">
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+              2段階開示の仕組み
+            </p>
             <ul className="mt-1 list-disc space-y-1 pl-4">
               <li>
                 同意しても、氏名・メールアドレスなどご本人を特定できる情報は企業に一切開示されません。企業に見えるのは大学区分・文理・志望業界・模試の偏差値など匿名化された情報のみです。
@@ -346,25 +360,29 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={
             submitting || !agreedTerms || (passwordConfirm !== "" && password !== passwordConfirm)
           }
-          className="mt-2 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          className="mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 disabled:shadow-none"
         >
           {submitting ? "登録中..." : "登録する"}
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="mt-6 text-center text-sm text-gray-600">
         すでにアカウントをお持ちの方は{" "}
-        <Link href="/login" className="text-blue-600 underline">
+        <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700">
           ログイン
         </Link>
       </p>
-    </main>
+    </AuthLayout>
   );
 }

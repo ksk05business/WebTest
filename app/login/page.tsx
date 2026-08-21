@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Lock, Mail } from "lucide-react";
+import { AuthLayout } from "@/src/components/AuthLayout";
+import { IconInput } from "@/src/components/IconInput";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,52 +50,56 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-900">ログイン</h1>
-
+    <AuthLayout title="ログイン" subtitle="アカウントにログインして模試・スカウトを確認しましょう">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           メールアドレス
-          <input
+          <IconInput
+            icon={Mail}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            placeholder="you@example.com"
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           パスワード
-          <input
+          <IconInput
+            icon={Lock}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+            placeholder="••••••••"
           />
         </label>
 
-        {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+        {error && (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          className="mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 disabled:shadow-none"
         >
           {submitting ? "ログイン中..." : "ログイン"}
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-600">
+      <p className="mt-6 text-center text-sm text-gray-600">
         アカウントをお持ちでない方は{" "}
-        <Link href="/register" className="text-blue-600 underline">
+        <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-700">
           会員登録
         </Link>
       </p>
-      <p className="text-center text-sm text-gray-600">
-        <Link href="/forgot-password" className="text-blue-600 underline">
+      <p className="mt-2 text-center text-sm text-gray-600">
+        <Link href="/forgot-password" className="text-blue-600 hover:text-blue-700">
           パスワードをお忘れですか？
         </Link>
       </p>
-    </main>
+    </AuthLayout>
   );
 }

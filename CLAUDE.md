@@ -43,6 +43,12 @@
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
+## ファビコン・ログイン/会員登録画面のデザイン刷新（2026-08-21）
+
+**ファビコン**: `app/favicon.ico`（デフォルトのVercelロゴ）を削除し、`app/icon.svg`（Next.jsのファイル規約による自動アイコン検出）に置き換えた。青(`#3b82f6`)→紫(`#8b5cf6`)グラデーションの角丸正方形に、白いコンパス針（N-Sを不透明・E-Wを半透明にした4方向の菱形）を重ねたデザイン。PNG/ICOへのラスタライズが必要な`apple-icon.png`は、画像変換ツールがこの環境に無いため作成していない（iOSのホーム画面追加時のアイコンはブラウザ既定にフォールバックする）。`app/layout.tsx`の`metadata`にタイトル「SPIナビ | 就活生のWebテスト対策＆スカウト」・description・`icons.icon`を設定し、`<html lang="en">`を`lang="ja"`に修正した（今までデフォルトの"Create Next App"のままだった）。
+
+**`/login`・`/register`のUI刷新**: 新規`src/components/AuthLayout.tsx`（両ページ共通のラッパー）が、`lg:`以上でグラデーション（blue→indigo→purple）のビジュアルパネル（キャッチコピー・強み3点をLucideアイコン付きで表示、`lg:sticky lg:top-0 lg:h-screen`でスクロールしても固定）とガラスモーフィズム風フォームカードの2カラムを構成する。モバイル（`lg:`未満）ではビジュアルパネルを完全に非表示にし、フォーム上部にロゴのみのコンパクトな見出しを出す（`/register`は項目数が多く、フル高さの2カラムがモバイルで崩れるため）。`src/components/IconInput.tsx`（Lucideアイコン付き入力欄、フォーカス時に`ring-4 ring-blue-500/10`のアニメーション）を氏名・メール・パスワードの各欄に使用。`UniversityField`・`IndustrySelect`・`LimitedCheckboxGroup`など既存の複合コンポーネントは内部スタイルを変更していない（`/mypage`の編集フォームでも共用されているため、意図せず影響が及ばないようにするため）。**両ページともバリデーション・API呼び出し・state管理ロジックは一切変更しておらず、見た目のみの刷新**。
+
 ## 成績ダッシュボード・エビングハウス反復復習機能（2026-08-21）
 
 **成績ダッシュボード**（`src/components/PerformanceDashboard.tsx`、`/mypage`から`email`を渡して描画）: サマリーカード（最高偏差値・直近偏差値・累計受検回数・評価ランクS〜D）、偏差値推移の折れ線グラフ（`recharts`を新規導入。`ResponsiveContainer`+`LineChart`、`app/layout.tsx`同様`"use client"`コンポーネント内でのみ使用）、カテゴリ別（言語/非言語/構造的把握）の正解率・偏差値バーと得意分野/弱点タグを表示する。復習リマインドカード（`今日復習すべき問題（N件）`、`GET /api/review`の件数がベース）もこのコンポーネント内にまとめて置いた。
@@ -140,8 +146,8 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 # ページ責務
 
 - `app/page.tsx`: サーバーコンポーネントのまま維持（`"use client"` 不要）。キャッチコピーと「新規登録」「ログイン」への導線。
-- `app/register/page.tsx`: クライアントコンポーネント。会員登録フォーム。`/api/register`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
-- `app/login/page.tsx`: クライアントコンポーネント。ログインフォーム。`/api/login`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
+- `app/register/page.tsx`: クライアントコンポーネント。会員登録フォーム。`/api/register`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。バリデーション・送信ロジックは2026-08-21のUI刷新でも変更していない（`src/components/AuthLayout.tsx`でラップし、`IconInput`でスタイルを差し替えただけ）。
+- `app/login/page.tsx`: クライアントコンポーネント。ログインフォーム。`/api/login`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。register同様、2026-08-21のUI刷新でロジックは変更していない。
 - `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。ログイン後のトップページとして、試験種別選択（`TEST_TYPES`）・成績ダッシュボード（`PerformanceDashboard`）・スカウト受信ボックス（`ScoutInbox`）を1画面に統合している（2026-08-21に`/mypage`から成績・復習・スカウトの表示をこちらへ移動）。旧`localStorage`の`spiResultHistory`に基づく簡易履歴テーブルは、D1ベースの`PerformanceDashboard`に置き換える形で廃止した。
 - `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。認証確認後に`GET /api/questions`から問題セットを取得する（`src/data/questions.ts`の静的配列は2026-08-21に廃止、型定義のみ残存）。試験終了時に`spiResult`/`spiResultHistory`（localStorage）を更新しつつ、`/api/exam-results`にもPOSTしてD1へ保存する（失敗しても結果画面表示は継続）。
 - `app/result/page.tsx`: クライアントコンポーネント。`localStorage` の `spiResult` を読み、スコアと評価コメント、収益化バナー枠、`/dashboard`への導線を表示。
