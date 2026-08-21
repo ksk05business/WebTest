@@ -91,6 +91,14 @@
 
 **大分類の命名衝突回避**: 玉手箱の3大分類は`tamatebako_math`/`tamatebako_verbal`/`tamatebako_english`という接頭辞付きidにした（SPIの`non_verbal`/`verbal`/`english`と別名にすることで、`functions/api/exam-results.ts`のカテゴリ別集計ロジック等が将来両テストの受験データを扱うようになった際に大分類が混同されないようにするため）。実データは1件も投入していないため、`GET /api/question-units`のレスポンス・単元カードの表示件数には影響がなく、全単元が「準備中」表示になる（クリックしてもトースト表示のみで`/practice`には遷移しない、既存の0件ハンドリングがそのまま機能する）。
 
+## 玉手箱GAB形式問題の追加・長文パッセージのグループ出題（2026-08-21）
+
+玉手箱の`tamatebako_verbal`/「論理的読解（GAB形式）」単元に、オリジナル書き下ろしの長文10本×設問4問＝40問を`POST /api/admin/questions`で本番D1へ投入した（科学・人文学・文化学・生物学・社会学・自然科学等がテーマ）。選択肢は固定3択（A:明らかに正しい／B:明らかに間違っている／C:本文だけでは判断できない）、`question_text`には長文全文＋設問文を1問ごとに自己完結する形で格納している（1問1行＝1レコードの既存スキーマをそのまま使い、長文を分離する新テーブルは作らなかった）。
+
+**「同じ長文の4問は連続したまとまりとして出題してほしい」というユーザー要求**に対応するため、`questions`テーブルに`passage_group_id INTEGER`（任意）を追加した（本番・ローカルとも`ALTER TABLE`実施済み、本番の40問は`UPDATE`で10グループに割り当て済み）。`GET /api/questions`（`functions/api/questions.ts`）を、従来の`ORDER BY RANDOM() LIMIT`によるSQLレベルのランダム抽出から、**アプリケーション側でグループ化してからシャッフルする方式**に変更した: 条件に合致する全行を取得→`passage_group_id`（無ければ自分の`id`を仮のグループキーとして扱い1件グループとする）でグループ化→グループの順序だけをシャッフル→グループ内は`id`昇順を保ったまま`limit`に達するまで連結、という流れにした。この結果、`passage_group_id`が同一の問題は常に連続して出題される一方、`passage_group_id`が無い既存のSPI問題群は従来通り1問単位でランダムに出題される（後方互換）。`POST /api/admin/questions`にも`passageGroupId`（任意の整数）を追加した。
+
+**重大な副作用として発覚した「/testへのカテゴリ漏れ」を同時に修正した**: `app/test/page.tsx`（本番模試＝SPI3専用のはずの画面）は`GET /api/questions`を**カテゴリ絞り込み無しで**呼び出しており、`questions`テーブルが実質SPI専用データしか持たなかった間は問題なかったが、今回`tamatebako_verbal`カテゴリの`status='published'`データを投入したことで、**SPIの本番模試に玉手箱のGAB長文問題が混入し得る状態**になっていたことに気づいた。`SPI_CATEGORIES = ["verbal","non_verbal","structural","english"]`（`functions/api/exam-results.ts`の`BROAD_CATEGORIES`と同じ4分類）を明示的に`?category=`として渡すよう修正済み。同様に、`PracticeUnitSelector`の「ランダム総合練習」（`/practice?category=all&testType=<id>`）も、`category=all`のときカテゴリ無指定で全テスト横断的に取得していたため、玉手箱の練習画面で「ランダム総合練習」を押すとSPIの問題が混ざりうる状態だった。`app/practice/page.tsx`の`loadQuestions()`で、`category==="all"`の場合は`PRACTICE_UNIT_GROUPS_BY_TEST[testId]`から該当テストの大分類一覧を導出して`?category=`に複数指定するよう修正した。**将来、新しいテスト種別のデータを追加する際は、同様の「他テストへの意図しない混入」が起きないか必ず確認すること**（`/test`は今後も`testType`によるフィルタ機構が無いため、SPI以外のカテゴリを`published`にする場合は特に注意）。
+
 ## 模擬試験/練習問題モード選択ダイアログ（2026-08-21）
 
 `/dashboard`の「試験の種類」カードは、直接`/test`へリンクする方式をやめ、クリックすると`src/components/ExamModeSelectModal.tsx`を開く方式にした。`available=false`（準備中）のカードもクリックできるようにし、モーダル内で「現在問題コンテンツを順次準備中です。公開まで今しばらくお待ちください。」と案内する（以前は非活性のdivだったが、今はボタンにしてどちらの状態でもモーダルを介す統一UIにした）。`available=true`（現状SPIのみ）の場合のみ、モーダル内に「模擬試験（本番モード、`/test`へ）」「練習問題（トレーニングモード、`/practice`へ）」の2択を表示する。

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
-import { DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
+import { DEFAULT_TEST_ID, PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -69,6 +69,10 @@ function PracticePageInner() {
     if (category && category !== "all") {
       params.set("category", category);
       if (subCategory) params.set("subCategory", subCategory);
+    } else if (category === "all") {
+      // 「ランダム総合練習」は現在のテスト種別の分野に限定する（他テストの問題が混ざらないようにする）
+      const groups = PRACTICE_UNIT_GROUPS_BY_TEST[testId] ?? PRACTICE_UNIT_GROUPS_BY_TEST[DEFAULT_TEST_ID];
+      groups.forEach((g) => params.append("category", g.category));
     }
     fetch(`/api/questions?${params.toString()}`)
       .then((res) => res.json())

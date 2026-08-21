@@ -7,8 +7,21 @@ interface Env {
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 50;
 
-// 出題対象の問題をランダム取得する。?category= / ?subCategory= はそれぞれ複数指定するとOR条件、
+type Row = QuestionRow & { passage_group_id: number | null };
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// 出題対象の問題を取得する。?category= / ?subCategory= はそれぞれ複数指定するとOR条件、
 // ?difficulty= は完全一致、?limit= は取得件数（デフォルト10、最大50）。status='published' の問題のみを対象とする。
+// 同じ長文から出題される設問（GAB形式の論理的読解等、passage_group_idが同一の問題）は、
+// シャッフル後も常にグループ内の順序（id昇順）を保ったまま連続して出題されるようにする。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const params = new URL(context.request.url).searchParams;
   const categories = params.getAll("category").filter(Boolean);
@@ -37,19 +50,35 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     binds.push(difficulty);
   }
 
-  binds.push(limit);
-
   const rows = await context.env.DB.prepare(
-    `SELECT id, category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty
+    `SELECT id, category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, passage_group_id
      FROM questions
-     WHERE ${conditions.join(" AND ")}
-     ORDER BY RANDOM()
-     LIMIT ?`
+     WHERE ${conditions.join(" AND ")}`
   )
     .bind(...binds)
-    .all<QuestionRow>();
+    .all<Row>();
+
+  const groups = new Map<string, Row[]>();
+  for (const row of rows.results ?? []) {
+    const key = row.passage_group_id !== null ? `g${row.passage_group_id}` : `q${row.id}`;
+    const list = groups.get(key);
+    if (list) list.push(row);
+    else groups.set(key, [row]);
+  }
+  for (const list of groups.values()) {
+    list.sort((a, b) => a.id - b.id);
+  }
+
+  const shuffledGroups = shuffle([...groups.values()]);
+  const selected: Row[] = [];
+  for (const group of shuffledGroups) {
+    if (selected.length >= limit) break;
+    if (selected.length + group.length <= limit || selected.length === 0) {
+      selected.push(...group.slice(0, limit - selected.length));
+    }
+  }
 
   return Response.json({
-    questions: (rows.results ?? []).map(toClientQuestion),
+    questions: selected.map(toClientQuestion),
   });
 };

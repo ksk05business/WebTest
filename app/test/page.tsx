@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import type { Question } from "@/src/data/questions";
 
 const TIME_PER_QUESTION = 60;
+// /testは現状SPI3本番模試専用のため、玉手箱等の他テスト向けカテゴリ（tamatebako_*等）を誤って
+// 出題しないよう、SPIの4大分類のみに明示的に絞り込む（functions/api/exam-results.tsのBROAD_CATEGORIESと同じ）。
+const SPI_CATEGORIES = ["verbal", "non_verbal", "structural", "english"];
 
 export default function TestPage() {
   const router = useRouter();
@@ -33,7 +36,9 @@ export default function TestPage() {
 
   useEffect(() => {
     if (!authChecked) return;
-    fetch("/api/questions")
+    const params = new URLSearchParams();
+    SPI_CATEGORIES.forEach((c) => params.append("category", c));
+    fetch(`/api/questions?${params.toString()}`)
       .then((res) => res.json())
       .then((data: { questions?: Question[]; error?: string }) => {
         if (!data.questions || data.questions.length === 0) {

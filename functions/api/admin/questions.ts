@@ -17,6 +17,7 @@ type QuestionInput = {
   difficulty?: unknown;
   status?: unknown;
   originalityNote?: unknown;
+  passageGroupId?: unknown;
 };
 
 type ValidatedQuestion = {
@@ -31,6 +32,7 @@ type ValidatedQuestion = {
   difficulty: number;
   status: string;
   originalityNote: string | null;
+  passageGroupId: number | null;
 };
 
 // 1件分の入力を検証し、DB保存用に正規化する。不正な場合はエラーメッセージを返す。
@@ -95,6 +97,13 @@ function validateQuestion(input: QuestionInput, index: number): ValidatedQuestio
   if (input.tables !== undefined && input.tables !== null && typeof input.tables !== "object") {
     return { error: `${label}: tablesはオブジェクト配列で指定してください` };
   }
+  if (
+    input.passageGroupId !== undefined &&
+    input.passageGroupId !== null &&
+    (typeof input.passageGroupId !== "number" || !Number.isInteger(input.passageGroupId))
+  ) {
+    return { error: `${label}: passageGroupIdは整数で指定してください` };
+  }
 
   return {
     category: input.category.trim(),
@@ -108,6 +117,7 @@ function validateQuestion(input: QuestionInput, index: number): ValidatedQuestio
     difficulty,
     status,
     originalityNote: typeof input.originalityNote === "string" ? input.originalityNote : null,
+    passageGroupId: typeof input.passageGroupId === "number" ? input.passageGroupId : null,
   };
 }
 
@@ -151,8 +161,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   for (const q of validated) {
     const row = await context.env.DB.prepare(
       `INSERT INTO questions
-        (category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, status, originality_note)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, status, originality_note, passage_group_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING id`
     )
       .bind(
@@ -166,7 +176,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         q.explanationJson,
         q.difficulty,
         q.status,
-        q.originalityNote
+        q.originalityNote,
+        q.passageGroupId
       )
       .first<{ id: number }>();
     if (row) insertedIds.push(row.id);
