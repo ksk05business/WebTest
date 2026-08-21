@@ -15,6 +15,7 @@ type PostBody = {
   total?: unknown;
   categoryScores?: unknown;
   answers?: unknown;
+  isPractice?: unknown;
 };
 
 function isCategoryScores(value: unknown): value is CategoryScores {
@@ -89,6 +90,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   const { email, score, total, categoryScores, answers } = body;
   const testType = typeof body.testType === "string" && body.testType ? body.testType : "spi";
+  const isPractice = body.isPractice === true;
 
   if (
     typeof email !== "string" ||
@@ -112,6 +114,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const accuracyRate = score / total;
+
+  // 練習問題（トレーニングモード）は正式な受験記録として保存しない（偏差値推移・カテゴリ分析には反映しない）。
+  // ただし間違えた言語問題の復習キュー登録だけは、本番模試と同様に行う。
+  if (isPractice) {
+    if (answers) {
+      await enqueueWrongVerbalAnswers(context.env.DB, user.id, answers);
+    }
+    return Response.json({ ok: true, isPractice: true, accuracyRate });
+  }
 
   const priorRows = await context.env.DB.prepare(
     "SELECT accuracy_rate FROM exam_results WHERE test_type = ?"

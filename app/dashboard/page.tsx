@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { PerformanceDashboard } from "@/src/components/PerformanceDashboard";
 import { ScoutInbox } from "@/src/components/ScoutInbox";
-import { TEST_TYPES } from "@/src/data/testTypes";
+import { ExamModeSelectModal } from "@/src/components/ExamModeSelectModal";
+import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [selectedTestType, setSelectedTestType] = useState<TestType | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -42,21 +43,24 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {TEST_TYPES.map((t) =>
               t.available ? (
-                <Link
+                <button
                   key={t.id}
-                  href={t.href}
+                  type="button"
+                  onClick={() => setSelectedTestType(t)}
                   className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-center font-semibold text-blue-700 hover:bg-blue-100"
                 >
                   {t.name}
-                </Link>
+                </button>
               ) : (
-                <div
+                <button
                   key={t.id}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-gray-400"
+                  type="button"
+                  onClick={() => setSelectedTestType(t)}
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-gray-400 hover:bg-gray-100"
                 >
                   {t.name}
                   <p className="mt-1 text-xs">準備中</p>
-                </div>
+                </button>
               )
             )}
           </div>
@@ -69,6 +73,13 @@ export default function DashboardPage() {
           </>
         )}
       </main>
+
+      {selectedTestType && (
+        <ExamModeSelectModal
+          testType={selectedTestType}
+          onClose={() => setSelectedTestType(null)}
+        />
+      )}
     </div>
   );
 }
