@@ -122,33 +122,23 @@ CREATE INDEX IF NOT EXISTS idx_scouts_company_id ON scouts(company_id);
 -- 市販本の文章・設定（人物名や具体的な数値の組み合わせ等）をそのまま転用せず、
 -- 「解法ロジック（アイディア）」のみを参考に完全オリジナルで作問することを前提としたスキーマ。
 -- originality_note に参照した解法ロジックの要約のみを記録し、原著作物の文章を書き写さない運用とする。
--- status により、大量生成した問題を人がレビューし published にするまでは出題対象に含めない。
+-- status により、大量生成した問題を人がレビューし published にするまでは出題対象に含めない運用も可能
+-- （デフォルトは published。/test では status='published' の問題のみランダム出題する）。
 -- ============================================================
 CREATE TABLE IF NOT EXISTS questions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  test_type TEXT NOT NULL DEFAULT 'spi', -- 'spi' | 'tamatebako' | 'tgweb' | 'gab' | 'cgab' | 'cab'
-  category TEXT NOT NULL, -- 分野。例: "非言語-損益算", "非言語-推論", "言語-語句"
-  difficulty INTEGER NOT NULL DEFAULT 3, -- 難易度 1(易)〜5(難)
+  category TEXT NOT NULL, -- 大分類。例: "non_verbal" | "verbal" | "structural"
+  sub_category TEXT NOT NULL, -- 小分類。例: "推論", "損益算", "資料の読み取り"
+  title TEXT, -- 表・資料読み取り問題等につける見出し（任意）
   question_text TEXT NOT NULL,
   tables_json TEXT, -- 表を伴う問題のみ、表データ(見出し・行)をJSON文字列で保持
-  correct_choice TEXT NOT NULL, -- 'A' | 'B' | 'C' | 'D' | 'E'
-  explanation TEXT NOT NULL, -- 解法ロジックの解説（ステップ単位で記述）
-  originality_note TEXT NOT NULL, -- 著作権対応メモ: 参照した解法アイデアの要約のみを記録し、原文の転載がないことを明記する
-  status TEXT NOT NULL DEFAULT 'draft', -- 'draft' | 'published' | 'archived'
-  created_by TEXT,
-  reviewed_by TEXT,
-  reviewed_at TEXT,
+  options TEXT NOT NULL, -- 選択肢のJSON配列。例: ["1000円","1100円","1167円","1200円","1400円"]
+  correct_answer INTEGER NOT NULL, -- optionsの正解インデックス（0始まり）
+  explanation TEXT NOT NULL, -- 解説。ステップごとの文字列配列をJSON文字列として保存
+  difficulty INTEGER NOT NULL DEFAULT 3, -- 難易度 1(易)〜5(難)
+  status TEXT NOT NULL DEFAULT 'published', -- 'draft' | 'published' | 'archived'
+  originality_note TEXT, -- 著作権対応メモ: 参照した解法アイデアの要約のみを記録し、原文の転載がないことを明記する
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_questions_test_type_status ON questions(test_type, status);
-
-CREATE TABLE IF NOT EXISTS question_choices (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  question_id INTEGER NOT NULL,
-  label TEXT NOT NULL, -- 'A' | 'B' | 'C' | 'D' | 'E'
-  choice_text TEXT NOT NULL,
-  FOREIGN KEY (question_id) REFERENCES questions(id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_question_choices_question_id ON question_choices(question_id);
+CREATE INDEX IF NOT EXISTS idx_questions_category_status ON questions(category, status);

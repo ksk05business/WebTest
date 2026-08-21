@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { questions } from "@/src/data/questions";
+import type { Question } from "@/src/data/questions";
 
 const TIME_PER_QUESTION = 60;
 
 export default function TestPage() {
   const router = useRouter();
+  const [questions, setQuestions] = useState<Question[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
@@ -16,8 +18,8 @@ export default function TestPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [results, setResults] = useState<{ category: string; correct: boolean }[]>([]);
 
-  const question = questions[currentIndex];
-  const isLast = currentIndex === questions.length - 1;
+  const question = questions?.[currentIndex];
+  const isLast = questions !== null && currentIndex === questions.length - 1;
 
   useEffect(() => {
     if (!localStorage.getItem("spiUser")) {
@@ -27,6 +29,20 @@ export default function TestPage() {
     setAuthChecked(true);
   }, [router]);
 
+  useEffect(() => {
+    if (!authChecked) return;
+    fetch("/api/questions")
+      .then((res) => res.json())
+      .then((data: { questions?: Question[]; error?: string }) => {
+        if (!data.questions || data.questions.length === 0) {
+          setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
+          return;
+        }
+        setQuestions(data.questions);
+      })
+      .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+  }, [authChecked]);
+
   // reset timer whenever we move to a new question
   useEffect(() => {
     setTimeLeft(TIME_PER_QUESTION);
@@ -34,7 +50,7 @@ export default function TestPage() {
 
   // countdown
   useEffect(() => {
-    if (!authChecked || answered) return;
+    if (!authChecked || answered || !question) return;
     if (timeLeft <= 0) {
       setAnswered(true);
       setResults((r) => [...r, { category: question.category, correct: false }]);
@@ -45,7 +61,7 @@ export default function TestPage() {
   }, [timeLeft, answered, authChecked, question]);
 
   function handleSelect(label: string) {
-    if (answered) return;
+    if (answered || !question) return;
     setSelected(label);
     setAnswered(true);
     const isCorrectAnswer = label === question.answer;
@@ -56,7 +72,7 @@ export default function TestPage() {
   }
 
   async function handleNext() {
-    if (isLast) {
+    if (isLast && questions) {
       const total = questions.length;
       localStorage.setItem("spiResult", JSON.stringify({ score, total }));
 
@@ -95,11 +111,27 @@ export default function TestPage() {
     setAnswered(false);
   }
 
-  const isCorrect = selected === question.answer;
-
   if (!authChecked) {
     return null;
   }
+
+  if (loadError) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+        <p className="text-sm font-medium text-red-600">{loadError}</p>
+      </main>
+    );
+  }
+
+  if (!question || !questions) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+        <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
+      </main>
+    );
+  }
+
+  const isCorrect = selected === question.answer;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">

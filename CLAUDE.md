@@ -41,7 +41,21 @@
 - `users.university_category`: 匿名開示用の大学区分（大学名そのものは開示しない）。`src/data/universityCategories.ts`の`getUniversityCategory()`で大学名からマッピングし、`register.ts`・`me.ts`のPUTで自動的に算出・保存する（実装済み）。2026-08-20に**就活で一般的な大学群の通称11区分に変更**: 旧帝一科（旧帝7校+一橋+東京科学大学）/ TOCKY（筑波・お茶の水・千葉・神戸・横浜国立）/ 電農名繊（電気通信・東京農工・名古屋工業・京都工芸繊維）/ その他国公立大学 / 早慶上理 / GMARCH / 関関同立 / 日東駒専 / 産近甲龍 / その他私立大学 / 海外大学。これらの通称に含まれる大学（九州大学・東京農工大学・東洋大学・甲南大学）は`src/data/universities.ts`の`UNIVERSITIES`に無かったため追加した。`src/data/universityCategories.ts`の全100校が漏れなくマッピングされていることをスクリプトで検証済み。既存ユーザー分は登録・プロフィール更新のタイミングでしか埋まらないため、古いレコードはNULLの可能性がある。
 
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
-- `questions` / `question_choices`: D1ベースの問題バンク（分野・難易度・オリジナリティメモ・レビューステータス付き）。**現状`/test`は`src/data/questions.ts`のTS配列を使い続けており、このテーブルへの移行・読み込みAPIはまだ実装していない**。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
+- `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
+
+## 問題データのD1移行（2026-08-21）
+
+`src/data/questions.ts`にハードコードしていたSPI問題を`questions`テーブル（D1）へ完全移行した。旧`questions`/`question_choices`テーブル（未使用・0件）は`DROP TABLE`してから作り直した（本番D1へも同様に適用済み、実データが無かったため安全に実施できた）。
+
+**新schema**: `id, category（大分類。"non_verbal"|"verbal"|"structural"）, sub_category（小分類。例:"損益算","推論","資料の読み取り"）, title（任意）, question_text, tables_json（表問題のみ、JSON文字列）, options（選択肢のJSON配列）, correct_answer（optionsの0始まりインデックス）, explanation（解説ステップのJSON文字列配列）, difficulty（1〜5）, status（'draft'|'published'|'archived'、デフォルト'published'）, originality_note（任意）, created_at`。旧設計にあった`question_choices`（選択肢を別テーブルに分離する方式）は廃止し、`options`のJSON配列に一本化した。
+
+**移行スクリプト**: `scripts/generate-seed-questions.mts`（Node 24のネイティブTS実行で`node scripts/generate-seed-questions.mts`と直接実行）が`src/data/questions.ts`の配列を読み、`seed_questions.sql`（INSERT文5件）を生成した。**移行後、`src/data/questions.ts`からは配列本体を削除し、型定義（`Question`/`TableBlock`）のみを残した**（`/test`が今もこの型をクライアント側の形状として使うため）。したがってこのスクリプトはもう再実行できない一度きりの移行アーティファクトであり、`scripts/`は`tsconfig.json`の`exclude`に追加してNext.jsのビルド時型チェック対象から外している。`seed_questions.sql`は`wrangler d1 execute webtest-db --remote --file seed_questions.sql`でそのまま再投入可能な形で残してある。
+
+**GET `/api/questions`**（`functions/api/questions.ts`）: `status='published'`の問題を`ORDER BY RANDOM()`でランダム取得する。`?category=`（複数指定でOR）・`?difficulty=`・`?limit=`（デフォルト10、最大50）に対応。DB行はクライアント向けに`Question`型（選択肢へA〜Eラベルを付与、`correct_answer`インデックスをラベルへ変換、`explanation`/`tables_json`をJSONパース、`category`フィールドには`sub_category`の値を返す）へ変換して返す。ユーザーの指定は`/api/test/questions`または`/api/questions`のいずれでもよいという柔軟な書き方だったため、既存の`functions/api/*.ts`のフラットな配置慣習に合わせて`/api/questions`を採用した。
+
+**POST `/api/admin/questions`**（`functions/api/admin/questions.ts`）: 単発（1オブジェクト）または一括（`{questions: [...]}`配列）で新問題を追加できる。このアプリには管理者ログイン機構が無いため、`x-admin-token`ヘッダーと`ADMIN_API_TOKEN`（Pages Secret）の一致で簡易認証している。**トークン値はチャットに出力していない**。ローカルでは`.dev.vars`の`ADMIN_API_TOKEN`（`.gitignore`済み）、本番では`wrangler pages secret put ADMIN_API_TOKEN`で設定済みで、値は`.env.admin.local`（`.gitignore`の`.env*`パターンに一致、リポジトリには含まれない）にのみ保存してある。
+
+**`/test`のリファクタ**（`app/test/page.tsx`）: `import { questions } from "@/src/data/questions"`の静的配列参照を廃止し、認証チェック後に`GET /api/questions`を叩いて取得する`useState<Question[] | null>`に変更した。取得中は「問題を読み込んでいます...」、0件時・通信エラー時はエラーメッセージを表示し、以降の問題選択・タイマー・採点・解説表示ロジックは既存のまま維持している。
 
 ## スカウト送信UI・送信履歴管理画面（2026-08-21追加）
 
@@ -85,17 +99,17 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 
 # アーキテクチャ制約（変更時は必ず守る）
 
-- 外部データベース（Supabase等）は接続しない。問題データは `src/data/questions.ts` にTypeScript配列として直書きする。
+- 外部データベース（Supabase等）は接続しない。データはCloudflare D1（`env.DB`）のみを使う。問題データは2026-08-21にD1の`questions`テーブルへ移行済み（「問題データのD1移行」の節を参照）。
 - 状態管理はReactの `useState` / `useEffect` のみを使う。Redux・Zustand等の状態管理ライブラリは導入しない。
 - ページ間でデータを引き継ぐ必要がある場合（例: `/test` → `/result` のスコア）は `localStorage` を使う。
 - 過剰な装飾・アニメーション・抽象化は避け、MVPとして機能することを最優先する。
 
 # TypeScript規約
 
-- `src/data/questions.ts` の `Question` / `TableBlock` 型を正とし、問題データはこの型に準拠させる。`category`は分野別成績集計（`exam_results.category_scores_json`）に使うため、新しい問題を追加する際は必ず設定する。
-- 選択肢ラベルは `"A" | "B" | "C" | "D" | "E"` のUnion型で管理する（`string`型で緩めない）。
+- `src/data/questions.ts` の `Question` / `TableBlock` 型を正とし、`GET /api/questions` のレスポンス（およびクライアント側の型）はこの型に準拠させる。`category`（`sub_category`の値）は分野別成績集計（`exam_results.category_scores_json`）に使うため、新しい問題を追加する際は必ず設定する。
+- 選択肢ラベルは `"A" | "B" | "C" | "D" | "E"` のUnion型で管理する（`string`型で緩めない）。D1の`options`はラベル無しのJSON配列で保持し、API側でインデックス順にA〜Eを付与する。
 - `any` は使わない。表データ（`TableBlock.rows`）のセル値は `string | number` とする。
-- 新しい問題データを追加する際は、既存の `id` と重複しないようにする（現在 id 1〜5 まで使用済み）。
+- 新しい問題を追加する際は `POST /api/admin/questions`（`x-admin-token`ヘッダー必須）を使う。手動でSQLを書く場合は既存の`id`と重複しないことをD1側で確認する（AUTOINCREMENTのため通常は自動で回避される）。
 
 # Tailwind CSS規約
 
@@ -109,7 +123,7 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 - `app/register/page.tsx`: クライアントコンポーネント。会員登録フォーム。`/api/register`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
 - `app/login/page.tsx`: クライアントコンポーネント。ログインフォーム。`/api/login`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
 - `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。`/test`への導線、`/api/exam-results`から取得した成績サマリー（最新偏差値・最高正答率・受験回数）、`localStorage`の`spiResultHistory`（過去の受験結果、最大20件）を表示する。
-- `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。試験終了時に`spiResult`/`spiResultHistory`（localStorage）を更新しつつ、`/api/exam-results`にもPOSTしてD1へ保存する（失敗しても結果画面表示は継続）。
+- `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。認証確認後に`GET /api/questions`から問題セットを取得する（`src/data/questions.ts`の静的配列は2026-08-21に廃止、型定義のみ残存）。試験終了時に`spiResult`/`spiResultHistory`（localStorage）を更新しつつ、`/api/exam-results`にもPOSTしてD1へ保存する（失敗しても結果画面表示は継続）。
 - `app/result/page.tsx`: クライアントコンポーネント。`localStorage` の `spiResult` を読み、スコアと評価コメント、収益化バナー枠、`/dashboard`への導線を表示。
 - `app/forgot-password/page.tsx`: クライアントコンポーネント。メール送信→OTP入力＋新パスワード設定の2ステップ。`/api/forgot-password`と`/api/reset-password`を呼ぶ。
 - `app/mypage/page.tsx`: プロフィール編集・スカウト同意トグル（`/api/consent`）・成績サマリー（`/api/exam-results`）に加え、`/api/scouts`から取得した「届いたスカウト」一覧と承諾/辞退ボタンを表示する。
