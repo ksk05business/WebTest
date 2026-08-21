@@ -5,17 +5,21 @@ import {
   Brain,
   Building2,
   CheckCircle2,
+  ChevronDown,
   Clock,
   FileText,
+  HelpCircle,
   Layers,
   Mail,
   Repeat2,
   ShieldCheck,
   Smartphone,
+  TrendingUp,
   UserPlus,
 } from "lucide-react";
 import { TEST_TYPES } from "@/src/data/testTypes";
 import { BusinessLink } from "@/src/components/BusinessLink";
+import { ForgettingCurveChart } from "@/src/components/ForgettingCurveChart";
 
 const BADGES = [
   { icon: Clock, text: "登録3分" },
@@ -54,6 +58,28 @@ const FEATURES = [
     title: "成績を見た企業から届く「特別スカウト」",
     description:
       "2段階開示で個人情報を守りつつ、本気度の高い優良企業から特別選考ルートの直オファーが届きます。",
+  },
+];
+
+const FAQS = [
+  {
+    question: "本当に完全無料で使えますか？",
+    answer:
+      "はい、学生の方は模試の受験・成績分析・復習機能を含むすべての機能を無料でご利用いただけます。企業からの掲載・スカウト送信料により運営しているため、学生に費用が発生することは一切ありません。",
+  },
+  {
+    question: "スカウトのために個人情報を渡すのが不安です。",
+    answer:
+      "スカウトは「2段階開示方式」を採用しています。企業には大学区分や偏差値などの匿名属性のみが共有され、氏名・メールアドレスなどはあなたが個別に承諾したスカウトに限り開示されます。共有設定はマイページからいつでも変更・撤回可能です。",
+  },
+  {
+    question: "対応しているWebテストの種類を教えてください。",
+    answer:
+      "SPI3のほか、玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOAなど主要なWebテストに順次対応しています（一部は準備中）。まずはSPI3から、対策・分析・復習まで一通り体験いただけます。",
+  },
+  {
+    question: "登録にどれくらい時間がかかりますか？",
+    answer: "大学・学部・志望業界などを入力するだけで、約3分で完了します。クレジットカードの登録は不要です。",
   },
 ];
 
@@ -152,6 +178,14 @@ export default function Home() {
             >
               ログイン
             </Link>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-blue-50/90 sm:text-sm">
+            {BADGES.map((b) => (
+              <span key={b.text} className="flex items-center gap-1.5">
+                <b.icon className="h-4 w-4" />
+                {b.text}
+              </span>
+            ))}
           </div>
         </div>
       </section>
@@ -280,6 +314,46 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 忘却曲線グラフ */}
+      <section className="border-y border-purple-100 bg-purple-50/40 px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-5xl">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
+            <div className="flex flex-col gap-4">
+              <span className="flex w-fit items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                <Brain className="h-3.5 w-3.5" />
+                科学的な記憶定着メソッド
+              </span>
+              <h2 className="text-balance text-2xl font-bold text-gray-900 sm:text-3xl">
+                「復習しないと忘れる」を、
+                <br />
+                仕組みで解決します。
+              </h2>
+              <p className="text-balance text-sm leading-relaxed text-gray-600 sm:text-base">
+                心理学者エビングハウスが提唱した「忘却曲線」の通り、人の記憶は復習しなければ急速に薄れていきます。Webテストナビは間違えた知識問題を自動でキューに登録し、
+                <strong className="font-bold text-gray-900">1日・3日・7日・14日</strong>
+                の最適なタイミングで復習を促すことで、一夜漬けでは終わらない「本当に使える知識」への定着をサポートします。
+              </p>
+              <div className="flex items-start gap-2 rounded-xl border border-purple-100 bg-purple-50/60 p-3 text-xs text-purple-800 sm:text-sm">
+                <TrendingUp className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                参考書を1周して終わりにせず、間違えた問題だけを効率よく繰り返せるから、限られた時間でも着実にスコアが伸びます。
+              </div>
+              <Link
+                href="/register"
+                className="mt-1 w-fit rounded-full bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/10 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:text-base"
+              >
+                無料で復習機能を試してみる
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+              <ForgettingCurveChart />
+              <p className="mt-2 text-center text-[11px] leading-relaxed text-gray-400">
+                ※エビングハウスの忘却曲線の考え方に基づくイメージ図です。復習タイミングによって記憶の定着率が回復・維持される傾向を表しています。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 利用の流れ */}
       <section className="bg-gray-50 px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
@@ -335,6 +409,33 @@ export default function Home() {
             >
               企業様ログイン
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-3xl">
+          <div className="mx-auto mb-10 flex max-w-2xl flex-col items-center gap-3 text-center">
+            <span className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+              <HelpCircle className="h-3.5 w-3.5" />
+              よくある質問
+            </span>
+            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">登録前によくいただく質問</h2>
+          </div>
+          <div className="flex flex-col gap-3">
+            {FAQS.map((f) => (
+              <details
+                key={f.question}
+                className="group rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-gray-900">
+                  {f.question}
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform group-open:rotate-180" />
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">{f.answer}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
