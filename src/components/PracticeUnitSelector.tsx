@@ -17,7 +17,7 @@ export function PracticeUnitSelector() {
   const [selection, setSelection] = useState<Selection>("random");
 
   useEffect(() => {
-    fetch("/api/questions/units")
+    fetch("/api/question-units")
       .then((res) => res.json())
       .then((data: { units?: UnitCount[]; total?: number }) => {
         setUnitCounts(data.units ?? []);
