@@ -10,6 +10,9 @@ export function Footer() {
         <Link href="/privacy" className="hover:text-gray-700 hover:underline">
           プライバシーポリシー
         </Link>
+        <Link href="/company/apply" className="hover:text-gray-700 hover:underline">
+          企業・就活エージェント様はこちら
+        </Link>
       </nav>
       <p className="mt-2">&copy; Webテストナビ</p>
     </footer>

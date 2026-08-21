@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function CompanyLoginPage() {
@@ -52,7 +53,11 @@ export default function CompanyLoginPage() {
     <main className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-6 py-10">
       <h1 className="text-2xl font-bold text-gray-900">企業様ログイン</h1>
       <p className="text-sm text-gray-500">
-        企業アカウントは運営による審査を経て発行されます。アカウントの発行をご希望の方はお問い合わせください。
+        企業アカウントは運営による審査を経て発行されます。まだアカウントをお持ちでない方は
+        <Link href="/company/apply" className="text-blue-600 underline">
+          利用審査のお申し込み
+        </Link>
+        へお進みください。
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

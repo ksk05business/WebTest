@@ -43,6 +43,24 @@
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
+## 企業・エージェント向け利用審査申請フロー & 管理者承認システム（2026-08-21）
+
+いたずら登録防止のため、企業アカウントは「自己申請（status='pending'）→ 管理者が承認/却下」の2段階フローに変更した。**新規に`company_applications`テーブルは作らず、既存の`company_profiles`テーブルに`status`カラムを追加する方式**を選んだ（ユーザー要求で両案が許容されていたため、既存テーブル・既存の企業ログイン/スカウトAPIをそのまま使い回せる方を採用）。
+
+**`company_profiles`のスキーマ変更**: `department`（部署）・`job_title`（役職）・`phone_number`・`corporate_site_url`・`account_type`（'direct_hire'|'agency'）・`inquiry_message`・`status`（'pending'|'active'|'rejected'、デフォルト'pending'）・`reviewed_at`を追加した。旧`approved INTEGER`カラムは**非推奨として残置**（SQLite/D1のALTER TABLEでは列のNOT NULL制約変更やDROPが安全に行いづらいため、削除はせず単にコード側で参照しなくした）。本番D1へは`ALTER TABLE`でカラム追加後、`UPDATE company_profiles SET status = 'active' WHERE approved = 1`で既存の承認済みアカウント（デモアカウント等）を`active`に昇格させる移行が必須（`schema.sql`の再実行だけでは反映されない、恒例のスキーマドリフト注意）。`password_hash`/`password_salt`は元々`NOT NULL`だが、申請時点ではまだパスワードが無いため空文字列`''`をプレースホルダーとしてINSERTしている（列定義自体は変更していない）。
+
+**`POST /api/company/apply`**（公開、認証不要）: 会社名・担当者氏名/部署/役職・会社用メール・電話番号・コーポレートサイトURL・アカウント種別が必須、問い合わせメッセージは任意。会社用メールは`functions/_lib/freeEmailDomains.ts`のブロックリスト（gmail.com, yahoo.co.jp等、非網羅的な簡易リスト）でフリーメールを拒否し、コーポレートサイトURLは`http(s)://`形式かを`URL`コンストラクタで検証する。メール重複時は409を返す。成功時は`status='pending'`・`password_hash`/`password_salt`は空文字で企業レコードを作成するのみで、この時点ではログイン・スカウト機能には一切アクセスできない。
+
+**管理者API**（`functions/api/admin/companies.ts`、GET一覧・POST承認/却下）: 既存の`POST /api/admin/questions`と同じ`x-admin-token`ヘッダー＋`ADMIN_API_TOKEN`（Pages Secret）による簡易認証を再利用している。承認（`action:'approve'`）時のみ`functions/_lib/password.ts`の`generateInitialPassword()`（英数字12桁）で初期パスワードを新規発行し、ハッシュ化して保存したうえで**平文パスワードをこのAPIレスポンスの中だけ**で返す（他のどこにも保持しない）。`status='pending'`の申請にしかapprove/rejectを実行できない（既に審査済みのものへの再操作は409で拒否、承認取り消し・再審査UIは今回実装していない）。
+
+**`/admin/companies`ページ**: サーバー側セッションが無いこの構成に合わせ、`sessionStorage`に保存した管理APIトークンをそのまま`x-admin-token`として全リクエストに付与する簡易ゲート方式にした（ブラウザタブを閉じると再入力が必要）。承認直後は発行された初期パスワードを画面に一度だけ表示する専用バナーを出す。**メール送信機能（Cloudflare Email Sending）は公開ローンチまで未設定のまま据え置く方針のため、初期パスワードの企業への通知は運営担当者が画面表示された値を手動で連絡する運用を前提としている**（自動メール送信は行わない）。
+
+**`/company/apply`**: 未ログイン向けの公開申請フォーム。送信後は「担当者より個別にご連絡いたします」という完了画面を表示する（自動メール通知は行わないため、この文言にしている）。
+
+**アクセス制御の変更点**: `functions/api/company/login.ts`はパスワード照合の**前に**`status !== 'active'`を確認し、pending/rejectedいずれも「現在アカウントの審査中または無効化されています」を返してログイン自体を拒否する（以前は`approved=0`でもログインだけはでき、ダッシュボード側で「承認待ち」表示にとどめていたが、今回の要求で「ログイン自体を完全遮断」に強化した）。`functions/api/company/scouts.ts`・`sent-scouts.ts`も`approved`ではなく`status === 'active'`をチェックするよう更新済み（多層防御として維持。通常フローではログインで既に弾かれるため到達しないはずだが、念のため残している）。フロントエンド（`/company/dashboard`・`/company/scouts`・`localStorage`の`spiCompanyUser.approved`）は変更していない（ログイン成功時は常に`approved: true`が返る前提のまま動く）。
+
+**LPへのBtoB導線追加**: `Footer`に「企業・就活エージェント様はこちら」リンク、`app/page.tsx`のヘッダーにも同リンク（`/company/apply`へ）、「ご利用の流れ」と「ボトムCTA」の間に採用担当者向け価値訴求セクション（「無料デモ・資料請求はこちら」＋「企業様ログイン」の2ボタン）を追加した。
+
 ## 模擬試験/練習問題モード選択ダイアログ（2026-08-21）
 
 `/dashboard`の「試験の種類」カードは、直接`/test`へリンクする方式をやめ、クリックすると`src/components/ExamModeSelectModal.tsx`を開く方式にした。`available=false`（準備中）のカードもクリックできるようにし、モーダル内で「現在問題コンテンツを順次準備中です。公開まで今しばらくお待ちください。」と案内する（以前は非活性のdivだったが、今はボタンにしてどちらの状態でもモーダルを介す統一UIにした）。`available=true`（現状SPIのみ）の場合のみ、モーダル内に「模擬試験（本番モード、`/test`へ）」「練習問題（トレーニングモード、`/practice`へ）」の2択を表示する。
@@ -176,7 +194,9 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 - `app/mypage/page.tsx`（画面タイトル「プロフィール設定」、ヘッダーのリンク文言は「プロフィール」、URLは既存の`/mypage`のまま）: 個人属性情報（氏名・大学・学部・志望業界・希望職種・卒業年月）専用の管理画面。2026-08-21に成績ダッシュボード・スカウト受信ボックスを`/dashboard`へ移動し、このページからは削除した（スカウト目的でのデータ共有トグルのみ、個人の同意設定としてこのページに残している）。**閲覧/編集の2モード制**（`mode: "view" | "edit"`）: 初期表示は`<dl>`によるテキスト閲覧のみで、「プロフィールを編集」ボタンで編集フォームに切り替わる。編集フォーム内の「編集をキャンセル」は`savedProfile`（最後にサーバーから取得/保存した値のスナップショット）から`applyProfile()`で各フィールドを復元してから閲覧モードへ戻す。「変更を保存」で`PUT /api/me`を呼び、成功時はローカルの`savedProfile`も更新したうえで閲覧モードへ自動的に戻る。ユーザー要求では更新APIとして`/api/user/profile`が例示されていたが、既存の`/api/me`（GET/PUT）がまったく同じ機能を持つため、新規エンドポイントは作らずそのまま使っている。
 - `app/review/page.tsx`: エビングハウスの忘却曲線に基づく反復復習モード。`GET /api/review`で当日分を取得し、1問1答形式で出題・`POST /api/review`で結果を即時送信する。
 - `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
-- `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。
+- `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。未登録者向けに`/company/apply`への導線を表示する。
+- `app/company/apply/page.tsx`: 企業・エージェント向けの公開利用審査申請フォーム。`POST /api/company/apply`を呼ぶだけで、ログイン等の状態は持たない。
+- `app/admin/companies/page.tsx`: 管理者用の審査申請一覧・承認/却下画面。`sessionStorage`の管理APIトークンで`GET/POST /api/admin/companies`を叩く（詳細は「企業・エージェント向け利用審査申請フロー」の節を参照）。
 - `app/company/dashboard/page.tsx`: 企業向けダッシュボード。ログイン必須（`spiCompanyUser`が無ければ`/company/login`へリダイレクト）。`approved=false`の場合は承認待ち表示のみ。承認済みなら大学区分・文理・志望業界・希望職種・偏差値下限でのフィルタ検索（`/api/company/scouts`のGET）を行い、候補者カードの「スカウトを送信する」ボタンから`ScoutSendModal`を開いて送信する（POSTも同エンドポイント）。
 - `app/company/scouts/page.tsx`: 送信済みスカウトの履歴・ステータス管理画面（`/api/company/sent-scouts`のGETを利用）。ステータス絞り込み・メッセージ確認・承諾済みスカウトの実名開示表示を行う。
 - `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）・模試結果の保存/取得（`exam-results.ts`）・スカウト応答（`scouts.ts`）を担当。`functions/api/company/*.ts`は企業向け（ログイン・候補者検索・スカウト送信・送信済み一覧）。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。

@@ -44,3 +44,11 @@ export async function verifyPassword(
   const derived = await derive(password, fromHex(salt));
   return toHex(derived) === hash;
 }
+
+// 企業アカウント承認時に発行する初期パスワード（英数字12桁）を生成する。
+const PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+
+export function generateInitialPassword(length = 12): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  return Array.from(bytes, (b) => PASSWORD_CHARS[b % PASSWORD_CHARS.length]).join("");
+}

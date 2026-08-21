@@ -2,7 +2,7 @@ interface Env {
   DB: D1Database;
 }
 
-type CompanyRow = { id: number; approved: number };
+type CompanyRow = { id: number; status: string };
 
 type SentScoutRow = {
   id: number;
@@ -31,14 +31,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   const company = await context.env.DB.prepare(
-    "SELECT id, approved FROM company_profiles WHERE email = ?"
+    "SELECT id, status FROM company_profiles WHERE email = ?"
   )
     .bind(companyEmail)
     .first<CompanyRow>();
   if (!company) {
     return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });
   }
-  if (!company.approved) {
+  if (company.status !== "active") {
     return Response.json(
       { error: "このアカウントはまだ運営の承認待ちのためスカウト履歴を閲覧できません" },
       { status: 403 }

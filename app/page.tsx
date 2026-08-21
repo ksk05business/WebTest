@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   BarChart3,
   Brain,
+  Building2,
   CheckCircle2,
   Clock,
   FileText,
@@ -87,6 +88,12 @@ export default function Home() {
             Webテスト<span className="text-gray-900">ナビ</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link
+              href="/company/apply"
+              className="hidden text-sm font-medium text-gray-500 hover:text-indigo-700 sm:inline"
+            >
+              企業・就活エージェント様はこちら
+            </Link>
             <Link
               href="/login"
               className="text-sm font-medium text-gray-600 hover:text-blue-700"
@@ -298,6 +305,38 @@ export default function Home() {
                 <p className="text-sm leading-relaxed text-gray-600">{s.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 企業・エージェント様向け */}
+      <section className="bg-gray-50 px-6 py-20 sm:py-24">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm sm:p-12">
+          <span className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+            <Building2 className="h-3.5 w-3.5" />
+            採用ご担当者様・就活エージェント様へ
+          </span>
+          <h2 className="text-balance text-2xl font-bold text-gray-900 sm:text-3xl">
+            スコア・志望業界による高精度データベースから
+            <br />
+            ターゲット学生に直接スカウトを送れます
+          </h2>
+          <p className="text-balance text-sm leading-relaxed text-gray-600 sm:text-base">
+            2段階開示方式で学生の個人情報を守りながら、模試の偏差値・志望業界・希望職種などの条件で候補者を検索し、匿名スカウトを送信できます。学生が承諾した場合のみ実名情報が開示されます。
+          </p>
+          <div className="flex flex-col items-center gap-3 sm:flex-row">
+            <Link
+              href="/company/apply"
+              className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-3.5 text-base font-bold text-white shadow-lg shadow-indigo-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              無料デモ・資料請求はこちら
+            </Link>
+            <Link
+              href="/company/login"
+              className="rounded-full border-2 border-gray-300 px-8 py-3.5 text-base font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              企業様ログイン
+            </Link>
           </div>
         </div>
       </section>

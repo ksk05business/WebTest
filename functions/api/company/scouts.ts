@@ -2,14 +2,14 @@ interface Env {
   DB: D1Database;
 }
 
-type CompanyRow = { id: number; approved: number };
+type CompanyRow = { id: number; status: string };
 
 async function getApprovedCompany(
   db: D1Database,
   companyEmail: string
 ): Promise<CompanyRow | null> {
   const company = await db
-    .prepare("SELECT id, approved FROM company_profiles WHERE email = ?")
+    .prepare("SELECT id, status FROM company_profiles WHERE email = ?")
     .bind(companyEmail)
     .first<CompanyRow>();
   return company;
@@ -46,7 +46,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (!company) {
     return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });
   }
-  if (!company.approved) {
+  if (company.status !== "active") {
     return Response.json(
       { error: "このアカウントはまだ運営の承認待ちのため候補者を閲覧できません" },
       { status: 403 }
@@ -161,7 +161,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (!company) {
     return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });
   }
-  if (!company.approved) {
+  if (company.status !== "active") {
     return Response.json(
       { error: "このアカウントはまだ運営の承認待ちのためスカウトを送信できません" },
       { status: 403 }

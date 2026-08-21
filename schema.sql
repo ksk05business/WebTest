@@ -67,21 +67,33 @@ CREATE INDEX IF NOT EXISTS idx_exam_results_user_id ON exam_results(user_id);
 -- 個別の学生の推薦や面談調整といった職業紹介（マッチング）行為は一切行わない。
 -- 企業と学生は、学生本人がスカウトを承諾した後にシステム上で直接連絡を取る。
 -- なりすまし・無関係業者によるスクレイピング目的の登録を防ぐため、
--- 企業アカウントは運営による承認（approved）を経るまでスカウト送信・候補者閲覧ができない設計とする。
+-- 企業アカウントは運営による審査（status）を経て 'active' にならない限りログイン自体ができない設計とする
+-- （いたずら登録防止）。/company/apply からの自己申請時点では status='pending' で
+-- password_hash/password_salt は空文字のプレースホルダー（NOT NULL制約を維持するため）とし、
+-- 管理者が承認した時点で初期パスワードを発行してこれらを実値に更新する。
 -- ============================================================
 CREATE TABLE IF NOT EXISTS company_profiles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   company_name TEXT NOT NULL,
   contact_name TEXT NOT NULL,
+  department TEXT, -- 担当者の部署
+  job_title TEXT, -- 担当者の役職
   email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
-  password_salt TEXT NOT NULL,
+  phone_number TEXT,
+  corporate_site_url TEXT,
+  account_type TEXT NOT NULL DEFAULT 'direct_hire', -- 'direct_hire'（直接採用企業） | 'agency'（就活エージェント/人材紹介会社）
+  inquiry_message TEXT, -- 問い合わせ・利用目的（任意）
+  password_hash TEXT NOT NULL DEFAULT '',
+  password_salt TEXT NOT NULL DEFAULT '',
   industry TEXT,
   -- 職業安定法上の事業区分。当社は職業紹介事業ではなく募集情報等提供事業として運営する前提を明示する。
   provider_business_type TEXT NOT NULL DEFAULT '募集情報等提供事業',
   -- 特定募集情報等提供事業として厚生労働省へ届出した場合の届出受理番号（未取得時はNULL）
   provider_notification_number TEXT,
-  approved INTEGER NOT NULL DEFAULT 0,
+  -- 'pending'（審査待ち・自己申請直後）| 'active'（承認済み・ログイン/スカウト利用可）| 'rejected'（却下・アクセス不可）
+  status TEXT NOT NULL DEFAULT 'pending',
+  reviewed_at TEXT, -- 管理者が承認/却下した日時
+  approved INTEGER NOT NULL DEFAULT 0, -- 非推奨（statusに置き換え済み）。既存データとの互換のためカラムのみ残す
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

@@ -14,7 +14,7 @@ type CompanyRow = {
   company_name: string;
   password_hash: string;
   password_salt: string;
-  approved: number;
+  status: string;
 };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -31,13 +31,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const company = await context.env.DB.prepare(
-    "SELECT id, company_name, password_hash, password_salt, approved FROM company_profiles WHERE email = ?"
+    "SELECT id, company_name, password_hash, password_salt, status FROM company_profiles WHERE email = ?"
   )
     .bind(email)
     .first<CompanyRow>();
 
   if (!company) {
     return Response.json({ error: "メールアドレスまたはパスワードが違います" }, { status: 401 });
+  }
+
+  // 審査中('pending')・却下('rejected')のアカウントは、パスワード照合の前にログイン自体を遮断する
+  // （いたずら登録・未審査アカウントの利用防止）。
+  if (company.status !== "active") {
+    return Response.json(
+      { error: "現在アカウントの審査中または無効化されています" },
+      { status: 403 }
+    );
   }
 
   const valid = await verifyPassword(password, company.password_hash, company.password_salt);
@@ -48,6 +57,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   return Response.json({
     ok: true,
     companyName: company.company_name,
-    approved: Boolean(company.approved),
+    approved: true,
   });
 };
