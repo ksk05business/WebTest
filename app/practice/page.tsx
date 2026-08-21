@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
+import { DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -13,10 +14,10 @@ function formatElapsed(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function BackToUnitsLink() {
+function BackToUnitsLink({ testId }: { testId: string }) {
   return (
     <Link
-      href="/practice"
+      href={`/practice?testType=${testId}`}
       className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-700"
     >
       <ArrowLeft className="h-4 w-4" />
@@ -38,6 +39,7 @@ function PracticePageInner() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
   const subCategory = searchParams.get("subCategory");
+  const testId = searchParams.get("testType") ?? DEFAULT_TEST_ID;
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -141,7 +143,7 @@ function PracticePageInner() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               email,
-              testType: "spi",
+              testType: testId,
               score,
               total,
               categoryScores,
@@ -167,13 +169,13 @@ function PracticePageInner() {
   }
 
   if (!category) {
-    return <PracticeUnitSelector />;
+    return <PracticeUnitSelector testId={testId} />;
   }
 
   if (loadError) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
-        <BackToUnitsLink />
+        <BackToUnitsLink testId={testId} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <p className="text-sm font-medium text-red-600">{loadError}</p>
         </div>
@@ -184,7 +186,7 @@ function PracticePageInner() {
   if (finished && questions) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
-        <BackToUnitsLink />
+        <BackToUnitsLink testId={testId} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
           <p className="text-lg font-semibold text-gray-900">練習お疲れ様でした！</p>
           <p className="text-sm text-gray-700">
@@ -216,7 +218,7 @@ function PracticePageInner() {
   if (!question || !questions) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
-        <BackToUnitsLink />
+        <BackToUnitsLink testId={testId} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
         </div>
@@ -228,7 +230,7 @@ function PracticePageInner() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
-      <BackToUnitsLink />
+      <BackToUnitsLink testId={testId} />
 
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span className="flex items-center gap-2">

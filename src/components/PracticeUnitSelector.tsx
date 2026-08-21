@@ -4,16 +4,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Shuffle } from "lucide-react";
-import { PRACTICE_UNIT_GROUPS } from "@/src/data/practiceUnits";
+import { DEFAULT_TEST_ID, PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
+import { TEST_TYPES } from "@/src/data/testTypes";
 
 type UnitCount = { category: string; subCategory: string; count: number };
 
-export function PracticeUnitSelector() {
+export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: string }) {
   const router = useRouter();
   const [unitCounts, setUnitCounts] = useState<UnitCount[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
+
+  const groups = PRACTICE_UNIT_GROUPS_BY_TEST[testId] ?? PRACTICE_UNIT_GROUPS_BY_TEST[DEFAULT_TEST_ID];
+  const testName = TEST_TYPES.find((t) => t.id === testId)?.name ?? "SPI3";
 
   useEffect(() => {
     fetch("/api/question-units")
@@ -44,7 +48,7 @@ export function PracticeUnitSelector() {
       setToast(`「${label}」の問題は準備中です`);
       return;
     }
-    const params = new URLSearchParams({ category, subCategory });
+    const params = new URLSearchParams({ category, subCategory, testType: testId });
     router.push(`/practice?${params.toString()}`);
   }
 
@@ -54,13 +58,13 @@ export function PracticeUnitSelector() {
       setToast("問題は準備中です");
       return;
     }
-    router.push("/practice?category=all");
+    router.push(`/practice?category=all&testType=${testId}`);
   }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
       <div className="flex flex-col gap-2">
-        <h1 className="text-xl font-bold text-gray-900">練習する分野・単元を選ぶ</h1>
+        <h1 className="text-xl font-bold text-gray-900">{testName} 練習する分野・単元を選ぶ</h1>
         <p className="text-sm text-gray-500">
           性格検査は対象外です。能力検査の分野から練習したい単元を選んでください。
         </p>
@@ -83,7 +87,7 @@ export function PracticeUnitSelector() {
         </span>
       </button>
 
-      {PRACTICE_UNIT_GROUPS.map((group) => (
+      {groups.map((group) => (
         <div key={group.category} className="flex flex-col gap-2">
           <p className="text-sm font-semibold text-gray-700">{group.groupLabel}</p>
           <div className="flex flex-col gap-2">

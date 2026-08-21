@@ -1,6 +1,8 @@
 // 練習問題モードの「分野・単元選択」画面に表示する単元一覧（性格検査は対象外）。
 // subCategory は questions.sub_category と完全一致する値を指定する（DBに実データが無い単元は0問として表示される）。
 // id は単元を一意に識別するための内部キー（React key・将来の問題作成ツール等での参照用。DBには保存しない）。
+// category はテスト種別ごとに専用のプレフィックス付き文字列を使う（例: SPIの"non_verbal"、玉手箱の"tamatebako_math"）。
+// 同じ大分類名（"言語"等）でもテストごとに出題内容が異なるため、カテゴリ別分析等で混同しないよう分けている。
 export type PracticeUnit = {
   id: string;
   subCategory: string;
@@ -8,12 +10,12 @@ export type PracticeUnit = {
 };
 
 export type PracticeUnitGroup = {
-  category: "non_verbal" | "verbal" | "structural" | "english";
+  category: string;
   groupLabel: string;
   units: PracticeUnit[];
 };
 
-export const PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
+const SPI_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
     category: "non_verbal",
     groupLabel: "非言語（能力）",
@@ -58,3 +60,41 @@ export const PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     ],
   },
 ];
+
+const TAMATEBAKO_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
+  {
+    category: "tamatebako_math",
+    groupLabel: "計数",
+    units: [
+      { id: "math_arithmetic", subCategory: "四則逆算", label: "四則逆算" },
+      { id: "math_graphics", subCategory: "図表の読み取り", label: "図表の読み取り" },
+      { id: "math_estimation", subCategory: "表の空欄推測", label: "表の空欄推測" },
+    ],
+  },
+  {
+    category: "tamatebako_verbal",
+    groupLabel: "言語",
+    units: [
+      { id: "verbal_logic", subCategory: "論理的読解（GAB形式）", label: "論理的読解（GAB形式）" },
+      { id: "verbal_judge", subCategory: "趣旨判定（IMAGES形式）", label: "趣旨判定（IMAGES形式）" },
+      { id: "verbal_summary", subCategory: "趣旨把握", label: "趣旨把握" },
+    ],
+  },
+  {
+    category: "tamatebako_english",
+    groupLabel: "英語",
+    units: [
+      { id: "english_logic", subCategory: "論理的読解（GAB形式）", label: "論理的読解（GAB形式）" },
+      { id: "english_summary", subCategory: "長文読解（IMAGES形式）", label: "長文読解（IMAGES形式）" },
+    ],
+  },
+];
+
+// テスト種別id（src/data/testTypes.tsのTestType.id）ごとの単元グループ。
+// 未定義のテスト種別（GAB/C-GAB・CAB・SCOA）は分野・単元一覧自体をまだ用意していない。
+export const PRACTICE_UNIT_GROUPS_BY_TEST: Record<string, PracticeUnitGroup[]> = {
+  spi: SPI_PRACTICE_UNIT_GROUPS,
+  tamatebako: TAMATEBAKO_PRACTICE_UNIT_GROUPS,
+};
+
+export const DEFAULT_TEST_ID = "spi";

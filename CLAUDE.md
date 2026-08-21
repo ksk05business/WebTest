@@ -81,6 +81,16 @@
 
 **LPへのBtoB導線追加**: `Footer`に「企業・就活エージェント様はこちら」リンク（`/company/apply`へ直接遷移）、「ご利用の流れ」と「ボトムCTA」の間に採用担当者向け価値訴求セクション（`id="business"`、`scroll-mt-20`でsticky headerに隠れないようスクロール位置を調整済み。「無料デモ・資料請求はこちら」＋「企業様ログイン」の2ボタン）を追加した。**ヘッダー内の同名リンクだけは`/company/apply`への直接遷移ではなく、`src/components/BusinessLink.tsx`（2026-08-21追加のクライアントコンポーネント）経由でLP内`#business`セクションへスムーススクロールする**（`usePathname()`で`/`にいる場合のみ`e.preventDefault()`＋`scrollIntoView({behavior:"smooth"})`、それ以外のページでは通常の`<Link href="/#business">`遷移に委ねる）。ヘッダーの3リンク（企業様リンク／ログイン／無料登録）の間隔は`gap-3`から`gap-6`に広げた。
 
+## 玉手箱の型定義・練習問題単元選択のテスト種別対応化（2026-08-21）
+
+`ExamModeSelectModal`・`PracticeUnitSelector`のロジックを`testType.id === "spi"`固定からテスト種別で汎用化した。新設の`src/data/testExplainers.ts`（`TEST_EXPLAINERS: Record<string, TestExplainer>`）と、`src/data/practiceUnits.ts`に追加した`PRACTICE_UNIT_GROUPS_BY_TEST: Record<string, PracticeUnitGroup[]>`（テスト種別id→単元グループ配列のマップ、`DEFAULT_TEST_ID = "spi"`）の2つのマップをキーに、`ExamModeSelectModal`は`testType.id`から該当する解説・単元グループを引いて表示するかどうかを判定する。単元一覧を持つテスト（`PRACTICE_UNIT_GROUPS_BY_TEST`にエントリがある）かどうかを`hasPracticeContent`として、`testType.available`（本番模試を実際に受けられるか）とは別軸で扱う。**この分離により、`available: false`のまま（＝`/test`の本番模試は未提供）でも「〜とは？」解説と練習問題の単元ブラウズだけは提供できる**ようにした。
+
+この汎用化に合わせ、`testType`クエリパラメータを`ExamModeSelectModal`→`/practice`→`PracticeUnitSelector`→`BackToUnitsLink`まで一貫して引き回すようにした（`PracticeUnitSelector`は`testId`プロパティを受け取り単元一覧とページタイトルを出し分け、`/practice`の`BackToUnitsLink`も`/practice?testType=<id>`に戻るようリンク先を変更、`POST /api/exam-results`の`testType`もハードコードの`"spi"`から動的な`testId`に変更）。
+
+**玉手箱（`id: "tamatebako"`）を追加実装**: `TEST_EXPLAINERS.tamatebako`（概要・受験形式・出題領域・対策ポイントの4項目、日本SHL社が提供する検査であること等の一般的事実はWebSearchでファクトチェック済みの内容を使用。ペーパーテスティング形式など裏取りできなかった/現行仕様と確認しづらい詳細は記載を避けた）と、`PRACTICE_UNIT_GROUPS_BY_TEST.tamatebako`（計数3単元: 四則逆算`math_arithmetic`/図表の読み取り`math_graphics`/表の空欄推測`math_estimation`、言語3単元: 論理的読解（GAB形式）`verbal_logic`/趣旨判定（IMAGES形式）`verbal_judge`/趣旨把握`verbal_summary`、英語2単元: 論理的読解（GAB形式）`english_logic`/長文読解（IMAGES形式）`english_summary`）を追加した。**`testType.id === "tamatebako"`の`available`は引き続き`false`のまま**にしている（`questions`テーブルに`test_type`列が無く`/test`はSPI専用の作りのため、`available`をtrueにすると本番模試でSPI問題が「玉手箱」と称して出題されてしまう。ユーザー要求では「準備中のままでも可」という選択肢が明示されていたため、この安全側の判断を採用した）。
+
+**大分類の命名衝突回避**: 玉手箱の3大分類は`tamatebako_math`/`tamatebako_verbal`/`tamatebako_english`という接頭辞付きidにした（SPIの`non_verbal`/`verbal`/`english`と別名にすることで、`functions/api/exam-results.ts`のカテゴリ別集計ロジック等が将来両テストの受験データを扱うようになった際に大分類が混同されないようにするため）。実データは1件も投入していないため、`GET /api/question-units`のレスポンス・単元カードの表示件数には影響がなく、全単元が「準備中」表示になる（クリックしてもトースト表示のみで`/practice`には遷移しない、既存の0件ハンドリングがそのまま機能する）。
+
 ## 模擬試験/練習問題モード選択ダイアログ（2026-08-21）
 
 `/dashboard`の「試験の種類」カードは、直接`/test`へリンクする方式をやめ、クリックすると`src/components/ExamModeSelectModal.tsx`を開く方式にした。`available=false`（準備中）のカードもクリックできるようにし、モーダル内で「現在問題コンテンツを順次準備中です。公開まで今しばらくお待ちください。」と案内する（以前は非活性のdivだったが、今はボタンにしてどちらの状態でもモーダルを介す統一UIにした）。`available=true`（現状SPIのみ）の場合のみ、モーダル内に「模擬試験（本番モード、`/test`へ）」「練習問題（トレーニングモード、`/practice`へ）」の2択を表示する。
