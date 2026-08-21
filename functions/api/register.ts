@@ -1,6 +1,7 @@
 import { hashPassword } from "../_lib/password";
 import { getUniversityCategory } from "../../src/data/universityCategories";
 import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
+import { parseDesiredOccupations } from "../_lib/desiredOccupations";
 
 interface Env {
   DB: D1Database;
@@ -19,6 +20,7 @@ type RegisterBody = {
   industryFirst?: unknown;
   industrySecond?: unknown;
   industryThird?: unknown;
+  desiredOccupations?: unknown;
   graduationYear?: unknown;
   graduationMonth?: unknown;
   agreedTerms?: unknown;
@@ -46,6 +48,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     industryFirst,
     industrySecond,
     industryThird,
+    desiredOccupations,
     graduationYear,
     graduationMonth,
     agreedTerms,
@@ -86,6 +89,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
   const isScoutConsent = scoutConsent === true;
 
+  const desiredOccupationsJson = parseDesiredOccupations(desiredOccupations);
+  if (!desiredOccupationsJson) {
+    return Response.json(
+      { error: "希望職種は1〜3つ選択してください" },
+      { status: 400 }
+    );
+  }
+
   if (
     industryFirst === industrySecond ||
     industryFirst === industryThird ||
@@ -115,8 +126,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     `INSERT INTO users
       (last_name, first_name, last_name_romaji, first_name_romaji, email, password_hash, password_salt,
        faculty_type, university, university_category, industry_first, industry_second, industry_third,
-       graduation_year, graduation_month, terms_agreed_at, scout_consent)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)
+       desired_occupations, graduation_year, graduation_month, terms_agreed_at, scout_consent)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)
      RETURNING id`
   )
     .bind(
@@ -133,6 +144,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       industryFirst,
       industrySecond,
       industryThird,
+      desiredOccupationsJson,
       graduationYear,
       graduationMonth,
       isScoutConsent ? 1 : 0

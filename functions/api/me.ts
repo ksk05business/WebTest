@@ -1,11 +1,12 @@
 import { getUniversityCategory } from "../../src/data/universityCategories";
 import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
+import { parseDesiredOccupations } from "../_lib/desiredOccupations";
 
 interface Env {
   DB: D1Database;
 }
 
-type UserProfile = {
+type UserProfileRow = {
   last_name: string;
   first_name: string;
   last_name_romaji: string;
@@ -17,6 +18,7 @@ type UserProfile = {
   industry_first: string;
   industry_second: string;
   industry_third: string;
+  desired_occupations: string;
   graduation_year: number;
   graduation_month: number;
   scout_consent: number;
@@ -31,17 +33,24 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const user = await context.env.DB.prepare(
     `SELECT last_name, first_name, last_name_romaji, first_name_romaji, email,
             faculty_type, university, university_category, industry_first, industry_second, industry_third,
-            graduation_year, graduation_month, scout_consent
+            desired_occupations, graduation_year, graduation_month, scout_consent
      FROM users WHERE email = ?`
   )
     .bind(email)
-    .first<UserProfile>();
+    .first<UserProfileRow>();
 
   if (!user) {
     return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
   }
 
-  return Response.json(user);
+  let desiredOccupations: string[] = [];
+  try {
+    desiredOccupations = JSON.parse(user.desired_occupations);
+  } catch {
+    desiredOccupations = [];
+  }
+
+  return Response.json({ ...user, desired_occupations: desiredOccupations });
 };
 
 type UpdateBody = {
@@ -58,6 +67,7 @@ type UpdateBody = {
   industryFirst?: unknown;
   industrySecond?: unknown;
   industryThird?: unknown;
+  desiredOccupations?: unknown;
   graduationYear?: unknown;
   graduationMonth?: unknown;
 };
@@ -82,6 +92,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     industryFirst,
     industrySecond,
     industryThird,
+    desiredOccupations,
     graduationYear,
     graduationMonth,
   } = body;
@@ -124,6 +135,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     );
   }
 
+  const desiredOccupationsJson = parseDesiredOccupations(desiredOccupations);
+  if (!desiredOccupationsJson) {
+    return Response.json(
+      { error: "希望職種は1〜3つ選択してください" },
+      { status: 400 }
+    );
+  }
+
   const universityCategory =
     typeof manualUniversityCategory === "string" &&
     (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(manualUniversityCategory)
@@ -134,7 +153,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     `UPDATE users SET
       last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
       faculty_type = ?, university = ?, university_category = ?, industry_first = ?, industry_second = ?, industry_third = ?,
-      graduation_year = ?, graduation_month = ?
+      desired_occupations = ?, graduation_year = ?, graduation_month = ?
      WHERE email = ?`
   )
     .bind(
@@ -148,6 +167,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       industryFirst,
       industrySecond,
       industryThird,
+      desiredOccupationsJson,
       graduationYear,
       graduationMonth,
       email

@@ -16,6 +16,7 @@ type SentScoutRow = {
   industry_first: string;
   industry_second: string;
   industry_third: string;
+  desired_occupations: string;
   last_name: string | null;
   first_name: string | null;
   email: string | null;
@@ -46,7 +47,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const rows = await context.env.DB.prepare(
     `SELECT
         s.id, s.status, s.is_anonymous, s.message, s.created_at, s.responded_at,
-        u.university_category, u.faculty_type, u.industry_first, u.industry_second, u.industry_third,
+        u.university_category, u.faculty_type, u.industry_first, u.industry_second, u.industry_third, u.desired_occupations,
         CASE WHEN s.is_anonymous = 0 THEN u.last_name ELSE NULL END AS last_name,
         CASE WHEN s.is_anonymous = 0 THEN u.first_name ELSE NULL END AS first_name,
         CASE WHEN s.is_anonymous = 0 THEN u.email ELSE NULL END AS email
@@ -71,6 +72,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       industryFirst: r.industry_first,
       industrySecond: r.industry_second,
       industryThird: r.industry_third,
+      desiredOccupations: (() => {
+        try {
+          return JSON.parse(r.desired_occupations) as string[];
+        } catch {
+          return [];
+        }
+      })(),
       lastName: r.last_name,
       firstName: r.first_name,
       email: r.email,

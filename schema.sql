@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
   -- スカウト機能で企業に開示するのはこの区分のみで、大学名そのものは開示しない。
   -- university（実大学名）からのマッピングはアプリ側で管理し、登録・更新時にここへ反映する想定。
   university_category TEXT,
+  -- 希望職種（最大3つ）。JSON文字列配列として保存する。例: ["営業・顧客交渉","IT・エンジニア・Web制作"]
+  desired_occupations TEXT NOT NULL DEFAULT '["こだわりなし・幅広く検討したい"]',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

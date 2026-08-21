@@ -5,8 +5,15 @@ import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { UniversityField } from "@/src/components/UniversityField";
 import { IndustrySelect } from "@/src/components/IndustrySelect";
-import { FACULTY_TYPES, GRADUATION_MONTHS, GRADUATION_YEARS } from "@/src/data/formOptions";
+import {
+  DESIRED_OCCUPATIONS,
+  FACULTY_TYPES,
+  GRADUATION_MONTHS,
+  GRADUATION_YEARS,
+  MAX_DESIRED_OCCUPATIONS,
+} from "@/src/data/formOptions";
 import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
+import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -22,6 +29,7 @@ type Profile = {
   industry_first: string;
   industry_second: string;
   industry_third: string;
+  desired_occupations: string[];
   graduation_year: number;
   graduation_month: number;
   scout_consent: number;
@@ -50,6 +58,7 @@ export default function MyPage() {
   const [industryFirst, setIndustryFirst] = useState("");
   const [industrySecond, setIndustrySecond] = useState("");
   const [industryThird, setIndustryThird] = useState("");
+  const [desiredOccupations, setDesiredOccupations] = useState<string[]>([]);
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +123,7 @@ export default function MyPage() {
         setIndustryFirst(data.industry_first);
         setIndustrySecond(data.industry_second);
         setIndustryThird(data.industry_third);
+        setDesiredOccupations(Array.isArray(data.desired_occupations) ? data.desired_occupations : []);
         setGraduationYear(String(data.graduation_year));
         setGraduationMonth(String(data.graduation_month));
         setScoutConsent(Boolean(data.scout_consent));
@@ -136,9 +146,14 @@ export default function MyPage() {
       !university ||
       !industryFirst ||
       !industrySecond ||
-      !industryThird
+      !industryThird ||
+      desiredOccupations.length === 0
     ) {
       setError("すべての項目を入力してください");
+      return;
+    }
+    if (desiredOccupations.length > MAX_DESIRED_OCCUPATIONS) {
+      setError(`希望職種は最大${MAX_DESIRED_OCCUPATIONS}つまで選択してください`);
       return;
     }
     if (!ROMAJI_PATTERN.test(lastNameRomaji.trim()) || !ROMAJI_PATTERN.test(firstNameRomaji.trim())) {
@@ -171,6 +186,7 @@ export default function MyPage() {
           industryFirst,
           industrySecond,
           industryThird,
+          desiredOccupations,
           graduationYear: Number(graduationYear),
           graduationMonth: Number(graduationMonth),
         }),
@@ -371,6 +387,14 @@ export default function MyPage() {
               <IndustrySelect label="第二志望" value={industrySecond} onChange={setIndustrySecond} />
               <IndustrySelect label="第三志望" value={industryThird} onChange={setIndustryThird} />
             </div>
+
+            <LimitedCheckboxGroup
+              label="希望職種（最大3つまで選択可）"
+              options={DESIRED_OCCUPATIONS}
+              selected={desiredOccupations}
+              onChange={setDesiredOccupations}
+              max={MAX_DESIRED_OCCUPATIONS}
+            />
 
             <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
               卒業年月

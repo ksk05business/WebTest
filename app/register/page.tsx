@@ -3,9 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FACULTY_TYPES, GRADUATION_MONTHS, GRADUATION_YEARS } from "@/src/data/formOptions";
+import {
+  DEFAULT_DESIRED_OCCUPATIONS,
+  DESIRED_OCCUPATIONS,
+  FACULTY_TYPES,
+  GRADUATION_MONTHS,
+  GRADUATION_YEARS,
+  MAX_DESIRED_OCCUPATIONS,
+} from "@/src/data/formOptions";
 import { IndustrySelect } from "@/src/components/IndustrySelect";
 import { UniversityField } from "@/src/components/UniversityField";
+import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -24,6 +32,7 @@ export default function RegisterPage() {
   const [industryFirst, setIndustryFirst] = useState("");
   const [industrySecond, setIndustrySecond] = useState("");
   const [industryThird, setIndustryThird] = useState("");
+  const [desiredOccupations, setDesiredOccupations] = useState<string[]>(DEFAULT_DESIRED_OCCUPATIONS);
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
   const [agreedTerms, setAgreedTerms] = useState(false);
@@ -47,9 +56,14 @@ export default function RegisterPage() {
       !university ||
       !industryFirst ||
       !industrySecond ||
-      !industryThird
+      !industryThird ||
+      desiredOccupations.length === 0
     ) {
       setError("すべての項目を入力してください");
+      return;
+    }
+    if (desiredOccupations.length > MAX_DESIRED_OCCUPATIONS) {
+      setError(`希望職種は最大${MAX_DESIRED_OCCUPATIONS}つまで選択してください`);
       return;
     }
     if (!agreedTerms) {
@@ -95,6 +109,7 @@ export default function RegisterPage() {
           industryFirst,
           industrySecond,
           industryThird,
+          desiredOccupations,
           graduationYear: Number(graduationYear),
           graduationMonth: Number(graduationMonth),
           agreedTerms,
@@ -242,6 +257,14 @@ export default function RegisterPage() {
           <IndustrySelect label="第二志望" value={industrySecond} onChange={setIndustrySecond} />
           <IndustrySelect label="第三志望" value={industryThird} onChange={setIndustryThird} />
         </div>
+
+        <LimitedCheckboxGroup
+          label="希望職種（最大3つまで選択可）"
+          options={DESIRED_OCCUPATIONS}
+          selected={desiredOccupations}
+          onChange={setDesiredOccupations}
+          max={MAX_DESIRED_OCCUPATIONS}
+        />
 
         <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
           卒業年月

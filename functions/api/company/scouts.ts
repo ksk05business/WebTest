@@ -22,6 +22,7 @@ type CandidateRow = {
   industry_first: string;
   industry_second: string;
   industry_third: string;
+  desired_occupations: string;
   latest_deviation_score: number | null;
 };
 
@@ -55,6 +56,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const universityCategories = params.getAll("universityCategory").filter(Boolean);
   const facultyTypes = params.getAll("facultyType").filter(Boolean);
   const industries = params.getAll("industry").filter(Boolean);
+  const desiredOccupations = params.getAll("desiredOccupation").filter(Boolean);
   const minDeviationRaw = params.get("minDeviation");
   const minDeviation = minDeviationRaw !== null ? Number(minDeviationRaw) : null;
 
@@ -76,6 +78,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     );
     binds.push(...industries, ...industries, ...industries);
   }
+  if (desiredOccupations.length > 0) {
+    conditions.push(
+      `(${desiredOccupations.map(() => "u.desired_occupations LIKE ?").join(" OR ")})`
+    );
+    binds.push(...desiredOccupations.map((o) => `%"${o}"%`));
+  }
   if (minDeviation !== null && !Number.isNaN(minDeviation)) {
     conditions.push(
       `(SELECT e.deviation_score FROM exam_results e WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) >= ?`
@@ -91,6 +99,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         u.industry_first,
         u.industry_second,
         u.industry_third,
+        u.desired_occupations,
         (SELECT e.deviation_score FROM exam_results e
           WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) AS latest_deviation_score
      FROM users u
@@ -108,6 +117,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       industryFirst: r.industry_first,
       industrySecond: r.industry_second,
       industryThird: r.industry_third,
+      desiredOccupations: (() => {
+        try {
+          return JSON.parse(r.desired_occupations) as string[];
+        } catch {
+          return [];
+        }
+      })(),
       latestDeviationScore: r.latest_deviation_score,
     })),
   });

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
-import { FACULTY_TYPES, INDUSTRIES } from "@/src/data/formOptions";
+import { DESIRED_OCCUPATIONS, FACULTY_TYPES, INDUSTRIES } from "@/src/data/formOptions";
 import { UNIVERSITY_CATEGORIES } from "@/src/data/universityCategories";
 
 function toggleValue(values: string[], value: string): string[] {
@@ -47,6 +47,7 @@ type Candidate = {
   industryFirst: string;
   industrySecond: string;
   industryThird: string;
+  desiredOccupations: string[];
   latestDeviationScore: number | null;
 };
 
@@ -61,6 +62,7 @@ type SentScout = {
   industryFirst: string;
   industrySecond: string;
   industryThird: string;
+  desiredOccupations: string[];
   lastName: string | null;
   firstName: string | null;
   email: string | null;
@@ -82,6 +84,7 @@ export default function CompanyDashboardPage() {
   const [universityCategories, setUniversityCategories] = useState<string[]>([]);
   const [facultyTypes, setFacultyTypes] = useState<string[]>([]);
   const [industries, setIndustries] = useState<string[]>([]);
+  const [desiredOccupations, setDesiredOccupations] = useState<string[]>([]);
   const [minDeviation, setMinDeviation] = useState("");
 
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
@@ -135,6 +138,7 @@ export default function CompanyDashboardPage() {
       universityCategories.forEach((v) => params.append("universityCategory", v));
       facultyTypes.forEach((v) => params.append("facultyType", v));
       industries.forEach((v) => params.append("industry", v));
+      desiredOccupations.forEach((v) => params.append("desiredOccupation", v));
       if (minDeviation) params.set("minDeviation", minDeviation);
 
       const res = await fetch(`/api/company/scouts?${params.toString()}`);
@@ -227,6 +231,13 @@ export default function CompanyDashboardPage() {
                   onChange={setIndustries}
                 />
 
+                <CheckboxGroup
+                  label="希望職種（複数選択可）"
+                  options={DESIRED_OCCUPATIONS}
+                  selected={desiredOccupations}
+                  onChange={setDesiredOccupations}
+                />
+
                 <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
                   SPI偏差値（以上）
                   <input
@@ -269,6 +280,18 @@ export default function CompanyDashboardPage() {
                       <p className="mt-2 text-xs text-gray-500">
                         志望業界: {c.industryFirst} / {c.industrySecond} / {c.industryThird}
                       </p>
+                      {c.desiredOccupations.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {c.desiredOccupations.map((o) => (
+                            <span
+                              key={o}
+                              className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700"
+                            >
+                              {o}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       <textarea
                         value={messages[c.studentId] ?? ""}
                         onChange={(e) =>
