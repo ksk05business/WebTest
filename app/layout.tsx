@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_NAME = "Webテストナビ";
-const SITE_TITLE = `${SITE_NAME} | SPI・玉手箱・TG-WEB・GAB・C-GAB・CAB対策＆スカウト`;
+const SITE_TITLE = `${SITE_NAME} | SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA対策＆スカウト`;
 const SITE_DESCRIPTION =
-  "Webテストナビは、SPI・玉手箱・TG-WEB・GAB・C-GAB・CABなど主要Webテストに幅広く対応した、就活生のための模試とスカウトサービスです。弱点分析・忘却曲線に基づく反復復習で対策し、2段階開示で安心してスカウトを受け取れます。";
+  "Webテストナビは、SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOAなど主要Webテストに幅広く対応した、就活生のための模試とスカウトサービスです。弱点分析・忘却曲線に基づく反復復習で対策し、2段階開示で安心してスカウトを受け取れます。";
 
 export const metadata: Metadata = {
   title: SITE_TITLE,

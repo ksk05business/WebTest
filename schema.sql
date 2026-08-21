@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS consent_events (
 CREATE TABLE IF NOT EXISTS exam_results (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
-  test_type TEXT NOT NULL DEFAULT 'spi', -- 'spi' | 'tamatebako' | 'tgweb' | 'gab' | 'cgab' | 'cab'
+  test_type TEXT NOT NULL DEFAULT 'spi', -- 'spi' | 'tamatebako' | 'tgweb' | 'gab_cgab' | 'cab' | 'scoa'
   score INTEGER NOT NULL,
   total INTEGER NOT NULL,
   accuracy_rate REAL NOT NULL, -- 正答率 (score / total)

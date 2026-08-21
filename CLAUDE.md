@@ -2,7 +2,7 @@
 
 # プロジェクト概要
 
-サービス名「Webテストナビ」（2026-08-21に「SPIナビ」から改称）。「本を買わない就活生向けのWebテスト模試アプリ」。SPI3のほか玉手箱・TG-WEB・GAB・C-GAB・CABにも対応する想定だが、実際に受験できる（`questions`テーブルにデータがあり`/test`で出題される）のは現状SPIのみで、他は`src/data/testTypes.ts`の`TEST_TYPES`で`available: false`（準備中）としてLP・ダッシュボードに掲載している。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
+サービス名「Webテストナビ」（2026-08-21に「SPIナビ」から改称）。「本を買わない就活生向けのWebテスト模試アプリ」。SPI3のほか玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOAにも対応する想定だが、実際に受験できる（`questions`テーブルにデータがあり`/test`で出題される）のは現状SPIのみで、他は`src/data/testTypes.ts`の`TEST_TYPES`で`available: false`（準備中）としてLP・ダッシュボードに掲載している。**2026-08-21にラインナップを整理し、従来別カードだった「GAB」「C-GAB」を`id: "gab_cgab"`の1カード「GAB / C-GAB」に統合、新たに`id: "scoa"`の「SCOA」を追加した**（公務員・地銀・中堅企業で頻出のSCOA性格・能力検査）。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
 画面は `/`（トップ）、`/register`（会員登録）、`/login`（ログイン）、`/dashboard`（ログイン後のホーム、ログイン必須）、`/test`（試験実行、ログイン必須）、`/result`（結果表示）。
 登録・ログインに成功すると`localStorage`の`spiUser`にセットし、そのまま`/dashboard`へ遷移する（別途ログインを挟まない）。
 
@@ -79,7 +79,7 @@
 
 ヘッダーロゴ（`DashboardHeader`/`CompanyHeader`/`AuthLayout`）、フッター（`Footer`）、`app/layout.tsx`のmetadata（title/description/OGP/Twitterカード）、パスワード再設定メールの送信者名・件名（`functions/api/forgot-password.ts`）、利用規約第1条・第2条（`app/terms/page.tsx`）を「Webテストナビ」に統一した。`app/privacy/page.tsx`には元々サービス名の直書きが無かったため変更不要（確認済み）。**`localStorage`のキー名`spiUser`/`spiCompanyUser`、`wrangler.jsonc`の`"name": "spi-mock-app"`、Cloudflare Pagesのプロジェクト名`webtest`は、ユーザーに見えない内部識別子のため意図的に変更していない**（特に`wrangler.jsonc`の`name`やCloudflareのプロジェクト名を変えるとデプロイ先のバインディングが変わりかねないため触らないこと）。
 
-サービス名変更に合わせ、単一の「SPI」テストに閉じた文言を「主要Webテスト全般」に対応する文言へ広げた（例: 利用規約第2条「SPI等の適性検査対策」→「SPI・玉手箱・TG-WEB・GAB・C-GAB・CAB等の適性検査対策」、LPのヒーローコピー・ステップ説明等）。実際に受験可能なのは現状SPIのみという状態は変わっていない（上記プロジェクト概要を参照）。
+サービス名変更に合わせ、単一の「SPI」テストに閉じた文言を「主要Webテスト全般」に対応する文言へ広げた（例: 利用規約第2条「SPI等の適性検査対策」→「SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA等の適性検査対策」、LPのヒーローコピー・ステップ説明等。2026-08-21のラインナップ整理でGAB/C-GABの表記統合・SCOA追加に合わせてさらに更新済み）。実際に受験可能なのは現状SPIのみという状態は変わっていない（上記プロジェクト概要を参照）。
 
 ## ファビコン・ログイン/会員登録画面のデザイン刷新（2026-08-21）
 

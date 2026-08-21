@@ -27,9 +27,9 @@ const TEST_BRAND_DETAILS: { id: string; displayName: string; subtitle: string }[
   { id: "spi", displayName: "SPI3", subtitle: "言語・非言語・構造的把握" },
   { id: "tamatebako", displayName: "玉手箱", subtitle: "計数・言語・英語" },
   { id: "tgweb", displayName: "TG-WEB", subtitle: "従来型・新型" },
-  { id: "gab", displayName: "GAB", subtitle: "商社・総合職向け適性検査" },
-  { id: "cgab", displayName: "C-GAB", subtitle: "Web会場型のGAB" },
-  { id: "cab", displayName: "CAB", subtitle: "SE・IT職向け（暗号・論理的思考）" },
+  { id: "gab_cgab", displayName: "GAB / C-GAB", subtitle: "言語・計数・英語" },
+  { id: "cab", displayName: "CAB", subtitle: "暗号・法則性・命令表（エンジニア・IT職向け）" },
+  { id: "scoa", displayName: "SCOA", subtitle: "言語・数理・論理・常識・英語（公務員・地銀・中堅企業で頻出）" },
 ];
 
 const TEST_BRANDS = TEST_BRAND_DETAILS.map((d) => ({
@@ -136,7 +136,7 @@ export default function Home() {
             模試 ✕ スカウト
           </h1>
           <p className="text-balance text-base leading-relaxed text-blue-50 sm:text-lg">
-            SPI / 玉手箱 / TG-WEB / GAB / C-GAB / CAB
+            SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA
             に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
           </p>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
