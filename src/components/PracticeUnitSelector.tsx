@@ -88,7 +88,7 @@ export function PracticeUnitSelector() {
               const disabled = !loading && count === 0;
               return (
                 <button
-                  key={unit.subCategory}
+                  key={unit.id}
                   type="button"
                   disabled={disabled}
                   onClick={() => setSelection({ category: group.category, subCategory: unit.subCategory })}

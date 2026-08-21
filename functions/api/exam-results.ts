@@ -53,20 +53,23 @@ function calculateDeviationScore(rate: number, priorRates: number[]): number {
   return 50 + (10 * (rate - mean)) / stddev;
 }
 
-// 言語（verbal）カテゴリの問題を間違えた場合、忘却曲線に基づく復習キューへ追加/リセットする。
+// 言語（verbal）・英語（english）カテゴリの問題を間違えた場合、忘却曲線に基づく復習キューへ追加/リセットする
+// （どちらも知識系＝反復記憶で伸びやすい分野のため対象とする）。
 // 既に復習キューにある問題（mastered済みも含む）は、間違えた時点でstage0・翌日復習にリセットする。
-async function enqueueWrongVerbalAnswers(db: D1Database, userId: number, answers: AnswerInput[]) {
+async function enqueueWrongLanguageAnswers(db: D1Database, userId: number, answers: AnswerInput[]) {
   const wrongIds = answers.filter((a) => !a.correct).map((a) => a.questionId);
   if (wrongIds.length === 0) return;
 
   const placeholders = wrongIds.map(() => "?").join(",");
-  const verbalQuestions = await db
-    .prepare(`SELECT id FROM questions WHERE id IN (${placeholders}) AND category = 'verbal'`)
+  const languageQuestions = await db
+    .prepare(
+      `SELECT id FROM questions WHERE id IN (${placeholders}) AND category IN ('verbal', 'english')`
+    )
     .bind(...wrongIds)
     .all<{ id: number }>();
 
   const modifier = daysFromNowModifier(INITIAL_REVIEW_INTERVAL_DAYS);
-  for (const q of verbalQuestions.results ?? []) {
+  for (const q of languageQuestions.results ?? []) {
     await db
       .prepare(
         `INSERT INTO user_question_reviews (user_id, question_id, review_stage, status, last_result, next_review_at)
@@ -119,7 +122,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // ただし間違えた言語問題の復習キュー登録だけは、本番模試と同様に行う。
   if (isPractice) {
     if (answers) {
-      await enqueueWrongVerbalAnswers(context.env.DB, user.id, answers);
+      await enqueueWrongLanguageAnswers(context.env.DB, user.id, answers);
     }
     return Response.json({ ok: true, isPractice: true, accuracyRate });
   }
@@ -148,7 +151,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     .run();
 
   if (answers) {
-    await enqueueWrongVerbalAnswers(context.env.DB, user.id, answers);
+    await enqueueWrongLanguageAnswers(context.env.DB, user.id, answers);
   }
 
   return Response.json({ ok: true, deviationScore, accuracyRate });
@@ -164,7 +167,7 @@ type ExamResultRow = {
   taken_at: string;
 };
 
-const BROAD_CATEGORIES = ["verbal", "non_verbal", "structural"] as const;
+const BROAD_CATEGORIES = ["verbal", "non_verbal", "structural", "english"] as const;
 
 function bucketBySubCategory(
   scores: CategoryScores,

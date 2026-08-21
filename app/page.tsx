@@ -24,7 +24,7 @@ const BADGES = [
 ];
 
 const TEST_BRAND_DETAILS: { id: string; displayName: string; subtitle: string }[] = [
-  { id: "spi", displayName: "SPI3", subtitle: "言語・非言語・構造的把握" },
+  { id: "spi", displayName: "SPI3", subtitle: "言語・非言語・構造的把握・英語" },
   { id: "tamatebako", displayName: "玉手箱", subtitle: "計数・言語・英語" },
   { id: "tgweb", displayName: "TG-WEB", subtitle: "従来型・新型" },
   { id: "gab_cgab", displayName: "GAB / C-GAB", subtitle: "言語・計数・英語" },

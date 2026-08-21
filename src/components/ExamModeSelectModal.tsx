@@ -59,7 +59,7 @@ export function ExamModeSelectModal({
                   </div>
                   <div>
                     <p className="font-semibold text-gray-700">出題領域</p>
-                    <p>能力検査（非言語・言語・構造的把握）。※性格検査は当アプリの対象外です。</p>
+                    <p>能力検査（非言語・言語・構造的把握・英語）。※性格検査は当アプリの対象外です。</p>
                   </div>
                   <div>
                     <p className="font-semibold text-gray-700">対策ポイント</p>

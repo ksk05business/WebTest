@@ -41,6 +41,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   verbal: "言語",
   non_verbal: "非言語",
   structural: "構造的把握",
+  english: "英語",
 };
 
 function getRank(deviation: number | null): string {

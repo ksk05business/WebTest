@@ -43,6 +43,12 @@
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
+## 練習問題の単元ラインナップ拡充・英語区分の追加（2026-08-21）
+
+`src/data/practiceUnits.ts`の`PRACTICE_UNIT_GROUPS`を拡充し、非言語7単元・言語6単元・構造的把握2単元に加えて**新しい大分類「英語（`category: "english"`）」を4単元で追加**した（語意/英英辞典/空欄補充/長文読解（英語））。`PracticeUnit`型に`id`（英語スネークケースの内部キー、例: `prob_probability`・`speed`・`word_usage`・`english_vocab`。DBには保存せずReact key等の内部用途のみ）を追加し、`subCategory`（`questions.sub_category`と完全一致させるJapanese文字列、DB照会・フィルタ用）とは役割を分離した。**この拡充で追加した15単元はすべて実データ0件（`GET /api/question-units`が返す件数が0）のため「準備中」表示になる**（既存の4単元＝推論・損益算・資料の読み取り・語彙のみ実データがある状態は変わっていない）。
+
+`english`を`non_verbal`/`verbal`/`structural`と並ぶ4つ目の大分類として、`functions/api/exam-results.ts`の`BROAD_CATEGORIES`・`src/components/PerformanceDashboard.tsx`の`CATEGORY_LABEL`（"英語"）に追加した。忘却曲線の復習キュー登録関数は`enqueueWrongVerbalAnswers`から`enqueueWrongLanguageAnswers`へ改名し、対象を`category IN ('verbal', 'english')`に拡張した（英語の語彙・熟語系も言語系と同様に知識定着型のため、忘却曲線復習の対象とする判断）。SPI3の出題領域を説明する箇所（`ExamModeSelectModal`の「SPI3とは？」・LPの`TEST_BRAND_DETAILS`）も「言語・非言語・構造的把握・英語」に更新し、実態と齟齬が出ないようにした。
+
 ## SPI3概要解説・練習問題の分野/単元選択UI（2026-08-21）
 
 **`ExamModeSelectModal`のSPI3解説アコーディオン**: `testType.id === "spi"`の場合のみ、モーダル上部（2モードカードの上）にネイティブ`<details>`/`<summary>`によるアコーディオン「SPI3とは？（特徴・形式の解説）」を表示する（概要・受験形式・出題領域・対策ポイントの4項目、いずれもユーザー要求の文言をそのまま使用）。他のテスト種別が将来利用可能になった場合は、同様の解説をそれぞれ追加する必要がある（現状は`id === "spi"`のみ対応）。
