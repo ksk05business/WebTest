@@ -42,7 +42,8 @@ export default function RegisterPage() {
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
   const [agreedTerms, setAgreedTerms] = useState(false);
-  const [scoutConsent, setScoutConsent] = useState(false);
+  const [scoutConsent, setScoutConsent] = useState(true);
+  const [scoutDetailsOpen, setScoutDetailsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -325,39 +326,56 @@ export default function RegisterPage() {
             </span>
           </label>
 
-          <label className="flex items-start gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={scoutConsent}
-              onChange={(e) => setScoutConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 accent-blue-600"
-            />
-            <span>
-              成績・大学区分・志望業界などの情報を、提携する就活エージェント・企業からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。
-            </span>
-          </label>
-          <div className="ml-6 flex flex-col gap-1 rounded-lg bg-white p-3 text-xs text-gray-600">
-            <p className="flex items-center gap-1.5 font-semibold text-gray-700">
-              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-              2段階開示の仕組み
-            </p>
-            <ul className="mt-1 list-disc space-y-1 pl-4">
-              <li>
-                同意しても、氏名・メールアドレスなどご本人を特定できる情報は企業に一切開示されません。企業に見えるのは大学区分・文理・志望業界・模試の偏差値など匿名化された情報のみです。
-              </li>
-              <li>
-                企業から匿名スカウトが届いた場合、内容を確認したうえで「承諾」した場合に限り、その企業にのみ氏名・メールアドレスが開示されます。「辞退」すれば開示されません。
-              </li>
-              <li>この同意はいつでもマイページから撤回できます（撤回後は新たなスカウト対象になりません）。</li>
-            </ul>
-            <p className="mt-1">
-              詳しくは
-              <Link href="/terms#scout" target="_blank" className="text-blue-600 underline">
-                利用規約（第5条）
-              </Link>
-              をご確認ください。
-            </p>
+          <div className="flex items-start justify-between gap-2">
+            <label className="flex flex-1 items-start gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={scoutConsent}
+                onChange={(e) => setScoutConsent(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-blue-600"
+              />
+              <span>成績・プロフィール情報の企業/エージェントへの共有に同意する（スカウト受信機能）</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setScoutDetailsOpen((v) => !v)}
+              className="flex-shrink-0 whitespace-nowrap text-xs font-medium text-blue-600 hover:text-blue-700"
+            >
+              {scoutDetailsOpen ? "詳細 ▲" : "詳細 ▼"}
+            </button>
           </div>
+
+          {scoutDetailsOpen && (
+            <div className="ml-6 flex flex-col gap-2 rounded-lg bg-white p-3 text-xs text-gray-600">
+              <p>
+                成績・大学区分・志望業界などの情報を、提携する就活エージェント・企業からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。
+              </p>
+              <div>
+                <p className="flex items-center gap-1.5 font-semibold text-gray-700">
+                  <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+                  2段階開示の仕組み
+                </p>
+                <ul className="mt-1 list-disc space-y-1 pl-4">
+                  <li>
+                    同意しても、氏名・メールアドレスなどご本人を特定できる情報は企業に一切開示されません。企業に見えるのは大学区分・文理・志望業界・模試の偏差値など匿名化された情報のみです。
+                  </li>
+                  <li>
+                    企業から匿名スカウトが届いた場合、内容を確認したうえで「承諾」した場合に限り、その企業にのみ氏名・メールアドレスが開示されます。「辞退」すれば開示されません。
+                  </li>
+                  <li>
+                    この同意はいつでもマイページ/プロフィールから撤回できます（撤回後は新たなスカウト対象になりません）。
+                  </li>
+                </ul>
+              </div>
+              <p>
+                ※ 詳しくは
+                <Link href="/terms#scout" target="_blank" className="text-blue-600 underline">
+                  利用規約（第5条）
+                </Link>
+                をご確認ください。
+              </p>
+            </div>
+          )}
         </div>
 
         {error && (
