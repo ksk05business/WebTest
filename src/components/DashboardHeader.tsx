@@ -33,7 +33,7 @@ export function DashboardHeader() {
   return (
     <header className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
       <Link href="/dashboard" className="relative text-xl font-bold text-blue-700">
-        SPI<span className="text-gray-900">ナビ</span>
+        Webテスト<span className="text-gray-900">ナビ</span>
         {unreadCount > 0 && (
           <span className="absolute -right-3 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
             {unreadCount}

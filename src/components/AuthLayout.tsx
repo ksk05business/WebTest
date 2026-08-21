@@ -41,12 +41,12 @@ export function AuthLayout({
         />
 
         <Link href="/" className="relative z-10 text-2xl font-bold">
-          SPI<span className="text-blue-200">ナビ</span>
+          Webテスト<span className="text-blue-200">ナビ</span>
         </Link>
 
         <div className="relative z-10 flex flex-col gap-7">
           <h2 className="text-3xl font-bold leading-snug text-balance">
-            高精度模試で弱点を克服し、
+            主要Webテストの高精度模試で弱点を克服し、
             <br />
             優良企業からのスカウトを獲得しよう
           </h2>
@@ -63,7 +63,7 @@ export function AuthLayout({
           </ul>
         </div>
 
-        <p className="relative z-10 text-xs text-blue-100">&copy; SPIナビ</p>
+        <p className="relative z-10 text-xs text-blue-100">&copy; Webテストナビ</p>
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-10">
@@ -71,7 +71,7 @@ export function AuthLayout({
           href="/"
           className="mb-6 text-2xl font-bold text-blue-700 lg:hidden"
         >
-          SPI<span className="text-gray-900">ナビ</span>
+          Webテスト<span className="text-gray-900">ナビ</span>
         </Link>
 
         <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white/90 p-8 shadow-xl shadow-blue-900/5 backdrop-blur-sm sm:p-10">

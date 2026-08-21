@@ -5,36 +5,52 @@ import {
   CheckCircle2,
   Clock,
   FileText,
+  Layers,
   Mail,
   Repeat2,
   ShieldCheck,
   Smartphone,
   UserPlus,
 } from "lucide-react";
+import { TEST_TYPES } from "@/src/data/testTypes";
 
 const BADGES = [
   { icon: Clock, text: "登録3分" },
-  { icon: Smartphone, text: "SP/PC両対応" },
-  { icon: ShieldCheck, text: "2段階開示で個人情報も安心" },
+  { icon: Smartphone, text: "SP/PC対応" },
+  { icon: ShieldCheck, text: "2段階開示で安心" },
 ];
+
+const TEST_BRAND_DETAILS: { id: string; displayName: string; subtitle: string }[] = [
+  { id: "spi", displayName: "SPI3", subtitle: "言語・非言語・構造的把握" },
+  { id: "tamatebako", displayName: "玉手箱", subtitle: "計数・言語・英語" },
+  { id: "tgweb", displayName: "TG-WEB", subtitle: "従来型・新型" },
+  { id: "gab", displayName: "GAB", subtitle: "商社・総合職向け適性検査" },
+  { id: "cgab", displayName: "C-GAB", subtitle: "Web会場型のGAB" },
+  { id: "cab", displayName: "CAB", subtitle: "SE・IT職向け（暗号・論理的思考）" },
+];
+
+const TEST_BRANDS = TEST_BRAND_DETAILS.map((d) => ({
+  ...d,
+  available: TEST_TYPES.find((t) => t.id === d.id)?.available ?? false,
+}));
 
 const FEATURES = [
   {
     icon: BarChart3,
     title: "本番想定の高精度Webテスト模試",
-    description: "偏差値・順位をリアルタイムに算出し、苦手分野を分析グラフで可視化します。",
+    description: "偏差値・順位をリアルタイムに算出し、カテゴリ別の苦手分野を分析グラフで可視化します。",
   },
   {
     icon: Brain,
     title: "忘却曲線に基づく自動復習機能",
     description:
-      "エビングハウスの忘却曲線を意識し、1日・3日・7日・14日の最適タイミングで知識問題の定着を徹底サポートします。",
+      "エビングハウスの忘却曲線を意識し、1日・3日・7日・14日の最適サイクルで知識問題の定着を徹底サポートします。",
   },
   {
     icon: Mail,
     title: "成績を見た企業から届く「特別スカウト」",
     description:
-      "2段階開示だから安心。最初は匿名で、本気度の高い優良企業から特別選考ルートのオファーが届きます。",
+      "2段階開示で個人情報を守りつつ、本気度の高い優良企業から特別選考ルートの直オファーが届きます。",
   },
 ];
 
@@ -47,12 +63,12 @@ const STEPS = [
   {
     icon: FileText,
     title: "Webテスト模試を受験",
-    description: "SPI模試を受けて成績を分析",
+    description: "SPIなど主要Webテストの模試を受けて成績を分析",
   },
   {
     icon: Repeat2,
-    title: "復習機能で弱点を克服",
-    description: "忘却曲線に沿った復習でスコアアップ",
+    title: "忘却曲線復習で弱点を克服",
+    description: "最適サイクルの復習でスコアアップ",
   },
   {
     icon: Mail,
@@ -67,7 +83,7 @@ export default function Home() {
       <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link href="/" className="text-lg font-bold text-blue-700">
-            SPI<span className="text-gray-900">ナビ</span>
+            Webテスト<span className="text-gray-900">ナビ</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
@@ -107,19 +123,22 @@ export default function Home() {
 
         <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6">
           <h1 className="text-balance text-3xl font-bold leading-snug text-white drop-shadow-sm sm:text-4xl md:text-5xl">
-            本を買わずに、SPI完全攻略。
+            参考書を買わずに、
             <br />
-            高精度模試 ✕ スカウト獲得
+            主要Webテストを完全攻略。
+            <br />
+            模試 ✕ スカウト
           </h1>
           <p className="text-balance text-base leading-relaxed text-blue-50 sm:text-lg">
-            参考書不要！高精度の模擬試験、エビングハウスの忘却曲線に基づく復習機能、企業からの特別スカウトまで、学生は【完全無料】で利用できます。
+            SPI / 玉手箱 / TG-WEB / GAB / C-GAB / CAB
+            に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
           </p>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
             <Link
               href="/register"
               className="rounded-full bg-white px-8 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              【完全無料】今すぐ会員登録して練習を始める
+              【完全無料】今すぐ会員登録して対策を始める
             </Link>
             <Link
               href="/login"
@@ -131,13 +150,51 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 対応Webテスト網羅 */}
+      <section className="px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="mx-auto mb-4 flex max-w-2xl flex-col items-center gap-3 text-center">
+            <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+              <Layers className="h-3.5 w-3.5" />
+              すべての主要Webテストを網羅
+            </span>
+            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+              これ1つで就活のWebテスト対策がすべて完結
+            </h2>
+            <p className="text-sm text-gray-500 sm:text-base">
+              業界・企業ごとに異なる出題形式にも、幅広く対応しています。
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {TEST_BRANDS.map((b) => (
+              <div
+                key={b.id}
+                className="flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-gray-900">{b.displayName}</h3>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      b.available ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    {b.available ? "対応済み" : "準備中"}
+                  </span>
+                </div>
+                <p className="text-xs leading-relaxed text-gray-500">{b.subtitle}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* 安心感バナー */}
-      <section className="border-b border-gray-100 bg-blue-50/60 px-6 py-8">
+      <section className="border-y border-gray-100 bg-blue-50/60 px-6 py-8">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
           <p className="text-sm font-semibold text-blue-900 sm:text-base">
-            学生は完全無料
+            なぜ完全無料？
             <span className="ml-1 font-normal text-blue-700">
-              （※企業からのスカウト掲載料で運営されているため、学生に費用は一切かかりません）
+              企業からのスカウト掲載料で運営されているため、学生に費用は一切かかりません。
             </span>
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -158,7 +215,7 @@ export default function Home() {
       <section className="px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-3 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">3つのコアな特徴</h2>
+            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">3つのコア機能</h2>
             <p className="text-sm text-gray-500 sm:text-base">
               就活生の「対策・分析・出会い」をひとつのサービスで完結できます。
             </p>
@@ -184,7 +241,7 @@ export default function Home() {
       <section className="bg-gray-50 px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-3 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">利用の流れ</h2>
+            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">ご利用の流れ</h2>
             <p className="text-sm text-gray-500 sm:text-base">4ステップで、対策からスカウト獲得まで。</p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -226,7 +283,7 @@ export default function Home() {
             href="/register"
             className="rounded-full bg-white px-10 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
           >
-            今すぐ無料でSPI対策を始める
+            完全無料でWebテスト対策を始める
           </Link>
         </div>
       </section>

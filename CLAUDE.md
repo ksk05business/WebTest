@@ -2,7 +2,7 @@
 
 # プロジェクト概要
 
-「本を買わない就活生向けのSPI WEB模試アプリ」。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
+サービス名「Webテストナビ」（2026-08-21に「SPIナビ」から改称）。「本を買わない就活生向けのWebテスト模試アプリ」。SPI3のほか玉手箱・TG-WEB・GAB・C-GAB・CABにも対応する想定だが、実際に受験できる（`questions`テーブルにデータがあり`/test`で出題される）のは現状SPIのみで、他は`src/data/testTypes.ts`の`TEST_TYPES`で`available: false`（準備中）としてLP・ダッシュボードに掲載している。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
 画面は `/`（トップ）、`/register`（会員登録）、`/login`（ログイン）、`/dashboard`（ログイン後のホーム、ログイン必須）、`/test`（試験実行、ログイン必須）、`/result`（結果表示）。
 登録・ログインに成功すると`localStorage`の`spiUser`にセットし、そのまま`/dashboard`へ遷移する（別途ログインを挟まない）。
 
@@ -42,6 +42,12 @@
 
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
+
+## サービス名リブランディング「SPIナビ」→「Webテストナビ」（2026-08-21）
+
+ヘッダーロゴ（`DashboardHeader`/`CompanyHeader`/`AuthLayout`）、フッター（`Footer`）、`app/layout.tsx`のmetadata（title/description/OGP/Twitterカード）、パスワード再設定メールの送信者名・件名（`functions/api/forgot-password.ts`）、利用規約第1条・第2条（`app/terms/page.tsx`）を「Webテストナビ」に統一した。`app/privacy/page.tsx`には元々サービス名の直書きが無かったため変更不要（確認済み）。**`localStorage`のキー名`spiUser`/`spiCompanyUser`、`wrangler.jsonc`の`"name": "spi-mock-app"`、Cloudflare Pagesのプロジェクト名`webtest`は、ユーザーに見えない内部識別子のため意図的に変更していない**（特に`wrangler.jsonc`の`name`やCloudflareのプロジェクト名を変えるとデプロイ先のバインディングが変わりかねないため触らないこと）。
+
+サービス名変更に合わせ、単一の「SPI」テストに閉じた文言を「主要Webテスト全般」に対応する文言へ広げた（例: 利用規約第2条「SPI等の適性検査対策」→「SPI・玉手箱・TG-WEB・GAB・C-GAB・CAB等の適性検査対策」、LPのヒーローコピー・ステップ説明等）。実際に受験可能なのは現状SPIのみという状態は変わっていない（上記プロジェクト概要を参照）。
 
 ## ファビコン・ログイン/会員登録画面のデザイン刷新（2026-08-21）
 
@@ -145,7 +151,7 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 
 # ページ責務
 
-- `app/page.tsx`: サーバーコンポーネントのまま維持（`"use client"` 不要、インタラクションはCSSの`hover:`だけで完結させている）。2026-08-21にCVR訴求型のLPへ刷新: sticky簡易ヘッダー→ヒーロー（キャッチコピー＋グラデーション大型CTA）→完全無料・安心感バナー（登録3分/SP・PC両対応/2段階開示バッジ）→3特徴カード（模試・復習機能・特別スカウト、`hover:-translate-y-1`でホバー浮き上がり）→利用の流れ4ステップ→ボトムCTA、の一枚構成。旧バージョンにあった`/test`への未ログインお試しリンクは、`/test`が認証必須化されて久しく実質的に無意味だったため削除した。
+- `app/page.tsx`: サーバーコンポーネントのまま維持（`"use client"` 不要、インタラクションはCSSの`hover:`だけで完結させている）。2026-08-21にCVR訴求型のLPへ刷新（さらに同日中に「主要Webテスト全網羅」訴求へ再刷新、下記「サービス名リブランディング」の節を参照）: sticky簡易ヘッダー→ヒーロー（キャッチコピー＋グラデーション大型CTA）→対応Webテスト網羅セクション（`src/data/testTypes.ts`の`TEST_TYPES`から対応状況バッジを算出）→完全無料・安心感バナー→3特徴カード（模試・復習機能・特別スカウト、`hover:-translate-y-1`でホバー浮き上がり）→利用の流れ4ステップ→ボトムCTA、の一枚構成。旧バージョンにあった`/test`への未ログインお試しリンクは、`/test`が認証必須化されて久しく実質的に無意味だったため削除した。
 - `app/register/page.tsx`: クライアントコンポーネント。会員登録フォーム。`/api/register`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。バリデーション・送信ロジックは2026-08-21のUI刷新でも変更していない（`src/components/AuthLayout.tsx`でラップし、`IconInput`でスタイルを差し替えただけ）。
 - `app/login/page.tsx`: クライアントコンポーネント。ログインフォーム。`/api/login`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。register同様、2026-08-21のUI刷新でロジックは変更していない。
 - `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。ログイン後のトップページとして、試験種別選択（`TEST_TYPES`）・成績ダッシュボード（`PerformanceDashboard`）・スカウト受信ボックス（`ScoutInbox`）を1画面に統合している（2026-08-21に`/mypage`から成績・復習・スカウトの表示をこちらへ移動）。旧`localStorage`の`spiResultHistory`に基づく簡易履歴テーブルは、D1ベースの`PerformanceDashboard`に置き換える形で廃止した。

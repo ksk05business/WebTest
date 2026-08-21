@@ -11,7 +11,7 @@ export function Footer() {
           プライバシーポリシー
         </Link>
       </nav>
-      <p className="mt-2">&copy; SPIナビ</p>
+      <p className="mt-2">&copy; Webテストナビ</p>
     </footer>
   );
 }

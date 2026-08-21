@@ -15,7 +15,7 @@ export function CompanyHeader({ companyName }: { companyName: string }) {
     <header className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
       <div className="flex items-center gap-6">
         <Link href="/company/dashboard" className="text-xl font-bold text-blue-700">
-          SPI<span className="text-gray-900">ナビ</span>
+          Webテスト<span className="text-gray-900">ナビ</span>
           <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
             企業様向け
           </span>

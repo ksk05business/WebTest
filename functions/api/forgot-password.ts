@@ -44,8 +44,8 @@ async function sendOtpEmail(env: Env, email: string, otp: string): Promise<void>
       },
       body: JSON.stringify({
         to: email,
-        from: { address: FROM_ADDRESS, name: "SPIナビ" },
-        subject: "【SPIナビ】パスワード再設定用のワンタイムパスワード",
+        from: { address: FROM_ADDRESS, name: "Webテストナビ" },
+        subject: "【Webテストナビ】パスワード再設定用のワンタイムパスワード",
         text: `パスワード再設定用のワンタイムパスワードは ${otp} です。\n有効期限は発行から${OTP_TTL_MINUTES}分間です。\n心当たりがない場合はこのメールを破棄してください。`,
         html: `<p>パスワード再設定用のワンタイムパスワードは <strong>${otp}</strong> です。</p><p>有効期限は発行から${OTP_TTL_MINUTES}分間です。</p><p>心当たりがない場合はこのメールを破棄してください。</p>`,
       }),

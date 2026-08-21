@@ -15,7 +15,7 @@ export default function TermsPage() {
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-gray-900">第1条（適用）</h2>
         <p className="text-sm text-gray-700">
-          本規約は、[運営者名]（以下「当社」）が提供する「SPIナビ」（以下「本サービス」）の利用条件を定めるものです。ユーザーは、本規約に同意のうえ本サービスを利用するものとします。
+          本規約は、[運営者名]（以下「当社」）が提供する「Webテストナビ」（以下「本サービス」）の利用条件を定めるものです。ユーザーは、本規約に同意のうえ本サービスを利用するものとします。
         </p>
       </section>
 
@@ -23,7 +23,7 @@ export default function TermsPage() {
         <h2 className="text-lg font-semibold text-gray-900">第2条（本サービスの内容）</h2>
         <p className="text-sm text-gray-700">本サービスは、以下の機能から構成されます。</p>
         <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
-          <li>SPI等の適性検査対策のためのWebテスト模試・練習問題の提供</li>
+          <li>SPI・玉手箱・TG-WEB・GAB・C-GAB・CAB等の適性検査対策のためのWebテスト模試・練習問題の提供</li>
           <li>
             学生ユーザーが個別に同意した場合に限り、その匿名化された成績・属性データを提携企業に公開し、企業からの匿名スカウトメッセージを受け取れる「2段階開示型スカウトサービス」（第7条）
           </li>
