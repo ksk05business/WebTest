@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 
@@ -10,6 +11,18 @@ function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function BackToUnitsLink() {
+  return (
+    <Link
+      href="/practice"
+      className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-700"
+    >
+      <ArrowLeft className="h-4 w-4" />
+      単元一覧に戻る
+    </Link>
+  );
 }
 
 export default function PracticePage() {
@@ -159,42 +172,42 @@ function PracticePageInner() {
 
   if (loadError) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm font-medium text-red-600">{loadError}</p>
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
+        <BackToUnitsLink />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <p className="text-sm font-medium text-red-600">{loadError}</p>
+        </div>
       </main>
     );
   }
 
   if (finished && questions) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10 text-center">
-        <p className="text-lg font-semibold text-gray-900">練習お疲れ様でした！</p>
-        <p className="text-sm text-gray-700">
-          {questions.length}問中 {score}問正解（経過時間 {formatElapsed(elapsed)}）
-        </p>
-        <p className="text-xs text-gray-500">
-          この練習の結果は偏差値には反映されません。間違えた言語問題は忘却曲線の復習キューに追加されました。
-        </p>
-        <div className="mt-2 flex flex-wrap justify-center gap-3">
-          <button
-            type="button"
-            onClick={handleRestart}
-            className="rounded-full border border-blue-300 px-6 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-          >
-            もう一度練習する
-          </button>
-          <Link
-            href="/practice"
-            className="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-          >
-            別の単元を選ぶ
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            ダッシュボードに戻る
-          </Link>
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
+        <BackToUnitsLink />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+          <p className="text-lg font-semibold text-gray-900">練習お疲れ様でした！</p>
+          <p className="text-sm text-gray-700">
+            {questions.length}問中 {score}問正解（経過時間 {formatElapsed(elapsed)}）
+          </p>
+          <p className="text-xs text-gray-500">
+            この練習の結果は偏差値には反映されません。間違えた言語問題は忘却曲線の復習キューに追加されました。
+          </p>
+          <div className="mt-2 flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              onClick={handleRestart}
+              className="rounded-full border border-blue-300 px-6 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+            >
+              もう一度練習する
+            </button>
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              ダッシュボードに戻る
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -202,8 +215,11 @@ function PracticePageInner() {
 
   if (!question || !questions) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
+        <BackToUnitsLink />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
+        </div>
       </main>
     );
   }
@@ -212,6 +228,8 @@ function PracticePageInner() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
+      <BackToUnitsLink />
+
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span className="flex items-center gap-2">
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">

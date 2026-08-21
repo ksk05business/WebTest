@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shuffle } from "lucide-react";
+import { ChevronRight, Shuffle } from "lucide-react";
 import { PRACTICE_UNIT_GROUPS } from "@/src/data/practiceUnits";
 
 type UnitCount = { category: string; subCategory: string; count: number };
-
-type Selection = { category: string; subCategory: string } | "random";
 
 export function PracticeUnitSelector() {
   const router = useRouter();
   const [unitCounts, setUnitCounts] = useState<UnitCount[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [selection, setSelection] = useState<Selection>("random");
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/question-units")
@@ -29,24 +28,34 @@ export function PracticeUnitSelector() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 2500);
+    return () => clearTimeout(id);
+  }, [toast]);
+
   function countFor(category: string, subCategory: string): number {
     return unitCounts.find((u) => u.category === category && u.subCategory === subCategory)?.count ?? 0;
   }
 
-  function handleStart() {
-    if (selection === "random") {
-      router.push("/practice?category=all");
+  function handleUnitClick(category: string, subCategory: string, label: string) {
+    if (loading) return;
+    if (countFor(category, subCategory) === 0) {
+      setToast(`「${label}」の問題は準備中です`);
       return;
     }
-    const params = new URLSearchParams({
-      category: selection.category,
-      subCategory: selection.subCategory,
-    });
+    const params = new URLSearchParams({ category, subCategory });
     router.push(`/practice?${params.toString()}`);
   }
 
-  const selectedCount =
-    selection === "random" ? total : countFor(selection.category, selection.subCategory);
+  function handleRandomClick() {
+    if (loading) return;
+    if (total === 0) {
+      setToast("問題は準備中です");
+      return;
+    }
+    router.push("/practice?category=all");
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
@@ -59,19 +68,18 @@ export function PracticeUnitSelector() {
 
       <button
         type="button"
-        onClick={() => setSelection("random")}
-        className={`flex items-center justify-between rounded-xl border-2 p-4 text-left transition-colors ${
-          selection === "random"
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-200 bg-white hover:border-blue-200"
-        }`}
+        onClick={handleRandomClick}
+        className="flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-colors hover:border-blue-300 hover:bg-blue-50"
       >
         <span className="flex items-center gap-2 font-bold text-gray-900">
           <Shuffle className="h-5 w-5 text-blue-600" />
           ランダム総合練習
         </span>
-        <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-          {loading ? "..." : `${total}問`}
+        <span className="flex items-center gap-2">
+          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+            {loading ? "..." : `${total}問`}
+          </span>
+          <ChevronRight className="h-4 w-4 text-gray-400" />
         </span>
       </button>
 
@@ -81,30 +89,28 @@ export function PracticeUnitSelector() {
           <div className="flex flex-col gap-2">
             {group.units.map((unit) => {
               const count = countFor(group.category, unit.subCategory);
-              const isSelected =
-                selection !== "random" &&
-                selection.category === group.category &&
-                selection.subCategory === unit.subCategory;
               const disabled = !loading && count === 0;
               return (
                 <button
                   key={unit.id}
                   type="button"
-                  disabled={disabled}
-                  onClick={() => setSelection({ category: group.category, subCategory: unit.subCategory })}
-                  className={`flex items-center justify-between rounded-xl border p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                    isSelected
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 bg-white hover:border-blue-200"
+                  onClick={() => handleUnitClick(group.category, unit.subCategory, unit.label)}
+                  className={`flex items-center justify-between rounded-xl border p-3 text-left transition-colors ${
+                    disabled
+                      ? "border-gray-200 bg-white opacity-50"
+                      : "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50"
                   }`}
                 >
                   <span className="text-sm font-medium text-gray-800">{unit.label}</span>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      disabled ? "bg-gray-100 text-gray-400" : "bg-blue-50 text-blue-700"
-                    }`}
-                  >
-                    {loading ? "..." : disabled ? "準備中" : `${count}問`}
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        disabled ? "bg-gray-100 text-gray-400" : "bg-blue-50 text-blue-700"
+                      }`}
+                    >
+                      {loading ? "..." : disabled ? "準備中" : `${count}問`}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
                   </span>
                 </button>
               );
@@ -113,14 +119,18 @@ export function PracticeUnitSelector() {
         </div>
       ))}
 
-      <button
-        type="button"
-        disabled={loading || selectedCount === 0}
-        onClick={handleStart}
-        className="mt-2 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+      <Link
+        href="/dashboard"
+        className="mt-2 rounded-full border border-gray-300 py-3 text-center font-semibold text-gray-700 hover:bg-gray-50"
       >
-        練習スタート
-      </button>
+        戻る（モード選択へ）
+      </Link>
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-gray-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg">
+          {toast}
+        </div>
+      )}
     </main>
   );
 }

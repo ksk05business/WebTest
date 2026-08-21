@@ -43,6 +43,12 @@
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions`: SPI問題バンク（2026-08-21にD1へ移行済み、`/test`が実際にここから取得している）。詳細は「問題データのD1移行」の節を参照。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
+## 単元選択UI・練習問題画面の導線改善（2026-08-21）
+
+`src/components/PracticeUnitSelector.tsx`から「選択してから練習スタート」の2段階UIを廃止し、**単元カード（またはランダム総合練習カード）をクリックした瞬間に`/practice?category=...&subCategory=...`へ直接遷移**する方式にした（`selection`ステートは削除）。0件（準備中）の単元をクリックした場合は遷移せず、画面下部に2.5秒で自動的に消えるトースト（「『{単元名}』の問題は準備中です」）を表示する。各カード右側に`ChevronRight`アイコンを追加し、クリック可能であることを視覚的に示している。下部の大きな「練習スタート」ボタンは廃止し、「戻る（モード選択へ）」（`/dashboard`へのリンク。モード選択モーダル自体は`/dashboard`上のモーダルなので、遷移先はモーダルを開き直せるダッシュボードとした）に置き換えた。
+
+`app/practice/page.tsx`には`BackToUnitsLink`（`ArrowLeft`アイコン＋「単元一覧に戻る」、`/practice`への単純なLink）を新設し、単元一覧選択画面自体（`!category`の早期return）を除く全ての描画状態（読み込みエラー・完了画面・問題読み込み中・出題中）の先頭に常時表示するようにした。回答途中に押しても確認ダイアログ等は挟まず、即座に`/practice`（単元一覧）へ戻る（練習モードは低リスク・進捗を保存しない前提のため、離脱確認は不要と判断）。完了画面にあった「別の単元を選ぶ」ボタンは、この常時表示リンクと機能が重複するため削除した。
+
 ## 練習問題の単元ラインナップ拡充・英語区分の追加（2026-08-21）
 
 `src/data/practiceUnits.ts`の`PRACTICE_UNIT_GROUPS`を拡充し、非言語7単元・言語6単元・構造的把握2単元に加えて**新しい大分類「英語（`category: "english"`）」を4単元で追加**した（語意/英英辞典/空欄補充/長文読解（英語））。`PracticeUnit`型に`id`（英語スネークケースの内部キー、例: `prob_probability`・`speed`・`word_usage`・`english_vocab`。DBには保存せずReact key等の内部用途のみ）を追加し、`subCategory`（`questions.sub_category`と完全一致させるJapanese文字列、DB照会・フィルタ用）とは役割を分離した。**この拡充で追加した15単元はすべて実データ0件（`GET /api/question-units`が返す件数が0）のため「準備中」表示になる**（既存の4単元＝推論・損益算・資料の読み取り・語彙のみ実データがある状態は変わっていない）。
