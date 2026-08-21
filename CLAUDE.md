@@ -43,6 +43,14 @@
 **手動入力大学の区分（2026-08-20対応）**: 一覧に無い大学は「その他国公立大学」「その他私立大学」「海外大学」の3択（`MANUAL_ENTRY_UNIVERSITIES`）から選んでから自由入力する。**この選んだ区分がそのまま`university_category`として保存される**（`register.ts`/`me.ts`が`manualUniversityCategory`をリクエストボディで受け取り、`MANUAL_ENTRY_UNIVERSITIES`に含まれる値ならそれを優先し、無ければ`getUniversityCategory(university)`にフォールバックする）。`UniversityField`は`onManualCategoryChange`で選択区分を親に伝え、マイページでは`/api/me`のGETが返す`university_category`を見て、一覧に無い大学＋手動区分に該当する場合のみ`initialManualCategory`として渡し、再保存時も区分が失われないようにしている。**この仕組みが無いと、手動入力大学は常に`getUniversityCategory`のフォールバック値（その他私立大学）に丸められてしまう**（海外大学を手動入力した場合も同様の不具合が過去にあった）。
 - `questions` / `question_choices`: D1ベースの問題バンク（分野・難易度・オリジナリティメモ・レビューステータス付き）。**現状`/test`は`src/data/questions.ts`のTS配列を使い続けており、このテーブルへの移行・読み込みAPIはまだ実装していない**。`originality_note`は市販本の文章を書き写さず、解法アイデアの要約のみを記録する運用にすること。
 
+## スカウト送信UI・送信履歴管理画面（2026-08-21追加）
+
+企業側のスカウト送信は`src/components/ScoutSendModal.tsx`（モーダル）に集約した。件名（`title`）・本文（`message`）・簡易テンプレート選択（コンポーネント内`SCOUT_TEMPLATES`定数、「カジュアル面談のご案内」「特別選考ルートのご案内」等）を持ち、`/company/dashboard`の候補者カードから開く。`scouts`テーブルに`title TEXT NOT NULL DEFAULT ''`を追加した（本番D1へは別途`ALTER TABLE`が必要、`schema.sql`再実行だけでは反映されない）。POST `/api/company/scouts`は`title`・`message`をどちらも必須（空文字不可）に変更した。
+
+送信済みスカウトの一覧・ステータス管理は新規ページ`/company/scouts`（`app/company/scouts/page.tsx`）に独立させた。以前は`/company/dashboard`に埋め込んでいたが、検索・送信画面と履歴管理画面の責務を分離するため移動した。`CompanyHeader`に「候補者検索」「送信履歴」のナビリンクを追加済み。ステータスバッジは「返信待ち」「承諾（実名開示済み）」「辞退」の表記（学生側`/mypage`の表記「未対応/承諾済み/辞退済み」とは別。企業向け画面の要求文言に合わせた）。ステータスでの絞り込みボタン、送信メッセージの開閉表示、`is_anonymous=0`時の氏名・メールアドレス開示切り替えを実装。**取得APIは新規に`GET /api/company/scouts`を使わず、既存の`GET /api/company/sent-scouts`をそのまま利用した**（`scouts.ts`のGETは候補者検索用に既に別の応答形状で使われているため、履歴取得と検索を同じエンドポイントに混在させると壊れるため分離を維持）。
+
+電話番号によるPII開示は未実装（`users`テーブルに電話番号カラム自体が存在せず、登録フローでも収集していないため）。氏名・メールアドレスのみを2段階開示の対象としている。
+
 ## スカウトAPI
 
 - `functions/api/scouts.ts`（学生向け・emailで本人確認）: GET `?email=`で自分宛のスカウト一覧（企業名・メッセージ・状態は常に見える。企業に自分の実名が開示されているかは`isAnonymous`で判定）。PUT `{email, scoutId, action:'accept'|'decline'}`で応答（`status='sent'`のものにしか作用しない）。
@@ -99,7 +107,8 @@
 - `app/mypage/page.tsx`: プロフィール編集・スカウト同意トグル（`/api/consent`）・成績サマリー（`/api/exam-results`）に加え、`/api/scouts`から取得した「届いたスカウト」一覧と承諾/辞退ボタンを表示する。
 - `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
 - `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。
-- `app/company/dashboard/page.tsx`: 企業向けダッシュボード。ログイン必須（`spiCompanyUser`が無ければ`/company/login`へリダイレクト）。`approved=false`の場合は承認待ち表示のみ。承認済みなら大学区分・文理・志望業界・偏差値下限でのフィルタ検索（`/api/company/scouts`）、候補者ごとのメッセージ付きスカウト送信、送信済みスカウトの状態・開示情報一覧（`/api/company/sent-scouts`）を表示する。
+- `app/company/dashboard/page.tsx`: 企業向けダッシュボード。ログイン必須（`spiCompanyUser`が無ければ`/company/login`へリダイレクト）。`approved=false`の場合は承認待ち表示のみ。承認済みなら大学区分・文理・志望業界・希望職種・偏差値下限でのフィルタ検索（`/api/company/scouts`のGET）を行い、候補者カードの「スカウトを送信する」ボタンから`ScoutSendModal`を開いて送信する（POSTも同エンドポイント）。
+- `app/company/scouts/page.tsx`: 送信済みスカウトの履歴・ステータス管理画面（`/api/company/sent-scouts`のGETを利用）。ステータス絞り込み・メッセージ確認・承諾済みスカウトの実名開示表示を行う。
 - `functions/api/*.ts`: Cloudflare Pages Functions。D1（`env.DB`）へのユーザー登録・認証・プロフィール取得更新（`me.ts`）・パスワード再設定（`forgot-password.ts`, `reset-password.ts`）・スカウト同意更新（`consent.ts`）・模試結果の保存/取得（`exam-results.ts`）・スカウト応答（`scouts.ts`）を担当。`functions/api/company/*.ts`は企業向け（ログイン・候補者検索・スカウト送信・送信済み一覧）。パスワードもOTPも`functions/_lib/password.ts`のPBKDF2でハッシュ化。登録・ログインとも成功時は`name`（姓名結合済み）を返す。
 
 ## 希望職種（`src/data/formOptions.ts`の`DESIRED_OCCUPATIONS`）

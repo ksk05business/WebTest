@@ -38,6 +38,7 @@ type Profile = {
 type ScoutItem = {
   id: number;
   companyName: string;
+  title: string;
   message: string | null;
   status: string;
   isAnonymous: boolean;
@@ -450,7 +451,10 @@ export default function MyPage() {
                 {scouts.map((s) => (
                   <div key={s.id} className="rounded-lg border border-gray-200 bg-white p-4">
                     <div className="flex items-center justify-between">
-                      <p className="font-semibold text-gray-900">{s.companyName}</p>
+                      <div>
+                        <p className="font-semibold text-gray-900">{s.companyName}</p>
+                        {s.title && <p className="text-sm text-gray-700">{s.title}</p>}
+                      </div>
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           s.status === "accepted"

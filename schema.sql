@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS scouts (
   student_id INTEGER NOT NULL,
   is_anonymous INTEGER NOT NULL DEFAULT 1,
   status TEXT NOT NULL DEFAULT 'sent', -- 'sent' | 'accepted' | 'declined' | 'withdrawn'
+  title TEXT NOT NULL DEFAULT '', -- スカウトタイトル/件名
   message TEXT, -- 企業からの匿名スカウトメッセージ。個人を特定する情報を含めない運用を前提とする
   responded_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),

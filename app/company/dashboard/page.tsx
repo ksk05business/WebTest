@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
+import { ScoutSendModal } from "@/src/components/ScoutSendModal";
 import { DESIRED_OCCUPATIONS, FACULTY_TYPES, INDUSTRIES } from "@/src/data/formOptions";
 import { UNIVERSITY_CATEGORIES } from "@/src/data/universityCategories";
 
@@ -51,29 +52,6 @@ type Candidate = {
   latestDeviationScore: number | null;
 };
 
-type SentScout = {
-  id: number;
-  status: string;
-  isAnonymous: boolean;
-  message: string | null;
-  createdAt: string;
-  universityCategory: string | null;
-  facultyType: string;
-  industryFirst: string;
-  industrySecond: string;
-  industryThird: string;
-  desiredOccupations: string[];
-  lastName: string | null;
-  firstName: string | null;
-  email: string | null;
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  sent: "未対応",
-  accepted: "承諾済み",
-  declined: "辞退済み",
-};
-
 export default function CompanyDashboardPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
@@ -91,11 +69,8 @@ export default function CompanyDashboardPage() {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const [messages, setMessages] = useState<Record<number, string>>({});
-  const [sendingId, setSendingId] = useState<number | null>(null);
-  const [sendMessageById, setSendMessageById] = useState<Record<number, string>>({});
-
-  const [sentScouts, setSentScouts] = useState<SentScout[]>([]);
+  const [scoutTarget, setScoutTarget] = useState<Candidate | null>(null);
+  const [sentNoteById, setSentNoteById] = useState<Record<number, string>>({});
 
   useEffect(() => {
     const raw = localStorage.getItem("spiCompanyUser");
@@ -112,22 +87,7 @@ export default function CompanyDashboardPage() {
     setCompanyName(company.companyName ?? "");
     setApproved(Boolean(company.approved));
     setAuthChecked(true);
-
-    if (company.approved) {
-      loadSentScouts(company.email);
-    }
   }, [router]);
-
-  function loadSentScouts(email: string) {
-    fetch(`/api/company/sent-scouts?companyEmail=${encodeURIComponent(email)}`)
-      .then((res) => res.json())
-      .then((data: { scouts?: SentScout[] }) => {
-        if (data.scouts) setSentScouts(data.scouts);
-      })
-      .catch(() => {
-        // 送信済み一覧の取得に失敗してもダッシュボード自体は表示する
-      });
-  }
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -156,36 +116,6 @@ export default function CompanyDashboardPage() {
     }
   }
 
-  async function handleSendScout(studentId: number) {
-    setSendingId(studentId);
-    setSendMessageById((m) => ({ ...m, [studentId]: "" }));
-    try {
-      const res = await fetch("/api/company/scouts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyEmail,
-          studentId,
-          message: messages[studentId] ?? "",
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setSendMessageById((m) => ({ ...m, [studentId]: data.error ?? "送信に失敗しました" }));
-        return;
-      }
-      setSendMessageById((m) => ({ ...m, [studentId]: "スカウトを送信しました。" }));
-      loadSentScouts(companyEmail);
-    } catch {
-      setSendMessageById((m) => ({
-        ...m,
-        [studentId]: "通信エラーが発生しました。時間をおいて再度お試しください。",
-      }));
-    } finally {
-      setSendingId(null);
-    }
-  }
-
   if (!authChecked) {
     return null;
   }
@@ -203,187 +133,124 @@ export default function CompanyDashboardPage() {
             </p>
           </div>
         ) : (
-          <>
-            <div className="flex flex-col gap-3">
-              <h1 className="text-lg font-bold text-gray-900">候補者を探す</h1>
-              <form
-                onSubmit={handleSearch}
-                className="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2"
-              >
-                <CheckboxGroup
-                  label="大学区分（複数選択可）"
-                  options={UNIVERSITY_CATEGORIES}
-                  selected={universityCategories}
-                  onChange={setUniversityCategories}
+          <div className="flex flex-col gap-3">
+            <h1 className="text-lg font-bold text-gray-900">候補者を探す</h1>
+            <form
+              onSubmit={handleSearch}
+              className="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2"
+            >
+              <CheckboxGroup
+                label="大学区分（複数選択可）"
+                options={UNIVERSITY_CATEGORIES}
+                selected={universityCategories}
+                onChange={setUniversityCategories}
+              />
+
+              <CheckboxGroup
+                label="学部・区分（文理、複数選択可）"
+                options={FACULTY_TYPES}
+                selected={facultyTypes}
+                onChange={setFacultyTypes}
+              />
+
+              <CheckboxGroup
+                label="志望業界（複数選択可）"
+                options={INDUSTRIES}
+                selected={industries}
+                onChange={setIndustries}
+              />
+
+              <CheckboxGroup
+                label="希望職種（複数選択可）"
+                options={DESIRED_OCCUPATIONS}
+                selected={desiredOccupations}
+                onChange={setDesiredOccupations}
+              />
+
+              <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+                SPI偏差値（以上）
+                <input
+                  type="number"
+                  value={minDeviation}
+                  onChange={(e) => setMinDeviation(e.target.value)}
+                  placeholder="例: 55"
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
                 />
+              </label>
 
-                <CheckboxGroup
-                  label="学部・区分（文理、複数選択可）"
-                  options={FACULTY_TYPES}
-                  selected={facultyTypes}
-                  onChange={setFacultyTypes}
-                />
+              <div className="sm:col-span-2">
+                <button
+                  type="submit"
+                  disabled={searching}
+                  className="w-full rounded-full bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 sm:w-auto sm:px-8"
+                >
+                  {searching ? "検索中..." : "検索する"}
+                </button>
+              </div>
+            </form>
 
-                <CheckboxGroup
-                  label="志望業界（複数選択可）"
-                  options={INDUSTRIES}
-                  selected={industries}
-                  onChange={setIndustries}
-                />
+            {searchError && <p className="text-sm font-medium text-red-600">{searchError}</p>}
 
-                <CheckboxGroup
-                  label="希望職種（複数選択可）"
-                  options={DESIRED_OCCUPATIONS}
-                  selected={desiredOccupations}
-                  onChange={setDesiredOccupations}
-                />
-
-                <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-                  SPI偏差値（以上）
-                  <input
-                    type="number"
-                    value={minDeviation}
-                    onChange={(e) => setMinDeviation(e.target.value)}
-                    placeholder="例: 55"
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
-                  />
-                </label>
-
-                <div className="sm:col-span-2">
-                  <button
-                    type="submit"
-                    disabled={searching}
-                    className="w-full rounded-full bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 sm:w-auto sm:px-8"
-                  >
-                    {searching ? "検索中..." : "検索する"}
-                  </button>
-                </div>
-              </form>
-
-              {searchError && <p className="text-sm font-medium text-red-600">{searchError}</p>}
-
-              {candidates && (
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm text-gray-500">{candidates.length}件の候補者</p>
-                  {candidates.map((c) => (
-                    <div key={c.studentId} className="rounded-lg border border-gray-200 bg-white p-4">
-                      <div className="flex flex-wrap gap-2 text-sm text-gray-700">
-                        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">
-                          {c.universityCategory ?? "区分未設定"}
-                        </span>
-                        <span className="rounded-full bg-gray-100 px-2 py-0.5">{c.facultyType}</span>
-                        <span className="rounded-full bg-gray-100 px-2 py-0.5">
-                          偏差値:{" "}
-                          {c.latestDeviationScore !== null ? c.latestDeviationScore.toFixed(1) : "未受験"}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-xs text-gray-500">
-                        志望業界: {c.industryFirst} / {c.industrySecond} / {c.industryThird}
-                      </p>
-                      {c.desiredOccupations.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {c.desiredOccupations.map((o) => (
-                            <span
-                              key={o}
-                              className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700"
-                            >
-                              {o}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <textarea
-                        value={messages[c.studentId] ?? ""}
-                        onChange={(e) =>
-                          setMessages((m) => ({ ...m, [c.studentId]: e.target.value }))
-                        }
-                        placeholder="スカウトメッセージ（任意）"
-                        rows={2}
-                        className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
-                      />
-                      <div className="mt-2 flex items-center gap-3">
-                        <button
-                          type="button"
-                          disabled={sendingId === c.studentId}
-                          onClick={() => handleSendScout(c.studentId)}
-                          className="rounded-full bg-blue-600 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-                        >
-                          {sendingId === c.studentId ? "送信中..." : "スカウトを送る"}
-                        </button>
-                        {sendMessageById[c.studentId] && (
-                          <span className="text-xs text-gray-600">{sendMessageById[c.studentId]}</span>
-                        )}
-                      </div>
+            {candidates && (
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-gray-500">{candidates.length}件の候補者</p>
+                {candidates.map((c) => (
+                  <div key={c.studentId} className="rounded-lg border border-gray-200 bg-white p-4">
+                    <div className="flex flex-wrap gap-2 text-sm text-gray-700">
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">
+                        {c.universityCategory ?? "区分未設定"}
+                      </span>
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5">{c.facultyType}</span>
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5">
+                        偏差値:{" "}
+                        {c.latestDeviationScore !== null ? c.latestDeviationScore.toFixed(1) : "未受験"}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <h2 className="text-lg font-bold text-gray-900">送信済みスカウト</h2>
-              {sentScouts.length === 0 ? (
-                <p className="text-sm text-gray-500">まだスカウトを送信していません。</p>
-              ) : (
-                <div className="overflow-x-auto rounded-lg border border-gray-200">
-                  <table className="w-full min-w-max border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border-b border-gray-200 px-3 py-2 text-left font-semibold text-gray-800">
-                          状態
-                        </th>
-                        <th className="border-b border-gray-200 px-3 py-2 text-left font-semibold text-gray-800">
-                          大学区分/文理
-                        </th>
-                        <th className="border-b border-gray-200 px-3 py-2 text-left font-semibold text-gray-800">
-                          氏名・連絡先
-                        </th>
-                        <th className="border-b border-gray-200 px-3 py-2 text-left font-semibold text-gray-800">
-                          送信日時
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sentScouts.map((s) => (
-                        <tr key={s.id}>
-                          <td className="border-b border-gray-100 px-3 py-2">
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                s.status === "accepted"
-                                  ? "bg-green-100 text-green-700"
-                                  : s.status === "declined"
-                                  ? "bg-gray-100 text-gray-500"
-                                  : "bg-blue-100 text-blue-700"
-                              }`}
-                            >
-                              {STATUS_LABEL[s.status] ?? s.status}
-                            </span>
-                          </td>
-                          <td className="border-b border-gray-100 px-3 py-2 text-gray-700">
-                            {s.universityCategory ?? "-"} / {s.facultyType}
-                          </td>
-                          <td className="border-b border-gray-100 px-3 py-2 text-gray-700">
-                            {s.isAnonymous ? (
-                              <span className="text-gray-400">承諾待ち（非開示）</span>
-                            ) : (
-                              <span>
-                                {s.lastName} {s.firstName}（{s.email}）
-                              </span>
-                            )}
-                          </td>
-                          <td className="border-b border-gray-100 px-3 py-2 text-gray-500">
-                            {s.createdAt}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </>
+                    <p className="mt-2 text-xs text-gray-500">
+                      志望業界: {c.industryFirst} / {c.industrySecond} / {c.industryThird}
+                    </p>
+                    {c.desiredOccupations.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {c.desiredOccupations.map((o) => (
+                          <span
+                            key={o}
+                            className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700"
+                          >
+                            {o}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="mt-3 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setScoutTarget(c)}
+                        className="rounded-full bg-blue-600 px-5 py-1.5 text-sm font-semibold text-white hover:bg-blue-700"
+                      >
+                        スカウトを送信する
+                      </button>
+                      {sentNoteById[c.studentId] && (
+                        <span className="text-xs text-gray-600">{sentNoteById[c.studentId]}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </main>
+
+      {scoutTarget && (
+        <ScoutSendModal
+          candidate={scoutTarget}
+          companyEmail={companyEmail}
+          onClose={() => setScoutTarget(null)}
+          onSent={() =>
+            setSentNoteById((m) => ({ ...m, [scoutTarget.studentId]: "スカウトを送信しました。" }))
+          }
+        />
+      )}
     </div>
   );
 }

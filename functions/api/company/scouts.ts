@@ -132,6 +132,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 type SendScoutBody = {
   companyEmail?: unknown;
   studentId?: unknown;
+  title?: unknown;
   message?: unknown;
 };
 
@@ -143,14 +144,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { companyEmail, studentId, message } = body;
+  const { companyEmail, studentId, title, message } = body;
   if (
     typeof companyEmail !== "string" ||
     !companyEmail.trim() ||
     typeof studentId !== "number" ||
-    (message !== undefined && typeof message !== "string")
+    typeof title !== "string" ||
+    !title.trim() ||
+    typeof message !== "string" ||
+    !message.trim()
   ) {
-    return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
+    return Response.json({ error: "件名と本文メッセージを入力してください" }, { status: 400 });
   }
 
   const company = await getApprovedCompany(context.env.DB, companyEmail);
@@ -187,10 +191,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   // is_anonymous = 1 で作成。学生が承諾するまで、企業はこの学生の氏名・連絡先を一切取得できない。
   await context.env.DB.prepare(
-    `INSERT INTO scouts (company_id, student_id, is_anonymous, status, message)
-     VALUES (?, ?, 1, 'sent', ?)`
+    `INSERT INTO scouts (company_id, student_id, is_anonymous, status, title, message)
+     VALUES (?, ?, 1, 'sent', ?, ?)`
   )
-    .bind(company.id, studentId, message ?? null)
+    .bind(company.id, studentId, title, message)
     .run();
 
   return Response.json({ ok: true });

@@ -8,6 +8,7 @@ type SentScoutRow = {
   id: number;
   status: string;
   is_anonymous: number;
+  title: string;
   message: string | null;
   created_at: string;
   responded_at: string | null;
@@ -46,7 +47,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const rows = await context.env.DB.prepare(
     `SELECT
-        s.id, s.status, s.is_anonymous, s.message, s.created_at, s.responded_at,
+        s.id, s.status, s.is_anonymous, s.title, s.message, s.created_at, s.responded_at,
         u.university_category, u.faculty_type, u.industry_first, u.industry_second, u.industry_third, u.desired_occupations,
         CASE WHEN s.is_anonymous = 0 THEN u.last_name ELSE NULL END AS last_name,
         CASE WHEN s.is_anonymous = 0 THEN u.first_name ELSE NULL END AS first_name,
@@ -64,6 +65,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       id: r.id,
       status: r.status,
       isAnonymous: Boolean(r.is_anonymous),
+      title: r.title,
       message: r.message,
       createdAt: r.created_at,
       respondedAt: r.responded_at,

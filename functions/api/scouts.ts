@@ -5,6 +5,7 @@ interface Env {
 type ScoutRow = {
   id: number;
   company_name: string;
+  title: string;
   message: string | null;
   status: string;
   is_anonymous: number;
@@ -26,7 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   const rows = await context.env.DB.prepare(
-    `SELECT s.id, c.company_name, s.message, s.status, s.is_anonymous, s.created_at, s.responded_at
+    `SELECT s.id, c.company_name, s.title, s.message, s.status, s.is_anonymous, s.created_at, s.responded_at
      FROM scouts s JOIN company_profiles c ON c.id = s.company_id
      WHERE s.student_id = ?
      ORDER BY s.created_at DESC`
@@ -38,6 +39,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     scouts: (rows.results ?? []).map((r) => ({
       id: r.id,
       companyName: r.company_name,
+      title: r.title,
       message: r.message,
       status: r.status,
       isAnonymous: Boolean(r.is_anonymous),
