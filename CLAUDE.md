@@ -91,7 +91,7 @@
 
 UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧はクリックでこのモーダルを開き、未読なら開いた瞬間に既読PUTを発行する。モーダル内は「詳細表示 → 承諾確認 → 辞退確認」の3ビューを1つのモーダル内で切り替える構成（`view`ステート）。承諾確認ビューは「企業と連絡を取る準備はOKですか？」という前向きな文言＋開示される情報（氏名・メールアドレスのみ。電話番号は収集していないため文言から除外）を明示、辞退確認ビューは「辞退しても企業に失礼にならない」旨を明記している。タグ表示はメッセージ本文からのキーワード抽出（`deriveScoutTags()`、「特別選考」「面談確約」等の固定キーワードリストとの部分一致）による簡易実装で、志望業界とのマッチ度タグは実装していない（scoutsテーブルにどの検索条件でヒットしたかを保存していないため、正確なマッチ度を算出するデータが無い）。
 
-未読件数バッジは`/mypage`の「届いたスカウト」見出し横（`新着N件`）と、`DashboardHeader`の「マイページ」リンク（右上の丸バッジ）の両方に表示する。`DashboardHeader`はマウント時に`localStorage`の`spiUser`から`email`を読み、`/api/scouts`を叩いて`status==='sent' && !isRead`の件数を計算する（`/dashboard`・`/mypage`どちらのページでも自動的に効く）。
+未読件数バッジは`ScoutInbox`（`/dashboard`）の「届いたスカウト」見出し横（`新着N件`）と、`DashboardHeader`のロゴ（「SPIナビ」→`/dashboard`リンク、右上の丸バッジ）の両方に表示する。`DashboardHeader`はマウント時に`localStorage`の`spiUser`から`email`を読み、`/api/scouts`を叩いて`status==='sent' && !isRead`の件数を計算する（`/dashboard`・`/mypage`どちらのページでも自動的に効く）。**2026-08-21にスカウト受信ボックスを`/mypage`から`/dashboard`へ移したのに合わせ、バッジの表示先も「マイページ」リンク（現在の文言は「プロフィール」）からロゴ側へ変更した**（プロフィール画面はもうスカウトを表示しないため）。
 
 ## スカウトAPI
 
@@ -106,7 +106,7 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 ## 模試結果のD1保存（`functions/api/exam-results.ts`）
 
 - POST: `{email, testType?, score, total, categoryScores?}`を受け取り、`users`をemailで引いて`exam_results`に保存する。`test_type`ごとに**その回より前の全受験者の正答率**を母集団として偏差値を算出する（サンプル2件未満または標準偏差0の場合は50固定）。過去の受験結果の偏差値は遡って再計算しない簡易実装。
-- GET: `?email=`で受験履歴（最大20件、新しい順）・最新偏差値・最高正答率・受験回数を返す。`app/dashboard/page.tsx`と`app/mypage/page.tsx`の両方がこれを叩いて表示している。
+- GET: `?email=`で受験履歴（最大20件、新しい順）・最新偏差値・最高正答率・受験回数・カテゴリ別内訳等を返す。`src/components/PerformanceDashboard.tsx`（`/dashboard`から描画）がこれを叩いて表示している（`/mypage`はプロフィール専用画面になったため2026-08-21にこの呼び出しを削除）。
 - `app/test/page.tsx`は`src/data/questions.ts`の`Question.category`（分野）ごとに正誤を集計し、試験終了時に`categoryScores`として送信する。localStorageへの保存（`spiResult`/`spiResultHistory`）は従来通り維持しており、D1保存が失敗しても結果画面表示は継続する（fire-and-forgetでtry/catch）。
 
 # 応答・進め方のルール
@@ -142,11 +142,11 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 - `app/page.tsx`: サーバーコンポーネントのまま維持（`"use client"` 不要）。キャッチコピーと「新規登録」「ログイン」への導線。
 - `app/register/page.tsx`: クライアントコンポーネント。会員登録フォーム。`/api/register`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
 - `app/login/page.tsx`: クライアントコンポーネント。ログインフォーム。`/api/login`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。
-- `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。`/test`への導線、`/api/exam-results`から取得した成績サマリー（最新偏差値・最高正答率・受験回数）、`localStorage`の`spiResultHistory`（過去の受験結果、最大20件）を表示する。
+- `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。ログイン後のトップページとして、試験種別選択（`TEST_TYPES`）・成績ダッシュボード（`PerformanceDashboard`）・スカウト受信ボックス（`ScoutInbox`）を1画面に統合している（2026-08-21に`/mypage`から成績・復習・スカウトの表示をこちらへ移動）。旧`localStorage`の`spiResultHistory`に基づく簡易履歴テーブルは、D1ベースの`PerformanceDashboard`に置き換える形で廃止した。
 - `app/test/page.tsx`: クライアントコンポーネント。1問60秒のタイマー、回答判定、解説表示、表データのレンダリングを担当。マウント時に`localStorage`の`spiUser`を確認し、無ければ`/login`へリダイレクトする（未ログイン時は何も描画しない）。認証確認後に`GET /api/questions`から問題セットを取得する（`src/data/questions.ts`の静的配列は2026-08-21に廃止、型定義のみ残存）。試験終了時に`spiResult`/`spiResultHistory`（localStorage）を更新しつつ、`/api/exam-results`にもPOSTしてD1へ保存する（失敗しても結果画面表示は継続）。
 - `app/result/page.tsx`: クライアントコンポーネント。`localStorage` の `spiResult` を読み、スコアと評価コメント、収益化バナー枠、`/dashboard`への導線を表示。
 - `app/forgot-password/page.tsx`: クライアントコンポーネント。メール送信→OTP入力＋新パスワード設定の2ステップ。`/api/forgot-password`と`/api/reset-password`を呼ぶ。
-- `app/mypage/page.tsx`: プロフィール編集・スカウト同意トグル（`/api/consent`）・成績ダッシュボード（`src/components/PerformanceDashboard.tsx`、偏差値推移グラフ・カテゴリ別分析・復習リマインドカード）に加え、`/api/scouts`から取得した「届いたスカウト」一覧と承諾/辞退ボタンを表示する。
+- `app/mypage/page.tsx`（画面タイトル「プロフィール設定」、ヘッダーのリンク文言は「プロフィール」、URLは既存の`/mypage`のまま）: 個人属性情報（氏名・大学・学部・志望業界・希望職種・卒業年月）専用の管理画面。2026-08-21に成績ダッシュボード・スカウト受信ボックスを`/dashboard`へ移動し、このページからは削除した（スカウト目的でのデータ共有トグルのみ、個人の同意設定としてこのページに残している）。**閲覧/編集の2モード制**（`mode: "view" | "edit"`）: 初期表示は`<dl>`によるテキスト閲覧のみで、「プロフィールを編集」ボタンで編集フォームに切り替わる。編集フォーム内の「編集をキャンセル」は`savedProfile`（最後にサーバーから取得/保存した値のスナップショット）から`applyProfile()`で各フィールドを復元してから閲覧モードへ戻す。「変更を保存」で`PUT /api/me`を呼び、成功時はローカルの`savedProfile`も更新したうえで閲覧モードへ自動的に戻る。ユーザー要求では更新APIとして`/api/user/profile`が例示されていたが、既存の`/api/me`（GET/PUT）がまったく同じ機能を持つため、新規エンドポイントは作らずそのまま使っている。
 - `app/review/page.tsx`: エビングハウスの忘却曲線に基づく反復復習モード。`GET /api/review`で当日分を取得し、1問1答形式で出題・`POST /api/review`で結果を即時送信する。
 - `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
 - `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。

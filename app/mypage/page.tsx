@@ -14,14 +14,6 @@ import {
 } from "@/src/data/formOptions";
 import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
-import { PerformanceDashboard } from "@/src/components/PerformanceDashboard";
-import {
-  ScoutDetailModal,
-  SCOUT_STATUS_LABEL,
-  SCOUT_STATUS_STYLE,
-  deriveScoutTags,
-  type ScoutItem,
-} from "@/src/components/ScoutDetailModal";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -46,7 +38,7 @@ type Profile = {
 export default function MyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState("");
+  const [mode, setMode] = useState<"view" | "edit">("view");
   const [email, setEmail] = useState("");
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -67,11 +59,32 @@ export default function MyPage() {
   const [scoutConsent, setScoutConsent] = useState(false);
   const [consentSaving, setConsentSaving] = useState(false);
   const [consentMessage, setConsentMessage] = useState<string | null>(null);
-  const [scouts, setScouts] = useState<ScoutItem[]>([]);
-  const [scoutError, setScoutError] = useState<string | null>(null);
-  const [selectedScoutId, setSelectedScoutId] = useState<number | null>(null);
-  const unreadScoutCount = scouts.filter((s) => s.status === "sent" && !s.isRead).length;
-  const selectedScout = scouts.find((s) => s.id === selectedScoutId) ?? null;
+  const [savedProfile, setSavedProfile] = useState<Profile | null>(null);
+
+  function applyProfile(data: Profile) {
+    setEmail(data.email);
+    setLastName(data.last_name);
+    setFirstName(data.first_name);
+    setLastNameRomaji(data.last_name_romaji);
+    setFirstNameRomaji(data.first_name_romaji);
+    setFacultyType(data.faculty_type);
+    setUniversity(data.university);
+    setManualUniversityCategory(
+      data.university_category &&
+        (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(data.university_category) &&
+        !(UNIVERSITIES as string[]).includes(data.university)
+        ? data.university_category
+        : null
+    );
+    setIndustryFirst(data.industry_first);
+    setIndustrySecond(data.industry_second);
+    setIndustryThird(data.industry_third);
+    setDesiredOccupations(Array.isArray(data.desired_occupations) ? data.desired_occupations : []);
+    setGraduationYear(String(data.graduation_year));
+    setGraduationMonth(String(data.graduation_month));
+    setScoutConsent(Boolean(data.scout_consent));
+    setSavedProfile(data);
+  }
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -85,10 +98,6 @@ export default function MyPage() {
       return;
     }
 
-    setUserEmail(user.email);
-
-    loadScouts(user.email);
-
     fetch(`/api/me?email=${encodeURIComponent(user.email)}`)
       .then((res) => res.json())
       .then((data: Profile & { error?: string }) => {
@@ -96,31 +105,17 @@ export default function MyPage() {
           setError(data.error);
           return;
         }
-        setEmail(data.email);
-        setLastName(data.last_name);
-        setFirstName(data.first_name);
-        setLastNameRomaji(data.last_name_romaji);
-        setFirstNameRomaji(data.first_name_romaji);
-        setFacultyType(data.faculty_type);
-        setUniversity(data.university);
-        if (
-          data.university_category &&
-          (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(data.university_category) &&
-          !(UNIVERSITIES as string[]).includes(data.university)
-        ) {
-          setManualUniversityCategory(data.university_category);
-        }
-        setIndustryFirst(data.industry_first);
-        setIndustrySecond(data.industry_second);
-        setIndustryThird(data.industry_third);
-        setDesiredOccupations(Array.isArray(data.desired_occupations) ? data.desired_occupations : []);
-        setGraduationYear(String(data.graduation_year));
-        setGraduationMonth(String(data.graduation_month));
-        setScoutConsent(Boolean(data.scout_consent));
+        applyProfile(data);
       })
       .catch(() => setError("プロフィールの取得に失敗しました"))
       .finally(() => setLoading(false));
   }, [router]);
+
+  function handleCancelEdit() {
+    if (savedProfile) applyProfile(savedProfile);
+    setError(null);
+    setMode("view");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -192,66 +187,30 @@ export default function MyPage() {
         return;
       }
       localStorage.setItem("spiUser", JSON.stringify({ name: data.name, email }));
+      setSavedProfile({
+        last_name: lastName,
+        first_name: firstName,
+        last_name_romaji: lastNameRomaji,
+        first_name_romaji: firstNameRomaji,
+        email,
+        faculty_type: facultyType,
+        university,
+        university_category: manualUniversityCategory,
+        industry_first: industryFirst,
+        industry_second: industrySecond,
+        industry_third: industryThird,
+        desired_occupations: desiredOccupations,
+        graduation_year: Number(graduationYear),
+        graduation_month: Number(graduationMonth),
+        scout_consent: scoutConsent ? 1 : 0,
+      });
       setSuccess(true);
+      setMode("view");
     } catch {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
       setSaving(false);
     }
-  }
-
-  function loadScouts(userEmail: string) {
-    fetch(`/api/scouts?email=${encodeURIComponent(userEmail)}`)
-      .then((res) => res.json())
-      .then((data: { scouts?: ScoutItem[]; error?: string }) => {
-        if (data.scouts) setScouts(data.scouts);
-      })
-      .catch(() => {
-        // スカウト一覧の取得に失敗してもマイページ自体は表示する
-      });
-  }
-
-  async function handleScoutAction(scoutId: number, action: "accept" | "decline") {
-    setScoutError(null);
-    let handledError = false;
-    try {
-      const res = await fetch("/api/scouts", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, scoutId, action }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        handledError = true;
-        setScoutError(data.error ?? "更新に失敗しました。時間をおいて再度お試しください。");
-        throw new Error(data.error ?? "更新に失敗しました");
-      }
-      loadScouts(email);
-    } catch (err) {
-      if (!handledError) {
-        setScoutError("通信エラーが発生しました。時間をおいて再度お試しください。");
-      }
-      throw err;
-    }
-  }
-
-  function handleOpenScout(scoutId: number) {
-    setSelectedScoutId(scoutId);
-    const target = scouts.find((s) => s.id === scoutId);
-    if (!target || target.isRead) return;
-
-    fetch("/api/scouts", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, scoutId, action: "read" }),
-    })
-      .then((res) => {
-        if (!res.ok) return;
-        setScouts((prev) => prev.map((s) => (s.id === scoutId ? { ...s, isRead: true } : s)));
-      })
-      .catch(() => {
-        // 既読反映に失敗してもモーダル表示自体は継続する
-      });
   }
 
   async function handleScoutConsentChange(next: boolean) {
@@ -284,12 +243,77 @@ export default function MyPage() {
       <DashboardHeader />
 
       <main className="mx-auto flex max-w-md flex-col gap-6 px-6 py-10">
-        <h1 className="text-2xl font-bold text-gray-900">マイページ</h1>
-
-        {userEmail && <PerformanceDashboard email={userEmail} />}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">プロフィール設定</h1>
+          {!loading && mode === "view" && (
+            <button
+              type="button"
+              onClick={() => {
+                setSuccess(false);
+                setMode("edit");
+              }}
+              className="rounded-full border border-blue-300 px-4 py-1.5 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+            >
+              プロフィールを編集
+            </button>
+          )}
+        </div>
 
         {loading ? (
           <p className="text-sm text-gray-500">読み込み中...</p>
+        ) : mode === "view" ? (
+          <div className="flex flex-col gap-4">
+            {success && <p className="text-sm font-medium text-green-600">保存しました。</p>}
+            <dl className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 text-sm">
+              <div>
+                <dt className="text-xs text-gray-500">メールアドレス</dt>
+                <dd className="text-gray-900">{email}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">氏名</dt>
+                <dd className="text-gray-900">
+                  {lastName} {firstName}（{lastNameRomaji} {firstNameRomaji}）
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">大学名</dt>
+                <dd className="text-gray-900">{university || "-"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">学部・区分</dt>
+                <dd className="text-gray-900">{facultyType || "-"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">志望業界（第一〜第三志望）</dt>
+                <dd className="text-gray-900">
+                  {industryFirst} / {industrySecond} / {industryThird}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">希望職種</dt>
+                <dd className="mt-1 flex flex-wrap gap-1">
+                  {desiredOccupations.length > 0 ? (
+                    desiredOccupations.map((o) => (
+                      <span
+                        key={o}
+                        className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
+                      >
+                        {o}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">卒業年月</dt>
+                <dd className="text-gray-900">
+                  {graduationYear}年{graduationMonth}月
+                </dd>
+              </div>
+            </dl>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
@@ -420,85 +444,25 @@ export default function MyPage() {
             </div>
 
             {error && <p className="text-sm font-medium text-red-600">{error}</p>}
-            {success && (
-              <p className="text-sm font-medium text-green-600">保存しました。</p>
-            )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="mt-2 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-            >
-              {saving ? "保存中..." : "保存する"}
-            </button>
-          </form>
-        )}
-
-        {!loading && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-gray-900">届いたスカウト</h2>
-              {unreadScoutCount > 0 && (
-                <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white">
-                  新着 {unreadScoutCount}件
-                </span>
-              )}
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                disabled={saving}
+                className="flex-1 rounded-full border border-gray-300 py-3 font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                編集をキャンセル
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex-1 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? "保存中..." : "変更を保存"}
+              </button>
             </div>
-            {scoutError && <p className="text-sm font-medium text-red-600">{scoutError}</p>}
-            {scouts.length === 0 ? (
-              <p className="text-sm text-gray-500">まだスカウトは届いていません。</p>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {scouts.map((s) => {
-                  const tags = deriveScoutTags(s.message);
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => handleOpenScout(s.id)}
-                      className="rounded-lg border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                              s.isRead
-                                ? "bg-gray-100 text-gray-400"
-                                : "bg-red-50 text-red-600"
-                            }`}
-                          >
-                            {s.isRead ? "既読" : "未読"}
-                          </span>
-                          <p className="text-xs text-gray-400">{s.companyName}</p>
-                        </div>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                            SCOUT_STATUS_STYLE[s.status] ?? "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          {SCOUT_STATUS_LABEL[s.status] ?? s.status}
-                        </span>
-                      </div>
-                      <p className="mt-1 font-semibold text-gray-900">{s.title || "(件名なし)"}</p>
-                      <p className="mt-0.5 text-xs text-gray-400">{s.createdAt}</p>
-                      {tags.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {tags.map((t) => (
-                            <span
-                              key={t}
-                              className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700"
-                            >
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          </form>
         )}
 
         {!loading && (
@@ -524,14 +488,6 @@ export default function MyPage() {
           </div>
         )}
       </main>
-
-      {selectedScout && (
-        <ScoutDetailModal
-          scout={selectedScout}
-          onClose={() => setSelectedScoutId(null)}
-          onRespond={handleScoutAction}
-        />
-      )}
     </div>
   );
 }
