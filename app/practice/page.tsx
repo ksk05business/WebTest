@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Question } from "@/src/data/questions";
+import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -12,7 +13,18 @@ function formatElapsed(seconds: number): string {
 }
 
 export default function PracticePage() {
+  return (
+    <Suspense fallback={null}>
+      <PracticePageInner />
+    </Suspense>
+  );
+}
+
+function PracticePageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category");
+  const subCategory = searchParams.get("subCategory");
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,7 +50,12 @@ export default function PracticePage() {
   }, [router]);
 
   function loadQuestions() {
-    fetch("/api/questions")
+    const params = new URLSearchParams({ limit: "20" });
+    if (category && category !== "all") {
+      params.set("category", category);
+      if (subCategory) params.set("subCategory", subCategory);
+    }
+    fetch(`/api/questions?${params.toString()}`)
       .then((res) => res.json())
       .then((data: { questions?: Question[]; error?: string }) => {
         if (!data.questions || data.questions.length === 0) {
@@ -51,9 +68,10 @@ export default function PracticePage() {
   }
 
   useEffect(() => {
-    if (!authChecked) return;
+    if (!authChecked || !category) return;
     loadQuestions();
-  }, [authChecked]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authChecked, category, subCategory]);
 
   function handleRestart() {
     setQuestions(null);
@@ -135,6 +153,10 @@ export default function PracticePage() {
     return null;
   }
 
+  if (!category) {
+    return <PracticeUnitSelector />;
+  }
+
   if (loadError) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
@@ -153,7 +175,7 @@ export default function PracticePage() {
         <p className="text-xs text-gray-500">
           この練習の結果は偏差値には反映されません。間違えた言語問題は忘却曲線の復習キューに追加されました。
         </p>
-        <div className="mt-2 flex gap-3">
+        <div className="mt-2 flex flex-wrap justify-center gap-3">
           <button
             type="button"
             onClick={handleRestart}
@@ -161,6 +183,12 @@ export default function PracticePage() {
           >
             もう一度練習する
           </button>
+          <Link
+            href="/practice"
+            className="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            別の単元を選ぶ
+          </Link>
           <Link
             href="/dashboard"
             className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
@@ -189,6 +217,11 @@ export default function PracticePage() {
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
             練習モード
           </span>
+          {subCategory && (
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+              {question.category}
+            </span>
+          )}
           第{currentIndex + 1}問 / 全{questions.length}問
         </span>
         <span className="font-mono text-lg font-bold text-gray-500">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ChevronDown, Info } from "lucide-react";
 import type { TestType } from "@/src/data/testTypes";
 
 export function ExamModeSelectModal({
@@ -36,6 +37,40 @@ export function ExamModeSelectModal({
           </div>
         ) : (
           <div className="mt-4 flex flex-col gap-3">
+            {testType.id === "spi" && (
+              <details className="group rounded-xl border border-gray-200">
+                <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-gray-800">
+                  <span className="flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    SPI3とは？（特徴・形式の解説）
+                  </span>
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="flex flex-col gap-3 border-t border-gray-100 px-4 py-3 text-sm text-gray-600">
+                  <div>
+                    <p className="font-semibold text-gray-700">概要</p>
+                    <p>
+                      日本リクルートマネジメントソリューションズ社が提供する、就活で最もポピュラーな適性検査です。
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">受験形式</p>
+                    <p>テストセンター、インハウスCBT、WEBテスティング、ペーパーテスト</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">出題領域</p>
+                    <p>能力検査（非言語・言語・構造的把握）。※性格検査は当アプリの対象外です。</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">対策ポイント</p>
+                    <p>
+                      誤謬率（間違いの割合）は測定されないため、「解ける問題を確実に素早く解く」ことが重要です。
+                    </p>
+                  </div>
+                </div>
+              </details>
+            )}
+
             <div className="flex flex-col gap-2 rounded-xl border border-gray-200 p-4">
               <p className="font-bold text-gray-900">模擬試験（本番モード）</p>
               <p className="text-sm leading-relaxed text-gray-600">

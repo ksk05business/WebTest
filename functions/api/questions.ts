@@ -7,11 +7,12 @@ interface Env {
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 50;
 
-// 出題対象の問題をランダム取得する。?category= を複数指定するとOR条件、?difficulty= は完全一致、
-// ?limit= は取得件数（デフォルト10、最大50）。status='published' の問題のみを対象とする。
+// 出題対象の問題をランダム取得する。?category= / ?subCategory= はそれぞれ複数指定するとOR条件、
+// ?difficulty= は完全一致、?limit= は取得件数（デフォルト10、最大50）。status='published' の問題のみを対象とする。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const params = new URL(context.request.url).searchParams;
   const categories = params.getAll("category").filter(Boolean);
+  const subCategories = params.getAll("subCategory").filter(Boolean);
   const difficultyRaw = params.get("difficulty");
   const difficulty = difficultyRaw !== null ? Number(difficultyRaw) : null;
   const limitRaw = params.get("limit");
@@ -26,6 +27,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (categories.length > 0) {
     conditions.push(`category IN (${categories.map(() => "?").join(",")})`);
     binds.push(...categories);
+  }
+  if (subCategories.length > 0) {
+    conditions.push(`sub_category IN (${subCategories.map(() => "?").join(",")})`);
+    binds.push(...subCategories);
   }
   if (difficulty !== null && !Number.isNaN(difficulty)) {
     conditions.push("difficulty = ?");
