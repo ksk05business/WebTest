@@ -15,6 +15,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { TEST_TYPES } from "@/src/data/testTypes";
+import { BusinessLink } from "@/src/components/BusinessLink";
 
 const BADGES = [
   { icon: Clock, text: "登録3分" },
@@ -87,13 +88,10 @@ export default function Home() {
           <Link href="/" className="text-lg font-bold text-blue-700">
             Webテスト<span className="text-gray-900">ナビ</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/company/apply"
-              className="hidden text-sm font-medium text-gray-500 hover:text-indigo-700 sm:inline"
-            >
+          <div className="flex items-center gap-6">
+            <BusinessLink className="hidden text-sm font-medium text-gray-500 hover:text-indigo-700 sm:inline">
               企業・就活エージェント様はこちら
-            </Link>
+            </BusinessLink>
             <Link
               href="/login"
               className="text-sm font-medium text-gray-600 hover:text-blue-700"
@@ -310,7 +308,7 @@ export default function Home() {
       </section>
 
       {/* 企業・エージェント様向け */}
-      <section className="bg-gray-50 px-6 py-20 sm:py-24">
+      <section id="business" className="scroll-mt-20 bg-gray-50 px-6 py-20 sm:py-24">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm sm:p-12">
           <span className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
             <Building2 className="h-3.5 w-3.5" />

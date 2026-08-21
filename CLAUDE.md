@@ -59,7 +59,7 @@
 
 **アクセス制御の変更点**: `functions/api/company/login.ts`はパスワード照合の**前に**`status !== 'active'`を確認し、pending/rejectedいずれも「現在アカウントの審査中または無効化されています」を返してログイン自体を拒否する（以前は`approved=0`でもログインだけはでき、ダッシュボード側で「承認待ち」表示にとどめていたが、今回の要求で「ログイン自体を完全遮断」に強化した）。`functions/api/company/scouts.ts`・`sent-scouts.ts`も`approved`ではなく`status === 'active'`をチェックするよう更新済み（多層防御として維持。通常フローではログインで既に弾かれるため到達しないはずだが、念のため残している）。フロントエンド（`/company/dashboard`・`/company/scouts`・`localStorage`の`spiCompanyUser.approved`）は変更していない（ログイン成功時は常に`approved: true`が返る前提のまま動く）。
 
-**LPへのBtoB導線追加**: `Footer`に「企業・就活エージェント様はこちら」リンク、`app/page.tsx`のヘッダーにも同リンク（`/company/apply`へ）、「ご利用の流れ」と「ボトムCTA」の間に採用担当者向け価値訴求セクション（「無料デモ・資料請求はこちら」＋「企業様ログイン」の2ボタン）を追加した。
+**LPへのBtoB導線追加**: `Footer`に「企業・就活エージェント様はこちら」リンク（`/company/apply`へ直接遷移）、「ご利用の流れ」と「ボトムCTA」の間に採用担当者向け価値訴求セクション（`id="business"`、`scroll-mt-20`でsticky headerに隠れないようスクロール位置を調整済み。「無料デモ・資料請求はこちら」＋「企業様ログイン」の2ボタン）を追加した。**ヘッダー内の同名リンクだけは`/company/apply`への直接遷移ではなく、`src/components/BusinessLink.tsx`（2026-08-21追加のクライアントコンポーネント）経由でLP内`#business`セクションへスムーススクロールする**（`usePathname()`で`/`にいる場合のみ`e.preventDefault()`＋`scrollIntoView({behavior:"smooth"})`、それ以外のページでは通常の`<Link href="/#business">`遷移に委ねる）。ヘッダーの3リンク（企業様リンク／ログイン／無料登録）の間隔は`gap-3`から`gap-6`に広げた。
 
 ## 模擬試験/練習問題モード選択ダイアログ（2026-08-21）
 
