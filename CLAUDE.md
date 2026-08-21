@@ -145,7 +145,7 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 
 # ページ責務
 
-- `app/page.tsx`: サーバーコンポーネントのまま維持（`"use client"` 不要）。キャッチコピーと「新規登録」「ログイン」への導線。
+- `app/page.tsx`: サーバーコンポーネントのまま維持（`"use client"` 不要、インタラクションはCSSの`hover:`だけで完結させている）。2026-08-21にCVR訴求型のLPへ刷新: sticky簡易ヘッダー→ヒーロー（キャッチコピー＋グラデーション大型CTA）→完全無料・安心感バナー（登録3分/SP・PC両対応/2段階開示バッジ）→3特徴カード（模試・復習機能・特別スカウト、`hover:-translate-y-1`でホバー浮き上がり）→利用の流れ4ステップ→ボトムCTA、の一枚構成。旧バージョンにあった`/test`への未ログインお試しリンクは、`/test`が認証必須化されて久しく実質的に無意味だったため削除した。
 - `app/register/page.tsx`: クライアントコンポーネント。会員登録フォーム。`/api/register`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。バリデーション・送信ロジックは2026-08-21のUI刷新でも変更していない（`src/components/AuthLayout.tsx`でラップし、`IconInput`でスタイルを差し替えただけ）。
 - `app/login/page.tsx`: クライアントコンポーネント。ログインフォーム。`/api/login`にPOSTし、成功時は`spiUser`を保存して`/dashboard`へ遷移する。register同様、2026-08-21のUI刷新でロジックは変更していない。
 - `app/dashboard/page.tsx`: クライアントコンポーネント。ログイン必須（`spiUser`が無ければ`/login`へリダイレクト）。ログイン後のトップページとして、試験種別選択（`TEST_TYPES`）・成績ダッシュボード（`PerformanceDashboard`）・スカウト受信ボックス（`ScoutInbox`）を1画面に統合している（2026-08-21に`/mypage`から成績・復習・スカウトの表示をこちらへ移動）。旧`localStorage`の`spiResultHistory`に基づく簡易履歴テーブルは、D1ベースの`PerformanceDashboard`に置き換える形で廃止した。
