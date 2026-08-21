@@ -14,6 +14,13 @@ import {
 } from "@/src/data/formOptions";
 import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
+import {
+  ScoutDetailModal,
+  SCOUT_STATUS_LABEL,
+  SCOUT_STATUS_STYLE,
+  deriveScoutTags,
+  type ScoutItem,
+} from "@/src/components/ScoutDetailModal";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -33,16 +40,6 @@ type Profile = {
   graduation_year: number;
   graduation_month: number;
   scout_consent: number;
-};
-
-type ScoutItem = {
-  id: number;
-  companyName: string;
-  title: string;
-  message: string | null;
-  status: string;
-  isAnonymous: boolean;
-  createdAt: string;
 };
 
 export default function MyPage() {
@@ -74,8 +71,10 @@ export default function MyPage() {
     bestAccuracyRate: number | null;
   } | null>(null);
   const [scouts, setScouts] = useState<ScoutItem[]>([]);
-  const [scoutActionId, setScoutActionId] = useState<number | null>(null);
   const [scoutError, setScoutError] = useState<string | null>(null);
+  const [selectedScoutId, setSelectedScoutId] = useState<number | null>(null);
+  const unreadScoutCount = scouts.filter((s) => s.status === "sent" && !s.isRead).length;
+  const selectedScout = scouts.find((s) => s.id === selectedScoutId) ?? null;
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -223,8 +222,8 @@ export default function MyPage() {
   }
 
   async function handleScoutAction(scoutId: number, action: "accept" | "decline") {
-    setScoutActionId(scoutId);
     setScoutError(null);
+    let handledError = false;
     try {
       const res = await fetch("/api/scouts", {
         method: "PUT",
@@ -233,15 +232,36 @@ export default function MyPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        handledError = true;
         setScoutError(data.error ?? "更新に失敗しました。時間をおいて再度お試しください。");
-        return;
+        throw new Error(data.error ?? "更新に失敗しました");
       }
       loadScouts(email);
-    } catch {
-      setScoutError("通信エラーが発生しました。時間をおいて再度お試しください。");
-    } finally {
-      setScoutActionId(null);
+    } catch (err) {
+      if (!handledError) {
+        setScoutError("通信エラーが発生しました。時間をおいて再度お試しください。");
+      }
+      throw err;
     }
+  }
+
+  function handleOpenScout(scoutId: number) {
+    setSelectedScoutId(scoutId);
+    const target = scouts.find((s) => s.id === scoutId);
+    if (!target || target.isRead) return;
+
+    fetch("/api/scouts", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, scoutId, action: "read" }),
+    })
+      .then((res) => {
+        if (!res.ok) return;
+        setScouts((prev) => prev.map((s) => (s.id === scoutId ? { ...s, isRead: true } : s)));
+      })
+      .catch(() => {
+        // 既読反映に失敗してもモーダル表示自体は継続する
+      });
   }
 
   async function handleScoutConsentChange(next: boolean) {
@@ -442,59 +462,66 @@ export default function MyPage() {
 
         {!loading && (
           <div className="flex flex-col gap-3">
-            <h2 className="text-lg font-bold text-gray-900">届いたスカウト</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900">届いたスカウト</h2>
+              {unreadScoutCount > 0 && (
+                <span className="rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white">
+                  新着 {unreadScoutCount}件
+                </span>
+              )}
+            </div>
             {scoutError && <p className="text-sm font-medium text-red-600">{scoutError}</p>}
             {scouts.length === 0 ? (
               <p className="text-sm text-gray-500">まだスカウトは届いていません。</p>
             ) : (
               <div className="flex flex-col gap-3">
-                {scouts.map((s) => (
-                  <div key={s.id} className="rounded-lg border border-gray-200 bg-white p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-gray-900">{s.companyName}</p>
-                        {s.title && <p className="text-sm text-gray-700">{s.title}</p>}
-                      </div>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          s.status === "accepted"
-                            ? "bg-green-100 text-green-700"
-                            : s.status === "declined"
-                            ? "bg-gray-100 text-gray-500"
-                            : "bg-blue-100 text-blue-700"
-                        }`}
-                      >
-                        {s.status === "sent" ? "未対応" : s.status === "accepted" ? "承諾済み" : "辞退済み"}
-                      </span>
-                    </div>
-                    {s.message && <p className="mt-2 text-sm text-gray-700">{s.message}</p>}
-                    <p className="mt-2 text-xs text-gray-400">
-                      {s.isAnonymous
-                        ? "承諾するまで、あなたの氏名・メールアドレスはこの企業に開示されません。"
-                        : "承諾済み：この企業にはあなたの氏名・メールアドレスが開示されています。"}
-                    </p>
-                    {s.status === "sent" && (
-                      <div className="mt-3 flex gap-2">
-                        <button
-                          type="button"
-                          disabled={scoutActionId === s.id}
-                          onClick={() => handleScoutAction(s.id, "accept")}
-                          className="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                {scouts.map((s) => {
+                  const tags = deriveScoutTags(s.message);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => handleOpenScout(s.id)}
+                      className="rounded-lg border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                              s.isRead
+                                ? "bg-gray-100 text-gray-400"
+                                : "bg-red-50 text-red-600"
+                            }`}
+                          >
+                            {s.isRead ? "既読" : "未読"}
+                          </span>
+                          <p className="text-xs text-gray-400">{s.companyName}</p>
+                        </div>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            SCOUT_STATUS_STYLE[s.status] ?? "bg-gray-100 text-gray-500"
+                          }`}
                         >
-                          承諾する
-                        </button>
-                        <button
-                          type="button"
-                          disabled={scoutActionId === s.id}
-                          onClick={() => handleScoutAction(s.id, "decline")}
-                          className="rounded-full border border-gray-300 px-4 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                        >
-                          辞退する
-                        </button>
+                          {SCOUT_STATUS_LABEL[s.status] ?? s.status}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <p className="mt-1 font-semibold text-gray-900">{s.title || "(件名なし)"}</p>
+                      <p className="mt-0.5 text-xs text-gray-400">{s.createdAt}</p>
+                      {tags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {tags.map((t) => (
+                            <span
+                              key={t}
+                              className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700"
+                            >
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -523,6 +550,14 @@ export default function MyPage() {
           </div>
         )}
       </main>
+
+      {selectedScout && (
+        <ScoutDetailModal
+          scout={selectedScout}
+          onClose={() => setSelectedScoutId(null)}
+          onRespond={handleScoutAction}
+        />
+      )}
     </div>
   );
 }
