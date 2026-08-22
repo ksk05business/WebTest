@@ -166,6 +166,12 @@ export default function ReviewPage() {
         </span>
       </div>
 
+      {question.questionCode && (
+        <span className="w-fit rounded-full bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-400">
+          問ID: {question.questionCode}
+        </span>
+      )}
+
       {question.title && (
         <p className="text-sm font-semibold text-blue-700">{question.title}</p>
       )}

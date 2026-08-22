@@ -14,6 +14,16 @@ function formatElapsed(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+function getUserEmail(): string | null {
+  const raw = localStorage.getItem("spiUser");
+  if (!raw) return null;
+  try {
+    return (JSON.parse(raw) as { email?: string }).email ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function BackToUnitsLink({ testId }: { testId: string }) {
   return (
     <Link
@@ -65,6 +75,25 @@ function PracticePageInner() {
   }, [router]);
 
   function loadQuestions() {
+    if (category === "wrong_review") {
+      const email = getUserEmail();
+      if (!email) {
+        setLoadError("ログイン情報が確認できませんでした。");
+        return;
+      }
+      fetch(`/api/practice/history?email=${encodeURIComponent(email)}&testType=${testId}&limit=20`)
+        .then((res) => res.json())
+        .then((data: { questions?: Question[]; error?: string }) => {
+          if (!data.questions || data.questions.length === 0) {
+            setLoadError("復習すべき間違えた問題が見つかりませんでした。");
+            return;
+          }
+          setQuestions(data.questions);
+        })
+        .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+      return;
+    }
+
     const params = new URLSearchParams({ limit: "20" });
     if (category && category !== "all") {
       params.set("category", category);
@@ -138,8 +167,7 @@ function PracticePageInner() {
       }
 
       try {
-        const rawUser = localStorage.getItem("spiUser");
-        const email = rawUser ? (JSON.parse(rawUser) as { email?: string }).email : undefined;
+        const email = getUserEmail();
         if (email) {
           const answers = results.map((r) => ({ questionId: r.questionId, correct: r.correct }));
           await fetch("/api/exam-results", {
@@ -154,6 +182,11 @@ function PracticePageInner() {
               answers,
               isPractice: true,
             }),
+          });
+          await fetch("/api/practice/history", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, testType: testId, answers, isPractice: true }),
           });
         }
       } catch {
@@ -252,6 +285,12 @@ function PracticePageInner() {
           経過 {formatElapsed(elapsed)}
         </span>
       </div>
+
+      {question.questionCode && (
+        <span className="w-fit rounded-full bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-400">
+          問ID: {question.questionCode}
+        </span>
+      )}
 
       {question.title && (
         <p className="text-sm font-semibold text-blue-700">{question.title}</p>

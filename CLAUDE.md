@@ -91,6 +91,16 @@
 
 **大分類の命名衝突回避**: 玉手箱の3大分類は`tamatebako_math`/`tamatebako_verbal`/`tamatebako_english`という接頭辞付きidにした（SPIの`non_verbal`/`verbal`/`english`と別名にすることで、`functions/api/exam-results.ts`のカテゴリ別集計ロジック等が将来両テストの受験データを扱うようになった際に大分類が混同されないようにするため）。実データは1件も投入していないため、`GET /api/question-units`のレスポンス・単元カードの表示件数には影響がなく、全単元が「準備中」表示になる（クリックしてもトースト表示のみで`/practice`には遷移しない、既存の0件ハンドリングがそのまま機能する）。
 
+## 全テスト種別・全単元共通の問題ID表示／汎用誤答復習機能（2026-08-22）
+
+**問題ID表示**: 新しいDBカラムは追加せず、`questions.category`（大分類）とD1側で計算する`ROW_NUMBER() OVER (PARTITION BY category ORDER BY id)`から`#SPI-NV-005`のような表示用コードを動的に導出する方式にした（`functions/_lib/questionFormat.ts`の`CATEGORY_CODE`マップ＋`buildQuestionCode()`、`toClientQuestion()`が`questionCode`として返す）。`category`は複数のsub_categoryにまたがる大分類なので、`ROW_NUMBER()`のPARTITION BYを`category`単位にすることで、`subCategory`や`difficulty`等の絞り込み条件を変えても同じ問題には常に同じ連番が振られる（＝WHERE句の内容に依存しない安定したID）ようにしている。このCTEを`functions/api/questions.ts`・`functions/api/review.ts`・新設の`functions/api/practice/history.ts`（GET）の3箇所すべてに適用した。**新しいテスト種別・大分類の問題を追加する際は`CATEGORY_CODE`にも接頭辞を追記すること**（未登録のcategoryは`questionCode`が`undefined`になり、バッジ自体が表示されないだけで動作は壊れない）。`/practice`・`/test`・`/review`の全問題解答画面に「問ID: #...」バッジとして表示している。
+
+**汎用誤答復習機能**: `user_question_history`テーブル（新設、`user_id, question_id, test_type, correct, is_practice, answered_at`）に、テスト種別・単元・出題モード（模試/練習）を問わずすべての解答を1回答=1行で記録する。既存の`user_question_reviews`（言語・英語カテゴリのみ対象、エビングハウスの忘却曲線に基づく`/review`専用の復習キュー）とは完全に別物として併存させている（役割が異なるため統合しなかった：`user_question_reviews`は「いつ復習すべきか」をスケジューリングする専用テーブル、`user_question_history`は「テスト種別ごとに今何を間違えたままか」を動的に判定するための生ログ）。
+
+新設`functions/api/practice/history.ts`（`functions/api/practice.ts`という同名フラットファイルが存在しないことを確認してから、入れ子ルートとして追加）: POSTは`{email, testType, answers:[{questionId,correct}], isPractice}`を受け取りそのまま行を積む（`exam-results.ts`の`answers`と同じ形状をそのまま流用）。GETは`?email=&testType=&countOnly=1`で件数のみ（バッジ用、画像等を含む問題本体を取得しないので軽量）、`?email=&testType=&limit=N`で「直近の解答が不正解のまま」の問題を`toClientQuestion()`形式でランダムN件返す（「直近」の判定は`ROW_NUMBER() OVER (PARTITION BY question_id ORDER BY answered_at DESC)`で同一問題の最新1件のみを見る＝一度間違えても後で正解していれば復習対象から外れる）。
+
+**呼び出し側**: `app/practice/page.tsx`・`app/test/page.tsx`はセッション終了時に、既存の`/api/exam-results`呼び出しに加えて新たに`/api/practice/history`にもPOSTする（両方呼ぶため多少冗長だが、既存の偏差値算出・言語系復習キューのロジックには一切手を入れず安全に追加できる構成を優先した）。`PracticeUnitSelector`の単元選択画面には「ランダム総合練習」の直前に「🔥 復習ノート：間違えた問題（N問）」カードを追加し、マウント時に`countOnly=1`で件数を取得、クリックで`/practice?testType=<id>&category=wrong_review`へ遷移する（0件の場合はトーストで案内し遷移しない）。`app/practice/page.tsx`の`loadQuestions()`は`category==="wrong_review"`のとき`/api/questions`ではなく`/api/practice/history`（`limit=20`）を呼ぶよう分岐している。
+
 ## 玉手箱GAB形式問題の追加・長文パッセージのグループ出題（2026-08-21）
 
 玉手箱の`tamatebako_verbal`/「論理的読解（GAB形式）」単元に、オリジナル書き下ろしの長文10本×設問4問＝40問を`POST /api/admin/questions`で本番D1へ投入した（科学・人文学・文化学・生物学・社会学・自然科学等がテーマ）。選択肢は固定3択（A:明らかに正しい／B:明らかに間違っている／C:本文だけでは判断できない）、`question_text`には長文全文＋設問文を1問ごとに自己完結する形で格納している（1問1行＝1レコードの既存スキーマをそのまま使い、長文を分離する新テーブルは作らなかった）。

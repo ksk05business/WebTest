@@ -11,9 +11,29 @@ export type QuestionRow = {
   correct_answer: number;
   explanation: string;
   image_data_uri?: string | null;
+  seq?: number;
 };
 
 const CHOICE_LABELS = ["A", "B", "C", "D", "E"] as const;
+
+// questions.category（大分類）ごとの表示用コード接頭辞。「問ID: #SPI-NV-001」のような形式で
+// 全テスト・全単元の問題に共通の識別ラベルを表示するために使う（新しいtest_type列を追加せず、
+// 既存のcategory値から導出する）。新しいテスト種別・大分類を追加した際はここにも追記すること。
+const CATEGORY_CODE: Record<string, { test: string; unit: string }> = {
+  non_verbal: { test: "SPI", unit: "NV" },
+  verbal: { test: "SPI", unit: "L" },
+  structural: { test: "SPI", unit: "S" },
+  english: { test: "SPI", unit: "E" },
+  tamatebako_math: { test: "TAM", unit: "M" },
+  tamatebako_verbal: { test: "TAM", unit: "L" },
+  tamatebako_english: { test: "TAM", unit: "E" },
+};
+
+function buildQuestionCode(category: string, seq: number | undefined): string | undefined {
+  const mapping = CATEGORY_CODE[category];
+  if (!mapping || seq === undefined) return undefined;
+  return `#${mapping.test}-${mapping.unit}-${String(seq).padStart(3, "0")}`;
+}
 
 export function toClientQuestion(row: QuestionRow) {
   let options: string[] = [];
@@ -40,6 +60,7 @@ export function toClientQuestion(row: QuestionRow) {
   return {
     id: row.id,
     category: row.sub_category,
+    questionCode: buildQuestionCode(row.category, row.seq),
     title: row.title ?? undefined,
     text: row.question_text,
     tables,

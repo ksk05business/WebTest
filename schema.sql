@@ -185,3 +185,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_user_question_reviews_user_question
   ON user_question_reviews(user_id, question_id);
 CREATE INDEX IF NOT EXISTS idx_user_question_reviews_due
   ON user_question_reviews(user_id, status, next_review_at);
+
+-- ============================================================
+-- 全テスト種別・全単元共通の回答履歴（POST /api/practice/history で1回答=1行を記録）。
+-- user_question_reviews（言語・英語カテゴリのみ対象の忘却曲線復習キュー）とは別に、
+-- テスト種別を問わずすべての解答（模試・練習問題どちらも）を記録する汎用ログ。
+-- 同じ問題を複数回解いた場合は履歴を積み重ね（上書きしない）、「直近の解答が不正解の問題」を
+-- answered_at降順の最新1件から動的に判定して「間違えた問題の復習」機能のソースにする。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS user_question_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  test_type TEXT NOT NULL, -- 'spi' | 'tamatebako' 等（src/data/testTypes.tsのTestType.idと同じ値）
+  correct INTEGER NOT NULL, -- 0 or 1
+  is_practice INTEGER NOT NULL DEFAULT 1, -- 練習問題=1、模擬試験（本番モード）=0
+  answered_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_question_history_lookup
+  ON user_question_history(user_id, test_type, question_id, answered_at);

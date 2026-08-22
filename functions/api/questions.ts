@@ -51,8 +51,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   const rows = await context.env.DB.prepare(
-    `SELECT id, category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, passage_group_id, image_data_uri
-     FROM questions
+    `WITH ranked AS (
+       SELECT id, ROW_NUMBER() OVER (PARTITION BY category ORDER BY id) AS seq FROM questions
+     )
+     SELECT q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.options, q.correct_answer, q.explanation, q.difficulty, q.passage_group_id, q.image_data_uri, r.seq
+     FROM questions q
+     JOIN ranked r ON r.id = q.id
      WHERE ${conditions.join(" AND ")}`
   )
     .bind(...binds)

@@ -109,6 +109,11 @@ export default function TestPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, testType: "spi", score, total, categoryScores, answers }),
           });
+          await fetch("/api/practice/history", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, testType: "spi", answers, isPractice: false }),
+          });
         }
       } catch {
         // D1保存に失敗してもlocalStorageには結果があるため、結果表示自体は継続する
@@ -158,6 +163,12 @@ export default function TestPage() {
           残り {timeLeft} 秒
         </span>
       </div>
+
+      {question.questionCode && (
+        <span className="w-fit rounded-full bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-400">
+          問ID: {question.questionCode}
+        </span>
+      )}
 
       {question.title && (
         <p className="text-sm font-semibold text-blue-700">

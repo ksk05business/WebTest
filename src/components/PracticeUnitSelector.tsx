@@ -3,11 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Shuffle } from "lucide-react";
+import { ChevronRight, Flame, Shuffle } from "lucide-react";
 import { DEFAULT_TEST_ID, PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_TYPES } from "@/src/data/testTypes";
 
 type UnitCount = { category: string; subCategory: string; count: number };
+
+function getUserEmail(): string | null {
+  const raw = localStorage.getItem("spiUser");
+  if (!raw) return null;
+  try {
+    return (JSON.parse(raw) as { email?: string }).email ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: string }) {
   const router = useRouter();
@@ -15,6 +25,8 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
+  const [wrongCount, setWrongCount] = useState(0);
+  const [wrongCountLoading, setWrongCountLoading] = useState(true);
 
   const groups = PRACTICE_UNIT_GROUPS_BY_TEST[testId] ?? PRACTICE_UNIT_GROUPS_BY_TEST[DEFAULT_TEST_ID];
   const testName = TEST_TYPES.find((t) => t.id === testId)?.name ?? "SPI3";
@@ -31,6 +43,21 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const email = getUserEmail();
+    if (!email) {
+      setWrongCountLoading(false);
+      return;
+    }
+    fetch(`/api/practice/history?email=${encodeURIComponent(email)}&testType=${testId}&countOnly=1`)
+      .then((res) => res.json())
+      .then((data: { count?: number }) => setWrongCount(data.count ?? 0))
+      .catch(() => {
+        // 取得に失敗しても復習カード自体は表示する（0件扱いになるだけ）
+      })
+      .finally(() => setWrongCountLoading(false));
+  }, [testId]);
 
   useEffect(() => {
     if (!toast) return;
@@ -52,6 +79,19 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
     router.push(`/practice?${params.toString()}`);
   }
 
+  function handleWrongReviewClick() {
+    if (wrongCountLoading) return;
+    if (!getUserEmail()) {
+      setToast("ログイン情報が確認できませんでした");
+      return;
+    }
+    if (wrongCount === 0) {
+      setToast("現在復習すべき間違えた問題はありません");
+      return;
+    }
+    router.push(`/practice?category=wrong_review&testType=${testId}`);
+  }
+
   function handleRandomClick() {
     if (loading) return;
     if (total === 0) {
@@ -69,6 +109,23 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
           性格検査は対象外です。能力検査の分野から練習したい単元を選んでください。
         </p>
       </div>
+
+      <button
+        type="button"
+        onClick={handleWrongReviewClick}
+        className="flex items-center justify-between rounded-xl border-2 border-orange-200 bg-orange-50 p-4 text-left transition-colors hover:border-orange-300 hover:bg-orange-100"
+      >
+        <span className="flex items-center gap-2 font-bold text-orange-900">
+          <Flame className="h-5 w-5 text-orange-600" />
+          復習ノート：間違えた問題
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-orange-700">
+            {wrongCountLoading ? "..." : `${wrongCount}問`}
+          </span>
+          <ChevronRight className="h-4 w-4 text-orange-400" />
+        </span>
+      </button>
 
       <button
         type="button"

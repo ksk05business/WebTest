@@ -9,6 +9,7 @@ export type TableBlock = {
 export type Question = {
   id: number;
   category: string;
+  questionCode?: string;
   title?: string;
   text: string;
   tables?: TableBlock[];

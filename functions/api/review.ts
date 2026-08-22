@@ -30,11 +30,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   const rows = await context.env.DB.prepare(
-    `SELECT
+    `WITH ranked AS (
+       SELECT id, ROW_NUMBER() OVER (PARTITION BY category ORDER BY id) AS seq FROM questions
+     )
+     SELECT
         r.id AS review_id, r.review_stage,
-        q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.options, q.correct_answer, q.explanation
+        q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.options, q.correct_answer, q.explanation, rk.seq
      FROM user_question_reviews r
      JOIN questions q ON q.id = r.question_id
+     JOIN ranked rk ON rk.id = q.id
      WHERE r.user_id = ? AND r.status = 'active' AND r.next_review_at <= datetime('now')
      ORDER BY r.next_review_at ASC`
   )
