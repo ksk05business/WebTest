@@ -51,7 +51,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   const rows = await context.env.DB.prepare(
-    `SELECT id, category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, passage_group_id
+    `SELECT id, category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, passage_group_id, image_data_uri
      FROM questions
      WHERE ${conditions.join(" AND ")}`
   )

@@ -259,6 +259,17 @@ function PracticePageInner() {
 
       <p className="whitespace-pre-wrap text-lg font-medium text-gray-900">{question.text}</p>
 
+      {question.imageDataUri && (
+        <div className="overflow-x-auto">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={question.imageDataUri}
+            alt="設問のグラフ"
+            className="mx-auto max-w-full rounded-lg border border-gray-200"
+          />
+        </div>
+      )}
+
       {question.tables && (
         <div className="flex flex-col gap-4">
           {question.tables.map((table, ti) => (

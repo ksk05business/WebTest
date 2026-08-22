@@ -99,6 +99,14 @@
 
 **重大な副作用として発覚した「/testへのカテゴリ漏れ」を同時に修正した**: `app/test/page.tsx`（本番模試＝SPI3専用のはずの画面）は`GET /api/questions`を**カテゴリ絞り込み無しで**呼び出しており、`questions`テーブルが実質SPI専用データしか持たなかった間は問題なかったが、今回`tamatebako_verbal`カテゴリの`status='published'`データを投入したことで、**SPIの本番模試に玉手箱のGAB長文問題が混入し得る状態**になっていたことに気づいた。`SPI_CATEGORIES = ["verbal","non_verbal","structural","english"]`（`functions/api/exam-results.ts`の`BROAD_CATEGORIES`と同じ4分類）を明示的に`?category=`として渡すよう修正済み。同様に、`PracticeUnitSelector`の「ランダム総合練習」（`/practice?category=all&testType=<id>`）も、`category=all`のときカテゴリ無指定で全テスト横断的に取得していたため、玉手箱の練習画面で「ランダム総合練習」を押すとSPIの問題が混ざりうる状態だった。`app/practice/page.tsx`の`loadQuestions()`で、`category==="all"`の場合は`PRACTICE_UNIT_GROUPS_BY_TEST[testId]`から該当テストの大分類一覧を導出して`?category=`に複数指定するよう修正した。**将来、新しいテスト種別のデータを追加する際は、同様の「他テストへの意図しない混入」が起きないか必ず確認すること**（`/test`は今後も`testType`によるフィルタ機構が無いため、SPI以外のカテゴリを`published`にする場合は特に注意）。
 
+## 図表読み取り問題の画像対応（2026-08-22）
+
+玉手箱の`tamatebako_math`/「図表の読み取り」単元向けに、折れ線・棒・円グラフを画像として表示する問題（12問）を追加した。この単元は表形式（`表の空欄推測`で使っている`tables_json`）ではなく、matplotlib等で生成された実際のグラフ画像を読み取らせる形式のため、`questions`テーブルに`image_data_uri TEXT`（任意）を新設した（本番・ローカルとも`ALTER TABLE`実施済み）。**R2等の外部オブジェクトストレージは未導入のため、当面は`data:image/png;base64,...`形式のdata URIをそのままD1のTEXTカラムに保存する方式**にした（画像1枚あたり40〜100KB程度、12問合計で約1MB。将来的に図表読み取り問題を大量に追加する場合は、レスポンスサイズ・D1容量の観点からR2导入を検討すべき）。
+
+`functions/_lib/questionFormat.ts`の`QuestionRow`に`image_data_uri?: string | null`（任意）を追加し、`toClientQuestion()`が`imageDataUri`として返す。`functions/api/questions.ts`のSELECT文・`functions/api/admin/questions.ts`の`imageDataUri`入力（`data:image/`で始まる文字列であることのみ検証）にも対応した。`src/data/questions.ts`の`Question`型に`imageDataUri?: string`を追加し、`app/practice/page.tsx`で`question.imageDataUri`がある場合に`<img>`タグ（`next/image`は静的エクスポート+data URIとの相性が悪いため未使用、素の`<img>`をeslint-disableコメント付きで使用）として表示する。
+
+**すべての設問で正解が選択肢A（1問だけ集計するとB）に偏っていた**（元データが検証用に正解を先頭に置く生成方法だったと見られる）ため、`表の空欄推測`のときと同様に、登録時に選択肢の順序を問題ごとにシャッフルしてから投入した。画像自体の内容（グラフの数値）は登録前に一部サンプルを実際に目視確認し、解説文の計算過程ともすべて突き合わせて誤りがないことを確認済み。
+
 ## 模擬試験/練習問題モード選択ダイアログ（2026-08-21）
 
 `/dashboard`の「試験の種類」カードは、直接`/test`へリンクする方式をやめ、クリックすると`src/components/ExamModeSelectModal.tsx`を開く方式にした。`available=false`（準備中）のカードもクリックできるようにし、モーダル内で「現在問題コンテンツを順次準備中です。公開まで今しばらくお待ちください。」と案内する（以前は非活性のdivだったが、今はボタンにしてどちらの状態でもモーダルを介す統一UIにした）。`available=true`（現状SPIのみ）の場合のみ、モーダル内に「模擬試験（本番モード、`/test`へ）」「練習問題（トレーニングモード、`/practice`へ）」の2択を表示する。

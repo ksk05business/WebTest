@@ -18,6 +18,7 @@ type QuestionInput = {
   status?: unknown;
   originalityNote?: unknown;
   passageGroupId?: unknown;
+  imageDataUri?: unknown;
 };
 
 type ValidatedQuestion = {
@@ -33,6 +34,7 @@ type ValidatedQuestion = {
   status: string;
   originalityNote: string | null;
   passageGroupId: number | null;
+  imageDataUri: string | null;
 };
 
 // 1件分の入力を検証し、DB保存用に正規化する。不正な場合はエラーメッセージを返す。
@@ -104,6 +106,13 @@ function validateQuestion(input: QuestionInput, index: number): ValidatedQuestio
   ) {
     return { error: `${label}: passageGroupIdは整数で指定してください` };
   }
+  if (
+    input.imageDataUri !== undefined &&
+    input.imageDataUri !== null &&
+    (typeof input.imageDataUri !== "string" || !input.imageDataUri.startsWith("data:image/"))
+  ) {
+    return { error: `${label}: imageDataUriはdata:image/で始まる文字列で指定してください` };
+  }
 
   return {
     category: input.category.trim(),
@@ -118,6 +127,7 @@ function validateQuestion(input: QuestionInput, index: number): ValidatedQuestio
     status,
     originalityNote: typeof input.originalityNote === "string" ? input.originalityNote : null,
     passageGroupId: typeof input.passageGroupId === "number" ? input.passageGroupId : null,
+    imageDataUri: typeof input.imageDataUri === "string" ? input.imageDataUri : null,
   };
 }
 
@@ -161,8 +171,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   for (const q of validated) {
     const row = await context.env.DB.prepare(
       `INSERT INTO questions
-        (category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, status, originality_note, passage_group_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (category, sub_category, title, question_text, tables_json, options, correct_answer, explanation, difficulty, status, originality_note, passage_group_id, image_data_uri)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING id`
     )
       .bind(
@@ -177,7 +187,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         q.difficulty,
         q.status,
         q.originalityNote,
-        q.passageGroupId
+        q.passageGroupId,
+        q.imageDataUri
       )
       .first<{ id: number }>();
     if (row) insertedIds.push(row.id);

@@ -12,6 +12,7 @@ export type Question = {
   title?: string;
   text: string;
   tables?: TableBlock[];
+  imageDataUri?: string;
   choices: { label: "A" | "B" | "C" | "D" | "E"; text: string }[];
   answer: "A" | "B" | "C" | "D" | "E";
   explanation: string[];

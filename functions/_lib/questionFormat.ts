@@ -10,6 +10,7 @@ export type QuestionRow = {
   options: string;
   correct_answer: number;
   explanation: string;
+  image_data_uri?: string | null;
 };
 
 const CHOICE_LABELS = ["A", "B", "C", "D", "E"] as const;
@@ -42,6 +43,7 @@ export function toClientQuestion(row: QuestionRow) {
     title: row.title ?? undefined,
     text: row.question_text,
     tables,
+    imageDataUri: row.image_data_uri ?? undefined,
     choices: options.map((text, i) => ({ label: CHOICE_LABELS[i] ?? String(i), text })),
     answer: CHOICE_LABELS[row.correct_answer] ?? String(row.correct_answer),
     explanation,

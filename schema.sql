@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS questions (
   status TEXT NOT NULL DEFAULT 'published', -- 'draft' | 'published' | 'archived'
   originality_note TEXT, -- 著作権対応メモ: 参照した解法アイデアの要約のみを記録し、原文の転載がないことを明記する
   passage_group_id INTEGER, -- 同一の長文（パッセージ）から出題される設問をまとめるグループID（任意）。GAB形式の論理的読解など、1つの長文に複数の設問が紐づく形式で使用し、出題時にグループ内の問題が常に連続するようにする
+  image_data_uri TEXT, -- 図表読み取り問題等で使うグラフ画像（data:image/png;base64,...形式）。R2等の外部ストレージは未導入のため、当面はD1に直接テキストとして保持する
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
