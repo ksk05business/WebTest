@@ -13,6 +13,9 @@ export function Footer() {
         <Link href="/company/apply" className="hover:text-gray-700 hover:underline">
           企業・就活エージェント様はこちら
         </Link>
+        <Link href="/contact" className="hover:text-gray-700 hover:underline">
+          お問い合わせ
+        </Link>
       </nav>
       <p className="mt-2">&copy; Webテストナビ</p>
     </footer>

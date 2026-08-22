@@ -20,6 +20,7 @@ import {
 import { TEST_TYPES } from "@/src/data/testTypes";
 import { BusinessLink } from "@/src/components/BusinessLink";
 import { ForgettingCurveChart } from "@/src/components/ForgettingCurveChart";
+import { SupportChatWidget } from "@/src/components/SupportChatWidget";
 
 const BADGES = [
   { icon: Clock, text: "登録3分" },
@@ -416,7 +417,7 @@ export default function Home() {
               <HelpCircle className="h-3.5 w-3.5" />
               よくある質問
             </span>
-            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">登録前によくいただく質問</h2>
+            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">よくある質問（FAQ）</h2>
           </div>
           <div className="flex flex-col gap-3">
             {FAQS.map((f) => (
@@ -458,6 +459,8 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      <SupportChatWidget />
     </div>
   );
 }

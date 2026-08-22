@@ -91,6 +91,14 @@
 
 **大分類の命名衝突回避**: 玉手箱の3大分類は`tamatebako_math`/`tamatebako_verbal`/`tamatebako_english`という接頭辞付きidにした（SPIの`non_verbal`/`verbal`/`english`と別名にすることで、`functions/api/exam-results.ts`のカテゴリ別集計ロジック等が将来両テストの受験データを扱うようになった際に大分類が混同されないようにするため）。実データは1件も投入していないため、`GET /api/question-units`のレスポンス・単元カードの表示件数には影響がなく、全単元が「準備中」表示になる（クリックしてもトースト表示のみで`/practice`には遷移しない、既存の0件ハンドリングがそのまま機能する）。
 
+## FAQ見出し修正・AIサポートチャットボット・お問い合わせ導線（2026-08-22）
+
+LPのFAQ見出しを「登録前によくいただく質問」→「よくある質問（FAQ）」に変更した（ユーザーが「または」で示した2案のうち、登録前訪問者に限らず使える汎用的な方を採用）。
+
+**AIサポートチャットボット**（`src/components/SupportChatWidget.tsx`、新規）: 実際のLLM APIやバックエンドは呼ばない、完全にクライアント側で完結する選択肢式ボット（ユーザー要求で「AI（または選択肢式ボット）」と明示的に許容されていたため、この方針を採用。運用コスト・モデレーション等の追加インフラが不要）。画面右下に浮遊表示し、クリックで4つの固定質問（費用・スカウトのタイミング・退会/停止・対応テスト種類）をボタンとして提示、選択するとチャットログに質問＋回答が追加される。LPの`app/page.tsx`にのみ設置（サイト全体ではなく「LP右下」というユーザー要求の範囲に絞った）。
+
+**お問い合わせ導線**: `src/components/Footer.tsx`（`app/layout.tsx`でサイト全体に適用済み、LPにも自動的に反映される）に`/contact`リンクを追加。新規`app/contact/page.tsx`は`/company/apply`と同じ構成（フォーム→`POST /api/contact`→D1保存→完了画面）のシンプルなお問い合わせフォーム（お名前・メールアドレス・お問い合わせ内容）。新規`contact_inquiries`テーブル（`functions/api/contact.ts`が保存）。**`/company/apply`と同様、メール送信機能は未設定のため自動返信・通知メールは送らず、D1に保存するのみ**（運営が直接D1を確認する運用。閲覧用の管理画面は今回のユーザー要求に含まれていなかったため未実装、必要になれば`/admin/companies`と同様の簡易admin-token方式で追加できる）。
+
 ## 全テスト種別・全単元共通の問題ID表示／汎用誤答復習機能（2026-08-22）
 
 **問題ID表示**: 新しいDBカラムは追加せず、`questions.category`（大分類）とD1側で計算する`ROW_NUMBER() OVER (PARTITION BY category ORDER BY id)`から`#SPI-NV-005`のような表示用コードを動的に導出する方式にした（`functions/_lib/questionFormat.ts`の`CATEGORY_CODE`マップ＋`buildQuestionCode()`、`toClientQuestion()`が`questionCode`として返す）。`category`は複数のsub_categoryにまたがる大分類なので、`ROW_NUMBER()`のPARTITION BYを`category`単位にすることで、`subCategory`や`difficulty`等の絞り込み条件を変えても同じ問題には常に同じ連番が振られる（＝WHERE句の内容に依存しない安定したID）ようにしている。このCTEを`functions/api/questions.ts`・`functions/api/review.ts`・新設の`functions/api/practice/history.ts`（GET）の3箇所すべてに適用した。**新しいテスト種別・大分類の問題を追加する際は`CATEGORY_CODE`にも接頭辞を追記すること**（未登録のcategoryは`questionCode`が`undefined`になり、バッジ自体が表示されないだけで動作は壊れない）。`/practice`・`/test`・`/review`の全問題解答画面に「問ID: #...」バッジとして表示している。

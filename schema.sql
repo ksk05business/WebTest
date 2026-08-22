@@ -207,3 +207,15 @@ CREATE TABLE IF NOT EXISTS user_question_history (
 
 CREATE INDEX IF NOT EXISTS idx_user_question_history_lookup
   ON user_question_history(user_id, test_type, question_id, answered_at);
+
+-- ============================================================
+-- お問い合わせフォーム（/contact）からの送信内容。company_applications等と同様、
+-- メール送信機能は未設定のため、運営が直接D1を確認する運用を前提とする（管理画面は未実装）。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS contact_inquiries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
