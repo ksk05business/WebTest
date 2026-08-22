@@ -91,6 +91,19 @@
 
 **大分類の命名衝突回避**: 玉手箱の3大分類は`tamatebako_math`/`tamatebako_verbal`/`tamatebako_english`という接頭辞付きidにした（SPIの`non_verbal`/`verbal`/`english`と別名にすることで、`functions/api/exam-results.ts`のカテゴリ別集計ロジック等が将来両テストの受験データを扱うようになった際に大分類が混同されないようにするため）。実データは1件も投入していないため、`GET /api/question-units`のレスポンス・単元カードの表示件数には影響がなく、全単元が「準備中」表示になる（クリックしてもトースト表示のみで`/practice`には遷移しない、既存の0件ハンドリングがそのまま機能する）。
 
+## 運営専用統合管理画面 /admin/dashboard（2026-08-22）
+
+お問い合わせ・企業/エージェント・学生の3種のデータを一元管理できる統合管理画面を追加した。LP・共通ヘッダー/フッターには一切リンクを置いていない（`/admin/companies`同様、URLを直接知っている運営担当者のみがアクセスする「秘密URL」方式）。
+
+**認証方式**: 新しいPages Secretは追加せず、既存の`ADMIN_API_TOKEN`を「管理者パスワード」としてそのまま使う（ユーザー要求で明示的に許容されていた）。`/admin/login`でパスワードを入力すると`sessionStorage`（キー`adminApiToken`、`/admin/companies`と共有）に保存して`/admin/dashboard`へ遷移する。**サーバー側の事前検証エンドポイントは作らず**、入力値をそのまま保存し、その後の管理API呼び出しが`x-admin-token`ヘッダーで実際に検証する（`/admin/companies`の既存モデルと同一）。`/admin/dashboard`は`useEffect`でsessionStorageを確認し、無ければ即座に`router.replace("/admin/login")`する。この構成はNext.jsの`output:"export"`静的サイトである以上、真のサーバーサイドセッション検証（ミドルウェア等）が使えないための設計上の制約であり、`/admin/companies`と同じ「クライアント側リダイレクト＋API側の実トークン検証」の二段構えで安全性を担保している。
+
+**3タブの実装**:
+- **お問い合わせタブ**（`src/components/admin/ContactInquiriesTab.tsx`）: `contact_inquiries`テーブルに新設した`status`カラム（`'unhandled'|'handled'`、既存テーブルのため`ALTER TABLE`で追加、本番・ローカルとも適用済み）を使い、`GET/POST /api/admin/contact-inquiries`で一覧取得・ステータス切り替えを行う。メールアドレス横に`mailto:`リンクを設置（送信自体はブラウザ標準のメールクライアントに委譲、アプリ側でのメール送信は行わない）。
+- **企業・エージェントタブ**: 既存の`/admin/companies`ページの本体ロジックを`src/components/admin/CompanyManagementPanel.tsx`として切り出し、`/admin/companies`（単独ページ、既存URL・挙動を維持）と`/admin/dashboard`の企業タブの両方から同じコンポーネントを`adminToken`を渡して共用する形にした（ユーザー要求の「既存の`/admin/companies`機能を統合」を、コード重複を避けつつ満たす構成）。バックエンドAPI（`/api/admin/companies`）は変更していない。
+- **学生タブ**（`src/components/admin/StudentsTab.tsx`）: 新設`GET /api/admin/users`が`users`テーブルと`exam_results`のCOUNT（サブクエリ）を結合し、登録日・氏名・メール・大学名/大学区分・文理・模試受験回数・スカウト同意フラグを返す（最大500件、新しい順）。検索（氏名・メール・大学名の部分一致）とスカウト同意フィルターは、この規模のベータ運用では十分実用的なため、サーバー側クエリではなくクライアント側のフィルタリングで実装した。
+
+**共通化**: 3つの管理APIすべてで使う`x-admin-token`検証ロジックを、従来`functions/api/admin/companies.ts`内にローカル定義されていたものを`functions/_lib/adminAuth.ts`（新規）の`checkAdminAuth()`として切り出し、`companies.ts`・新設の`contact-inquiries.ts`・`users.ts`の3ファイルで共用するようにした（動作は既存と完全に同一、リファクタリングのみ）。
+
 ## FAQ見出し修正・AIサポートチャットボット・お問い合わせ導線（2026-08-22）
 
 LPのFAQ見出しを「登録前によくいただく質問」→「よくある質問（FAQ）」に変更した（ユーザーが「または」で示した2案のうち、登録前訪問者に限らず使える汎用的な方を採用）。

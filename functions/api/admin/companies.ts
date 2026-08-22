@@ -1,19 +1,9 @@
 import { generateInitialPassword, hashPassword } from "../../_lib/password";
+import { checkAdminAuth } from "../../_lib/adminAuth";
 
 interface Env {
   DB: D1Database;
   ADMIN_API_TOKEN?: string;
-}
-
-function checkAdminAuth(context: { request: Request; env: Env }): Response | null {
-  const adminToken = context.env.ADMIN_API_TOKEN;
-  if (!adminToken) {
-    return Response.json({ error: "管理APIが設定されていません" }, { status: 503 });
-  }
-  if (context.request.headers.get("x-admin-token") !== adminToken) {
-    return Response.json({ error: "認証に失敗しました" }, { status: 401 });
-  }
-  return null;
 }
 
 type CompanyApplicationRow = {

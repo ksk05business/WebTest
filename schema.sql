@@ -210,12 +210,14 @@ CREATE INDEX IF NOT EXISTS idx_user_question_history_lookup
 
 -- ============================================================
 -- お問い合わせフォーム（/contact）からの送信内容。company_applications等と同様、
--- メール送信機能は未設定のため、運営が直接D1を確認する運用を前提とする（管理画面は未実装）。
+-- メール送信機能は未設定のため、運営が直接D1を確認する運用を前提とする。
+-- 管理画面（/admin/dashboard）から一覧確認・対応ステータス更新ができる。
 -- ============================================================
 CREATE TABLE IF NOT EXISTS contact_inquiries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'unhandled', -- 'unhandled' | 'handled'
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
