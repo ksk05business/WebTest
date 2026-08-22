@@ -91,6 +91,18 @@
 
 **大分類の命名衝突回避**: 玉手箱の3大分類は`tamatebako_math`/`tamatebako_verbal`/`tamatebako_english`という接頭辞付きidにした（SPIの`non_verbal`/`verbal`/`english`と別名にすることで、`functions/api/exam-results.ts`のカテゴリ別集計ロジック等が将来両テストの受験データを扱うようになった際に大分類が混同されないようにするため）。実データは1件も投入していないため、`GET /api/question-units`のレスポンス・単元カードの表示件数には影響がなく、全単元が「準備中」表示になる（クリックしてもトースト表示のみで`/practice`には遷移しない、既存の0件ハンドリングがそのまま機能する）。
 
+## セキュリティ監査：セッション認証の導入とIDOR脆弱性の修正（2026-08-22）
+
+ユーザー要求によるセキュリティ監査で、このアプリの認証モデルに重大な設計上の欠陥が見つかった：`functions/api/scouts.ts`・`me.ts`・`consent.ts`・`exam-results.ts`・`review.ts`・`practice/history.ts`（学生向け）と`company/scouts.ts`・`company/sent-scouts.ts`（企業向け）の8ファイルすべてが、**クライアントから送られてきた`email`/`companyEmail`という文字列をそのまま「本人確認」として信用していた**（パスワードやトークンによる検証が一切無い）。つまり、他人のメールアドレスさえ知っていれば、そのAPIを直接叩くことで他人の模試結果・スカウト・プロフィール・復習履歴を読み書きできる状態だった（IDOR = Insecure Direct Object Reference）。ハードコードされた秘密情報（`ADMIN_API_TOKEN`のフォールバック値、JWT_SECRET等）は監査の結果見つからず、`/api/admin/`配下の認証チェック漏れも無かった（`admin/questions.ts`だけ共通ヘルパーを使わず同等ロジックをインライン重複させていたため、`functions/_lib/adminAuth.ts`の`checkAdminAuth()`に統一した）。
+
+**修正方針**: 新規`sessions`テーブル（`token, subject_type('user'|'company'), subject_id, expires_at`）と`functions/_lib/session.ts`を追加し、ログイン/新規登録時にランダムな256bitトークンを発行してHttpOnly・Secure・SameSite=LaxのCookie（学生=`session`、企業=`company_session`、別名で共存）として返すようにした。以後、上記8ファイルは`getAuthenticatedSubjectId(db, request, "user"|"company")`でCookieを検証し、**そこで得られたIDのみを本人確認の根拠として使う**（クライアントが送ってくる`email`パラメータは以後の認可判定には一切使わない。GETは`?email=`自体を削除、POST/PUTのbodyからも`email`フィールドを削除した）。ログアウト用に`POST /api/logout`・`POST /api/company/logout`を新設し、DBのセッション行を削除した上でCookieもクリアする。
+
+**フロントエンド側の対応**: 同一オリジンの`fetch()`はデフォルトでCookieを自動送信するため、既存のfetch呼び出し自体（呼び出しURL・ヘッダー）は変更不要だった。変更が必要だったのは「セッションが無効/期限切れだった場合の挙動」のみ：`src/lib/authRedirect.ts`（新規）の`redirectToLogin()`/`redirectToCompanyLogin()`を、`app/mypage`・`app/review`・`app/practice`（`wrong_review`取得部分のみ、模試終了時のfire-and-forget保存は従来通り失敗を握りつぶす）・`app/company/dashboard`・`app/company/scouts`・`src/components/PerformanceDashboard.tsx`・`src/components/ScoutInbox.tsx`・`src/components/ScoutSendModal.tsx`の各所に追加し、APIが`{error:"ログインが必要です"}`（401）を返したらローカルの`spiUser`/`spiCompanyUser`を破棄してログイン画面へ戻すようにした。`DashboardHeader.tsx`・`CompanyHeader.tsx`の「ログアウト」ボタンも新設のログアウトAPIを呼ぶよう変更した。
+
+**この変更の影響範囲に関する重要な注意**: 修正前にログイン済みだった実ユーザーのブラウザにはセッションCookieが存在しないため、デプロイ後に上記の保護対象APIへアクセスすると401になり、一度ログイン画面に戻される（再ログインすれば新しいCookieが発行され、以後は問題なく使える）。ベータ・ローンチ前でユーザー数がごく少数の段階のため許容したが、今後同種の認証方式変更を行う際は、実ユーザーへの影響（強制再ログイン）を毎回考慮すること。
+
+**動作検証**: ローカル・本番の両方で、被害者役・攻撃者役の2つのテストアカウントを作成し、「攻撃者のセッションCookieのまま、リクエストボディ/クエリに被害者のメールアドレスを指定してAPIを叩く」という攻撃シナリオを`GET/PUT /api/me`・`GET /api/scouts`・`POST /api/practice/history`で再現し、**すべて攻撃者自身のデータにのみ作用し、被害者のデータには一切影響しないこと**を確認した。あわせてCookie無しアクセスの401、ログアウト後の旧Cookie失効、企業側セッション（`company_session`）の独立動作、管理者API（`x-admin-token`方式、今回のセッション機構とは無関係に維持）が影響を受けないことも確認済み。検証用アカウントは全て本番から削除済み。
+
 ## AIサポートチャットボットの刷新・自由入力AI応答機能（2026-08-22）
 
 `src/components/SupportChatWidget.tsx`を「AI就活ナビ助手」（固定4問の選択肢式ボット）から「Webテストナビ AIアシスタント」（自由入力対応）へ刷新した。テキスト入力欄＋送信ボタン（`lucide-react`の`Send`アイコン）を追加し、送信すると新設の`POST /api/chat`を呼ぶ。既存の4つのショートカット質問ボタンも、クリックすると同じ`sendMessage()`経由で送信されるようにし、ハードコードされた即答ロジックは廃止した（すべてAIが回答する一本化）。応答待ち中は3点のバウンドアニメーションでタイピング中を表現し、メッセージ追加のたびに`scrollIntoView`で自動スクロールする。

@@ -16,7 +16,7 @@ export function DashboardHeader() {
 
     fetch(`/api/scouts?email=${encodeURIComponent(user.email)}`)
       .then((res) => res.json())
-      .then((data: { scouts?: { status: string; isRead: boolean }[] }) => {
+      .then((data: { scouts?: { status: string; isRead: boolean }[]; error?: string }) => {
         if (!data.scouts) return;
         setUnreadCount(data.scouts.filter((s) => s.status === "sent" && !s.isRead).length);
       })
@@ -26,6 +26,9 @@ export function DashboardHeader() {
   }, []);
 
   function handleLogout() {
+    fetch("/api/logout", { method: "POST" }).catch(() => {
+      // ログアウトAPI呼び出しに失敗しても、ローカルの状態はクリアしてログイン画面へ戻す
+    });
     localStorage.removeItem("spiUser");
     router.push("/");
   }

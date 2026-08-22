@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
+import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 
 type SentScout = {
   id: number;
@@ -71,6 +72,10 @@ export default function CompanyScoutsPage() {
     fetch(`/api/company/sent-scouts?companyEmail=${encodeURIComponent(email)}`)
       .then((res) => res.json())
       .then((data: { scouts?: SentScout[]; error?: string }) => {
+        if (data.error === "ログインが必要です") {
+          redirectToCompanyLogin(router);
+          return;
+        }
         if (data.scouts) {
           setScouts(data.scouts);
         } else {

@@ -5,6 +5,7 @@ import {
   daysFromNowModifier,
   nextIntervalDaysAfterStage,
 } from "../_lib/reviewSchedule";
+import { getAuthenticatedSubjectId } from "../_lib/session";
 
 interface Env {
   DB: D1Database;
@@ -17,16 +18,9 @@ type ReviewRow = QuestionRow & {
 
 // 今日（現在時刻時点）が復習期日になっている問題を取得する。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const email = new URL(context.request.url).searchParams.get("email");
-  if (!email) {
-    return Response.json({ error: "emailが指定されていません" }, { status: 400 });
-  }
-
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
   const rows = await context.env.DB.prepare(
@@ -42,7 +36,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      WHERE r.user_id = ? AND r.status = 'active' AND r.next_review_at <= datetime('now')
      ORDER BY r.next_review_at ASC`
   )
-    .bind(user.id)
+    .bind(userId)
     .all<ReviewRow>();
 
   return Response.json({
@@ -55,7 +49,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 };
 
 type PostBody = {
-  email?: unknown;
   reviewId?: unknown;
   result?: unknown;
 };
@@ -64,6 +57,11 @@ type PostBody = {
 // 正解: ステージを1つ進め、次の間隔（3日→7日→14日）で次回復習日を設定。ステージ4到達でmastered。
 // 不正解: ステージを0に戻し、翌日（+1日）に再度復習させる。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
+
   let body: PostBody;
   try {
     body = await context.request.json();
@@ -71,21 +69,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { email, reviewId, result } = body;
+  const { reviewId, result } = body;
   if (
-    typeof email !== "string" ||
-    !email.trim() ||
     typeof reviewId !== "number" ||
     (result !== "correct" && result !== "incorrect")
   ) {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
-  }
-
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
   }
 
   const review = await context.env.DB.prepare(
@@ -94,7 +83,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     .bind(reviewId)
     .first<{ id: number; user_id: number; review_stage: number }>();
 
-  if (!review || review.user_id !== user.id) {
+  if (!review || review.user_id !== userId) {
     return Response.json({ error: "復習項目が見つかりません" }, { status: 404 });
   }
 

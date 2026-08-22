@@ -1,4 +1,5 @@
 import { toClientQuestion, type QuestionRow } from "../../_lib/questionFormat";
+import { getAuthenticatedSubjectId } from "../../_lib/session";
 
 interface Env {
   DB: D1Database;
@@ -7,7 +8,6 @@ interface Env {
 type AnswerInput = { questionId: number; correct: boolean };
 
 type PostBody = {
-  email?: unknown;
   testType?: unknown;
   answers?: unknown;
   isPractice?: unknown;
@@ -27,6 +27,11 @@ function isAnswers(value: unknown): value is AnswerInput[] {
 // テスト種別・単元・出題モード（練習/模試）を問わず、1回答=1行として user_question_history に記録する。
 // テスト種別の異なる問題を混同しないよう、testTypeも保存する。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
+
   let body: PostBody;
   try {
     body = await context.request.json();
@@ -34,19 +39,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { email, answers } = body;
+  const { answers } = body;
   const testType = typeof body.testType === "string" && body.testType ? body.testType : "spi";
   const isPractice = body.isPractice !== false;
 
-  if (typeof email !== "string" || !email.trim() || !isAnswers(answers) || answers.length === 0) {
+  if (!isAnswers(answers) || answers.length === 0) {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
-  }
-
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
   }
 
   for (const a of answers) {
@@ -54,7 +52,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       `INSERT INTO user_question_history (user_id, question_id, test_type, correct, is_practice)
        VALUES (?, ?, ?, ?, ?)`
     )
-      .bind(user.id, a.questionId, testType, a.correct ? 1 : 0, isPractice ? 1 : 0)
+      .bind(userId, a.questionId, testType, a.correct ? 1 : 0, isPractice ? 1 : 0)
       .run();
   }
 
@@ -67,8 +65,12 @@ type WrongRow = QuestionRow;
 // 「間違えた問題」は、同じ問題への最新の解答（answered_at降順の1件）が不正解のものを指す
 // （その後正解していれば対象から外れる）。テスト種別ごとに独立してカウント・出題する。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
+
   const params = new URL(context.request.url).searchParams;
-  const email = params.get("email");
   const testType = params.get("testType");
   const countOnly = params.get("countOnly") === "1";
   const limitRaw = params.get("limit");
@@ -77,15 +79,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     50
   );
 
-  if (!email || !testType) {
-    return Response.json({ error: "emailとtestTypeを指定してください" }, { status: 400 });
-  }
-
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
+  if (!testType) {
+    return Response.json({ error: "testTypeを指定してください" }, { status: 400 });
   }
 
   const countRow = await context.env.DB.prepare(
@@ -97,7 +92,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      )
      SELECT COUNT(*) AS cnt FROM latest WHERE rn = 1 AND correct = 0`
   )
-    .bind(user.id, testType)
+    .bind(userId, testType)
     .first<{ cnt: number }>();
   const count = countRow?.cnt ?? 0;
 
@@ -126,7 +121,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      ORDER BY RANDOM()
      LIMIT ?`
   )
-    .bind(user.id, testType, limit)
+    .bind(userId, testType, limit)
     .all<WrongRow>();
 
   return Response.json({

@@ -14,6 +14,7 @@ import {
 } from "@/src/data/formOptions";
 import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
+import { redirectToLogin } from "@/src/lib/authRedirect";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -102,6 +103,10 @@ export default function MyPage() {
       .then((res) => res.json())
       .then((data: Profile & { error?: string }) => {
         if (data.error) {
+          if (data.error === "ログインが必要です") {
+            redirectToLogin(router);
+            return;
+          }
           setError(data.error);
           return;
         }
@@ -183,6 +188,10 @@ export default function MyPage() {
         // API側からJSON以外の応答が返ってきた場合
       }
       if (!res.ok || !data.name) {
+        if (res.status === 401) {
+          redirectToLogin(router);
+          return;
+        }
         setError(data.error ?? `更新に失敗しました（status: ${res.status}）`);
         return;
       }
@@ -225,6 +234,10 @@ export default function MyPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 401) {
+          redirectToLogin(router);
+          return;
+        }
         setScoutConsent(!next);
         setConsentMessage(data.error ?? `更新に失敗しました（status: ${res.status}）`);
         return;

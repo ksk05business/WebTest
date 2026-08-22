@@ -1,3 +1,5 @@
+import { checkAdminAuth } from "../../_lib/adminAuth";
+
 interface Env {
   DB: D1Database;
   ADMIN_API_TOKEN?: string;
@@ -135,13 +137,8 @@ function validateQuestion(input: QuestionInput, index: number): ValidatedQuestio
 // リクエストボディにも対応する。x-admin-token ヘッダーが ADMIN_API_TOKEN と一致しない限り拒否する
 // （このアプリには管理者ログイン機構が無いため、共有シークレットによる簡易ゲートとした）。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const adminToken = context.env.ADMIN_API_TOKEN;
-  if (!adminToken) {
-    return Response.json({ error: "管理APIが設定されていません" }, { status: 503 });
-  }
-  if (context.request.headers.get("x-admin-token") !== adminToken) {
-    return Response.json({ error: "認証に失敗しました" }, { status: 401 });
-  }
+  const authError = checkAdminAuth(context);
+  if (authError) return authError;
 
   let body: unknown;
   try {

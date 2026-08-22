@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ScoutDetailModal,
   SCOUT_STATUS_LABEL,
@@ -8,9 +9,11 @@ import {
   deriveScoutTags,
   type ScoutItem,
 } from "@/src/components/ScoutDetailModal";
+import { redirectToLogin } from "@/src/lib/authRedirect";
 
 // 届いたスカウトの簡易受信ボックス。トップページ(/dashboard)から email を渡して表示する。
 export function ScoutInbox({ email }: { email: string }) {
+  const router = useRouter();
   const [scouts, setScouts] = useState<ScoutItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [scoutError, setScoutError] = useState<string | null>(null);
@@ -27,6 +30,10 @@ export function ScoutInbox({ email }: { email: string }) {
     fetch(`/api/scouts?email=${encodeURIComponent(email)}`)
       .then((res) => res.json())
       .then((data: { scouts?: ScoutItem[]; error?: string }) => {
+        if (data.error === "ログインが必要です") {
+          redirectToLogin(router);
+          return;
+        }
         if (data.scouts) setScouts(data.scouts);
       })
       .catch(() => {
@@ -47,6 +54,10 @@ export function ScoutInbox({ email }: { email: string }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         handledError = true;
+        if (res.status === 401) {
+          redirectToLogin(router);
+          throw new Error("ログインが必要です");
+        }
         setScoutError(data.error ?? "更新に失敗しました。時間をおいて再度お試しください。");
         throw new Error(data.error ?? "更新に失敗しました");
       }
@@ -70,6 +81,10 @@ export function ScoutInbox({ email }: { email: string }) {
       body: JSON.stringify({ email, scoutId, action: "read" }),
     })
       .then((res) => {
+        if (res.status === 401) {
+          redirectToLogin(router);
+          return;
+        }
         if (!res.ok) return;
         setScouts((prev) => prev.map((s) => (s.id === scoutId ? { ...s, isRead: true } : s)));
       })

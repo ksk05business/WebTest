@@ -6,6 +6,7 @@ import { CompanyHeader } from "@/src/components/CompanyHeader";
 import { ScoutSendModal } from "@/src/components/ScoutSendModal";
 import { DESIRED_OCCUPATIONS, FACULTY_TYPES, INDUSTRIES } from "@/src/data/formOptions";
 import { UNIVERSITY_CATEGORIES } from "@/src/data/universityCategories";
+import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 
 function toggleValue(values: string[], value: string): string[] {
   return values.includes(value) ? values.filter((v) => v !== value) : [...values, value];
@@ -104,6 +105,10 @@ export default function CompanyDashboardPage() {
       const res = await fetch(`/api/company/scouts?${params.toString()}`);
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 401) {
+          redirectToCompanyLogin(router);
+          return;
+        }
         setSearchError(data.error ?? `検索に失敗しました（status: ${res.status}）`);
         setCandidates(null);
         return;

@@ -221,3 +221,20 @@ CREATE TABLE IF NOT EXISTS contact_inquiries (
   status TEXT NOT NULL DEFAULT 'unhandled', -- 'unhandled' | 'handled'
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- ============================================================
+-- ログインセッション（学生・企業共通）。セキュリティ監査（2026-08-22）で、多くのユーザー向けAPIが
+-- クライアントから送られたemail/companyEmailをそのまま信頼して本人確認としていた問題（=メール
+-- アドレスさえ分かれば他人のデータを閲覧・操作できてしまう状態）を修正するために追加した。
+-- ログイン/新規登録時にランダムなトークンを発行してHttpOnly Cookieとして返し、以後の本人確認は
+-- このテーブルへの照合のみで行う（クライアントが送るemailは以後の認可判定には使わない）。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  subject_type TEXT NOT NULL, -- 'user'（学生） | 'company'（企業・エージェント）
+  subject_id INTEGER NOT NULL, -- subject_typeに応じて users.id または company_profiles.id
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  expires_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_subject ON sessions(subject_type, subject_id);

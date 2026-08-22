@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { redirectToLogin } from "@/src/lib/authRedirect";
 import {
   CartesianGrid,
   Line,
@@ -73,7 +74,11 @@ export function PerformanceDashboard({ email }: { email: string }) {
     fetch(`/api/exam-results?email=${encodeURIComponent(email)}`)
       .then((res) => res.json())
       .then((data: (ExamData & { error?: string }) | { error: string }) => {
-        if (!("error" in data)) setExamData(data);
+        if ("error" in data) {
+          if (data.error === "ログインが必要です") redirectToLogin(router);
+          return;
+        }
+        setExamData(data);
       })
       .catch(() => {
         // 成績サマリーの取得に失敗してもマイページ自体は表示する
@@ -81,7 +86,11 @@ export function PerformanceDashboard({ email }: { email: string }) {
 
     fetch(`/api/review?email=${encodeURIComponent(email)}`)
       .then((res) => res.json())
-      .then((data: { reviews?: unknown[] }) => {
+      .then((data: { reviews?: unknown[]; error?: string }) => {
+        if (data.error === "ログインが必要です") {
+          redirectToLogin(router);
+          return;
+        }
         if (data.reviews) setReviewDueCount(data.reviews.length);
       })
       .catch(() => {

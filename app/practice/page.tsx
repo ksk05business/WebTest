@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 import { DEFAULT_TEST_ID, PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
+import { redirectToLogin } from "@/src/lib/authRedirect";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -84,6 +85,10 @@ function PracticePageInner() {
       fetch(`/api/practice/history?email=${encodeURIComponent(email)}&testType=${testId}&limit=20`)
         .then((res) => res.json())
         .then((data: { questions?: Question[]; error?: string }) => {
+          if (data.error === "ログインが必要です") {
+            redirectToLogin(router);
+            return;
+          }
           if (!data.questions || data.questions.length === 0) {
             setLoadError("復習すべき間違えた問題が見つかりませんでした。");
             return;

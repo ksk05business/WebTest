@@ -1,6 +1,7 @@
 import { getUniversityCategory } from "../../src/data/universityCategories";
 import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
 import { parseDesiredOccupations } from "../_lib/desiredOccupations";
+import { getAuthenticatedSubjectId } from "../_lib/session";
 
 interface Env {
   DB: D1Database;
@@ -25,18 +26,18 @@ type UserProfileRow = {
 };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const email = new URL(context.request.url).searchParams.get("email");
-  if (!email) {
-    return Response.json({ error: "emailが指定されていません" }, { status: 400 });
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
   const user = await context.env.DB.prepare(
     `SELECT last_name, first_name, last_name_romaji, first_name_romaji, email,
             faculty_type, university, university_category, industry_first, industry_second, industry_third,
             desired_occupations, graduation_year, graduation_month, scout_consent
-     FROM users WHERE email = ?`
+     FROM users WHERE id = ?`
   )
-    .bind(email)
+    .bind(userId)
     .first<UserProfileRow>();
 
   if (!user) {
@@ -54,7 +55,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 };
 
 type UpdateBody = {
-  email?: unknown;
   lastName?: unknown;
   firstName?: unknown;
   lastNameRomaji?: unknown;
@@ -73,6 +73,11 @@ type UpdateBody = {
 };
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
+
   let body: UpdateBody;
   try {
     body = await context.request.json();
@@ -81,7 +86,6 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 
   const {
-    email,
     lastName,
     firstName,
     lastNameRomaji,
@@ -98,8 +102,6 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   } = body;
 
   if (
-    typeof email !== "string" ||
-    !email.trim() ||
     typeof lastName !== "string" ||
     !lastName.trim() ||
     typeof firstName !== "string" ||
@@ -154,7 +156,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
       faculty_type = ?, university = ?, university_category = ?, industry_first = ?, industry_second = ?, industry_third = ?,
       desired_occupations = ?, graduation_year = ?, graduation_month = ?
-     WHERE email = ?`
+     WHERE id = ?`
   )
     .bind(
       lastName,
@@ -170,7 +172,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       desiredOccupationsJson,
       graduationYear,
       graduationMonth,
-      email
+      userId
     )
     .run();
 

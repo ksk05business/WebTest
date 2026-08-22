@@ -1,4 +1,5 @@
 import { INITIAL_REVIEW_INTERVAL_DAYS, daysFromNowModifier } from "../_lib/reviewSchedule";
+import { getAuthenticatedSubjectId } from "../_lib/session";
 
 interface Env {
   DB: D1Database;
@@ -9,7 +10,6 @@ type CategoryScores = Record<string, { correct: number; total: number }>;
 type AnswerInput = { questionId: number; correct: boolean };
 
 type PostBody = {
-  email?: unknown;
   testType?: unknown;
   score?: unknown;
   total?: unknown;
@@ -84,6 +84,11 @@ async function enqueueWrongLanguageAnswers(db: D1Database, userId: number, answe
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
+
   let body: PostBody;
   try {
     body = await context.request.json();
@@ -91,13 +96,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { email, score, total, categoryScores, answers } = body;
+  const { score, total, categoryScores, answers } = body;
   const testType = typeof body.testType === "string" && body.testType ? body.testType : "spi";
   const isPractice = body.isPractice === true;
 
   if (
-    typeof email !== "string" ||
-    !email.trim() ||
     typeof score !== "number" ||
     typeof total !== "number" ||
     total <= 0 ||
@@ -109,20 +112,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
   }
 
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
-  }
-
   const accuracyRate = score / total;
 
   // 練習問題（トレーニングモード）は正式な受験記録として保存しない（偏差値推移・カテゴリ分析には反映しない）。
   // ただし間違えた言語問題の復習キュー登録だけは、本番模試と同様に行う。
   if (isPractice) {
     if (answers) {
-      await enqueueWrongLanguageAnswers(context.env.DB, user.id, answers);
+      await enqueueWrongLanguageAnswers(context.env.DB, userId, answers);
     }
     return Response.json({ ok: true, isPractice: true, accuracyRate });
   }
@@ -140,7 +136,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
      VALUES (?, ?, ?, ?, ?, ?, ?)`
   )
     .bind(
-      user.id,
+      userId,
       testType,
       score,
       total,
@@ -151,7 +147,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     .run();
 
   if (answers) {
-    await enqueueWrongLanguageAnswers(context.env.DB, user.id, answers);
+    await enqueueWrongLanguageAnswers(context.env.DB, userId, answers);
   }
 
   return Response.json({ ok: true, deviationScore, accuracyRate });
@@ -184,23 +180,16 @@ function bucketBySubCategory(
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const email = new URL(context.request.url).searchParams.get("email");
-  if (!email) {
-    return Response.json({ error: "emailが指定されていません" }, { status: 400 });
-  }
-
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
   const rows = await context.env.DB.prepare(
     `SELECT test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
      FROM exam_results WHERE user_id = ? ORDER BY taken_at DESC LIMIT 20`
   )
-    .bind(user.id)
+    .bind(userId)
     .all<ExamResultRow>();
 
   const history = (rows.results ?? []).map((r) => ({

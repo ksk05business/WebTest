@@ -7,6 +7,9 @@ export function CompanyHeader({ companyName }: { companyName: string }) {
   const router = useRouter();
 
   function handleLogout() {
+    fetch("/api/company/logout", { method: "POST" }).catch(() => {
+      // ログアウトAPI呼び出しに失敗しても、ローカルの状態はクリアしてログイン画面へ戻す
+    });
     localStorage.removeItem("spiCompanyUser");
     router.push("/company/login");
   }

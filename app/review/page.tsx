@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Question } from "@/src/data/questions";
+import { redirectToLogin } from "@/src/lib/authRedirect";
 
 type ReviewItem = {
   reviewId: number;
@@ -45,6 +46,10 @@ export default function ReviewPage() {
       .then((res) => res.json())
       .then((data: { reviews?: ReviewItem[]; error?: string }) => {
         if (data.error) {
+          if (data.error === "ログインが必要です") {
+            redirectToLogin(router);
+            return;
+          }
           setLoadError(data.error);
           return;
         }

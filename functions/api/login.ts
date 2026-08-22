@@ -1,4 +1,5 @@
 import { verifyPassword } from "../_lib/password";
+import { createSession, sessionCookieHeader } from "../_lib/session";
 
 interface Env {
   DB: D1Database;
@@ -46,5 +47,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "メールアドレスまたはパスワードが違います" }, { status: 401 });
   }
 
-  return Response.json({ ok: true, name: `${user.last_name} ${user.first_name}` });
+  const token = await createSession(context.env.DB, "user", user.id);
+
+  return new Response(
+    JSON.stringify({ ok: true, name: `${user.last_name} ${user.first_name}` }),
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Set-Cookie": sessionCookieHeader("user", token),
+      },
+    }
+  );
 };

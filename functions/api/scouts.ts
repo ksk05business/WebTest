@@ -1,3 +1,5 @@
+import { getAuthenticatedSubjectId } from "../_lib/session";
+
 interface Env {
   DB: D1Database;
 }
@@ -15,16 +17,9 @@ type ScoutRow = {
 };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const email = new URL(context.request.url).searchParams.get("email");
-  if (!email) {
-    return Response.json({ error: "emailが指定されていません" }, { status: 400 });
-  }
-
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
   const rows = await context.env.DB.prepare(
@@ -33,7 +28,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      WHERE s.student_id = ?
      ORDER BY s.created_at DESC`
   )
-    .bind(user.id)
+    .bind(userId)
     .all<ScoutRow>();
 
   return Response.json({
@@ -52,12 +47,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 };
 
 type RespondBody = {
-  email?: unknown;
   scoutId?: unknown;
   action?: unknown;
 };
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
+  const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
+
   let body: RespondBody;
   try {
     body = await context.request.json();
@@ -65,21 +64,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { email, scoutId, action } = body;
+  const { scoutId, action } = body;
   if (
-    typeof email !== "string" ||
-    !email.trim() ||
     typeof scoutId !== "number" ||
     (action !== "accept" && action !== "decline" && action !== "read")
   ) {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
-  }
-
-  const user = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
-    .bind(email)
-    .first<{ id: number }>();
-  if (!user) {
-    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
   }
 
   const scout = await context.env.DB.prepare(
@@ -88,7 +78,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     .bind(scoutId)
     .first<{ id: number; student_id: number; status: string; is_read: number }>();
 
-  if (!scout || scout.student_id !== user.id) {
+  if (!scout || scout.student_id !== userId) {
     return Response.json({ error: "スカウトが見つかりません" }, { status: 404 });
   }
 

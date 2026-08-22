@@ -1,3 +1,5 @@
+import { getAuthenticatedSubjectId } from "../../_lib/session";
+
 interface Env {
   DB: D1Database;
 }
@@ -25,15 +27,15 @@ type SentScoutRow = {
 
 // 送信済みスカウト一覧。is_anonymous = 0（学生が承諾済み）の場合のみ氏名・メールアドレスを開示する。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const companyEmail = new URL(context.request.url).searchParams.get("companyEmail");
-  if (!companyEmail) {
-    return Response.json({ error: "companyEmailが指定されていません" }, { status: 400 });
+  const companyId = await getAuthenticatedSubjectId(context.env.DB, context.request, "company");
+  if (!companyId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
   const company = await context.env.DB.prepare(
-    "SELECT id, status FROM company_profiles WHERE email = ?"
+    "SELECT id, status FROM company_profiles WHERE id = ?"
   )
-    .bind(companyEmail)
+    .bind(companyId)
     .first<CompanyRow>();
   if (!company) {
     return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });

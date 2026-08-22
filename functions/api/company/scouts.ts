@@ -1,16 +1,15 @@
+import { getAuthenticatedSubjectId } from "../../_lib/session";
+
 interface Env {
   DB: D1Database;
 }
 
 type CompanyRow = { id: number; status: string };
 
-async function getApprovedCompany(
-  db: D1Database,
-  companyEmail: string
-): Promise<CompanyRow | null> {
+async function getApprovedCompany(db: D1Database, companyId: number): Promise<CompanyRow | null> {
   const company = await db
-    .prepare("SELECT id, status FROM company_profiles WHERE email = ?")
-    .bind(companyEmail)
+    .prepare("SELECT id, status FROM company_profiles WHERE id = ?")
+    .bind(companyId)
     .first<CompanyRow>();
   return company;
 }
@@ -36,13 +35,14 @@ function placeholders(values: string[]): string {
 // クエリパラメータ（いずれも同名パラメータを複数指定すると複数選択=OR条件になる）:
 //   universityCategory, facultyType, industry（第一〜第三志望のいずれかに一致）, minDeviation
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const params = new URL(context.request.url).searchParams;
-  const companyEmail = params.get("companyEmail");
-  if (!companyEmail) {
-    return Response.json({ error: "companyEmailが指定されていません" }, { status: 400 });
+  const companyId = await getAuthenticatedSubjectId(context.env.DB, context.request, "company");
+  if (!companyId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
-  const company = await getApprovedCompany(context.env.DB, companyEmail);
+  const params = new URL(context.request.url).searchParams;
+
+  const company = await getApprovedCompany(context.env.DB, companyId);
   if (!company) {
     return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });
   }
@@ -130,13 +130,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 };
 
 type SendScoutBody = {
-  companyEmail?: unknown;
   studentId?: unknown;
   title?: unknown;
   message?: unknown;
 };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const companyId = await getAuthenticatedSubjectId(context.env.DB, context.request, "company");
+  if (!companyId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
+
   let body: SendScoutBody;
   try {
     body = await context.request.json();
@@ -144,10 +148,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const { companyEmail, studentId, title, message } = body;
+  const { studentId, title, message } = body;
   if (
-    typeof companyEmail !== "string" ||
-    !companyEmail.trim() ||
     typeof studentId !== "number" ||
     typeof title !== "string" ||
     !title.trim() ||
@@ -157,7 +159,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "件名と本文メッセージを入力してください" }, { status: 400 });
   }
 
-  const company = await getApprovedCompany(context.env.DB, companyEmail);
+  const company = await getApprovedCompany(context.env.DB, companyId);
   if (!company) {
     return Response.json({ error: "企業アカウントが見つかりません" }, { status: 404 });
   }

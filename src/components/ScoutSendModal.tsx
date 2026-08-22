@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 
 type Candidate = {
   studentId: number;
@@ -36,6 +38,7 @@ export function ScoutSendModal({
   onClose: () => void;
   onSent: () => void;
 }) {
+  const router = useRouter();
   const [templateIndex, setTemplateIndex] = useState(0);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
@@ -71,6 +74,10 @@ export function ScoutSendModal({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 401) {
+          redirectToCompanyLogin(router);
+          return;
+        }
         setError(data.error ?? `送信に失敗しました（status: ${res.status}）`);
         return;
       }

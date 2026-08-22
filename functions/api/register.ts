@@ -2,6 +2,7 @@ import { hashPassword } from "../_lib/password";
 import { getUniversityCategory } from "../../src/data/universityCategories";
 import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
 import { parseDesiredOccupations } from "../_lib/desiredOccupations";
+import { createSession, sessionCookieHeader } from "../_lib/session";
 
 interface Env {
   DB: D1Database;
@@ -162,5 +163,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
   }
 
-  return Response.json({ ok: true, name: `${lastName} ${firstName}` });
+  if (!inserted) {
+    return Response.json({ error: "登録に失敗しました" }, { status: 500 });
+  }
+
+  const token = await createSession(context.env.DB, "user", inserted.id);
+
+  return new Response(JSON.stringify({ ok: true, name: `${lastName} ${firstName}` }), {
+    headers: {
+      "Content-Type": "application/json",
+      "Set-Cookie": sessionCookieHeader("user", token),
+    },
+  });
 };
