@@ -54,7 +54,21 @@ export function ExamModeSelectModal({
                   {explainer.sections.map((section) => (
                     <div key={section.title}>
                       <p className="font-semibold text-gray-700">{section.title}</p>
-                      <p>{section.body}</p>
+                      {section.body && <p>{section.body}</p>}
+                      {section.groups && (
+                        <div className="mt-1.5 flex flex-col gap-2">
+                          {section.groups.map((group) => (
+                            <div key={group.label}>
+                              <p className="text-xs font-bold text-gray-500">【{group.label}】</p>
+                              <ul className="list-disc space-y-0.5 pl-5">
+                                {group.items.map((item) => (
+                                  <li key={item}>{item}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
