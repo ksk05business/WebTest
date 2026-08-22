@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 管理画面にログインしたい方へ
+
+運営者向けの管理画面ログイン方法は [ADMIN_ACCESS.md](./ADMIN_ACCESS.md) にまとめてあります。
+
 ## Getting Started
 
 First, run the development server:
