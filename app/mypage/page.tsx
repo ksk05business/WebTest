@@ -14,6 +14,9 @@ import {
 } from "@/src/data/formOptions";
 import { MANUAL_ENTRY_UNIVERSITIES, UNIVERSITIES } from "@/src/data/universities";
 import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
+import { MbtiSelect } from "@/src/components/MbtiSelect";
+import { MbtiBadge } from "@/src/components/MbtiBadge";
+import { getMbtiGroupLabel } from "@/src/data/mbti";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
@@ -34,6 +37,7 @@ type Profile = {
   graduation_year: number;
   graduation_month: number;
   scout_consent: number;
+  mbti: string | null;
 };
 
 export default function MyPage() {
@@ -52,6 +56,7 @@ export default function MyPage() {
   const [industrySecond, setIndustrySecond] = useState("");
   const [industryThird, setIndustryThird] = useState("");
   const [desiredOccupations, setDesiredOccupations] = useState<string[]>([]);
+  const [mbti, setMbti] = useState("");
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +86,7 @@ export default function MyPage() {
     setIndustrySecond(data.industry_second);
     setIndustryThird(data.industry_third);
     setDesiredOccupations(Array.isArray(data.desired_occupations) ? data.desired_occupations : []);
+    setMbti(data.mbti ?? "");
     setGraduationYear(String(data.graduation_year));
     setGraduationMonth(String(data.graduation_month));
     setScoutConsent(Boolean(data.scout_consent));
@@ -177,6 +183,7 @@ export default function MyPage() {
           industrySecond,
           industryThird,
           desiredOccupations,
+          mbti,
           graduationYear: Number(graduationYear),
           graduationMonth: Number(graduationMonth),
         }),
@@ -209,6 +216,7 @@ export default function MyPage() {
         industry_second: industrySecond,
         industry_third: industryThird,
         desired_occupations: desiredOccupations,
+        mbti: mbti || null,
         graduation_year: Number(graduationYear),
         graduation_month: Number(graduationMonth),
         scout_consent: scoutConsent ? 1 : 0,
@@ -325,6 +333,19 @@ export default function MyPage() {
                   {graduationYear}年{graduationMonth}月
                 </dd>
               </div>
+              <div>
+                <dt className="text-xs text-gray-500">MBTI（16タイプ）</dt>
+                <dd className="mt-1 text-gray-900">
+                  {mbti ? (
+                    <span className="flex items-center gap-2">
+                      <MbtiBadge code={mbti} />
+                      <span className="text-xs text-gray-400">{getMbtiGroupLabel(mbti)}タイプ</span>
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">未回答</span>
+                  )}
+                </dd>
+              </div>
             </dl>
           </div>
         ) : (
@@ -427,6 +448,15 @@ export default function MyPage() {
               onChange={setDesiredOccupations}
               max={MAX_DESIRED_OCCUPATIONS}
             />
+
+            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              MBTI（16タイプ・任意）
+              <MbtiSelect
+                value={mbti}
+                onChange={setMbti}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              />
+            </label>
 
             <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
               卒業年月

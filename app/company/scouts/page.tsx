@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
+import { MbtiBadge } from "@/src/components/MbtiBadge";
 import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 
 type SentScout = {
@@ -18,6 +19,7 @@ type SentScout = {
   industrySecond: string;
   industryThird: string;
   desiredOccupations: string[];
+  mbti: string | null;
   lastName: string | null;
   firstName: string | null;
   email: string | null;
@@ -156,6 +158,7 @@ export default function CompanyScoutsPage() {
                       <span className="rounded-full bg-gray-100 px-2 py-0.5">
                         志望業界: {s.industryFirst} / {s.industrySecond} / {s.industryThird}
                       </span>
+                      <MbtiBadge code={s.mbti} />
                     </div>
                     {s.desiredOccupations.length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-1">

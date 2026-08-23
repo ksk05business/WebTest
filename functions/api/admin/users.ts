@@ -16,6 +16,7 @@ type UserRow = {
   scout_consent: number;
   created_at: string;
   exam_count: number;
+  mbti: string | null;
 };
 
 // 登録済み学生の一覧取得（最大500件、新しい順）。検索・フィルターはクライアント側で行う想定の簡易実装。
@@ -26,7 +27,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const rows = await context.env.DB.prepare(
     `SELECT
         u.id, u.last_name, u.first_name, u.email, u.university, u.university_category, u.faculty_type,
-        u.scout_consent, u.created_at,
+        u.scout_consent, u.created_at, u.mbti,
         (SELECT COUNT(*) FROM exam_results er WHERE er.user_id = u.id) AS exam_count
      FROM users u
      ORDER BY u.created_at DESC
@@ -44,6 +45,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       scoutConsent: r.scout_consent === 1,
       createdAt: r.created_at,
       examCount: r.exam_count,
+      mbti: r.mbti,
     })),
   });
 };

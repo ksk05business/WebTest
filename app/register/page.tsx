@@ -17,6 +17,7 @@ import { UniversityField } from "@/src/components/UniversityField";
 import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
 import { AuthLayout } from "@/src/components/AuthLayout";
 import { IconInput } from "@/src/components/IconInput";
+import { MbtiSelect } from "@/src/components/MbtiSelect";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -39,6 +40,7 @@ export default function RegisterPage() {
   const [industrySecond, setIndustrySecond] = useState("");
   const [industryThird, setIndustryThird] = useState("");
   const [desiredOccupations, setDesiredOccupations] = useState<string[]>(DEFAULT_DESIRED_OCCUPATIONS);
+  const [mbti, setMbti] = useState("");
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
   const [agreedTerms, setAgreedTerms] = useState(false);
@@ -117,6 +119,7 @@ export default function RegisterPage() {
           industrySecond,
           industryThird,
           desiredOccupations,
+          mbti,
           graduationYear: Number(graduationYear),
           graduationMonth: Number(graduationMonth),
           agreedTerms,
@@ -277,6 +280,14 @@ export default function RegisterPage() {
           onChange={setDesiredOccupations}
           max={MAX_DESIRED_OCCUPATIONS}
         />
+
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
+          MBTI（16タイプ・任意）
+          <MbtiSelect value={mbti} onChange={setMbti} className={SELECT_CLASS} />
+          <span className="text-xs font-normal text-gray-400">
+            わからない場合は「わからない / 回答しない」のままで構いません。
+          </span>
+        </label>
 
         <div className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
           卒業年月

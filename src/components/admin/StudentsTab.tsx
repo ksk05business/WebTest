@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { MbtiBadge } from "@/src/components/MbtiBadge";
 
 type Student = {
   id: number;
@@ -12,6 +13,7 @@ type Student = {
   scoutConsent: boolean;
   createdAt: string;
   examCount: number;
+  mbti: string | null;
 };
 
 type ConsentFilter = "all" | "consented" | "not_consented";
@@ -101,6 +103,7 @@ export function StudentsTab({
                 <th className="px-3 py-2 font-semibold">メールアドレス</th>
                 <th className="px-3 py-2 font-semibold">大学（区分）</th>
                 <th className="px-3 py-2 font-semibold">文理</th>
+                <th className="px-3 py-2 font-semibold">MBTI</th>
                 <th className="px-3 py-2 font-semibold">模試受験回数</th>
                 <th className="px-3 py-2 font-semibold">スカウト同意</th>
               </tr>
@@ -118,6 +121,9 @@ export function StudentsTab({
                     )}
                   </td>
                   <td className="px-3 py-2 text-gray-700">{s.facultyType}</td>
+                  <td className="px-3 py-2">
+                    <MbtiBadge code={s.mbti} />
+                  </td>
                   <td className="px-3 py-2 text-gray-700">{s.examCount}回</td>
                   <td className="px-3 py-2">
                     <span

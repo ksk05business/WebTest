@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
+import { MbtiBadge } from "@/src/components/MbtiBadge";
 
 type Candidate = {
   studentId: number;
   universityCategory: string | null;
   facultyType: string;
   latestDeviationScore: number | null;
+  mbti?: string | null;
 };
 
 const SCOUT_TEMPLATES = [
@@ -116,6 +118,7 @@ export function ScoutSendModal({
               ? candidate.latestDeviationScore.toFixed(1)
               : "未受験"}
           </span>
+          <MbtiBadge code={candidate.mbti} />
         </div>
 
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">

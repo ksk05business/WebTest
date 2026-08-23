@@ -1,4 +1,5 @@
 import { getAuthenticatedSubjectId } from "../../_lib/session";
+import { getAffinityMbtiCodes, isValidMbtiCode } from "../../../src/data/mbti";
 
 interface Env {
   DB: D1Database;
@@ -23,6 +24,7 @@ type CandidateRow = {
   industry_third: string;
   desired_occupations: string;
   latest_deviation_score: number | null;
+  mbti: string | null;
 };
 
 // 複数値をIN句用のプレースホルダ文字列に変換する（例: 3件なら "?,?,?"）
@@ -31,9 +33,11 @@ function placeholders(values: string[]): string {
 }
 
 // 候補者の匿名検索。scout_consent = 1 の学生のみを対象とし、
-// 大学区分・文理・志望業界・直近偏差値のみを返す（氏名・メールアドレス等は一切含めない）。
+// 大学区分・文理・志望業界・直近偏差値・MBTIのみを返す（氏名・メールアドレス等は一切含めない）。
 // クエリパラメータ（いずれも同名パラメータを複数指定すると複数選択=OR条件になる）:
-//   universityCategory, facultyType, industry（第一〜第三志望のいずれかに一致）, minDeviation
+//   universityCategory, facultyType, industry（第一〜第三志望のいずれかに一致）, desiredOccupation, minDeviation, mbti
+// 並び順: industryで絞り込んだ場合、その業界と親和性の高いMBTIグループ（分析家・外交官・管理者・探検家）に
+// 属する候補者を優先表示する「マッチング補正」を適用したうえで、新着順（id降順）に並べる。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const companyId = await getAuthenticatedSubjectId(context.env.DB, context.request, "company");
   if (!companyId) {
@@ -57,6 +61,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const facultyTypes = params.getAll("facultyType").filter(Boolean);
   const industries = params.getAll("industry").filter(Boolean);
   const desiredOccupations = params.getAll("desiredOccupation").filter(Boolean);
+  const mbtiCodes = params.getAll("mbti").filter(isValidMbtiCode);
   const minDeviationRaw = params.get("minDeviation");
   const minDeviation = minDeviationRaw !== null ? Number(minDeviationRaw) : null;
 
@@ -84,12 +89,24 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     );
     binds.push(...desiredOccupations.map((o) => `%"${o}"%`));
   }
+  if (mbtiCodes.length > 0) {
+    conditions.push(`u.mbti IN (${placeholders(mbtiCodes)})`);
+    binds.push(...mbtiCodes);
+  }
   if (minDeviation !== null && !Number.isNaN(minDeviation)) {
     conditions.push(
       `(SELECT e.deviation_score FROM exam_results e WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) >= ?`
     );
     binds.push(minDeviation);
   }
+
+  // 検索対象の業界と親和性の高いMBTIグループのコード一覧（業界フィルター未指定なら空配列＝補正なし）。
+  const affinityMbtiCodes = getAffinityMbtiCodes(industries);
+  const orderByAffinity = affinityMbtiCodes.length > 0;
+  const affinityCase = orderByAffinity
+    ? `CASE WHEN u.mbti IN (${placeholders(affinityMbtiCodes)}) THEN 0 ELSE 1 END`
+    : "0";
+  const orderBinds = orderByAffinity ? [...affinityMbtiCodes] : [];
 
   const rows = await context.env.DB.prepare(
     `SELECT
@@ -100,14 +117,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         u.industry_second,
         u.industry_third,
         u.desired_occupations,
+        u.mbti,
         (SELECT e.deviation_score FROM exam_results e
-          WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) AS latest_deviation_score
+          WHERE e.user_id = u.id ORDER BY e.taken_at DESC LIMIT 1) AS latest_deviation_score,
+        ${affinityCase} AS affinity_rank
      FROM users u
      WHERE ${conditions.join(" AND ")}
-     ORDER BY u.id DESC`
+     ORDER BY affinity_rank ASC, u.id DESC`
   )
-    .bind(...binds)
-    .all<CandidateRow>();
+    // affinityCase（SELECT句）はWHERE句より前に出現するため、バインド順もorderBinds→bindsの順にする
+    .bind(...orderBinds, ...binds)
+    .all<CandidateRow & { affinity_rank: number }>();
 
   return Response.json({
     candidates: (rows.results ?? []).map((r) => ({
@@ -125,6 +145,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         }
       })(),
       latestDeviationScore: r.latest_deviation_score,
+      mbti: r.mbti,
     })),
   });
 };

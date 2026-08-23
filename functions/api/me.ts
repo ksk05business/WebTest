@@ -2,6 +2,7 @@ import { getUniversityCategory } from "../../src/data/universityCategories";
 import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
 import { parseDesiredOccupations } from "../_lib/desiredOccupations";
 import { getAuthenticatedSubjectId } from "../_lib/session";
+import { isValidMbtiCode } from "../../src/data/mbti";
 
 interface Env {
   DB: D1Database;
@@ -23,6 +24,7 @@ type UserProfileRow = {
   graduation_year: number;
   graduation_month: number;
   scout_consent: number;
+  mbti: string | null;
 };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -34,7 +36,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const user = await context.env.DB.prepare(
     `SELECT last_name, first_name, last_name_romaji, first_name_romaji, email,
             faculty_type, university, university_category, industry_first, industry_second, industry_third,
-            desired_occupations, graduation_year, graduation_month, scout_consent
+            desired_occupations, graduation_year, graduation_month, scout_consent, mbti
      FROM users WHERE id = ?`
   )
     .bind(userId)
@@ -70,6 +72,7 @@ type UpdateBody = {
   desiredOccupations?: unknown;
   graduationYear?: unknown;
   graduationMonth?: unknown;
+  mbti?: unknown;
 };
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
@@ -99,6 +102,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     desiredOccupations,
     graduationYear,
     graduationMonth,
+    mbti,
   } = body;
 
   if (
@@ -145,6 +149,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     );
   }
 
+  // MBTIは任意項目。未選択（""/undefined/null）はNULL保存、指定時は既知の16タイプのみ許可する。
+  if (mbti !== undefined && mbti !== null && mbti !== "" && (typeof mbti !== "string" || !isValidMbtiCode(mbti))) {
+    return Response.json({ error: "MBTIの値が不正です" }, { status: 400 });
+  }
+  const mbtiValue = typeof mbti === "string" && mbti !== "" ? mbti : null;
+
   const universityCategory =
     typeof manualUniversityCategory === "string" &&
     (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(manualUniversityCategory)
@@ -155,7 +165,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     `UPDATE users SET
       last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
       faculty_type = ?, university = ?, university_category = ?, industry_first = ?, industry_second = ?, industry_third = ?,
-      desired_occupations = ?, graduation_year = ?, graduation_month = ?
+      desired_occupations = ?, graduation_year = ?, graduation_month = ?, mbti = ?
      WHERE id = ?`
   )
     .bind(
@@ -172,6 +182,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       desiredOccupationsJson,
       graduationYear,
       graduationMonth,
+      mbtiValue,
       userId
     )
     .run();

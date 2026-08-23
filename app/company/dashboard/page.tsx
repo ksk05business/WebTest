@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
 import { ScoutSendModal } from "@/src/components/ScoutSendModal";
+import { MbtiBadge } from "@/src/components/MbtiBadge";
 import { DESIRED_OCCUPATIONS, FACULTY_TYPES, INDUSTRIES } from "@/src/data/formOptions";
 import { UNIVERSITY_CATEGORIES } from "@/src/data/universityCategories";
+import { MBTI_GROUP_LABELS, MBTI_GROUP_ORDER, MBTI_TYPES } from "@/src/data/mbti";
 import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 
 function toggleValue(values: string[], value: string): string[] {
@@ -42,6 +44,37 @@ function CheckboxGroup({
   );
 }
 
+function MbtiCheckboxGroup({
+  selected,
+  onChange,
+}: {
+  selected: string[];
+  onChange: (values: string[]) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+      MBTI指定（複数選択可）
+      <div className="flex max-h-40 flex-col gap-2 overflow-y-auto rounded-lg border border-gray-300 bg-white p-2">
+        {MBTI_GROUP_ORDER.map((group) => (
+          <div key={group}>
+            <p className="text-xs font-semibold text-gray-400">{MBTI_GROUP_LABELS[group]}</p>
+            {MBTI_TYPES.filter((t) => t.group === group).map((t) => (
+              <label key={t.code} className="flex items-center gap-2 text-sm font-normal text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={selected.includes(t.code)}
+                  onChange={() => onChange(toggleValue(selected, t.code))}
+                />
+                {t.code} ({t.nickname})
+              </label>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 type Candidate = {
   studentId: number;
   universityCategory: string | null;
@@ -51,6 +84,7 @@ type Candidate = {
   industryThird: string;
   desiredOccupations: string[];
   latestDeviationScore: number | null;
+  mbti: string | null;
 };
 
 export default function CompanyDashboardPage() {
@@ -64,6 +98,7 @@ export default function CompanyDashboardPage() {
   const [facultyTypes, setFacultyTypes] = useState<string[]>([]);
   const [industries, setIndustries] = useState<string[]>([]);
   const [desiredOccupations, setDesiredOccupations] = useState<string[]>([]);
+  const [mbtiCodes, setMbtiCodes] = useState<string[]>([]);
   const [minDeviation, setMinDeviation] = useState("");
 
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
@@ -100,6 +135,7 @@ export default function CompanyDashboardPage() {
       facultyTypes.forEach((v) => params.append("facultyType", v));
       industries.forEach((v) => params.append("industry", v));
       desiredOccupations.forEach((v) => params.append("desiredOccupation", v));
+      mbtiCodes.forEach((v) => params.append("mbti", v));
       if (minDeviation) params.set("minDeviation", minDeviation);
 
       const res = await fetch(`/api/company/scouts?${params.toString()}`);
@@ -172,6 +208,8 @@ export default function CompanyDashboardPage() {
                 onChange={setDesiredOccupations}
               />
 
+              <MbtiCheckboxGroup selected={mbtiCodes} onChange={setMbtiCodes} />
+
               <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
                 SPI偏差値（以上）
                 <input
@@ -210,6 +248,7 @@ export default function CompanyDashboardPage() {
                         偏差値:{" "}
                         {c.latestDeviationScore !== null ? c.latestDeviationScore.toFixed(1) : "未受験"}
                       </span>
+                      <MbtiBadge code={c.mbti} />
                     </div>
                     <p className="mt-2 text-xs text-gray-500">
                       志望業界: {c.industryFirst} / {c.industrySecond} / {c.industryThird}

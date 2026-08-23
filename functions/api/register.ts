@@ -3,6 +3,7 @@ import { getUniversityCategory } from "../../src/data/universityCategories";
 import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
 import { parseDesiredOccupations } from "../_lib/desiredOccupations";
 import { createSession, sessionCookieHeader } from "../_lib/session";
+import { isValidMbtiCode } from "../../src/data/mbti";
 
 interface Env {
   DB: D1Database;
@@ -26,6 +27,7 @@ type RegisterBody = {
   graduationMonth?: unknown;
   agreedTerms?: unknown;
   scoutConsent?: unknown;
+  mbti?: unknown;
 };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -54,6 +56,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     graduationMonth,
     agreedTerms,
     scoutConsent,
+    mbti,
   } = body;
 
   if (
@@ -89,6 +92,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "利用規約・プライバシーポリシーへの同意が必要です" }, { status: 400 });
   }
   const isScoutConsent = scoutConsent === true;
+
+  // MBTIは任意項目。未選択（""/undefined/null）はNULL保存、指定時は既知の16タイプのみ許可する。
+  if (mbti !== undefined && mbti !== null && mbti !== "" && (typeof mbti !== "string" || !isValidMbtiCode(mbti))) {
+    return Response.json({ error: "MBTIの値が不正です" }, { status: 400 });
+  }
+  const mbtiValue = typeof mbti === "string" && mbti !== "" ? mbti : null;
 
   const desiredOccupationsJson = parseDesiredOccupations(desiredOccupations);
   if (!desiredOccupationsJson) {
@@ -127,8 +136,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     `INSERT INTO users
       (last_name, first_name, last_name_romaji, first_name_romaji, email, password_hash, password_salt,
        faculty_type, university, university_category, industry_first, industry_second, industry_third,
-       desired_occupations, graduation_year, graduation_month, terms_agreed_at, scout_consent)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)
+       desired_occupations, graduation_year, graduation_month, terms_agreed_at, scout_consent, mbti)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
      RETURNING id`
   )
     .bind(
@@ -148,7 +157,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       desiredOccupationsJson,
       graduationYear,
       graduationMonth,
-      isScoutConsent ? 1 : 0
+      isScoutConsent ? 1 : 0,
+      mbtiValue
     )
     .first<{ id: number }>();
 

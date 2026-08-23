@@ -25,6 +25,10 @@ CREATE TABLE IF NOT EXISTS users (
   university_category TEXT,
   -- 希望職種（最大3つ）。JSON文字列配列として保存する。例: ["営業・顧客交渉","IT・エンジニア・Web制作"]
   desired_occupations TEXT NOT NULL DEFAULT '["こだわりなし・幅広く検討したい"]',
+  -- MBTI（16タイプ性格診断）のコード（例: "ENTJ"）。任意入力のためNULL許容。
+  -- 通称和名（例: "指揮官"）や4グループ（分析家・外交官・管理者・探検家）へのマッピングは
+  -- src/data/mbti.ts で管理し、DBにはコード文字列のみを保存する。
+  mbti TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
