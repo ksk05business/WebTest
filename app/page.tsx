@@ -29,13 +29,13 @@ const BADGES = [
   { icon: ShieldCheck, text: "2段階開示で安心" },
 ];
 
-const TEST_BRAND_DETAILS: { id: string; displayName: string; subtitle: string }[] = [
-  { id: "spi", displayName: "SPI3", subtitle: "言語・非言語・構造的把握・英語" },
-  { id: "tamatebako", displayName: "玉手箱", subtitle: "計数・言語・英語" },
-  { id: "tgweb", displayName: "TG-WEB", subtitle: "従来型・新型" },
-  { id: "gab_cgab", displayName: "GAB / C-GAB", subtitle: "言語・計数・英語" },
-  { id: "cab", displayName: "CAB", subtitle: "暗号・法則性・命令表（エンジニア・IT職向け）" },
-  { id: "scoa", displayName: "SCOA", subtitle: "言語・数理・論理・常識・英語（公務員・地銀・中堅企業で頻出）" },
+const TEST_BRAND_DETAILS: { id: string; slug: string; displayName: string; subtitle: string }[] = [
+  { id: "spi", slug: "spi", displayName: "SPI3", subtitle: "言語・非言語・構造的把握・英語" },
+  { id: "tamatebako", slug: "tamatebako", displayName: "玉手箱", subtitle: "計数・言語・英語" },
+  { id: "tgweb", slug: "tg-web", displayName: "TG-WEB", subtitle: "従来型・新型" },
+  { id: "gab_cgab", slug: "gab", displayName: "GAB / C-GAB", subtitle: "言語・計数・英語" },
+  { id: "cab", slug: "cab", displayName: "CAB", subtitle: "暗号・法則性・命令表（エンジニア・IT職向け）" },
+  { id: "scoa", slug: "scoa", displayName: "SCOA", subtitle: "言語・数理・論理・常識・英語（公務員・地銀・中堅企業で頻出）" },
 ];
 
 const TEST_BRANDS = TEST_BRAND_DETAILS.map((d) => ({
@@ -112,6 +112,16 @@ const JSON_LD = {
       url: SITE_URL,
       description: SITE_DESCRIPTION,
       inLanguage: "ja",
+    },
+    {
+      "@type": "WebApplication",
+      name: SITE_NAME,
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "JPY" },
+      provider: { "@type": "EducationalOrganization", name: SITE_NAME, url: SITE_URL },
     },
     {
       "@type": "EducationalOrganization",
@@ -287,8 +297,9 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {TEST_BRANDS.map((b) => (
-              <div
+              <Link
                 key={b.id}
+                href={`/test/${b.slug}`}
                 className="flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className="flex items-center justify-between">
@@ -302,7 +313,7 @@ export default function Home() {
                   </span>
                 </div>
                 <p className="text-xs leading-relaxed text-gray-500">{b.subtitle}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

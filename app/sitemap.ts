@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { GUIDE_ARTICLES } from "@/src/data/guideArticles";
+import { TEST_GUIDES } from "@/src/data/testGuides";
 import { SITE_URL } from "@/src/lib/site";
 
 // 静的サイト出力（output: "export"）ではビルド時に一度だけ生成されるため force-static を明示する。
@@ -30,5 +31,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticEntries, ...guideEntries];
+  const testCategoryEntries: MetadataRoute.Sitemap = TEST_GUIDES.map((guide) => ({
+    url: `${SITE_URL}/test/${guide.slug}`,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  return [...staticEntries, ...testCategoryEntries, ...guideEntries];
 }

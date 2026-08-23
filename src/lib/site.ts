@@ -2,17 +2,24 @@
 // layout.tsx（メタデータ）、page.tsx（JSON-LD）、sitemap.ts、robots.ts、/guide配下のページで共通利用する。
 export const SITE_URL = "https://shukatsu-webtest.com";
 export const SITE_NAME = "Webテストナビ";
-export const SITE_TITLE = `${SITE_NAME} | SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA対策＆スカウト`;
+export const SITE_TITLE = "【完全無料】Webテスト対策サイト・アプリ | SPI3・玉手箱の練習問題集・解説付き";
 export const SITE_DESCRIPTION =
-  "Webテストナビは、SPI 無料 練習問題や玉手箱 対策 おすすめを探す就活生のための模試・解き方ガイド・スカウトサービスです。SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOAなど主要Webテストの模試でWebテスト 模試 偏差値を測定し、弱点分析・忘却曲線に基づく反復復習で対策、2段階開示で安心してスカウトを受け取れます。";
+  "参考書不要！SPI3・玉手箱・TG-WEB等のWebテスト（適性検査）対策が無料で完結する就活生向け練習サイト・アプリ。忘却曲線に基づいた効率学習と本番模試で偏差値を可視化。";
 export const SITE_KEYWORDS = [
+  "Webテスト",
+  "ウェブテスト",
+  "適性検査",
+  "就活 Webテスト",
+  "SPI 問題",
+  "玉手箱 問題",
+  "Webテスト 問題集",
+  "Webテスト アプリ",
+  "Webテスト サイト",
+  "SPI アプリ",
+  "玉手箱 アプリ",
+  "Webテスト 参考書",
   "SPI 無料 練習問題",
   "玉手箱 対策 おすすめ",
   "Webテスト 模試 偏差値",
-  "SPI3 対策",
-  "玉手箱 練習問題",
-  "Webテスト 対策 無料",
   "就活 適性検査 練習",
-  "TG-WEB 対策",
-  "GAB C-GAB 対策",
 ];
