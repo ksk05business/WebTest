@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Question } from "@/src/data/questions";
+import { formatJapaneseDate } from "@/src/lib/formatDate";
 
 const TIME_PER_QUESTION = 60;
 // /testは現状SPI3本番模試専用のため、玉手箱等の他テスト向けカテゴリ（tamatebako_*等）を誤って
@@ -19,6 +20,10 @@ export default function TestPage() {
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [score, setScore] = useState(0);
   const [authChecked, setAuthChecked] = useState(false);
+  const [eligibility, setEligibility] = useState<{ eligible: boolean; nextResetAt: string } | null>(
+    null
+  );
+  const [eligibilityError, setEligibilityError] = useState<string | null>(null);
   const [results, setResults] = useState<
     { questionId: number; category: string; correct: boolean }[]
   >([]);
@@ -34,8 +39,28 @@ export default function TestPage() {
     setAuthChecked(true);
   }, [router]);
 
+  // テスト種別ごとに2ヶ月に1回（奇数月1日に一斉リセット）のみ受験可能。今期すでに受験済みなら
+  // 問題の取得自体を行わず、受験不可メッセージを表示する。
   useEffect(() => {
     if (!authChecked) return;
+    fetch("/api/exam-eligibility?testType=spi")
+      .then((res) => res.json())
+      .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
+        if (data.error) {
+          if (data.error === "ログインが必要です") {
+            router.replace("/login");
+            return;
+          }
+          setEligibilityError(data.error);
+          return;
+        }
+        setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
+      })
+      .catch(() => setEligibilityError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+  }, [authChecked, router]);
+
+  useEffect(() => {
+    if (!authChecked || !eligibility?.eligible) return;
     const params = new URLSearchParams();
     SPI_CATEGORIES.forEach((c) => params.append("category", c));
     fetch(`/api/questions?${params.toString()}`)
@@ -48,7 +73,7 @@ export default function TestPage() {
         setQuestions(data.questions);
       })
       .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
-  }, [authChecked]);
+  }, [authChecked, eligibility]);
 
   // reset timer whenever we move to a new question
   useEffect(() => {
@@ -129,6 +154,42 @@ export default function TestPage() {
 
   if (!authChecked) {
     return null;
+  }
+
+  if (eligibilityError) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+        <p className="text-sm font-medium text-red-600">{eligibilityError}</p>
+      </main>
+    );
+  }
+
+  if (!eligibility) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+        <p className="text-sm text-gray-500">受験可否を確認しています...</p>
+      </main>
+    );
+  }
+
+  if (!eligibility.eligible) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10 text-center">
+        <p className="text-base font-semibold text-gray-900">
+          このテストは2ヶ月に1回のみ受験可能です
+        </p>
+        <p className="text-sm text-gray-600">
+          次回一斉リセット: {formatJapaneseDate(eligibility.nextResetAt)}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard")}
+          className="mt-2 rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+        >
+          ダッシュボードへ戻る
+        </button>
+      </main>
+    );
   }
 
   if (loadError) {

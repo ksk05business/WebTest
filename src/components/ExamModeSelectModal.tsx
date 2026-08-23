@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Info } from "lucide-react";
 import type { TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_EXPLAINERS } from "@/src/data/testExplainers";
+import { formatJapaneseDate } from "@/src/lib/formatDate";
 
 export function ExamModeSelectModal({
   testType,
@@ -16,6 +18,22 @@ export function ExamModeSelectModal({
   const router = useRouter();
   const explainer = TEST_EXPLAINERS[testType.id];
   const hasPracticeContent = Boolean(PRACTICE_UNIT_GROUPS_BY_TEST[testType.id]);
+
+  // テスト種別ごとに2ヶ月に1回（奇数月1日に一斉リセット）のみ受験可能。
+  const [eligibility, setEligibility] = useState<{ eligible: boolean; nextResetAt: string } | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!testType.available) return;
+    fetch(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
+      .then((res) => res.json())
+      .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
+        if (data.error) return;
+        setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
+      })
+      .catch(() => {});
+  }, [testType.available, testType.id]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
@@ -81,13 +99,22 @@ export function ExamModeSelectModal({
                 本番同様の制限時間で全範囲から出題。成績・偏差値が記録され、企業スカウトの評価対象になります。
               </p>
               {testType.available ? (
-                <button
-                  type="button"
-                  onClick={() => router.push(testType.href)}
-                  className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                  模擬試験をスタート
-                </button>
+                eligibility && !eligibility.eligible ? (
+                  <div className="mt-1 rounded-lg bg-amber-50 px-3 py-2.5 text-center text-xs font-semibold text-amber-800">
+                    このテストは2ヶ月に1回のみ受験可能です
+                    <br />
+                    次回一斉リセット: {formatJapaneseDate(eligibility.nextResetAt)}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => router.push(testType.href)}
+                    disabled={!eligibility}
+                    className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    模擬試験をスタート
+                  </button>
+                )
               ) : (
                 <p className="mt-1 rounded-full bg-gray-100 py-2.5 text-center text-sm font-semibold text-gray-400">
                   本番模試は準備中です

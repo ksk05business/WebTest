@@ -1,5 +1,6 @@
 import { INITIAL_REVIEW_INTERVAL_DAYS, daysFromNowModifier } from "../_lib/reviewSchedule";
 import { getAuthenticatedSubjectId } from "../_lib/session";
+import { checkExamEligibility } from "../_lib/mockExamCycle";
 
 interface Env {
   DB: D1Database;
@@ -121,6 +122,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       await enqueueWrongLanguageAnswers(context.env.DB, userId, answers);
     }
     return Response.json({ ok: true, isPractice: true, accuracyRate });
+  }
+
+  // 本番模試はテスト種別ごとに2ヶ月に1回（奇数月1日に一斉リセット）のみ受験可能。
+  // クライアント側の判定に加え、サーバー側でも受験権を再検証する（多重送信・直接APIコール対策）。
+  const eligibility = await checkExamEligibility(context.env.DB, userId, testType);
+  if (!eligibility.eligible) {
+    return Response.json(
+      {
+        error: `このテストは2ヶ月に1回のみ受験可能です（次回一斉リセット: ${eligibility.nextResetAt}）`,
+        nextResetAt: eligibility.nextResetAt,
+      },
+      { status: 409 }
+    );
   }
 
   const priorRows = await context.env.DB.prepare(

@@ -7,6 +7,9 @@ import { PerformanceDashboard } from "@/src/components/PerformanceDashboard";
 import { ScoutInbox } from "@/src/components/ScoutInbox";
 import { ExamModeSelectModal } from "@/src/components/ExamModeSelectModal";
 import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
+import { formatJapaneseDate } from "@/src/lib/formatDate";
+
+type Eligibility = { eligible: boolean; nextResetAt: string };
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -14,6 +17,7 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [selectedTestType, setSelectedTestType] = useState<TestType | null>(null);
+  const [eligibilityByType, setEligibilityByType] = useState<Record<string, Eligibility>>({});
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -26,6 +30,23 @@ export default function DashboardPage() {
     if (user.email) setUserEmail(user.email);
     setAuthChecked(true);
   }, [router]);
+
+  // 受験可能なテスト種別ごとに、本番模試の今期受験状況（2ヶ月に1回・奇数月1日一斉リセット）を取得する。
+  useEffect(() => {
+    if (!authChecked) return;
+    TEST_TYPES.filter((t) => t.available).forEach((t) => {
+      fetch(`/api/exam-eligibility?testType=${encodeURIComponent(t.id)}`)
+        .then((res) => res.json())
+        .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
+          if (data.error) return;
+          setEligibilityByType((prev) => ({
+            ...prev,
+            [t.id]: { eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" },
+          }));
+        })
+        .catch(() => {});
+    });
+  }, [authChecked]);
 
   if (!authChecked) {
     return null;
@@ -50,6 +71,13 @@ export default function DashboardPage() {
                   className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-center font-semibold text-blue-700 hover:bg-blue-100"
                 >
                   {t.name}
+                  <p className="mt-1 text-[10px] font-normal text-gray-500">
+                    {!eligibilityByType[t.id]
+                      ? "受験状況を確認中..."
+                      : eligibilityByType[t.id].eligible
+                      ? "今期 受験可能（2ヶ月に1回）"
+                      : `受験済み（次回リセット: ${formatJapaneseDate(eligibilityByType[t.id].nextResetAt)}）`}
+                  </p>
                 </button>
               ) : (
                 <button
