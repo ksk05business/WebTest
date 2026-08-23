@@ -4,6 +4,9 @@ export function Footer() {
   return (
     <footer className="mt-auto border-t border-gray-200 px-6 py-6 text-center text-xs text-gray-500">
       <nav className="flex flex-wrap items-center justify-center gap-4">
+        <Link href="/guide" className="hover:text-gray-700 hover:underline">
+          単元別解き方ガイド
+        </Link>
         <Link href="/terms" className="hover:text-gray-700 hover:underline">
           利用規約
         </Link>

@@ -21,6 +21,7 @@ import { TEST_TYPES } from "@/src/data/testTypes";
 import { BusinessLink } from "@/src/components/BusinessLink";
 import { ForgettingCurveChart } from "@/src/components/ForgettingCurveChart";
 import { SupportChatWidget } from "@/src/components/SupportChatWidget";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/src/lib/site";
 
 const BADGES = [
   { icon: Clock, text: "登録3分" },
@@ -102,9 +103,53 @@ const STEPS = [
   },
 ];
 
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      inLanguage: "ja",
+    },
+    {
+      "@type": "EducationalOrganization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      areaServed: "JP",
+      hasCourse: TEST_BRAND_DETAILS.map((brand) => ({
+        "@type": "Course",
+        name: `${brand.displayName} 無料対策講座`,
+        description: `${brand.displayName}（${brand.subtitle}）の練習問題・模試・解き方ガイドを無料で提供する対策講座。`,
+        provider: { "@type": "EducationalOrganization", name: SITE_NAME, url: SITE_URL },
+        isAccessibleForFree: true,
+        hasCourseInstance: {
+          "@type": "CourseInstance",
+          courseMode: "online",
+          courseWorkload: "PT30M",
+        },
+      })),
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQS.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+      })),
+    },
+  ],
+};
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link href="/" className="text-lg font-bold text-blue-700">

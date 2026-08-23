@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/src/components/Footer";
+import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL } from "@/src/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,14 +14,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_NAME = "Webテストナビ";
-const SITE_TITLE = `${SITE_NAME} | SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA対策＆スカウト`;
-const SITE_DESCRIPTION =
-  "Webテストナビは、SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOAなど主要Webテストに幅広く対応した、就活生のための模試とスカウトサービスです。弱点分析・忘却曲線に基づく反復復習で対策し、2段階開示で安心してスカウトを受け取れます。";
-
 export const metadata: Metadata = {
-  title: SITE_TITLE,
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
   description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: "/icon.svg",
   },
@@ -28,6 +32,7 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     siteName: SITE_NAME,
+    url: SITE_URL,
     locale: "ja_JP",
     type: "website",
   },
