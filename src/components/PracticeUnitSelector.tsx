@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Flame, Shuffle } from "lucide-react";
+import { ChevronRight, Flame } from "lucide-react";
 import { DEFAULT_TEST_ID, PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_TYPES } from "@/src/data/testTypes";
 
@@ -22,7 +22,6 @@ function getUserEmail(): string | null {
 export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: string }) {
   const router = useRouter();
   const [unitCounts, setUnitCounts] = useState<UnitCount[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [wrongCount, setWrongCount] = useState(0);
@@ -34,9 +33,8 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
   useEffect(() => {
     fetch("/api/question-units")
       .then((res) => res.json())
-      .then((data: { units?: UnitCount[]; total?: number }) => {
+      .then((data: { units?: UnitCount[] }) => {
         setUnitCounts(data.units ?? []);
-        setTotal(data.total ?? 0);
       })
       .catch(() => {
         // 収録問題数の取得に失敗しても単元一覧自体は表示する（バッジが0件になるだけ）
@@ -92,15 +90,6 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
     router.push(`/practice?category=wrong_review&testType=${testId}`);
   }
 
-  function handleRandomClick() {
-    if (loading) return;
-    if (total === 0) {
-      setToast("問題は準備中です");
-      return;
-    }
-    router.push(`/practice?category=all&testType=${testId}`);
-  }
-
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
       <div className="flex flex-col gap-2">
@@ -124,23 +113,6 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
             {wrongCountLoading ? "..." : `${wrongCount}問`}
           </span>
           <ChevronRight className="h-4 w-4 text-orange-400" />
-        </span>
-      </button>
-
-      <button
-        type="button"
-        onClick={handleRandomClick}
-        className="flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-colors hover:border-blue-300 hover:bg-blue-50"
-      >
-        <span className="flex items-center gap-2 font-bold text-gray-900">
-          <Shuffle className="h-5 w-5 text-blue-600" />
-          ランダム総合練習
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-            {loading ? "..." : `${total}問`}
-          </span>
-          <ChevronRight className="h-4 w-4 text-gray-400" />
         </span>
       </button>
 
