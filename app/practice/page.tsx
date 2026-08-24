@@ -7,7 +7,6 @@ import { ArrowLeft } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 import { DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
-import { redirectToLogin } from "@/src/lib/authRedirect";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -76,29 +75,6 @@ function PracticePageInner() {
   }, [router]);
 
   function loadQuestions() {
-    if (category === "wrong_review") {
-      const email = getUserEmail();
-      if (!email) {
-        setLoadError("ログイン情報が確認できませんでした。");
-        return;
-      }
-      fetch(`/api/practice/history?email=${encodeURIComponent(email)}&testType=${testId}&limit=20`)
-        .then((res) => res.json())
-        .then((data: { questions?: Question[]; error?: string }) => {
-          if (data.error === "ログインが必要です") {
-            redirectToLogin(router);
-            return;
-          }
-          if (!data.questions || data.questions.length === 0) {
-            setLoadError("復習すべき間違えた問題が見つかりませんでした。");
-            return;
-          }
-          setQuestions(data.questions);
-        })
-        .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
-      return;
-    }
-
     const params = new URLSearchParams({ limit: "20" });
     if (category) {
       params.set("category", category);

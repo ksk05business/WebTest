@@ -62,6 +62,7 @@ export function toClientQuestion(row: QuestionRow) {
   return {
     id: row.id,
     category: row.sub_category,
+    rawCategory: row.category,
     questionCode: buildQuestionCode(row.category, row.seq),
     title: row.title ?? undefined,
     text: row.question_text,

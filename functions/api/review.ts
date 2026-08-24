@@ -1,6 +1,6 @@
 import { toClientQuestion, type QuestionRow } from "../_lib/questionFormat";
 import {
-  INITIAL_REVIEW_INTERVAL_DAYS,
+  INCORRECT_RESET_INTERVAL_DAYS,
   MASTERED_STAGE,
   daysFromNowModifier,
   nextIntervalDaysAfterStage,
@@ -14,26 +14,36 @@ interface Env {
 type ReviewRow = QuestionRow & {
   review_id: number;
   review_stage: number;
+  status: string;
+  next_review_at: string;
 };
 
-// 今日（現在時刻時点）が復習期日になっている問題を取得する。
+// ?scope=all: ステータス問わず復習ノートの全問題（テスト種別・科目ごとの一覧表示用）。
+// ?scope未指定（デフォルト）: 今日（現在時刻時点）が復習期日になっているactiveな問題のみ（復習セッション用）。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
   if (!userId) {
     return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
+  const scope = new URL(context.request.url).searchParams.get("scope");
+  const showAll = scope === "all";
+
+  const condition = showAll
+    ? "r.user_id = ?"
+    : "r.user_id = ? AND r.status = 'active' AND r.next_review_at <= datetime('now')";
+
   const rows = await context.env.DB.prepare(
     `WITH ranked AS (
        SELECT id, ROW_NUMBER() OVER (PARTITION BY category ORDER BY id) AS seq FROM questions
      )
      SELECT
-        r.id AS review_id, r.review_stage,
+        r.id AS review_id, r.review_stage, r.status, r.next_review_at,
         q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.options, q.correct_answer, q.explanation, rk.seq
      FROM user_question_reviews r
      JOIN questions q ON q.id = r.question_id
      JOIN ranked rk ON rk.id = q.id
-     WHERE r.user_id = ? AND r.status = 'active' AND r.next_review_at <= datetime('now')
+     WHERE ${condition}
      ORDER BY r.next_review_at ASC`
   )
     .bind(userId)
@@ -43,6 +53,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     reviews: (rows.results ?? []).map((r) => ({
       reviewId: r.review_id,
       reviewStage: r.review_stage,
+      status: r.status,
+      nextReviewAt: r.next_review_at,
       question: toClientQuestion(r),
     })),
   });
@@ -94,7 +106,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
            next_review_at = datetime('now', ?), updated_at = datetime('now')
        WHERE id = ?`
     )
-      .bind(daysFromNowModifier(INITIAL_REVIEW_INTERVAL_DAYS), reviewId)
+      .bind(daysFromNowModifier(INCORRECT_RESET_INTERVAL_DAYS), reviewId)
       .run();
 
     return Response.json({ ok: true, reviewStage: 0, status: "active" });

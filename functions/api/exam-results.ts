@@ -54,23 +54,23 @@ function calculateDeviationScore(rate: number, priorRates: number[]): number {
   return 50 + (10 * (rate - mean)) / stddev;
 }
 
-// 言語（verbal）・英語（english）カテゴリの問題を間違えた場合、忘却曲線に基づく復習キューへ追加/リセットする
-// （どちらも知識系＝反復記憶で伸びやすい分野のため対象とする）。
-// 既に復習キューにある問題（mastered済みも含む）は、間違えた時点でstage0・翌日復習にリセットする。
-async function enqueueWrongLanguageAnswers(db: D1Database, userId: number, answers: AnswerInput[]) {
+// 練習問題・模試で間違えた問題（テスト種別・科目を問わずすべて）を、忘却曲線に基づく復習キューへ
+// 追加/リセットする。既に復習キューにある問題（mastered済みも含む）は、間違えた時点でstage0・
+// 当日復習にリセットする。
+// 以前はverbal/englishカテゴリのみを対象としていたが、非言語・玉手箱等の問題を間違えても
+// 復習ノートに追加されない不具合があったため、カテゴリを問わず全問を対象とするよう修正した。
+async function enqueueWrongAnswers(db: D1Database, userId: number, answers: AnswerInput[]) {
   const wrongIds = answers.filter((a) => !a.correct).map((a) => a.questionId);
   if (wrongIds.length === 0) return;
 
   const placeholders = wrongIds.map(() => "?").join(",");
-  const languageQuestions = await db
-    .prepare(
-      `SELECT id FROM questions WHERE id IN (${placeholders}) AND category IN ('verbal', 'english')`
-    )
+  const wrongQuestions = await db
+    .prepare(`SELECT id FROM questions WHERE id IN (${placeholders})`)
     .bind(...wrongIds)
     .all<{ id: number }>();
 
   const modifier = daysFromNowModifier(INITIAL_REVIEW_INTERVAL_DAYS);
-  for (const q of languageQuestions.results ?? []) {
+  for (const q of wrongQuestions.results ?? []) {
     await db
       .prepare(
         `INSERT INTO user_question_reviews (user_id, question_id, review_stage, status, last_result, next_review_at)
@@ -116,10 +116,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const accuracyRate = score / total;
 
   // 練習問題（トレーニングモード）は正式な受験記録として保存しない（偏差値推移・カテゴリ分析には反映しない）。
-  // ただし間違えた言語問題の復習キュー登録だけは、本番模試と同様に行う。
+  // ただし間違えた問題の復習キュー登録だけは、本番模試と同様に行う。
   if (isPractice) {
     if (answers) {
-      await enqueueWrongLanguageAnswers(context.env.DB, userId, answers);
+      await enqueueWrongAnswers(context.env.DB, userId, answers);
     }
     return Response.json({ ok: true, isPractice: true, accuracyRate });
   }
@@ -161,7 +161,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     .run();
 
   if (answers) {
-    await enqueueWrongLanguageAnswers(context.env.DB, userId, answers);
+    await enqueueWrongAnswers(context.env.DB, userId, answers);
   }
 
   return Response.json({ ok: true, deviationScore, accuracyRate });

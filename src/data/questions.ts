@@ -9,6 +9,9 @@ export type TableBlock = {
 export type Question = {
   id: number;
   category: string;
+  // questions.category（大分類、例: "non_verbal", "tamatebako_math"）。復習ノートでテスト種別・
+  // 科目ごとにグルーピング表示するために使う。category（=sub_category、例: "推論"）とは別物。
+  rawCategory?: string;
   questionCode?: string;
   title?: string;
   text: string;
