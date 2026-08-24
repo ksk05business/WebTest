@@ -17,17 +17,20 @@ type CompanyApplicationRow = {
   corporate_site_url: string | null;
   account_type: string;
   inquiry_message: string | null;
+  request_type: string;
   status: string;
   created_at: string;
   reviewed_at: string | null;
 };
 
-// 審査申請の一覧取得。?status= で絞り込み可能（デフォルトは全件）。管理API共通のx-admin-token認証。
+// 申請・資料請求の一覧取得。?status= ?requestType= で絞り込み可能（デフォルトは全件）。管理API共通のx-admin-token認証。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const authError = checkAdminAuth(context);
   if (authError) return authError;
 
-  const status = new URL(context.request.url).searchParams.get("status");
+  const url = new URL(context.request.url);
+  const status = url.searchParams.get("status");
+  const requestType = url.searchParams.get("requestType");
 
   const conditions: string[] = [];
   const binds: string[] = [];
@@ -35,10 +38,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     conditions.push("status = ?");
     binds.push(status);
   }
+  if (requestType) {
+    conditions.push("request_type = ?");
+    binds.push(requestType);
+  }
 
   const rows = await context.env.DB.prepare(
     `SELECT id, company_name, contact_name, department, job_title, email, phone_number,
-            corporate_site_url, account_type, inquiry_message, status, created_at, reviewed_at
+            corporate_site_url, account_type, inquiry_message, request_type, status, created_at, reviewed_at
      FROM company_profiles
      ${conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""}
      ORDER BY created_at DESC`
@@ -58,6 +65,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       corporateSiteUrl: r.corporate_site_url,
       accountType: r.account_type,
       inquiryMessage: r.inquiry_message,
+      requestType: r.request_type,
       status: r.status,
       createdAt: r.created_at,
       reviewedAt: r.reviewed_at,
@@ -70,7 +78,12 @@ type ReviewBody = {
   action?: unknown;
 };
 
-// 審査申請の承認/却下。承認時のみ初期パスワードを新規発行してレスポンスに含める（一度きり、この応答以外には残さない）。
+const VALID_ACTIONS = ["approve", "reject", "mark_handled", "mark_received"] as const;
+
+// 申請・資料請求への対応。
+//   approve/reject: request_type='account_apply' の申請のみ有効。承認時のみ初期パスワードを新規発行してレスポンスに含める
+//   （一度きり、この応答以外には残さない）。
+//   mark_handled/mark_received: request_type='document_request' の資料請求のみ有効。アカウントは発行しない、対応状況のトグル。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const authError = checkAdminAuth(context);
   if (authError) return authError;
@@ -83,47 +96,69 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const { companyId, action } = body;
-  if (typeof companyId !== "number" || (action !== "approve" && action !== "reject")) {
+  if (
+    typeof companyId !== "number" ||
+    typeof action !== "string" ||
+    !(VALID_ACTIONS as readonly string[]).includes(action)
+  ) {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
   }
 
   const company = await context.env.DB.prepare(
-    "SELECT id, email, status FROM company_profiles WHERE id = ?"
+    "SELECT id, email, status, request_type FROM company_profiles WHERE id = ?"
   )
     .bind(companyId)
-    .first<{ id: number; email: string; status: string }>();
+    .first<{ id: number; email: string; status: string; request_type: string }>();
 
   if (!company) {
     return Response.json({ error: "申請が見つかりません" }, { status: 404 });
   }
-  if (company.status !== "pending") {
-    return Response.json({ error: "この申請は既に審査済みです" }, { status: 409 });
-  }
 
-  if (action === "reject") {
+  if (action === "approve" || action === "reject") {
+    if (company.request_type !== "account_apply") {
+      return Response.json({ error: "この操作は利用審査申請にのみ使用できます" }, { status: 400 });
+    }
+    if (company.status !== "pending") {
+      return Response.json({ error: "この申請は既に審査済みです" }, { status: 409 });
+    }
+
+    if (action === "reject") {
+      await context.env.DB.prepare(
+        "UPDATE company_profiles SET status = 'rejected', reviewed_at = datetime('now') WHERE id = ?"
+      )
+        .bind(companyId)
+        .run();
+      return Response.json({ ok: true, status: "rejected" });
+    }
+
+    const initialPassword = generateInitialPassword();
+    const { hash, salt } = await hashPassword(initialPassword);
+
     await context.env.DB.prepare(
-      "UPDATE company_profiles SET status = 'rejected', reviewed_at = datetime('now') WHERE id = ?"
+      `UPDATE company_profiles
+       SET status = 'active', password_hash = ?, password_salt = ?, reviewed_at = datetime('now')
+       WHERE id = ?`
     )
-      .bind(companyId)
+      .bind(hash, salt, companyId)
       .run();
-    return Response.json({ ok: true, status: "rejected" });
+
+    return Response.json({
+      ok: true,
+      status: "active",
+      email: company.email,
+      initialPassword,
+    });
   }
 
-  const initialPassword = generateInitialPassword();
-  const { hash, salt } = await hashPassword(initialPassword);
-
+  // mark_handled / mark_received（資料請求への対応トグル）
+  if (company.request_type !== "document_request") {
+    return Response.json({ error: "この操作は資料請求にのみ使用できます" }, { status: 400 });
+  }
+  const nextStatus = action === "mark_handled" ? "handled" : "received";
   await context.env.DB.prepare(
-    `UPDATE company_profiles
-     SET status = 'active', password_hash = ?, password_salt = ?, reviewed_at = datetime('now')
-     WHERE id = ?`
+    "UPDATE company_profiles SET status = ?, reviewed_at = datetime('now') WHERE id = ?"
   )
-    .bind(hash, salt, companyId)
+    .bind(nextStatus, companyId)
     .run();
-
-  return Response.json({
-    ok: true,
-    status: "active",
-    email: company.email,
-    initialPassword,
-  });
+  return Response.json({ ok: true, status: nextStatus });
 };

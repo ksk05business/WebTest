@@ -80,13 +80,13 @@ CREATE TABLE IF NOT EXISTS company_profiles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   company_name TEXT NOT NULL,
   contact_name TEXT NOT NULL,
-  department TEXT, -- 担当者の部署
-  job_title TEXT, -- 担当者の役職
+  department TEXT, -- 担当者の部署（利用審査申請のみ収集。資料請求では未収集のためNULL）
+  job_title TEXT, -- 担当者の役職（利用審査申請のみ収集。資料請求では未収集のためNULL）
   email TEXT NOT NULL UNIQUE,
   phone_number TEXT,
   corporate_site_url TEXT,
-  account_type TEXT NOT NULL DEFAULT 'direct_hire', -- 'direct_hire'（直接採用企業） | 'agency'（就活エージェント/人材紹介会社）
-  inquiry_message TEXT, -- 問い合わせ・利用目的（任意）
+  account_type TEXT NOT NULL DEFAULT 'direct_hire', -- 'direct_hire'（直接採用企業） | 'agency'（就活エージェント/人材紹介会社）。資料請求では未収集のため既定値のまま
+  inquiry_message TEXT, -- 問い合わせ・利用目的（任意、利用審査申請のみ）
   password_hash TEXT NOT NULL DEFAULT '',
   password_salt TEXT NOT NULL DEFAULT '',
   industry TEXT,
@@ -94,9 +94,12 @@ CREATE TABLE IF NOT EXISTS company_profiles (
   provider_business_type TEXT NOT NULL DEFAULT '募集情報等提供事業',
   -- 特定募集情報等提供事業として厚生労働省へ届出した場合の届出受理番号（未取得時はNULL）
   provider_notification_number TEXT,
-  -- 'pending'（審査待ち・自己申請直後）| 'active'（承認済み・ログイン/スカウト利用可）| 'rejected'（却下・アクセス不可）
+  -- 'account_apply'（利用審査申請・アカウント発行希望） | 'document_request'（サービス紹介資料請求のみ、アカウントは発行しない）
+  request_type TEXT NOT NULL DEFAULT 'account_apply',
+  -- request_type='account_apply' の場合: 'pending'（審査待ち）| 'active'（承認済み・ログイン/スカウト利用可）| 'rejected'（却下）
+  -- request_type='document_request' の場合: 'received'（受付済み・資料送付待ち）| 'handled'（資料送付等の対応済み）
   status TEXT NOT NULL DEFAULT 'pending',
-  reviewed_at TEXT, -- 管理者が承認/却下した日時
+  reviewed_at TEXT, -- 管理者が承認/却下、または資料請求への対応を完了した日時
   approved INTEGER NOT NULL DEFAULT 0, -- 非推奨（statusに置き換え済み）。既存データとの互換のためカラムのみ残す
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
