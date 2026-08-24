@@ -167,7 +167,7 @@ export default function Home() {
           </Link>
           <div className="flex items-center gap-6">
             <BusinessLink className="hidden text-sm font-medium text-gray-500 hover:text-indigo-700 sm:inline">
-              企業・就活エージェント様はこちら
+              直接採用企業様はこちら
             </BusinessLink>
             <Link
               href="/login"
@@ -433,12 +433,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 企業・エージェント様向け */}
+      {/* 直接採用企業様向け */}
       <section id="business" className="scroll-mt-20 bg-gray-50 px-6 py-20 sm:py-24">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm sm:p-12">
           <span className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
             <Building2 className="h-3.5 w-3.5" />
-            採用ご担当者様・就活エージェント様へ
+            直接採用の採用ご担当者様へ
           </span>
           <h2 className="text-balance text-2xl font-bold text-gray-900 sm:text-3xl">
             スコア・志望業界による高精度データベースから

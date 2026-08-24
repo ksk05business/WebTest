@@ -23,6 +23,13 @@ const ACCOUNT_TYPE_LABEL: Record<string, string> = {
   agency: "就活エージェント/人材紹介会社",
 };
 
+// 本サービスは直接採用企業専用のため、'agency'（人材紹介・エージェント事業者）の申請は
+// 原則却下対象として審査担当者に警告表示する（自動却下はせず、最終判断は運営に委ねる）。
+const IS_RESTRICTED_ACCOUNT_TYPE: Record<string, boolean> = {
+  direct_hire: false,
+  agency: true,
+};
+
 const STATUS_LABEL: Record<string, string> = {
   pending: "審査待ち",
   active: "承認済み",
@@ -37,7 +44,8 @@ const STATUS_STYLE: Record<string, string> = {
 
 const STATUS_TABS = ["pending", "active", "rejected", "all"] as const;
 
-// 企業・就活エージェントの審査申請一覧・承認/却下UI。/admin/companies（単独ページ）と
+// 直接採用企業の審査申請一覧・承認/却下UI（人材紹介・エージェント事業者からの申請は
+// 原則却下対象として警告バッジ表示する）。/admin/companies（単独ページ）と
 // /admin/dashboard（統合管理画面の企業タブ）の両方から、同じadminTokenを渡して共用する。
 export function CompanyManagementPanel({
   adminToken,
@@ -162,8 +170,15 @@ export function CompanyManagementPanel({
         <p className="text-sm text-gray-500">該当する申請はありません。</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {companies.map((c) => (
-            <div key={c.id} className="rounded-lg border border-gray-200 bg-white p-4">
+          {companies.map((c) => {
+            const isRestricted = IS_RESTRICTED_ACCOUNT_TYPE[c.accountType] ?? false;
+            return (
+            <div
+              key={c.id}
+              className={`rounded-lg border bg-white p-4 ${
+                isRestricted && c.status === "pending" ? "border-red-300 bg-red-50/30" : "border-gray-200"
+              }`}
+            >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <p className="font-bold text-gray-900">{c.companyName}</p>
@@ -177,9 +192,20 @@ export function CompanyManagementPanel({
                   <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
                     {ACCOUNT_TYPE_LABEL[c.accountType] ?? c.accountType}
                   </span>
+                  {isRestricted && (
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+                      ⚠ エージェント該当（原則却下）
+                    </span>
+                  )}
                 </div>
                 <span className="text-xs text-gray-400">{c.createdAt}</span>
               </div>
+
+              {isRestricted && c.status === "pending" && (
+                <p className="mt-2 rounded-md bg-red-100 p-2 text-xs font-medium text-red-800">
+                  本サービスは直接採用企業専用です。人材紹介・エージェント事業者からの申請のため、却下を推奨します。事業内容を確認のうえご判断ください。
+                </p>
+              )}
 
               <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-sm text-gray-700 sm:grid-cols-2">
                 <p>
@@ -233,7 +259,8 @@ export function CompanyManagementPanel({
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

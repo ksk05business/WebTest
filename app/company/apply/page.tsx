@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 
 const ACCOUNT_TYPES = [
-  { value: "direct_hire", label: "直接採用企業" },
-  { value: "agency", label: "就活エージェント / 人材紹介会社" },
+  { value: "direct_hire", label: "直接採用企業（自社採用のみ）" },
+  { value: "agency", label: "就活エージェント / 人材紹介会社（原則ご利用いただけません）" },
 ] as const;
 
 export default function CompanyApplyPage() {
@@ -86,9 +86,16 @@ export default function CompanyApplyPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 px-6 py-10">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-gray-900">企業・就活エージェント様向け 利用審査申請</h1>
+        <h1 className="text-2xl font-bold text-gray-900">直接採用企業様向け 利用審査申請</h1>
         <p className="text-sm text-gray-600">
           スコア・志望業界による高精度データベースからターゲット学生に直接スカウトを送れます。いたずら登録防止のため、運営による審査を経てアカウントを発行いたします。
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+        <p className="font-bold">ご利用いただける事業者について</p>
+        <p className="mt-1 leading-relaxed">
+          本サービスは、求職者の直接採用（自社採用）を目的とする事業会社様専用です。求職者を他社へ紹介・仲介する人材紹介行為を目的としたご利用、および取得した情報を第三者へ転売する目的でのご利用（就活エージェント・人材紹介会社様等によるご利用）はお断りしております。該当する場合、誠に恐れ入りますが本サービスをご利用いただけません。
         </p>
       </div>
 
@@ -188,6 +195,11 @@ export default function CompanyApplyPage() {
               </label>
             ))}
           </div>
+          {accountType === "agency" && (
+            <p className="text-xs font-medium text-red-600">
+              ⚠ 人材紹介・エージェント事業者様からのお申し込みは原則承認されません。直接採用（自社採用）目的でのご利用のみお申し込みください。
+            </p>
+          )}
         </div>
 
         <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">

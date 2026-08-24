@@ -14,7 +14,7 @@ export function Footer() {
           プライバシーポリシー
         </Link>
         <Link href="/company/apply" className="hover:text-gray-700 hover:underline">
-          企業・就活エージェント様はこちら
+          直接採用企業様はこちら
         </Link>
         <Link href="/contact" className="hover:text-gray-700 hover:underline">
           お問い合わせ

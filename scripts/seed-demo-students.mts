@@ -1,4 +1,4 @@
-// 企業・エージェント向けデモ画面のクオリティ向上のため、リアリティのあるダミー学生15名分を
+// 直接採用企業向けデモ画面のクオリティ向上のため、リアリティのあるダミー学生15名分を
 // D1へシードするための一度きりのスクリプト。Node上で直接実行し（scripts/generate-seed-questions.mts
 // と同じ方式）、INSERT文一式を seed_demo_students.sql に書き出す。実際のD1への反映は
 //   npx wrangler d1 execute webtest-db --local --file=seed_demo_students.sql

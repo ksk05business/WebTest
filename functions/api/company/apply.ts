@@ -27,7 +27,9 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-// 企業・就活エージェント向けの利用審査申請。未ログインの公開エンドポイント。
+// 直接採用企業向けの利用審査申請。未ログインの公開エンドポイント。
+// accountType='agency'（人材紹介・エージェント事業者）の申請自体は受け付けるが、原則利用不可のため
+// 管理画面側（CompanyManagementPanel）で警告バッジを表示し、審査担当者の却下判断を促す。
 // 送信時点ではアカウントは status='pending' で作成され、管理者が承認するまでログイン・スカウト機能は一切使えない
 // （password_hash/password_saltは承認時まで空文字のプレースホルダー）。
 export const onRequestPost: PagesFunction<Env> = async (context) => {

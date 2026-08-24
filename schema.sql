@@ -237,7 +237,7 @@ CREATE TABLE IF NOT EXISTS contact_inquiries (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
-  subject_type TEXT NOT NULL, -- 'user'（学生） | 'company'（企業・エージェント）
+  subject_type TEXT NOT NULL, -- 'user'（学生） | 'company'（直接採用企業）
   subject_id INTEGER NOT NULL, -- subject_typeに応じて users.id または company_profiles.id
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   expires_at TEXT NOT NULL
