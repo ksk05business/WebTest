@@ -4,15 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { isFreeEmailDomain } from "@/src/lib/freeEmailDomains";
 
-const ACCOUNT_TYPES = [
-  { value: "direct_hire", label: "直接採用企業（自社採用のみ）" },
-  { value: "agency", label: "就活エージェント / 人材紹介会社（原則ご利用いただけません）" },
-] as const;
-
 type FormType = "account_apply" | "document_request";
 
 const FORM_TABS: { value: FormType; label: string }[] = [
-  { value: "account_apply", label: "無料アカウント開設（利用審査申請）" },
+  { value: "account_apply", label: "利用審査申請（アカウント発行）" },
   { value: "document_request", label: "サービス紹介資料請求" },
 ];
 
@@ -29,7 +24,6 @@ export default function CompanyApplyPage() {
   // 利用審査申請（account_apply）のみの項目
   const [department, setDepartment] = useState("");
   const [jobTitle, setJobTitle] = useState("");
-  const [accountType, setAccountType] = useState<string>("direct_hire");
   const [inquiryMessage, setInquiryMessage] = useState("");
 
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +69,9 @@ export default function CompanyApplyPage() {
           email,
           phoneNumber,
           corporateSiteUrl,
-          ...(formType === "account_apply" ? { department, jobTitle, accountType, inquiryMessage } : {}),
+          ...(formType === "account_apply"
+            ? { department, jobTitle, accountType: "direct_hire", inquiryMessage }
+            : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -119,16 +115,9 @@ export default function CompanyApplyPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 px-6 py-10">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-gray-900">直接採用企業様向け お申し込み</h1>
+        <h1 className="text-2xl font-bold text-gray-900">企業様向け 利用審査申請 / 資料請求</h1>
         <p className="text-sm text-gray-600">
-          スコア・志望業界による高精度データベースからターゲット学生に直接スカウトを送れます。いたずら登録防止のため、運営による審査を経てアカウントを発行いたします。まずはサービス紹介資料のみご希望の場合は「サービス紹介資料請求」からお申し込みください。
-        </p>
-      </div>
-
-      <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
-        <p className="font-bold">ご利用いただける事業者について</p>
-        <p className="mt-1 leading-relaxed">
-          本サービスは、求職者の直接採用（自社採用）を目的とする事業会社様専用です。求職者を他社へ紹介・仲介する人材紹介行為を目的としたご利用、および取得した情報を第三者へ転売する目的でのご利用（就活エージェント・人材紹介会社様等によるご利用）はお断りしております。該当する場合、誠に恐れ入りますが本サービスをご利用いただけません。
+          スコア・志望業界による高精度データベースからターゲット学生に直接スカウトを送れます。
         </p>
       </div>
 
@@ -228,40 +217,15 @@ export default function CompanyApplyPage() {
         </label>
 
         {formType === "account_apply" && (
-          <>
-            <div className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              契約・アカウント種別
-              <div className="flex flex-col gap-1 rounded-lg border border-gray-300 bg-white p-2">
-                {ACCOUNT_TYPES.map((t) => (
-                  <label key={t.value} className="flex items-center gap-2 text-sm font-normal text-gray-700">
-                    <input
-                      type="radio"
-                      name="accountType"
-                      value={t.value}
-                      checked={accountType === t.value}
-                      onChange={(e) => setAccountType(e.target.value)}
-                    />
-                    {t.label}
-                  </label>
-                ))}
-              </div>
-              {accountType === "agency" && (
-                <p className="text-xs font-medium text-red-600">
-                  ⚠ 人材紹介・エージェント事業者様からのお申し込みは原則承認されません。直接採用（自社採用）目的でのご利用のみお申し込みください。
-                </p>
-              )}
-            </div>
-
-            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
-              お問い合わせ・利用目的（任意）
-              <textarea
-                value={inquiryMessage}
-                onChange={(e) => setInquiryMessage(e.target.value)}
-                rows={4}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
-              />
-            </label>
-          </>
+          <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+            お問い合わせ・利用目的（任意）
+            <textarea
+              value={inquiryMessage}
+              onChange={(e) => setInquiryMessage(e.target.value)}
+              rows={4}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            />
+          </label>
         )}
 
         {error && <p className="text-sm font-medium text-red-600">{error}</p>}
