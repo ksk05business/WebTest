@@ -14,7 +14,9 @@ export type QuestionRow = {
   seq?: number;
 };
 
-const CHOICE_LABELS = ["A", "B", "C", "D", "E"] as const;
+// A〜Zの26択まで対応（構造的把握力のP・Q分類等でA〜Jの10択を使うケースがあるため、
+// SPI/玉手箱の通常問題で使うA〜E固定の5択より広く確保しておく）。
+const CHOICE_LABELS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
 // questions.category（大分類）ごとの表示用コード接頭辞。「問ID: #SPI-NV-001」のような形式で
 // 全テスト・全単元の問題に共通の識別ラベルを表示するために使う（新しいtest_type列を追加せず、
