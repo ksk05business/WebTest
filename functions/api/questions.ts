@@ -1,4 +1,5 @@
 import { toClientQuestion, type QuestionRow } from "../_lib/questionFormat";
+import { getAuthenticatedSubjectId } from "../_lib/session";
 
 interface Env {
   DB: D1Database;
@@ -22,6 +23,9 @@ function shuffle<T>(arr: T[]): T[] {
 // ?difficulty= は完全一致、?limit= は取得件数（デフォルト10、最大50）。status='published' の問題のみを対象とする。
 // 同じ長文から出題される設問（GAB形式の論理的読解等、passage_group_idが同一の問題）は、
 // シャッフル後も常にグループ内の順序（id昇順）を保ったまま連続して出題されるようにする。
+// ?statusFilter= は練習問題の自己評価ステータス（user_question_statuses）による絞り込み。
+// 'wrong_uncertain'（×不正解＋△自信なしのみ）または 'unanswered'（未回答のみ）を指定するとログイン必須になる
+// （ユーザー自身のステータスに基づく絞り込みのため）。未指定時は従来通り誰でも取得できる。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const params = new URL(context.request.url).searchParams;
   const categories = params.getAll("category").filter(Boolean);
@@ -33,6 +37,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     Math.max(limitRaw !== null && !Number.isNaN(Number(limitRaw)) ? Number(limitRaw) : DEFAULT_LIMIT, 1),
     MAX_LIMIT
   );
+  const statusFilter = params.get("statusFilter");
+
+  let userId: number | null = null;
+  if (statusFilter === "wrong_uncertain" || statusFilter === "unanswered") {
+    userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+    if (!userId) {
+      return Response.json({ error: "ログインが必要です" }, { status: 401 });
+    }
+  }
 
   const conditions = ["status = 'published'"];
   const binds: (string | number)[] = [];
@@ -48,6 +61,17 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   if (difficulty !== null && !Number.isNaN(difficulty)) {
     conditions.push("difficulty = ?");
     binds.push(difficulty);
+  }
+  if (userId !== null && statusFilter === "wrong_uncertain") {
+    conditions.push(
+      `EXISTS (SELECT 1 FROM user_question_statuses s WHERE s.question_id = q.id AND s.user_id = ? AND s.status IN ('wrong', 'uncertain'))`
+    );
+    binds.push(userId);
+  } else if (userId !== null && statusFilter === "unanswered") {
+    conditions.push(
+      `NOT EXISTS (SELECT 1 FROM user_question_statuses s WHERE s.question_id = q.id AND s.user_id = ?)`
+    );
+    binds.push(userId);
   }
 
   const rows = await context.env.DB.prepare(

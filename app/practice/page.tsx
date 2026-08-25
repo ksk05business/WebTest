@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 import { DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
+import { redirectToLogin } from "@/src/lib/authRedirect";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -50,6 +51,7 @@ function PracticePageInner() {
   const category = searchParams.get("category");
   const subCategory = searchParams.get("subCategory");
   const testId = searchParams.get("testType") ?? DEFAULT_TEST_ID;
+  const statusFilter = searchParams.get("statusFilter"); // 'wrong_uncertain' | 'unanswered' | null
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -80,11 +82,22 @@ function PracticePageInner() {
       params.set("category", category);
       if (subCategory) params.set("subCategory", subCategory);
     }
+    if (statusFilter) params.set("statusFilter", statusFilter);
     fetch(`/api/questions?${params.toString()}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.status === 401) {
+          redirectToLogin(router);
+          throw new Error("unauthorized");
+        }
+        return res.json();
+      })
       .then((data: { questions?: Question[]; error?: string }) => {
         if (!data.questions || data.questions.length === 0) {
-          setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
+          setLoadError(
+            statusFilter
+              ? "対象の問題がありません。すべて解答済みか、該当する問題がまだありません。"
+              : "出題できる問題がありません。時間をおいて再度お試しください。"
+          );
           return;
         }
         setQuestions(data.questions);
@@ -96,7 +109,7 @@ function PracticePageInner() {
     if (!authChecked || !category) return;
     loadQuestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authChecked, category, subCategory]);
+  }, [authChecked, category, subCategory, statusFilter]);
 
   function handleRestart() {
     setQuestions(null);
@@ -118,6 +131,20 @@ function PracticePageInner() {
     return () => clearInterval(id);
   }, [authChecked, finished]);
 
+  // 練習問題の自己評価ステータス（〇known/△uncertain/×wrong）をupsertする。
+  // 失敗しても練習の進行自体は継続する（fire-and-forget）。
+  async function postQuestionStatus(questionId: number, status: "known" | "uncertain" | "wrong") {
+    try {
+      await fetch("/api/question-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId, status }),
+      });
+    } catch {
+      // 失敗しても練習の進行自体は継続する
+    }
+  }
+
   function handleSelect(label: string) {
     if (answered || !question) return;
     setSelected(label);
@@ -129,7 +156,17 @@ function PracticePageInner() {
     ]);
     if (isCorrectAnswer) {
       setScore((s) => s + 1);
+    } else {
+      // 不正解は自動的に×（wrong）へ分類する
+      void postQuestionStatus(question.id, "wrong");
     }
+  }
+
+  async function handleAssessment(status: "known" | "uncertain") {
+    if (question) {
+      await postQuestionStatus(question.id, status);
+    }
+    handleNext();
   }
 
   async function handleNext() {
@@ -256,6 +293,16 @@ function PracticePageInner() {
               {question.category}
             </span>
           )}
+          {statusFilter === "wrong_uncertain" && (
+            <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700">
+              復習モード（×＋△）
+            </span>
+          )}
+          {statusFilter === "unanswered" && (
+            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+              未回答のみ
+            </span>
+          )}
           第{currentIndex + 1}問 / 全{questions.length}問
         </span>
         <span className="font-mono text-lg font-bold text-gray-500">
@@ -363,12 +410,33 @@ function PracticePageInner() {
               <li key={i}>{step}</li>
             ))}
           </ol>
-          <button
-            onClick={handleNext}
-            className="mt-4 w-full rounded-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
-          >
-            {isLast ? "練習を終える" : "次の問題へ"}
-          </button>
+
+          {isCorrect ? (
+            <div className="mt-4 flex flex-col gap-2">
+              <p className="text-sm font-medium text-gray-700">今回の正解の感触を選択してください</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleAssessment("known")}
+                  className="flex-1 rounded-full bg-green-600 py-2 font-semibold text-white hover:bg-green-700"
+                >
+                  🟢 理解して解けた（〇）
+                </button>
+                <button
+                  onClick={() => handleAssessment("uncertain")}
+                  className="flex-1 rounded-full bg-amber-500 py-2 font-semibold text-white hover:bg-amber-600"
+                >
+                  🟡 自信がない・勘で正解（△）
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="mt-4 w-full rounded-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
+            >
+              {isLast ? "練習を終える" : "次の問題へ"}
+            </button>
+          )}
         </div>
       )}
     </main>

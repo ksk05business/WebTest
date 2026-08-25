@@ -218,6 +218,28 @@ CREATE INDEX IF NOT EXISTS idx_user_question_history_lookup
   ON user_question_history(user_id, test_type, question_id, answered_at);
 
 -- ============================================================
+-- 練習問題の自己評価ステータス（〇正解・理解済み/△正解・自信なし/×不正解）。
+-- 1ユーザー×1問題につき1行のみ保持し、解答するたびに最新の自己評価で上書きする（履歴は積まない）。
+-- 行が存在しない問題は「未回答」として扱う（このテーブルには未回答の行は作らない）。
+-- 単元選択画面のステータス内訳表示（GET /api/question-status-summary）、および
+-- 「不正解＋自信なしのみ復習」「未回答のみ」フィルタ（GET /api/questions の statusFilter）に使う。
+-- user_question_reviews（言語・英語カテゴリの忘却曲線復習キュー）とは別物で、
+-- こちらは全テスト種別・全単元を対象にした、ユーザー自身の申告ベースの定着度管理。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS user_question_statuses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  status TEXT NOT NULL, -- 'known'（〇） | 'uncertain'（△） | 'wrong'（×）
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_question_statuses_user_question
+  ON user_question_statuses(user_id, question_id);
+
+-- ============================================================
 -- お問い合わせフォーム（/contact）からの送信内容。company_applications等と同様、
 -- メール送信機能は未設定のため、運営が直接D1を確認する運用を前提とする。
 -- 管理画面（/admin/dashboard）から一覧確認・対応ステータス更新ができる。

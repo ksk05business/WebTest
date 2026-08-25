@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, Flame } from "lucide-react";
 import { DEFAULT_TEST_ID, PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_TYPES } from "@/src/data/testTypes";
+import { UnitStatusSummaryModal } from "@/src/components/UnitStatusSummaryModal";
 
 type UnitCount = { category: string; subCategory: string; count: number };
 
@@ -14,6 +15,11 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
   const [unitCounts, setUnitCounts] = useState<UnitCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<{
+    category: string;
+    subCategory: string;
+    label: string;
+  } | null>(null);
   // 復習ノート（エビングハウスの忘却曲線に基づく間隔反復キュー）の今日分の件数。
   const [dueReviewCount, setDueReviewCount] = useState(0);
   const [dueReviewLoading, setDueReviewLoading] = useState(true);
@@ -59,8 +65,7 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
       setToast(`「${label}」の問題は準備中です`);
       return;
     }
-    const params = new URLSearchParams({ category, subCategory, testType: testId });
-    router.push(`/practice?${params.toString()}`);
+    setSelectedUnit({ category, subCategory, label });
   }
 
   function handleReviewNoteClick() {
@@ -141,6 +146,16 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-gray-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg">
           {toast}
         </div>
+      )}
+
+      {selectedUnit && (
+        <UnitStatusSummaryModal
+          category={selectedUnit.category}
+          subCategory={selectedUnit.subCategory}
+          label={selectedUnit.label}
+          testId={testId}
+          onClose={() => setSelectedUnit(null)}
+        />
       )}
     </main>
   );
