@@ -37,7 +37,7 @@ const SPI_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
       { id: "idiom_structure", subCategory: "熟語の成り立ち", label: "熟語の成り立ち" },
       { id: "vocabulary", subCategory: "語彙", label: "語彙・意味" },
       { id: "word_usage", subCategory: "語句の用法", label: "語句の用法" },
-      { id: "fill_blank_reorder", subCategory: "空欄補充・文の並べ替え", label: "空欄補充・文の並べ替え" },
+      { id: "sentence_reorder", subCategory: "文の並べ替え", label: "文の並べ替え" },
       { id: "reading_comprehension", subCategory: "長文読解", label: "長文読解" },
     ],
   },
