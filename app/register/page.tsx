@@ -345,7 +345,7 @@ export default function RegisterPage() {
                 onChange={(e) => setScoutConsent(e.target.checked)}
                 className="mt-0.5 h-4 w-4 accent-blue-600"
               />
-              <span>成績・プロフィール情報の直接採用企業への共有に同意する（スカウト受信機能）</span>
+              <span>成績・プロフィール情報のご利用企業様への共有に同意する（スカウト受信機能）</span>
             </label>
             <button
               type="button"
@@ -359,10 +359,10 @@ export default function RegisterPage() {
           {scoutDetailsOpen && (
             <div className="ml-6 flex flex-col gap-2 rounded-lg bg-white p-3 text-xs text-gray-600">
               <p>
-                成績・大学区分・志望業界などの情報を、提携する直接採用企業からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。
+                成績・大学区分・志望業界などの情報を、提携するご利用企業様からのスカウト目的で共有することに同意します（任意）。同意しなくても模試・練習問題はご利用いただけます。
               </p>
               <p className="font-semibold text-blue-700">
-                Webテストナビでは、人材紹介業者ではなく直接採用を行う企業からのみスカウトが届きます。
+                Webテストナビでは、人材紹介業者を通さず、企業様から直接スカウトが届きます。
               </p>
               <div>
                 <p className="flex items-center gap-1.5 font-semibold text-gray-700">

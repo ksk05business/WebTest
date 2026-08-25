@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { isFreeEmailDomain } from "@/src/lib/freeEmailDomains";
 
 type FormType = "account_apply" | "document_request";
@@ -114,6 +115,14 @@ export default function CompanyApplyPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 px-6 py-10">
+      <Link
+        href="/#business"
+        className="flex w-fit items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-blue-600"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        企業様向けトップへ戻る
+      </Link>
+
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold text-gray-900">企業様向け 利用審査申請 / 資料請求</h1>
         <p className="text-sm text-gray-600">

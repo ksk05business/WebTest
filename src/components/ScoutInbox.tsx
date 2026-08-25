@@ -108,7 +108,7 @@ export function ScoutInbox({ email }: { email: string }) {
         )}
       </div>
       <p className="text-xs text-gray-500">
-        Webテストナビでは、人材紹介業者ではなく直接採用を行う企業からのみスカウトが届きます。
+        Webテストナビでは、人材紹介業者を通さず、企業様から直接スカウトが届きます。
       </p>
       {scoutError && <p className="text-sm font-medium text-red-600">{scoutError}</p>}
       {scouts.length === 0 ? (

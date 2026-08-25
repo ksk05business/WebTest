@@ -520,14 +520,14 @@ export default function MyPage() {
                 className="mt-0.5"
               />
               <span>
-                成績・大学名・志望業界などの情報を、提携する直接採用企業からのスカウト目的で共有することに同意します（任意）。詳しくは
+                成績・大学名・志望業界などの情報を、提携するご利用企業様からのスカウト目的で共有することに同意します（任意）。詳しくは
                 <a href="/terms" target="_blank" className="text-blue-600 underline">
                   利用規約
                 </a>
                 をご確認ください。
                 <br />
                 <span className="font-semibold text-blue-700">
-                  Webテストナビでは、人材紹介業者ではなく直接採用を行う企業からのみスカウトが届きます。
+                  Webテストナビでは、人材紹介業者を通さず、企業様から直接スカウトが届きます。
                 </span>
               </span>
             </label>
