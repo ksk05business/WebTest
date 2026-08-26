@@ -10,13 +10,10 @@ type CompanyRecommendation = {
   industry: string | null;
 };
 
-const ACCOUNT_TYPE_LABEL: Record<string, string> = {
-  direct_hire: "直接採用企業",
-  agency: "就活エージェント",
-};
-
 // /dashboardの「あなたへのおすすめ企業」セクション。旧ScoutInboxの表示枠を置き換えたもの。
 // 現状はマッチングロジックを持たない簡易実装（functions/api/company-recommendations.ts参照）。
+// 業種（industry）は現状ほとんどの企業で未設定（NULL）のため、無い場合は汎用の案内文にフォールバックする。
+// account_type（直接採用企業/就活エージェント）はデモ用の内部区分でありユーザー向けの意味が薄いため非表示にした。
 export function RecommendedCompanies() {
   const [companies, setCompanies] = useState<CompanyRecommendation[] | null>(null);
 
@@ -38,29 +35,36 @@ export function RecommendedCompanies() {
           現在掲載中のおすすめ企業はありません。
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {companies.map((c) => (
-            <div
-              key={c.id}
-              className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-4"
-            >
-              <p className="truncate font-semibold text-gray-900">{c.companyName}</p>
-              <span className="w-fit rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
-                {ACCOUNT_TYPE_LABEL[c.accountType] ?? c.accountType}
-              </span>
-              {c.industry && <p className="text-xs text-gray-500">{c.industry}</p>}
-              {c.corporateSiteUrl && (
-                <a
-                  href={c.corporateSiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 flex min-h-6 items-center text-xs font-medium text-blue-600 underline"
-                >
-                  企業サイトを見る
-                </a>
-              )}
-            </div>
-          ))}
+        <div className="max-h-96 scroll-smooth overflow-y-auto rounded-lg border border-gray-200 bg-white">
+          <div className="divide-y divide-gray-100">
+            {companies.map((c) => (
+              <div key={c.id} className="flex flex-wrap items-center gap-3 p-4">
+                <p className="flex-shrink-0 truncate font-semibold text-gray-900 sm:w-44">
+                  {c.companyName}
+                </p>
+                {c.industry && (
+                  <span className="flex-shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                    {c.industry}
+                  </span>
+                )}
+                <p className="min-w-0 flex-1 truncate text-xs text-gray-500">
+                  {c.industry
+                    ? `${c.industry}分野で求人情報を掲載中です。`
+                    : "求人情報の詳細は企業サイトをご確認ください。"}
+                </p>
+                {c.corporateSiteUrl && (
+                  <a
+                    href={c.corporateSiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-shrink-0 whitespace-nowrap text-xs font-medium text-blue-600 underline"
+                  >
+                    企業サイトを見る
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

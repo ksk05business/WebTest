@@ -33,8 +33,8 @@ export function DashboardHeader() {
   }
 
   return (
-    <header className="border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
-      <div className="flex items-center justify-between">
+    <header className="border-b border-gray-200">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
         <Link href="/dashboard" className="text-xl font-bold text-blue-700">
           Webテスト<span className="text-gray-900">ナビ</span>
         </Link>
@@ -85,7 +85,7 @@ export function DashboardHeader() {
       </div>
 
       {menuOpen && (
-        <div className="mt-3 flex flex-col gap-2 sm:hidden">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 pb-3 sm:hidden sm:px-6">
           <Link
             href="/dashboard/scouts"
             onClick={() => setMenuOpen(false)}

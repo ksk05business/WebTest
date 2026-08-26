@@ -133,7 +133,7 @@ export default function DashboardScoutsPage() {
     <div className="min-h-screen bg-gray-50">
       <DashboardHeader />
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
         <h1 className="mb-6 text-xl font-bold text-gray-900">スカウト</h1>
 
         {loadError && <p className="mb-4 text-sm font-medium text-red-600">{loadError}</p>}
