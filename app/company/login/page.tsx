@@ -27,7 +27,7 @@ export default function CompanyLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      let data: { error?: string; companyName?: string; approved?: boolean } = {};
+      let data: { error?: string; companyName?: string; contactName?: string; approved?: boolean } = {};
       try {
         data = await res.json();
       } catch {
@@ -39,7 +39,12 @@ export default function CompanyLoginPage() {
       }
       localStorage.setItem(
         "spiCompanyUser",
-        JSON.stringify({ companyName: data.companyName, email, approved: Boolean(data.approved) })
+        JSON.stringify({
+          companyName: data.companyName,
+          contactName: data.contactName ?? "",
+          email,
+          approved: Boolean(data.approved),
+        })
       );
       router.push("/company/dashboard");
     } catch {

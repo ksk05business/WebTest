@@ -13,30 +13,50 @@ type Candidate = {
   mbti?: string | null;
 };
 
+// {{companyName}}: ログイン中の企業名、{{lastName}}: 担当者氏名の苗字（先頭トークン）に、
+// テンプレート選択時（applyTemplate）で動的に置換される。
 const SCOUT_TEMPLATES = [
   { label: "テンプレートを選択しない", title: "", message: "" },
   {
     label: "カジュアル面談のご案内",
     title: "カジュアル面談のご案内",
     message:
-      "はじめまして。貴殿のプロフィールを拝見し、ぜひ一度カジュアルにお話しさせていただきたくご連絡いたしました。\n選考とは切り離した形での面談ですので、企業研究の一環としてお気軽にご参加いただけますと幸いです。\nご興味をお持ちいただけましたら、ご返信をお待ちしております。",
+      "はじめまして！{{companyName}}の採用担当の{{lastName}}です。\n貴殿の適性検査の成績・プロフィールを拝見し、ぜひ一度カジュアルにお話したくご連絡いたしました。まずは弊社の事業や取り組みについて知っていただければ幸いです。",
   },
   {
     label: "特別選考ルートのご案内",
     title: "特別選考ルートのご案内",
     message:
-      "はじめまして。貴殿のこれまでの実績・プロフィールを拝見し、ぜひ弊社の特別選考ルートにご案内したくご連絡いたしました。\n通常の選考フローの一部を短縮したご案内となります。ご興味をお持ちいただけましたら、詳細をご案内させていただきます。",
+      "はじめまして！{{companyName}}の採用担当の{{lastName}}です。\n貴殿の適性検査の成績・プロフィールを拝見し、ぜひ弊社の特別選考ルートにご案内したくご連絡いたしました。通常の選考フローの一部を短縮したご案内となります。ご興味をお持ちいただけましたら、詳細をご案内させていただきます。",
+  },
+  {
+    label: "弊社インターンのご案内",
+    title: "弊社インターンのご案内",
+    message:
+      "はじめまして！{{companyName}}の採用担当の{{lastName}}です。\n貴殿の適性検査の成績・プロフィールを拝見し、ぜひ弊社の実践型インターンシップにご案内したくご連絡いたしました。実際の業務を体験いただける特別プログラムとなります。まずは詳細についてお話しさせていただけますと幸いです。",
   },
 ] as const;
+
+// 担当者氏名（例: "田中 太郎"）から苗字（先頭トークン）のみを抽出する。
+// 半角/全角スペースいずれの区切りにも対応し、スペースが無ければ氏名全体をそのまま返す。
+function extractSurname(fullName: string): string {
+  const trimmed = fullName.trim();
+  if (!trimmed) return "";
+  return trimmed.split(/[\s　]+/)[0] ?? "";
+}
 
 export function ScoutSendModal({
   candidate,
   companyEmail,
+  companyName,
+  contactName,
   onClose,
   onSent,
 }: {
   candidate: Candidate;
   companyEmail: string;
+  companyName: string;
+  contactName: string;
   onClose: () => void;
   onSent: () => void;
 }) {
@@ -50,8 +70,14 @@ export function ScoutSendModal({
   function applyTemplate(index: number) {
     setTemplateIndex(index);
     const t = SCOUT_TEMPLATES[index];
+    const resolvedCompanyName = companyName.trim() || "弊社";
+    const resolvedSurname = extractSurname(contactName) || "担当者";
     setTitle(t.title);
-    setMessage(t.message);
+    setMessage(
+      t.message
+        .replaceAll("{{companyName}}", resolvedCompanyName)
+        .replaceAll("{{lastName}}", resolvedSurname)
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {

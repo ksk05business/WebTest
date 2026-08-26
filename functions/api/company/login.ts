@@ -13,6 +13,7 @@ type LoginBody = {
 type CompanyRow = {
   id: number;
   company_name: string;
+  contact_name: string;
   password_hash: string;
   password_salt: string;
   status: string;
@@ -32,7 +33,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const company = await context.env.DB.prepare(
-    "SELECT id, company_name, password_hash, password_salt, status FROM company_profiles WHERE email = ?"
+    "SELECT id, company_name, contact_name, password_hash, password_salt, status FROM company_profiles WHERE email = ?"
   )
     .bind(email)
     .first<CompanyRow>();
@@ -58,7 +59,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const token = await createSession(context.env.DB, "company", company.id);
 
   return new Response(
-    JSON.stringify({ ok: true, companyName: company.company_name, approved: true }),
+    JSON.stringify({
+      ok: true,
+      companyName: company.company_name,
+      contactName: company.contact_name,
+      approved: true,
+    }),
     {
       headers: {
         "Content-Type": "application/json",

@@ -92,6 +92,7 @@ export default function CompanyDashboardPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [companyEmail, setCompanyEmail] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [contactName, setContactName] = useState("");
   const [approved, setApproved] = useState(false);
 
   const [universityCategories, setUniversityCategories] = useState<string[]>([]);
@@ -114,13 +115,19 @@ export default function CompanyDashboardPage() {
       router.replace("/company/login");
       return;
     }
-    const company = JSON.parse(raw) as { companyName?: string; email?: string; approved?: boolean };
+    const company = JSON.parse(raw) as {
+      companyName?: string;
+      contactName?: string;
+      email?: string;
+      approved?: boolean;
+    };
     if (!company.email) {
       router.replace("/company/login");
       return;
     }
     setCompanyEmail(company.email);
     setCompanyName(company.companyName ?? "");
+    setContactName(company.contactName ?? "");
     setApproved(Boolean(company.approved));
     setAuthChecked(true);
   }, [router]);
@@ -289,6 +296,8 @@ export default function CompanyDashboardPage() {
         <ScoutSendModal
           candidate={scoutTarget}
           companyEmail={companyEmail}
+          companyName={companyName}
+          contactName={contactName}
           onClose={() => setScoutTarget(null)}
           onSent={() =>
             setSentNoteById((m) => ({ ...m, [scoutTarget.studentId]: "スカウトを送信しました。" }))
