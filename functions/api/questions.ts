@@ -6,7 +6,9 @@ interface Env {
 }
 
 const DEFAULT_LIMIT = 10;
-const MAX_LIMIT = 50;
+// 基礎能力試験（35分タイムボックス制、app/test/page.tsxのBasicExamFlow）が言語・非言語それぞれ
+// 150問のプールを事前取得するため、通常上限もそれを許容できる値にしている。
+const MAX_LIMIT = 200;
 // statusFilter（未回答のみ/×＋△のみ復習）指定時は、該当する問題を全件出題する意図のため、
 // 通常のランダム抽出より大幅に高い上限を設ける。
 const STATUS_FILTER_MAX_LIMIT = 300;

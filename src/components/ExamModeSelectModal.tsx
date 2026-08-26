@@ -8,6 +8,16 @@ import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_EXPLAINERS } from "@/src/data/testExplainers";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 
+// SPIの本番模試は「基礎能力試験（言語・非言語）」「英語」「構造把握」の3パートに分けて受験する。
+// パートごとに独立した受験可否（2ヶ月に1回リセット）を持つ（functions/api/exam-eligibility.tsのtestType）。
+const SPI_EXAM_PARTS = [
+  { id: "spi_basic", label: "基礎能力試験（言語・非言語）" },
+  { id: "spi_english", label: "英語" },
+  { id: "spi_structural", label: "構造把握" },
+] as const;
+
+type PartEligibility = { eligible: boolean; nextResetAt: string };
+
 export function ExamModeSelectModal({
   testType,
   onClose,
@@ -18,14 +28,17 @@ export function ExamModeSelectModal({
   const router = useRouter();
   const explainer = TEST_EXPLAINERS[testType.id];
   const hasPracticeContent = Boolean(PRACTICE_UNIT_GROUPS_BY_TEST[testType.id]);
+  const isSpi = testType.id === "spi";
 
   // テスト種別ごとに2ヶ月に1回（奇数月1日に一斉リセット）のみ受験可能。
   const [eligibility, setEligibility] = useState<{ eligible: boolean; nextResetAt: string } | null>(
     null
   );
+  // SPIのみ、基礎能力試験・英語・構造把握の3パートそれぞれの受験可否を個別に持つ。
+  const [spiPartEligibility, setSpiPartEligibility] = useState<Record<string, PartEligibility>>({});
 
   useEffect(() => {
-    if (!testType.available) return;
+    if (!testType.available || isSpi) return;
     fetch(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
       .then((res) => res.json())
       .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
@@ -33,7 +46,23 @@ export function ExamModeSelectModal({
         setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
       })
       .catch(() => {});
-  }, [testType.available, testType.id]);
+  }, [testType.available, testType.id, isSpi]);
+
+  useEffect(() => {
+    if (!testType.available || !isSpi) return;
+    SPI_EXAM_PARTS.forEach((part) => {
+      fetch(`/api/exam-eligibility?testType=${part.id}`)
+        .then((res) => res.json())
+        .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
+          if (data.error) return;
+          setSpiPartEligibility((prev) => ({
+            ...prev,
+            [part.id]: { eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" },
+          }));
+        })
+        .catch(() => {});
+    });
+  }, [testType.available, isSpi]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
@@ -96,29 +125,58 @@ export function ExamModeSelectModal({
             <div className="flex flex-col gap-2 rounded-xl border border-gray-200 p-4">
               <p className="font-bold text-gray-900">模擬試験（本番モード）</p>
               <p className="text-sm leading-relaxed text-gray-600">
-                本番同様の制限時間で全範囲から出題。成績・偏差値が記録され、企業スカウトの評価対象になります。
+                本番同様の制限時間で出題。成績・偏差値が記録され、企業スカウトの評価対象になります。
+                {isSpi && "「基礎能力試験（言語・非言語）」「英語」「構造把握」の3つに分かれており、それぞれ独立して受験できます。"}
               </p>
-              {testType.available ? (
-                eligibility && !eligibility.eligible ? (
-                  <div className="mt-1 rounded-lg bg-amber-50 px-3 py-2.5 text-center text-xs font-semibold text-amber-800">
-                    このテストは2ヶ月に1回のみ受験可能です
-                    <br />
-                    次回一斉リセット: {formatJapaneseDate(eligibility.nextResetAt)}
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => router.push(testType.href)}
-                    disabled={!eligibility}
-                    className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    模擬試験をスタート
-                  </button>
-                )
-              ) : (
+              {!testType.available ? (
                 <p className="mt-1 rounded-full bg-gray-100 py-2.5 text-center text-sm font-semibold text-gray-400">
                   本番模試は準備中です
                 </p>
+              ) : isSpi ? (
+                <div className="mt-1 flex flex-col gap-2">
+                  {SPI_EXAM_PARTS.map((part) => {
+                    const partEligibility = spiPartEligibility[part.id];
+                    return (
+                      <div
+                        key={part.id}
+                        className="flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3"
+                      >
+                        <p className="text-sm font-semibold text-gray-800">{part.label}</p>
+                        {partEligibility && !partEligibility.eligible ? (
+                          <div className="rounded-lg bg-amber-50 px-3 py-2 text-center text-xs font-semibold text-amber-800">
+                            このテストは2ヶ月に1回のみ受験可能です
+                            <br />
+                            次回一斉リセット: {formatJapaneseDate(partEligibility.nextResetAt)}
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/test?part=${part.id}`)}
+                            disabled={!partEligibility}
+                            className="rounded-full bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            スタート
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : eligibility && !eligibility.eligible ? (
+                <div className="mt-1 rounded-lg bg-amber-50 px-3 py-2.5 text-center text-xs font-semibold text-amber-800">
+                  このテストは2ヶ月に1回のみ受験可能です
+                  <br />
+                  次回一斉リセット: {formatJapaneseDate(eligibility.nextResetAt)}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.push(testType.href)}
+                  disabled={!eligibility}
+                  className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  模擬試験をスタート
+                </button>
               )}
             </div>
 

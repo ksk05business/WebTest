@@ -9,7 +9,18 @@ export type ExamEligibility = {
   nextResetAt: string; // ISO日付（YYYY-MM-DD）
 };
 
-export const MOCK_EXAM_TEST_TYPES = ["spi", "tamatebako", "tgweb", "gab_cgab", "cab", "scoa"] as const;
+// SPIの本番模試は「基礎能力試験（言語・非言語）」「英語」「構造把握」の3パートに分けて受験する仕様のため、
+// 単一の"spi"ではなくパートごとに独立したtest_typeを用いる（受験可否・偏差値母集団もパートごとに別集計される）。
+export const MOCK_EXAM_TEST_TYPES = [
+  "spi_basic",
+  "spi_english",
+  "spi_structural",
+  "tamatebako",
+  "tgweb",
+  "gab_cgab",
+  "cab",
+  "scoa",
+] as const;
 
 // 指定日時が属する期間の開始日（直近の奇数月1日 0:00 UTC）を返す。
 export function getCurrentPeriodStart(now: Date): Date {

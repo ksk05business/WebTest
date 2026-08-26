@@ -21,3 +21,18 @@ export type Question = {
   answer: "A" | "B" | "C" | "D" | "E";
   explanation: string[];
 };
+
+// 基礎能力試験（35分タイムボックス制、app/test/page.tsxのBasicExamFlow）の解答スナップショット。
+// 試験中は正誤・解説を出さず、終了後に/resultへ渡して一覧表示するためlocalStorage(spiResultReview)に保存する。
+export type ExamReviewEntry = {
+  questionId: number;
+  questionCode?: string;
+  title?: string;
+  text: string;
+  choices: { label: string; text: string }[];
+  correctLabel: string;
+  selectedLabel: string | null;
+  correct: boolean;
+  explanation: string[];
+  category: string;
+};
