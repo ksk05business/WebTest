@@ -27,6 +27,9 @@ const SPI_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
       { id: "prob_probability", subCategory: "場合の数・確率", label: "場合の数・確率" },
       { id: "speed", subCategory: "速さ・時間・距離", label: "速さ・時間・距離" },
       { id: "table_reading", subCategory: "資料の読み取り", label: "表の読み取り" },
+      { id: "work_rate", subCategory: "仕事算", label: "仕事算" },
+      { id: "installment", subCategory: "分割払い", label: "分割払い" },
+      { id: "concentration", subCategory: "濃度算", label: "濃度算" },
     ],
   },
   {
