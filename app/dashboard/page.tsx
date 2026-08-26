@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { PerformanceDashboard } from "@/src/components/PerformanceDashboard";
 import { RecommendedCompanies } from "@/src/components/RecommendedCompanies";
+import { NoticeBoard } from "@/src/components/NoticeBoard";
 import { ExamModeSelectModal } from "@/src/components/ExamModeSelectModal";
 import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
@@ -14,7 +15,6 @@ type Eligibility = { eligible: boolean; nextResetAt: string };
 export default function DashboardPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
-  const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [selectedTestType, setSelectedTestType] = useState<TestType | null>(null);
   const [eligibilityByType, setEligibilityByType] = useState<Record<string, Eligibility>>({});
@@ -26,7 +26,6 @@ export default function DashboardPage() {
       return;
     }
     const user = JSON.parse(raw) as { name?: string; email?: string };
-    setUserName(user.name ?? "");
     if (user.email) setUserEmail(user.email);
     setAuthChecked(true);
   }, [router]);
@@ -57,8 +56,6 @@ export default function DashboardPage() {
       <DashboardHeader />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
-        <p className="mb-6 text-gray-600">ようこそ、{userName}さん</p>
-
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* メインエリア */}
           <div className="flex flex-col gap-8 lg:col-span-2">
@@ -104,6 +101,7 @@ export default function DashboardPage() {
 
           {/* 右サイドバー */}
           <aside className="flex flex-col gap-6">
+            <NoticeBoard />
             <div className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-4">
               <h3 className="text-sm font-bold text-gray-900">就活記事・コラム</h3>
               <p className="text-xs leading-relaxed text-gray-500">
