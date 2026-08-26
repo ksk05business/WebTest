@@ -6,6 +6,7 @@ import {
   nextIntervalDaysAfterStage,
 } from "../_lib/reviewSchedule";
 import { getAuthenticatedSubjectId } from "../_lib/session";
+import { KNOWLEDGE_REVIEW_CATEGORIES } from "../_lib/knowledgeCategories";
 
 interface Env {
   DB: D1Database;
@@ -29,9 +30,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const scope = new URL(context.request.url).searchParams.get("scope");
   const showAll = scope === "all";
 
+  // 復習対象は語彙・文法など「暗記主体の知識系単元」（言語・英語）のみに限定する。
+  // 非言語・構造的把握などの計算・思考系分野は、単元ごとの「×＋△のみを復習する」機能（practiceモード）で扱う。
+  const categoryPlaceholders = KNOWLEDGE_REVIEW_CATEGORIES.map(() => "?").join(",");
   const condition = showAll
-    ? "r.user_id = ?"
-    : "r.user_id = ? AND r.status = 'active' AND r.next_review_at <= datetime('now')";
+    ? `r.user_id = ? AND q.category IN (${categoryPlaceholders})`
+    : `r.user_id = ? AND r.status = 'active' AND r.next_review_at <= datetime('now') AND q.category IN (${categoryPlaceholders})`;
 
   const rows = await context.env.DB.prepare(
     `WITH ranked AS (
@@ -46,7 +50,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      WHERE ${condition}
      ORDER BY r.next_review_at ASC`
   )
-    .bind(userId)
+    .bind(userId, ...KNOWLEDGE_REVIEW_CATEGORIES)
     .all<ReviewRow>();
 
   return Response.json({

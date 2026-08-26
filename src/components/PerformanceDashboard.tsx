@@ -105,7 +105,7 @@ export function PerformanceDashboard({ email }: { email: string }) {
           <div>
             <p className="font-bold text-amber-800">今日復習すべき問題（{reviewDueCount}件）</p>
             <p className="mt-0.5 text-xs text-amber-700">
-              忘却曲線に基づき、今がちょうど復習のタイミングです。
+              移動中のスキマ時間に最適！忘却曲線に基づいた言語・英語の暗記復習問題です。
             </p>
           </div>
           <button

@@ -245,7 +245,7 @@ function PracticePageInner() {
             {questions.length}問中 {score}問正解（経過時間 {formatElapsed(elapsed)}）
           </p>
           <p className="text-xs text-gray-500">
-            この練習の結果は偏差値には反映されません。間違えた言語問題は忘却曲線の復習キューに追加されました。
+            この練習の結果は偏差値には反映されません。間違えた言語・英語の問題は忘却曲線の復習キューに追加されました。
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             <button

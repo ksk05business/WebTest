@@ -390,7 +390,8 @@ export default function ReviewPage() {
             {tab === "today" ? "今日復習すべき問題はありません" : "復習ノートに登録された問題はまだありません"}
           </p>
           <p className="text-xs text-gray-500">
-            練習問題や模試で間違えると、忘却曲線に基づいて自動的にここへ追加されます。
+            言語・英語（語彙・語句の意味等）の練習問題や模試で間違えると、忘却曲線に基づいて自動的にここへ追加されます。
+            非言語などの問題は各単元の練習画面から復習できます。
           </p>
           <Link href="/mypage" className="text-sm text-blue-600 underline">
             マイページに戻る

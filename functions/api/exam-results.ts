@@ -1,6 +1,7 @@
 import { INITIAL_REVIEW_INTERVAL_DAYS, daysFromNowModifier } from "../_lib/reviewSchedule";
 import { getAuthenticatedSubjectId } from "../_lib/session";
 import { checkExamEligibility } from "../_lib/mockExamCycle";
+import { KNOWLEDGE_REVIEW_CATEGORIES } from "../_lib/knowledgeCategories";
 
 interface Env {
   DB: D1Database;
@@ -54,19 +55,25 @@ function calculateDeviationScore(rate: number, priorRates: number[]): number {
   return 50 + (10 * (rate - mean)) / stddev;
 }
 
-// 練習問題・模試で間違えた問題（テスト種別・科目を問わずすべて）を、忘却曲線に基づく復習キューへ
+// 練習問題・模試で間違えた問題を、忘却曲線に基づく復習キュー（user_question_reviews）へ
 // 追加/リセットする。既に復習キューにある問題（mastered済みも含む）は、間違えた時点でstage0・
 // 当日復習にリセットする。
-// 以前はverbal/englishカテゴリのみを対象としていたが、非言語・玉手箱等の問題を間違えても
-// 復習ノートに追加されない不具合があったため、カテゴリを問わず全問を対象とするよう修正した。
+// 対象は語彙・文法など「暗記主体の知識系単元」（KNOWLEDGE_REVIEW_CATEGORIES＝言語・英語）のみに限定する
+// （2026-08-26改訂）。非言語・構造的把握などの計算・思考系分野は、この忘却曲線キューではなく単元ごとの
+// 「×＋△のみを復習する」機能（practiceモード、user_question_statusesベース）で復習する設計とした。
+// なお過去には「カテゴリを問わず全問を対象」としていた時期もあったが（非言語等が復習ノートに
+// 追加されない不具合の修正として）、今回改めて知識系単元のみに絞り込む方針に変更している。
 async function enqueueWrongAnswers(db: D1Database, userId: number, answers: AnswerInput[]) {
   const wrongIds = answers.filter((a) => !a.correct).map((a) => a.questionId);
   if (wrongIds.length === 0) return;
 
   const placeholders = wrongIds.map(() => "?").join(",");
+  const categoryPlaceholders = KNOWLEDGE_REVIEW_CATEGORIES.map(() => "?").join(",");
   const wrongQuestions = await db
-    .prepare(`SELECT id FROM questions WHERE id IN (${placeholders})`)
-    .bind(...wrongIds)
+    .prepare(
+      `SELECT id FROM questions WHERE id IN (${placeholders}) AND category IN (${categoryPlaceholders})`
+    )
+    .bind(...wrongIds, ...KNOWLEDGE_REVIEW_CATEGORIES)
     .all<{ id: number }>();
 
   const modifier = daysFromNowModifier(INITIAL_REVIEW_INTERVAL_DAYS);
