@@ -29,7 +29,7 @@ function BackToUnitsLink({ testId }: { testId: string }) {
   return (
     <Link
       href={`/practice?testType=${testId}`}
-      className="inline-flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-700"
+      className="inline-flex min-h-12 items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-700"
     >
       <ArrowLeft className="h-4 w-4" />
       単元一覧に戻る
@@ -251,13 +251,13 @@ function PracticePageInner() {
             <button
               type="button"
               onClick={handleRestart}
-              className="rounded-full border border-blue-300 px-6 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+              className="flex min-h-12 items-center rounded-full border border-blue-300 px-6 text-sm font-semibold text-blue-700 hover:bg-blue-50"
             >
               もう一度練習する
             </button>
             <Link
               href="/dashboard"
-              className="rounded-full bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className="flex min-h-12 items-center rounded-full bg-blue-600 px-6 text-sm font-semibold text-white hover:bg-blue-700"
             >
               ダッシュボードに戻る
             </Link>
@@ -284,8 +284,8 @@ function PracticePageInner() {
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
       <BackToUnitsLink testId={testId} />
 
-      <div className="flex items-center justify-between text-sm text-gray-500">
-        <span className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-gray-500">
+        <span className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
             練習モード
           </span>
@@ -304,9 +304,11 @@ function PracticePageInner() {
               未回答のみ
             </span>
           )}
-          第{currentIndex + 1}問 / 全{questions.length}問
+          <span className="whitespace-nowrap">
+            第{currentIndex + 1}問 / 全{questions.length}問
+          </span>
         </span>
-        <span className="font-mono text-lg font-bold text-gray-500">
+        <span className="flex-shrink-0 whitespace-nowrap font-mono text-lg font-bold text-gray-500">
           経過 {formatElapsed(elapsed)}
         </span>
       </div>
@@ -391,7 +393,7 @@ function PracticePageInner() {
               key={choice.label}
               disabled={answered}
               onClick={() => handleSelect(choice.label)}
-              className={`rounded-lg border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed ${style}`}
+              className={`flex min-h-12 items-center rounded-lg border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed ${style}`}
             >
               <span className="mr-2 font-bold">{choice.label}.</span>
               {choice.text}
@@ -415,16 +417,16 @@ function PracticePageInner() {
           {isCorrect ? (
             <div className="mt-4 flex flex-col gap-2">
               <p className="text-sm font-medium text-gray-700">今回の正解の感触を選択してください</p>
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                 <button
                   onClick={() => handleAssessment("known")}
-                  className="flex-1 rounded-full bg-green-600 py-2 font-semibold text-white hover:bg-green-700"
+                  className="min-h-12 rounded-full bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700 sm:flex-1 sm:text-base"
                 >
                   🟢 理解して解けた（〇）
                 </button>
                 <button
                   onClick={() => handleAssessment("uncertain")}
-                  className="flex-1 rounded-full bg-amber-500 py-2 font-semibold text-white hover:bg-amber-600"
+                  className="min-h-12 rounded-full bg-amber-500 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-600 sm:flex-1 sm:text-base"
                 >
                   🟡 自信がない・勘で正解（△）
                 </button>
@@ -433,7 +435,7 @@ function PracticePageInner() {
           ) : (
             <button
               onClick={handleNext}
-              className="mt-4 w-full rounded-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
+              className="mt-4 min-h-12 w-full rounded-full bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
             >
               {isLast ? "練習を終える" : "次の問題へ"}
             </button>

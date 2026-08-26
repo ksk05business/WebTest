@@ -22,7 +22,7 @@ import { MbtiSelect } from "@/src/components/MbtiSelect";
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
 const SELECT_CLASS =
-  "rounded-xl border border-gray-300 px-3 py-2.5 text-gray-900 transition-all duration-150 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10";
+  "min-h-12 rounded-xl border border-gray-300 px-3 py-2.5 text-gray-900 transition-all duration-150 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -148,7 +148,7 @@ export default function RegisterPage() {
   return (
     <AuthLayout title="会員登録" subtitle="無料で登録して模試とスカウトをはじめよう">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium text-gray-700">
             苗字
             <IconInput
@@ -171,7 +171,7 @@ export default function RegisterPage() {
 
         <div className="flex flex-col gap-2">
           <p className="text-xs text-gray-500">アルファベット表記</p>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <label className="flex flex-1 flex-col gap-1.5 text-sm font-medium text-gray-700">
               Last Name
               <input
@@ -403,7 +403,7 @@ export default function RegisterPage() {
           disabled={
             submitting || !agreedTerms || (passwordConfirm !== "" && password !== passwordConfirm)
           }
-          className="mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 disabled:shadow-none"
+          className="mt-2 min-h-12 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 disabled:shadow-none"
         >
           {submitting ? "登録中..." : "登録する"}
         </button>

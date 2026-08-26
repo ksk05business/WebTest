@@ -17,7 +17,7 @@ export function IndustrySelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+        className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
       >
         <option value="">選択してください</option>
         {INDUSTRIES.map((i) => (

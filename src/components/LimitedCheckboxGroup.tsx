@@ -36,11 +36,15 @@ export function LimitedCheckboxGroup({
       {label}
       <div className="flex flex-col gap-1 rounded-lg border border-gray-300 bg-white p-2">
         {options.map((o) => (
-          <label key={o} className="flex items-center gap-2 text-sm font-normal text-gray-700">
+          <label
+            key={o}
+            className="flex min-h-12 items-center gap-2 rounded-md px-1 text-sm font-normal text-gray-700 hover:bg-gray-50"
+          >
             <input
               type="checkbox"
               checked={selected.includes(o)}
               onChange={() => handleToggle(o)}
+              className="h-4 w-4 flex-shrink-0 accent-blue-600"
             />
             {o}
           </label>

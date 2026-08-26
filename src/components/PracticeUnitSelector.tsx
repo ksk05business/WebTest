@@ -85,13 +85,13 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
       <button
         type="button"
         onClick={handleReviewNoteClick}
-        className="flex items-center justify-between rounded-xl border-2 border-orange-200 bg-orange-50 p-4 text-left transition-colors hover:border-orange-300 hover:bg-orange-100"
+        className="flex min-h-12 items-center justify-between gap-2 rounded-xl border-2 border-orange-200 bg-orange-50 p-4 text-left transition-colors hover:border-orange-300 hover:bg-orange-100"
       >
-        <span className="flex items-center gap-2 font-bold text-orange-900">
-          <Flame className="h-5 w-5 text-orange-600" />
-          復習ノート（今日復習すべき問題）
+        <span className="flex min-w-0 items-center gap-2 font-bold text-orange-900">
+          <Flame className="h-5 w-5 flex-shrink-0 text-orange-600" />
+          <span className="truncate">復習ノート（今日復習すべき問題）</span>
         </span>
-        <span className="flex items-center gap-2">
+        <span className="flex flex-shrink-0 items-center gap-2">
           <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-orange-700">
             {dueReviewLoading ? "..." : `${dueReviewCount}問`}
           </span>
@@ -111,14 +111,16 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
                   key={unit.id}
                   type="button"
                   onClick={() => handleUnitClick(group.category, unit.subCategory, unit.label)}
-                  className={`flex items-center justify-between rounded-xl border p-3 text-left transition-colors ${
+                  className={`flex min-h-12 items-center justify-between gap-2 rounded-xl border p-3 text-left transition-colors ${
                     disabled
                       ? "border-gray-200 bg-white opacity-50"
                       : "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50"
                   }`}
                 >
-                  <span className="text-sm font-medium text-gray-800">{unit.label}</span>
-                  <span className="flex items-center gap-2">
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800">
+                    {unit.label}
+                  </span>
+                  <span className="flex flex-shrink-0 items-center gap-2">
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         disabled ? "bg-gray-100 text-gray-400" : "bg-blue-50 text-blue-700"
@@ -137,7 +139,7 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
 
       <Link
         href="/dashboard"
-        className="mt-2 rounded-full border border-gray-300 py-3 text-center font-semibold text-gray-700 hover:bg-gray-50"
+        className="mt-2 flex min-h-12 items-center justify-center rounded-full border border-gray-300 py-3 text-center font-semibold text-gray-700 hover:bg-gray-50"
       >
         戻る（モード選択へ）
       </Link>

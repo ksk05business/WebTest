@@ -63,19 +63,20 @@ export function UnitStatusSummaryModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        className="w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
+        style={{ maxHeight: "90vh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">{label}</h2>
+        <div className="flex items-start justify-between gap-2">
+          <h2 className="break-words text-lg font-bold text-gray-900">{label}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-xl leading-none text-gray-400 hover:text-gray-600"
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center text-xl leading-none text-gray-400 hover:text-gray-600"
             aria-label="閉じる"
           >
             ×
@@ -113,7 +114,7 @@ export function UnitStatusSummaryModal({
               <button
                 type="button"
                 onClick={() => startPractice()}
-                className="rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                className="min-h-12 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
               >
                 すべての問題から解く
               </button>
@@ -121,7 +122,7 @@ export function UnitStatusSummaryModal({
                 type="button"
                 onClick={() => startPractice("wrong_uncertain")}
                 disabled={reviewCount === 0}
-                className="rounded-full bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="min-h-12 rounded-full bg-orange-500 px-3 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 × 不正解 ＋ △ 自信なし のみを復習する（推奨）
               </button>
@@ -129,7 +130,7 @@ export function UnitStatusSummaryModal({
                 type="button"
                 onClick={() => startPractice("unanswered")}
                 disabled={summary.unanswered === 0}
-                className="rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="min-h-12 rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 未回答問題のみを解く
               </button>

@@ -82,15 +82,17 @@ export function ScoutDetailModal({
       >
         {view === "detail" && (
           <>
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs text-gray-400">{scout.companyName}</p>
-                <h2 className="text-lg font-bold text-gray-900">{scout.title || "(件名なし)"}</h2>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-xs text-gray-400">{scout.companyName}</p>
+                <h2 className="break-words text-lg font-bold text-gray-900">
+                  {scout.title || "(件名なし)"}
+                </h2>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-xl leading-none text-gray-400 hover:text-gray-600"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center text-xl leading-none text-gray-400 hover:text-gray-600"
                 aria-label="閉じる"
               >
                 ×
@@ -136,14 +138,14 @@ export function ScoutDetailModal({
                 <button
                   type="button"
                   onClick={() => setView("confirmAccept")}
-                  className="flex-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                  className="min-h-12 flex-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                 >
                   承諾する
                 </button>
                 <button
                   type="button"
                   onClick={() => setView("confirmDecline")}
-                  className="flex-1 rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  className="min-h-12 flex-1 rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                 >
                   辞退する
                 </button>
@@ -168,7 +170,7 @@ export function ScoutDetailModal({
                 type="button"
                 disabled={submitting}
                 onClick={() => handleConfirm("accept")}
-                className="flex-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                className="min-h-12 flex-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {submitting ? "処理中..." : "はい、承諾する"}
               </button>
@@ -176,7 +178,7 @@ export function ScoutDetailModal({
                 type="button"
                 disabled={submitting}
                 onClick={() => setView("detail")}
-                className="flex-1 rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="min-h-12 flex-1 rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 やめておく
               </button>
@@ -196,7 +198,7 @@ export function ScoutDetailModal({
                 type="button"
                 disabled={submitting}
                 onClick={() => handleConfirm("decline")}
-                className="flex-1 rounded-full bg-gray-700 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
+                className="min-h-12 flex-1 rounded-full bg-gray-700 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
               >
                 {submitting ? "処理中..." : "辞退する"}
               </button>
@@ -204,7 +206,7 @@ export function ScoutDetailModal({
                 type="button"
                 disabled={submitting}
                 onClick={() => setView("detail")}
-                className="flex-1 rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="min-h-12 flex-1 rounded-full border border-gray-300 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 キャンセル
               </button>

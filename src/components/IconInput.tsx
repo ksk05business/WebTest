@@ -15,7 +15,7 @@ export function IconInput({ icon: Icon, className, ...props }: IconInputProps) {
       />
       <input
         {...props}
-        className={`w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-3 text-gray-900 transition-all duration-150 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 ${
+        className={`w-full min-h-12 rounded-xl border border-gray-300 py-2.5 pl-10 pr-3 text-gray-900 transition-all duration-150 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 ${
           className ?? ""
         }`}
       />

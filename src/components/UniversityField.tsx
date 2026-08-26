@@ -42,7 +42,7 @@ export function UniversityField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={`${manualLabel}の大学名を入力してください`}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+          className="w-full min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
         />
         <button
           type="button"
@@ -102,7 +102,7 @@ export function UniversityField({
                   onManualCategoryChange?.(null);
                   setOpen(false);
                 }}
-                className="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-blue-50"
+                className="flex min-h-12 w-full items-center px-3 py-2 text-left text-sm text-gray-800 hover:bg-blue-50"
               >
                 {u}
               </button>

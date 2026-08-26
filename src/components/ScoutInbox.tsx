@@ -124,19 +124,19 @@ export function ScoutInbox({ email }: { email: string }) {
                 onClick={() => handleOpenScout(s.id)}
                 className="rounded-lg border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <span
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                      className={`flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${
                         s.isRead ? "bg-gray-100 text-gray-400" : "bg-red-50 text-red-600"
                       }`}
                     >
                       {s.isRead ? "既読" : "未読"}
                     </span>
-                    <p className="text-xs text-gray-400">{s.companyName}</p>
+                    <p className="truncate text-xs text-gray-400">{s.companyName}</p>
                   </div>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    className={`flex-shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${
                       SCOUT_STATUS_STYLE[s.status] ?? "bg-gray-100 text-gray-500"
                     }`}
                   >

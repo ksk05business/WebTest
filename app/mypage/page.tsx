@@ -273,7 +273,7 @@ export default function MyPage() {
                 setSuccess(false);
                 setMode("edit");
               }}
-              className="rounded-full border border-blue-300 px-4 py-1.5 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+              className="flex min-h-12 items-center rounded-full border border-blue-300 px-4 text-sm font-semibold text-blue-700 hover:bg-blue-50"
             >
               プロフィールを編集
             </button>
@@ -363,14 +363,14 @@ export default function MyPage() {
               </span>
             </label>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
                 苗字
                 <input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                  className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
                 />
               </label>
               <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
@@ -379,21 +379,21 @@ export default function MyPage() {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                  className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
                 />
               </label>
             </div>
 
             <div className="flex flex-col gap-2">
               <p className="text-xs text-gray-500">アルファベット表記</p>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
                   Last Name
                   <input
                     type="text"
                     value={lastNameRomaji}
                     onChange={(e) => setLastNameRomaji(e.target.value)}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                    className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
                   />
                 </label>
                 <label className="flex flex-1 flex-col gap-1 text-sm font-medium text-gray-700">
@@ -402,7 +402,7 @@ export default function MyPage() {
                     type="text"
                     value={firstNameRomaji}
                     onChange={(e) => setFirstNameRomaji(e.target.value)}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                    className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
                   />
                 </label>
               </div>
@@ -423,7 +423,7 @@ export default function MyPage() {
               <select
                 value={facultyType}
                 onChange={(e) => setFacultyType(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
               >
                 <option value="">選択してください</option>
                 {FACULTY_TYPES.map((f) => (
@@ -454,7 +454,7 @@ export default function MyPage() {
               <MbtiSelect
                 value={mbti}
                 onChange={setMbti}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
               />
             </label>
 
@@ -464,7 +464,7 @@ export default function MyPage() {
                 <select
                   value={graduationYear}
                   onChange={(e) => setGraduationYear(e.target.value)}
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                  className="min-h-12 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
                 >
                   {GRADUATION_YEARS.map((y) => (
                     <option key={y} value={y}>
@@ -475,7 +475,7 @@ export default function MyPage() {
                 <select
                   value={graduationMonth}
                   onChange={(e) => setGraduationMonth(e.target.value)}
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                  className="min-h-12 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
                 >
                   {GRADUATION_MONTHS.map((m) => (
                     <option key={m} value={m}>
@@ -493,14 +493,14 @@ export default function MyPage() {
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={saving}
-                className="flex-1 rounded-full border border-gray-300 py-3 font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                className="min-h-12 flex-1 rounded-full border border-gray-300 py-3 font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 編集をキャンセル
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                className="min-h-12 flex-1 rounded-full bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {saving ? "保存中..." : "変更を保存"}
               </button>
@@ -517,7 +517,7 @@ export default function MyPage() {
                 checked={scoutConsent}
                 disabled={consentSaving}
                 onChange={(e) => handleScoutConsentChange(e.target.checked)}
-                className="mt-0.5"
+                className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-600"
               />
               <span>
                 成績・大学名・志望業界などの情報を、提携するご利用企業様からのスカウト目的で共有することに同意します（任意）。詳しくは
