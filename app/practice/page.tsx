@@ -77,7 +77,8 @@ function PracticePageInner() {
   }, [router]);
 
   function loadQuestions() {
-    const params = new URLSearchParams({ limit: "20" });
+    // statusFilter（未回答のみ/×＋△のみ復習）指定時は該当する全問題を出題するため、上限を大きく取る。
+    const params = new URLSearchParams({ limit: statusFilter ? "300" : "20" });
     if (category) {
       params.set("category", category);
       if (subCategory) params.set("subCategory", subCategory);

@@ -7,6 +7,9 @@ interface Env {
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 50;
+// statusFilter（未回答のみ/×＋△のみ復習）指定時は、該当する問題を全件出題する意図のため、
+// 通常のランダム抽出より大幅に高い上限を設ける。
+const STATUS_FILTER_MAX_LIMIT = 300;
 
 type Row = QuestionRow & { passage_group_id: number | null };
 
@@ -32,12 +35,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const subCategories = params.getAll("subCategory").filter(Boolean);
   const difficultyRaw = params.get("difficulty");
   const difficulty = difficultyRaw !== null ? Number(difficultyRaw) : null;
+  const statusFilter = params.get("statusFilter");
+  const effectiveMaxLimit =
+    statusFilter === "wrong_uncertain" || statusFilter === "unanswered" ? STATUS_FILTER_MAX_LIMIT : MAX_LIMIT;
   const limitRaw = params.get("limit");
   const limit = Math.min(
     Math.max(limitRaw !== null && !Number.isNaN(Number(limitRaw)) ? Number(limitRaw) : DEFAULT_LIMIT, 1),
-    MAX_LIMIT
+    effectiveMaxLimit
   );
-  const statusFilter = params.get("statusFilter");
 
   let userId: number | null = null;
   if (statusFilter === "wrong_uncertain" || statusFilter === "unanswered") {
