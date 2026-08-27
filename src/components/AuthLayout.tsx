@@ -15,10 +15,20 @@ export function AuthLayout({
   title,
   subtitle,
   children,
+  maxWidthClassName = "max-w-md",
+  outerPaddingClassName = "py-10",
+  cardPaddingClassName = "p-8 sm:p-10",
 }: {
   title: string;
   subtitle: string;
   children: ReactNode;
+  // フォームカードの最大幅。項目数が多い会員登録画面など、既定の"max-w-md"より
+  // 広いレイアウトが必要な場合に上書きする（ログイン画面は既定値のまま）。
+  maxWidthClassName?: string;
+  // 外枠（画面全体）の上下余白。縦幅を節約したい画面向けに上書きできる。
+  outerPaddingClassName?: string;
+  // フォームカード自体の内側余白。縦幅を節約したい画面向けに上書きできる。
+  cardPaddingClassName?: string;
 }) {
   return (
     <div className="min-h-screen bg-gray-50 lg:flex">
@@ -66,7 +76,7 @@ export function AuthLayout({
         <p className="relative z-10 text-xs text-blue-100">&copy; Webテストナビ</p>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-10">
+      <div className={`flex flex-1 flex-col items-center justify-center px-6 ${outerPaddingClassName}`}>
         <Link
           href="/"
           className="mb-6 text-2xl font-bold text-blue-700 lg:hidden"
@@ -74,10 +84,12 @@ export function AuthLayout({
           Webテスト<span className="text-gray-900">ナビ</span>
         </Link>
 
-        <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white/90 p-8 shadow-xl shadow-blue-900/5 backdrop-blur-sm sm:p-10">
+        <div
+          className={`w-full ${maxWidthClassName} rounded-2xl border border-gray-200 bg-white/90 ${cardPaddingClassName} shadow-xl shadow-blue-900/5 backdrop-blur-sm`}
+        >
           <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
           <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
-          <div className="mt-6">{children}</div>
+          <div className="mt-4">{children}</div>
         </div>
       </div>
     </div>

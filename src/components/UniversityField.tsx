@@ -10,6 +10,7 @@ export function UniversityField({
   onChange,
   onManualCategoryChange,
   initialManualCategory,
+  onKeyDown,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -18,6 +19,8 @@ export function UniversityField({
   onManualCategoryChange?: (category: string | null) => void;
   // マイページ等、既に手動入力の大学区分が保存されている場合の初期表示用。
   initialManualCategory?: string | null;
+  // 会員登録画面のEnterキー次フィールド移動などに使う、内部inputへのキーイベント伝播用。
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }) {
   const [manualLabel, setManualLabel] = useState<string | null>(initialManualCategory ?? null);
   const [query, setQuery] = useState(value);
@@ -41,6 +44,7 @@ export function UniversityField({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={onKeyDown}
           placeholder={`${manualLabel}の大学名を入力してください`}
           className="w-full min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
         />
@@ -77,6 +81,7 @@ export function UniversityField({
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
+        onKeyDown={onKeyDown}
         placeholder="大学名を入力して検索"
         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
       />

@@ -8,12 +8,16 @@ export function LimitedCheckboxGroup({
   selected,
   onChange,
   max,
+  compact,
 }: {
   label: string;
   options: readonly string[];
   selected: string[];
   onChange: (values: string[]) => void;
   max: number;
+  // trueの場合、2列グリッド・詰めた余白のコンパクト表示にする（会員登録画面向け）。
+  // 未指定の場合は既存の見た目（マイページ等）を維持する。
+  compact?: boolean;
 }) {
   const [warning, setWarning] = useState<string | null>(null);
 
@@ -34,11 +38,21 @@ export function LimitedCheckboxGroup({
   return (
     <div className="flex flex-col gap-1 text-sm font-medium text-gray-700">
       {label}
-      <div className="flex flex-col gap-1 rounded-lg border border-gray-300 bg-white p-2">
+      <div
+        className={
+          compact
+            ? "grid grid-cols-2 gap-x-2 gap-y-0.5 rounded-lg border border-gray-300 bg-white p-1.5"
+            : "flex flex-col gap-1 rounded-lg border border-gray-300 bg-white p-2"
+        }
+      >
         {options.map((o) => (
           <label
             key={o}
-            className="flex min-h-12 items-center gap-2 rounded-md px-1 text-sm font-normal text-gray-700 hover:bg-gray-50"
+            className={
+              compact
+                ? "flex min-h-8 items-center gap-1.5 rounded-md px-1 text-xs font-normal leading-tight text-gray-700 hover:bg-gray-50"
+                : "flex min-h-12 items-center gap-2 rounded-md px-1 text-sm font-normal text-gray-700 hover:bg-gray-50"
+            }
           >
             <input
               type="checkbox"

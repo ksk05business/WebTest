@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { TermsContent } from "@/src/components/TermsContent";
-import { PrivacyContent } from "@/src/components/PrivacyContent";
 
-// 会員登録画面から起動する規約確認モーダル。利用規約・プライバシーポリシーの全文を
-// スクロール可能なコンテナ内に表示し、最後までスクロールするまで「同意する」を押せないようにする。
+// 会員登録画面から起動する利用規約の確認モーダル。利用規約の全文をスクロール可能な
+// コンテナ内に表示し、最後までスクロールするまで「同意する」を押せないようにする。
+// プライバシーポリシーは別途、登録フォーム側で直接チェック可能な項目として分離している。
 export function TermsAgreementModal({
   onAgree,
   onClose,
@@ -18,7 +18,7 @@ export function TermsAgreementModal({
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const el = e.currentTarget;
-    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 4) {
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
       setScrolledToBottom(true);
     }
   }
@@ -27,7 +27,7 @@ export function TermsAgreementModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
       <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 className="text-base font-bold text-gray-900">利用規約・プライバシーポリシー</h2>
+          <h2 className="text-base font-bold text-gray-900">利用規約</h2>
           <button
             type="button"
             onClick={onClose}
@@ -40,8 +40,6 @@ export function TermsAgreementModal({
 
         <div onScroll={handleScroll} className="max-h-96 overflow-y-auto px-5 py-4">
           <TermsContent />
-          <hr className="my-8 border-gray-200" />
-          <PrivacyContent />
         </div>
 
         <div className="flex flex-col gap-2 border-t border-gray-100 px-5 py-4">
