@@ -93,11 +93,89 @@ const TAMATEBAKO_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   },
 ];
 
+const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
+  {
+    category: "tgweb_verbal",
+    groupLabel: "言語",
+    units: [
+      { id: "tgweb_fill_blank", subCategory: "空欄補充", label: "空欄補充" },
+      { id: "tgweb_reorder", subCategory: "並べ替え", label: "並べ替え" },
+      { id: "tgweb_reading", subCategory: "長文読解", label: "長文読解" },
+    ],
+  },
+  {
+    category: "tgweb_math",
+    groupLabel: "計数",
+    units: [
+      { id: "tgweb_cipher", subCategory: "暗号", label: "暗号" },
+      { id: "tgweb_one_stroke", subCategory: "一筆書き", label: "一筆書き" },
+      { id: "tgweb_origami", subCategory: "折り紙", label: "折り紙" },
+      { id: "tgweb_dice", subCategory: "サイコロ", label: "サイコロ" },
+      { id: "tgweb_inference", subCategory: "推論", label: "推論" },
+    ],
+  },
+  {
+    category: "tgweb_english",
+    groupLabel: "英語",
+    units: [
+      { id: "tgweb_reading_en", subCategory: "長文読解", label: "長文読解" },
+      { id: "tgweb_grammar", subCategory: "文法", label: "文法" },
+    ],
+  },
+];
+
+const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
+  {
+    category: "scoa_language",
+    groupLabel: "言語",
+    units: [
+      { id: "scoa_idiom", subCategory: "熟語・格言", label: "熟語・格言" },
+      { id: "scoa_kanji", subCategory: "漢字の読み", label: "漢字の読み" },
+      { id: "scoa_reading", subCategory: "長文読解", label: "長文読解" },
+    ],
+  },
+  {
+    category: "scoa_math",
+    groupLabel: "数理",
+    units: [
+      { id: "scoa_arithmetic", subCategory: "四則計算", label: "四則計算" },
+      { id: "scoa_equation", subCategory: "方程式・数列", label: "方程式・数列" },
+    ],
+  },
+  {
+    category: "scoa_logic",
+    groupLabel: "論理",
+    units: [
+      { id: "scoa_dice", subCategory: "サイコロ・場合の数", label: "サイコロ・場合の数" },
+      { id: "scoa_inference", subCategory: "推論", label: "推論" },
+      { id: "scoa_figure", subCategory: "図形", label: "図形" },
+    ],
+  },
+  {
+    category: "scoa_common_sense",
+    groupLabel: "常識",
+    units: [
+      { id: "scoa_science", subCategory: "理科", label: "理科" },
+      { id: "scoa_social", subCategory: "社会", label: "社会" },
+    ],
+  },
+  {
+    category: "scoa_english",
+    groupLabel: "英語",
+    units: [
+      { id: "scoa_word", subCategory: "単語・文法・イディオム", label: "単語・文法・イディオム" },
+      { id: "scoa_fill_blank", subCategory: "穴埋め", label: "穴埋め" },
+    ],
+  },
+];
+
 // テスト種別id（src/data/testTypes.tsのTestType.id）ごとの単元グループ。
-// 未定義のテスト種別（GAB/C-GAB・CAB・SCOA）は分野・単元一覧自体をまだ用意していない。
+// 未定義のテスト種別（GAB/C-GAB・CAB）は分野・単元一覧自体をまだ用意していない。
 export const PRACTICE_UNIT_GROUPS_BY_TEST: Record<string, PracticeUnitGroup[]> = {
   spi: SPI_PRACTICE_UNIT_GROUPS,
   tamatebako: TAMATEBAKO_PRACTICE_UNIT_GROUPS,
+  tgweb: TGWEB_PRACTICE_UNIT_GROUPS,
+  scoa: SCOA_PRACTICE_UNIT_GROUPS,
 };
 
 export const DEFAULT_TEST_ID = "spi";
