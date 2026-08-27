@@ -58,9 +58,9 @@ const FEATURES = [
   },
   {
     icon: Mail,
-    title: "成績を見た企業から届く「特別スカウト」",
+    title: "成績・MBTI・志望で届く「特別スカウト」",
     description:
-      "2段階開示で個人情報を守りつつ、本気度の高い優良企業から特別選考ルートの直オファーが届きます。",
+      "2段階開示で個人情報を守りつつ、Webテスト成績や志望動向、MBTI相性を総合考慮した本気度の高い優良企業から特別オファーが届きます。",
   },
 ];
 
@@ -105,7 +105,7 @@ const STEPS = [
   {
     icon: Mail,
     title: "スカウト",
-    description: "高成績やプロフィールを見た企業から特別オファー",
+    description: "模試成績やMBTIを見た優良企業から特別オファー",
   },
 ];
 
@@ -368,7 +368,9 @@ export default function Home() {
                   <f.icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">{f.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-600">{f.description}</p>
+                <p className="text-sm leading-relaxed text-gray-600 [word-break:keep-all]">
+                  {f.description}
+                </p>
               </div>
             ))}
           </div>
@@ -435,7 +437,9 @@ export default function Home() {
                   <s.icon className="h-6 w-6 text-blue-600" />
                 </div>
                 <h3 className="font-bold text-gray-900">{s.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-600">{s.description}</p>
+                <p className="text-sm leading-relaxed text-gray-600 [word-break:keep-all]">
+                  {s.description}
+                </p>
               </div>
             ))}
           </div>
