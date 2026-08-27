@@ -18,6 +18,7 @@ import { LimitedCheckboxGroup } from "@/src/components/LimitedCheckboxGroup";
 import { AuthLayout } from "@/src/components/AuthLayout";
 import { IconInput } from "@/src/components/IconInput";
 import { MbtiSelect } from "@/src/components/MbtiSelect";
+import { TermsAgreementModal } from "@/src/components/TermsAgreementModal";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -44,6 +45,7 @@ export default function RegisterPage() {
   const [graduationYear, setGraduationYear] = useState(String(GRADUATION_YEARS[0]));
   const [graduationMonth, setGraduationMonth] = useState("3");
   const [agreedTerms, setAgreedTerms] = useState(false);
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [scoutConsent, setScoutConsent] = useState(true);
   const [scoutDetailsOpen, setScoutDetailsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -318,24 +320,28 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
-          <label className="flex items-start gap-2 text-sm text-gray-700">
+          <div className="flex items-start gap-2 text-sm text-gray-700">
             <input
               type="checkbox"
               checked={agreedTerms}
-              onChange={(e) => setAgreedTerms(e.target.checked)}
-              className="mt-0.5 h-4 w-4 accent-blue-600"
+              disabled
+              readOnly
+              className="mt-0.5 h-4 w-4 accent-blue-600 disabled:opacity-100"
             />
             <span>
-              <Link href="/terms" target="_blank" className="text-blue-600 underline">
-                利用規約
-              </Link>
-              および
-              <Link href="/privacy" target="_blank" className="text-blue-600 underline">
-                プライバシーポリシー
-              </Link>
-              に同意します（必須）
+              <button
+                type="button"
+                onClick={() => setTermsModalOpen(true)}
+                className="font-semibold text-blue-600 underline hover:text-blue-700"
+              >
+                利用規約およびプライバシーポリシー
+              </button>
+              の内容を最後までご確認のうえ、同意します（必須）
+              {agreedTerms && (
+                <span className="ml-1 font-semibold text-green-600">✓ 同意済み</span>
+              )}
             </span>
-          </label>
+          </div>
 
           <div className="flex items-start justify-between gap-2">
             <label className="flex flex-1 items-start gap-2 text-sm text-gray-700">
@@ -415,6 +421,16 @@ export default function RegisterPage() {
           ログイン
         </Link>
       </p>
+
+      {termsModalOpen && (
+        <TermsAgreementModal
+          onAgree={() => {
+            setAgreedTerms(true);
+            setTermsModalOpen(false);
+          }}
+          onClose={() => setTermsModalOpen(false)}
+        />
+      )}
     </AuthLayout>
   );
 }
