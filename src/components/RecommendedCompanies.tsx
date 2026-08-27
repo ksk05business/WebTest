@@ -29,7 +29,17 @@ export function RecommendedCompanies() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-lg font-bold text-gray-900">あなたへのおすすめ企業</h2>
+      <div className="flex flex-col gap-0.5">
+        <h2 className="text-lg font-bold text-gray-900">
+          あなたに関心を持つ企業
+          <span className="ml-2 inline-block rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 align-middle text-xs font-medium text-gray-600">
+            PR
+          </span>
+        </h2>
+        <p className="text-xs text-gray-400">
+          ※本エリアは企業からの広告配信（ターゲティングPR）により表示されています
+        </p>
+      </div>
 
       {companies === null ? (
         <p className="text-sm text-gray-500">読み込み中...</p>
@@ -64,14 +74,19 @@ export function RecommendedCompanies() {
                       : "求人情報の詳細は企業サイトをご確認ください。"}
                   </p>
                   {c.corporateSiteUrl && (
-                    <a
-                      href={c.corporateSiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-shrink-0 whitespace-nowrap text-xs font-medium text-blue-600 underline"
-                    >
-                      企業サイトを見る
-                    </a>
+                    <span className="flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap">
+                      <a
+                        href={c.corporateSiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-medium text-blue-600 underline"
+                      >
+                        企業サイトを見る
+                      </a>
+                      <span className="inline-block rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+                        PR
+                      </span>
+                    </span>
                   )}
                 </div>
                 {c.appealTags.length > 0 && (
