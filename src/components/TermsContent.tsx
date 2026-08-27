@@ -175,6 +175,13 @@ export function TermsContent() {
         <p className="text-sm text-gray-700">
           本サービスは、これらのテストの出題形式を参考に当社が分析・作成した「非公式の対策・演習ツール」であり、上記各社その他各テストの実施会社・開発元企業とは一切関係がありません。本サービスの内容について、上記各社が推奨・保証・提携しているものではありません。
         </p>
+        <p className="text-sm text-gray-700">
+          問題の作成プロセスと商標権表記の詳細については、
+          <a href="/policy" className="text-blue-600 underline">
+            問題作成ポリシーおよび非公式サービスに関するご案内
+          </a>
+          もあわせてご確認ください。
+        </p>
       </section>
 
       <section className="mt-4 flex flex-col gap-2">
