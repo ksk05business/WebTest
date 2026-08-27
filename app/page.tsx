@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   AlertTriangle,
   BarChart3,
+  BookOpen,
   Brain,
   Building2,
   CheckCircle2,
@@ -87,19 +88,24 @@ const STEPS = [
     description: "志望業界・希望職種を入力するだけ",
   },
   {
-    icon: FileText,
-    title: "Webテスト模試を受験",
-    description: "SPIなど主要Webテストの模試を受けて成績を分析",
+    icon: BookOpen,
+    title: "練習問題",
+    description: "単元ごとの問題演習で基礎力を強化",
   },
   {
     icon: Repeat2,
-    title: "忘却曲線復習で弱点を克服",
-    description: "最適サイクルの復習でスコアアップ",
+    title: "効率的な復習",
+    description: "〇・△・×の自己評価と忘却曲線で弱点克服",
+  },
+  {
+    icon: FileText,
+    title: "模試",
+    description: "本番形式の模試で偏差値・順位を判定",
   },
   {
     icon: Mail,
-    title: "特別スカウトを受信",
-    description: "成績を見た企業から直接オファー",
+    title: "スカウト",
+    description: "高成績やプロフィールを見た企業から特別オファー",
   },
 ];
 
@@ -414,9 +420,9 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-3 text-center">
             <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">ご利用の流れ</h2>
-            <p className="text-sm text-gray-500 sm:text-base">4ステップで、対策からスカウト獲得まで。</p>
+            <p className="text-sm text-gray-500 sm:text-base">5ステップで、対策からスカウト獲得まで。</p>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {STEPS.map((s, i) => (
               <div
                 key={s.title}
@@ -456,7 +462,7 @@ export default function Home() {
               href="/company/apply"
               className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-3.5 text-base font-bold text-white shadow-lg shadow-indigo-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              無料デモ・資料請求はこちら
+              利用申請・資料請求はこちら
             </Link>
             <Link
               href="/company/login"

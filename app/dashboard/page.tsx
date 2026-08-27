@@ -6,6 +6,7 @@ import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { PerformanceDashboard } from "@/src/components/PerformanceDashboard";
 import { RecommendedCompanies } from "@/src/components/RecommendedCompanies";
 import { NoticeBoard } from "@/src/components/NoticeBoard";
+import { SupportChatWidget } from "@/src/components/SupportChatWidget";
 import { ExamModeSelectModal } from "@/src/components/ExamModeSelectModal";
 import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
@@ -117,6 +118,8 @@ export default function DashboardPage() {
           </aside>
         </div>
       </main>
+
+      <SupportChatWidget />
 
       {selectedTestType && (
         <ExamModeSelectModal
