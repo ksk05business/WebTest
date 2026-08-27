@@ -393,7 +393,7 @@ export default function RegisterPage() {
               <Link href="/privacy" target="_blank" className="font-semibold text-blue-600 underline">
                 プライバシーポリシー
               </Link>
-              （成績・プロフィール情報のご利用企業様への共有＝スカウト機能を含む）に同意します（必須）
+              に同意します（必須）
             </span>
           </label>
         </div>
