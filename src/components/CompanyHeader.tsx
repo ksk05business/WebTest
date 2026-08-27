@@ -34,6 +34,12 @@ export function CompanyHeader({ companyName }: { companyName: string }) {
       </div>
       <div className="flex items-center gap-3">
         <span className="text-sm text-gray-600">{companyName}</span>
+        <Link
+          href="/company/profile"
+          className="rounded-full border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          プロフィール
+        </Link>
         <button
           type="button"
           onClick={handleLogout}

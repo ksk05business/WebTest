@@ -101,6 +101,8 @@ CREATE TABLE IF NOT EXISTS company_profiles (
   status TEXT NOT NULL DEFAULT 'pending',
   reviewed_at TEXT, -- 管理者が承認/却下、または資料請求への対応を完了した日時
   approved INTEGER NOT NULL DEFAULT 0, -- 非推奨（statusに置き換え済み）。既存データとの互換のためカラムのみ残す
+  short_message TEXT, -- 学生向け「あなたへのおすすめ企業」に表示する25字以内のアピールメッセージ（企業プロフィール画面で設定）
+  appeal_tags TEXT, -- 「あなたへのおすすめ企業」に表示するアピールタグ（src/data/formOptions.tsのAPPEAL_TAGSからの複数選択、JSON文字列配列）
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

@@ -41,3 +41,22 @@ export const DESIRED_OCCUPATIONS = [
 
 export const DEFAULT_DESIRED_OCCUPATIONS = ["こだわりなし・幅広く検討したい"];
 export const MAX_DESIRED_OCCUPATIONS = 3;
+
+// 企業プロフィール画面で設定する、学生向け「あなたへのおすすめ企業」用のアピールタグ（複数選択可）。
+// company_profiles.appeal_tagsにJSON文字列配列として保存する。
+export const APPEAL_TAGS = [
+  "20代1,000万円以上",
+  "30歳時800万円以上",
+  "30歳時1,500万円以上",
+  "初年度500万円以上",
+  "初年度600万円以上",
+  "海外勤務・海外駐在あり",
+  "20代管理職登用実績あり",
+  "配属確約",
+  "社費での海外留学制度(MBA等)",
+  "職種別採用",
+  "転勤なし",
+  "住宅補助・社宅制度等あり",
+] as const;
+
+export const SHORT_MESSAGE_MAX_LENGTH = 25;

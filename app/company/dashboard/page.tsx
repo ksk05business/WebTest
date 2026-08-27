@@ -182,7 +182,7 @@ export default function CompanyDashboardPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <h1 className="text-lg font-bold text-gray-900">候補者を探す</h1>
+            <h1 className="text-lg font-bold text-gray-900">スカウト</h1>
             <form
               onSubmit={handleSearch}
               className="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2"
@@ -234,7 +234,7 @@ export default function CompanyDashboardPage() {
                   disabled={searching}
                   className="w-full rounded-full bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 sm:w-auto sm:px-8"
                 >
-                  {searching ? "検索中..." : "検索する"}
+                  {searching ? "検索中..." : "候補者を検索"}
                 </button>
               </div>
             </form>
