@@ -1,5 +1,6 @@
 import { generateInitialPassword, hashPassword } from "../../_lib/password";
 import { checkAdminAuth } from "../../_lib/adminAuth";
+import { APPROVAL_BONUS_TOKENS, grantTokens } from "../../_lib/companyTokens";
 
 interface Env {
   DB: D1Database;
@@ -142,11 +143,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .bind(hash, salt, companyId)
       .run();
 
+    // 初回承認特典として無料トークンを付与する（company_token_logsにreason='review_bonus'で記録）。
+    await grantTokens(context.env.DB, companyId, APPROVAL_BONUS_TOKENS, "review_bonus");
+
     return Response.json({
       ok: true,
       status: "active",
       email: company.email,
       initialPassword,
+      grantedTokens: APPROVAL_BONUS_TOKENS,
     });
   }
 

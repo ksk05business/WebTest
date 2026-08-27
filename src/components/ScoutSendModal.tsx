@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 import { MbtiBadge } from "@/src/components/MbtiBadge";
@@ -65,6 +66,7 @@ export function ScoutSendModal({
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [insufficientTokens, setInsufficientTokens] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   function applyTemplate(index: number) {
@@ -83,6 +85,7 @@ export function ScoutSendModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInsufficientTokens(false);
     if (!title.trim() || !message.trim()) {
       setError("件名と本文メッセージを入力してください");
       return;
@@ -104,6 +107,11 @@ export function ScoutSendModal({
       if (!res.ok) {
         if (res.status === 401) {
           redirectToCompanyLogin(router);
+          return;
+        }
+        if (data.insufficientTokens) {
+          setInsufficientTokens(true);
+          setError(null);
           return;
         }
         setError(data.error ?? `送信に失敗しました（status: ${res.status}）`);
@@ -147,6 +155,29 @@ export function ScoutSendModal({
           <MbtiBadge code={candidate.mbti} />
         </div>
 
+        {insufficientTokens ? (
+          <div className="mt-4 flex flex-col gap-3 rounded-lg border-2 border-amber-400 bg-amber-50 p-4 text-sm text-amber-900">
+            <p className="font-bold">トークン残高が不足しています</p>
+            <p>
+              スカウトの送信には1件につき1トークンが必要です。トークンパックを購入して残高を追加してください。
+            </p>
+            <div className="mt-1 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                閉じる
+              </button>
+              <Link
+                href="/company/tokens"
+                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                トークンを購入する
+              </Link>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
             テンプレート
@@ -203,6 +234,7 @@ export function ScoutSendModal({
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

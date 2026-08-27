@@ -1,10 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export function CompanyHeader({ companyName }: { companyName: string }) {
   const router = useRouter();
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!localStorage.getItem("spiCompanyUser")) return;
+    fetch("/api/company/tokens")
+      .then((res) => res.json())
+      .then((data: { tokenBalance?: number }) => {
+        if (typeof data.tokenBalance === "number") setTokenBalance(data.tokenBalance);
+      })
+      .catch(() => {
+        // 残高の取得に失敗してもヘッダー自体は表示する
+      });
+  }, []);
 
   function handleLogout() {
     fetch("/api/company/logout", { method: "POST" }).catch(() => {
@@ -30,9 +44,20 @@ export function CompanyHeader({ companyName }: { companyName: string }) {
           <Link href="/company/scouts" className="hover:text-blue-700">
             送信履歴
           </Link>
+          <Link href="/company/tokens" className="hover:text-blue-700">
+            トークン
+          </Link>
         </nav>
       </div>
       <div className="flex items-center gap-3">
+        {tokenBalance !== null && (
+          <Link
+            href="/company/tokens"
+            className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 hover:bg-blue-100"
+          >
+            残り{tokenBalance}トークン
+          </Link>
+        )}
         <span className="text-sm text-gray-600">{companyName}</span>
         <Link
           href="/company/profile"

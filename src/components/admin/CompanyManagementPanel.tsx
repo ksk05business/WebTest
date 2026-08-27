@@ -79,6 +79,7 @@ export function CompanyManagementPanel({
     companyName: string;
     email: string;
     initialPassword: string;
+    grantedTokens: number;
   } | null>(null);
 
   useEffect(() => {
@@ -132,6 +133,7 @@ export function CompanyManagementPanel({
           companyName: company.companyName,
           email: data.email,
           initialPassword: data.initialPassword,
+          grantedTokens: data.grantedTokens ?? 0,
         });
       }
       loadCompanies(requestTypeFilter, statusFilter);
@@ -157,6 +159,10 @@ export function CompanyManagementPanel({
             <span className="rounded bg-white px-2 py-0.5 font-mono font-bold">
               {approvedResult.initialPassword}
             </span>
+          </p>
+          <p>
+            初回特典トークン: <span className="font-bold">{approvedResult.grantedTokens}トークン</span>
+            を自動付与しました（有効期限180日）。
           </p>
           <p className="text-xs text-green-700">
             このパスワードは今だけ表示されます。担当者へ個別にご連絡ください（画面を閉じると再表示できません）。

@@ -103,7 +103,25 @@ CREATE TABLE IF NOT EXISTS company_profiles (
   approved INTEGER NOT NULL DEFAULT 0, -- 非推奨（statusに置き換え済み）。既存データとの互換のためカラムのみ残す
   short_message TEXT, -- 学生向け「あなたへのおすすめ企業」に表示する25字以内のアピールメッセージ（企業プロフィール画面で設定）
   appeal_tags TEXT, -- 「あなたへのおすすめ企業」に表示するアピールタグ（src/data/formOptions.tsのAPPEAL_TAGSからの複数選択、JSON文字列配列）
+  -- トークン消費型マネタイズ（functions/_lib/companyTokens.ts）。スカウト送信・おすすめ表示設定で消費する。
+  token_balance INTEGER NOT NULL DEFAULT 0, -- トークン残高
+  token_expires_at TEXT, -- トークンの有効期限（付与のたびに「付与日+180日」で更新。NULLまたは過去日時なら残高があっても消費不可）
+  featured_until TEXT, -- 「おすすめ表示」設定の有効期限（この日時までstudent向けcompany-recommendationsで優先表示される）
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ============================================================
+-- 企業トークンの増減履歴（functions/_lib/companyTokens.ts経由でのみ書き込む）
+-- reason: 'review_bonus'（審査承認特典）| 'pack_purchase'（パック購入によるトークン付与）
+--       | 'scout_send'（スカウト送信による消費） | 'recommendation_feature'（おすすめ表示設定による消費）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS company_token_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  company_id INTEGER NOT NULL,
+  delta INTEGER NOT NULL, -- 変動数（付与は正、消費は負）
+  reason TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (company_id) REFERENCES company_profiles(id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_company_profiles_email ON company_profiles(email);

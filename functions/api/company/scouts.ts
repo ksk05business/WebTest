@@ -1,5 +1,6 @@
 import { getAuthenticatedSubjectId } from "../../_lib/session";
 import { getAffinityMbtiCodes, isValidMbtiCode } from "../../../src/data/mbti";
+import { SCOUT_TOKEN_COST, consumeTokens } from "../../_lib/companyTokens";
 
 interface Env {
   DB: D1Database;
@@ -210,6 +211,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     .first();
   if (existing) {
     return Response.json({ error: "この候補者には既にスカウトを送信済みです" }, { status: 409 });
+  }
+
+  // トークン消費型: スカウト1件の送信につき1トークンを消費する。残高不足の場合は送信自体をブロックし、
+  // フロントエンド側でトークン購入導線（購入モーダル等）を表示できるようinsufficientTokensフラグを返す。
+  const consumed = await consumeTokens(context.env.DB, company.id, SCOUT_TOKEN_COST, "scout_send");
+  if (!consumed) {
+    return Response.json(
+      {
+        error: "トークン残高が不足しています。トークンを購入してください。",
+        insufficientTokens: true,
+      },
+      { status: 402 }
+    );
   }
 
   // is_anonymous = 1 で作成。学生が承諾するまで、企業はこの学生の氏名・連絡先を一切取得できない。

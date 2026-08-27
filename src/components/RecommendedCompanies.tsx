@@ -10,6 +10,7 @@ type CompanyRecommendation = {
   industry: string | null;
   shortMessage: string | null;
   appealTags: string[];
+  isFeatured: boolean;
 };
 
 // /dashboardの「あなたへのおすすめ企業」セクション。旧ScoutInboxの表示枠を置き換えたもの。
@@ -42,6 +43,11 @@ export function RecommendedCompanies() {
             {companies.map((c) => (
               <div key={c.id} className="flex flex-col gap-2 p-4">
                 <div className="flex flex-wrap items-center gap-3">
+                  {c.isFeatured && (
+                    <span className="flex-shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 px-2 py-0.5 text-xs font-bold text-white">
+                      PR
+                    </span>
+                  )}
                   <p className="flex-shrink-0 truncate font-semibold text-gray-900 sm:w-44">
                     {c.companyName}
                   </p>

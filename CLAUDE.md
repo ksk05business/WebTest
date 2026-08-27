@@ -276,6 +276,22 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 
 **スカウト同意の独立チェックボックス廃止**: `scoutConsent`用の独立チェックボックスと「詳細 ▼」展開パネルを`app/register/page.tsx`から完全に削除し、送信時は`scoutConsent: agreedToPrivacy`（プライバシーポリシーへの同意＝スカウト目的での情報提供への同意を内包）として送信するようにした。**この変更は、2026-08-21に一度「リクナビ事件の教訓を踏まえ、スカウト同意はチェックボックスを分離し必須条件にしない」という設計判断を明示的に採用した経緯（本ファイル内「スカウトAPI」節）を、今回のユーザー要求により再度上書きするもの**。プライバシーポリシー本文（`PrivacyContent`の「3. 第三者提供」）には2段階開示・提供目的・提供範囲・提供先・提供方法が明記されているため情報提供自体は行われているが、学生側から見ると「スカウト対象になりたくない」という選択が、プライバシーポリシーへの同意（＝サービス利用の必須条件）とセットになり、事実上のデフォルトオプトイン相当になる。個人情報保護法の第三者提供同意（分かりやすく独立した意思確認）の観点からは望ましくない設計である可能性が高く、実際の公開前に弁護士レビューで必ず確認すべき点として明記しておく。サーバー側（`functions/api/register.ts`）は元々`agreedTerms`と`scoutConsent`を独立したフィールドとして受け取る設計のため、今回はAPIは一切変更していない（フロントエンドが送る値の組み合わせ方のみを変更）。
 
+## 企業向けトークン消費型マネタイズ（2026-08-27）
+
+企業向けの課金モデルを「成果報酬型」から「トークン購入・消費型」に変更した。増減はすべて`functions/_lib/companyTokens.ts`（`grantTokens()`/`consumeTokens()`/`getEffectiveTokenBalance()`）経由でのみ行い、`company_token_logs`に履歴を残す（`company_profiles.token_balance`を他の場所から直接UPDATEしない）。
+
+**DB**: `company_profiles`に`token_balance INTEGER DEFAULT 0`・`token_expires_at TEXT`・`featured_until TEXT`（おすすめ表示の有効期限）を追加、新規`company_token_logs`（company_id, delta, reason, created_at）を作成（本番D1へも適用済み）。トークンは付与のたびに有効期限を「付与日+180日」へ一律更新する簡易実装（複数回の付与分を個別に期限管理する仕組みは持たない）。有効期限切れの残高は`getEffectiveTokenBalance()`が実質0として返す（レコード上の`token_balance`自体は書き換えない）。
+
+**消費ルール**: スカウト送信（`functions/api/company/scouts.ts`のPOST）は1件につき1トークン消費、残高不足時は`consumeTokens()`がfalseを返し402＋`{insufficientTokens:true}`を返す。フロントエンド（`ScoutSendModal.tsx`）はこのフラグを見て送信フォームの代わりに「トークン残高が不足しています」という案内と`/company/tokens`への導線をモーダル内に表示する。「おすすめ表示」設定（新規`functions/api/company/promotion.ts`のPOST、`?days=7|14|30`固定選択肢）は1日あたり1トークン消費し、`company_profiles.featured_until`を更新する（既に有効期間が残っていればその終了日時から追加日数を積み増す、前倒し消化はしない）。`functions/api/company-recommendations.ts`は`featured_until > now`の企業を`ORDER BY`で優先表示するようにし、レスポンスに`isFeatured`を追加、`RecommendedCompanies.tsx`が「PR」バッジとして表示する。
+
+**審査承認時の無料トークン付与**: `functions/api/admin/companies.ts`の`approve`アクションで、企業を`active`にした直後に`grantTokens(db, companyId, APPROVAL_BONUS_TOKENS=30, "review_bonus")`を呼ぶ。`CompanyManagementPanel.tsx`の承認完了バナーにも付与トークン数を表示する。`pending`の企業は`token_balance=0`のまま（承認まで一切トークンが増えない）で、`scouts.ts`・`promotion.ts`双方の`status !== 'active'`ガード（既存のスカウト機能承認待ちブロックと同じ仕組み）によりスカウト送信・おすすめ表示設定のいずれも行えない。
+
+**トークンパック購入UI（`/company/tokens`）**: ミニパック（50トークン/40,000円）・スタンダードパック（100トークン/60,000円・おすすめ表示バッジ付き）・ボリュームパック（300トークン/150,000円）の3プランを表示。**実際のStripe決済連携は未実装**（ユーザー要求でも「Stripe決済連携用UI」＝表示のみが求められていたため、決済処理自体は範囲外と判断）。「購入を申し込む」ボタンは新規エンドポイントを作らず、既存の`POST /api/contact`（`contact_inquiries`テーブル）にパック内容を整形したメッセージとして送信する形で実装した（`/company/apply`同様、メール送信機能が未設定のため運営がD1を直接確認して個別に決済案内する運用を前提とする）。このため、購入申し込み後の実際のトークン付与は運営が手動で`grantTokens()`相当のSQLを実行する必要がある（管理画面での購入申請一覧・fulfillment用UIは今回のユーザー要求の検証項目に含まれていなかったため実装していない。将来必要になれば`/admin/companies`と同様のadmin-token方式で追加できる）。
+
+**`CompanyHeader.tsx`**: ナビに「トークン」リンクを追加し、右上に現在のトークン残高バッジ（`GET /api/company/tokens`から取得、`DashboardHeader`の未読スカウト数バッジと同じ非同期取得パターン）を表示する。
+
+**動作検証**: ローカルD1で一連のフローを実地検証した。①企業申請→管理者承認で`token_balance=30`・`token_expires_at`=承認日+180日・`company_token_logs`に`review_bonus`行が記録されることを確認、②スカウト送信で残高が1減り`scout_send`ログが記録されることを確認、③残高0の状態でのスカウト送信が402＋`insufficientTokens:true`でブロックされることを確認、④`POST /api/company/promotion`（7日）で残高が7減り`featured_until`が7日後に設定されることを確認、⑤残高不足時の`promotion`も同様に402でブロックされることを確認、⑥`GET /api/company-recommendations`で`featured_until`が有効な企業が`isFeatured:true`として返り優先表示されることを確認。検証用アカウント・データはすべて削除済み。
+
 # 応答・進め方のルール
 
 - ユーザーへの応答は常に日本語で行う。
