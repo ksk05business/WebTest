@@ -129,8 +129,11 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "scoa_language",
     groupLabel: "言語",
     units: [
-      { id: "scoa_idiom", subCategory: "熟語・格言", label: "熟語・格言" },
-      { id: "scoa_kanji", subCategory: "漢字の読み", label: "漢字の読み" },
+      {
+        id: "scoa_idiom",
+        subCategory: "熟語・ことわざ・慣用句・故事成語",
+        label: "熟語・ことわざ・慣用句・故事成語",
+      },
       { id: "scoa_reading", subCategory: "長文読解", label: "長文読解" },
     ],
   },

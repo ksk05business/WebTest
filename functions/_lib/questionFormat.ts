@@ -29,6 +29,7 @@ const CATEGORY_CODE: Record<string, { test: string; unit: string }> = {
   tamatebako_math: { test: "TAM", unit: "M" },
   tamatebako_verbal: { test: "TAM", unit: "L" },
   tamatebako_english: { test: "TAM", unit: "E" },
+  scoa_language: { test: "SCOA", unit: "L" },
 };
 
 function buildQuestionCode(category: string, seq: number | undefined): string | undefined {
