@@ -148,18 +148,52 @@ export function TermsContent() {
       </section>
 
       <section className="mt-4 flex flex-col gap-2">
-        <h2 className="text-lg font-semibold text-gray-900">第11条（規約の変更）</h2>
+        <h2 className="text-lg font-semibold text-gray-900">第11条（知的財産権・問題作成ポリシー）</h2>
+        <p className="text-sm text-gray-700">
+          本サービス上で提供するすべての問題、解説、テキスト等のコンテンツは、当社が生成AI技術を活用し、当社独自のプロンプトおよびアルゴリズムによってゼロから作成・監修した「完全オリジナルコンテンツ」です。市販の参考書、出版物、他社が提供するWebサービス等、既存の著作物を直接複製・転載・翻案したものではありません。本サービス上のコンテンツに関する著作権その他の知的財産権は、すべて当社に帰属します。
+        </p>
+        <p className="text-sm text-gray-700">
+          ユーザーは、本サービス上のコンテンツを、私的利用の範囲を超えて複製、転載、再配布、改変、その他の二次利用をしてはなりません。
+        </p>
+      </section>
+
+      <section className="mt-4 flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-gray-900">
+          第12条（商標権表記・非公式サービスであることの明記）
+        </h2>
+        <p className="text-sm text-gray-700">
+          本サービスで言及する各適性検査の名称の商標権は、それぞれ以下の企業に帰属します。
+        </p>
+        <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
+          <li>「SPI」「SPI3」は株式会社リクルートマネジメントソリューションズの登録商標です。</li>
+          <li>
+            「玉手箱」「GAB」「CAB」は日本エス・エイチ・エル株式会社（SHL）の登録商標または商標です。
+          </li>
+          <li>「TG-WEB」は株式会社ヒューマネージの登録商標です。</li>
+          <li>「SCOA」は株式会社日本総合適性職能点検協会の登録商標または商標です。</li>
+        </ul>
+        <p className="text-sm text-gray-700">
+          本サービスは、これらのテストの出題形式を参考に当社が分析・作成した「非公式の対策・演習ツール」であり、上記各社その他各テストの実施会社・開発元企業とは一切関係がありません。本サービスの内容について、上記各社が推奨・保証・提携しているものではありません。
+        </p>
+      </section>
+
+      <section className="mt-4 flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-gray-900">第13条（規約の変更）</h2>
         <p className="text-sm text-gray-700">
           当社は、必要と判断した場合には、ユーザーに通知することにより、本規約を変更できるものとします。
         </p>
       </section>
 
       <section className="mt-4 flex flex-col gap-2">
-        <h2 className="text-lg font-semibold text-gray-900">第12条（準拠法・管轄）</h2>
+        <h2 className="text-lg font-semibold text-gray-900">第14条（準拠法・管轄）</h2>
         <p className="text-sm text-gray-700">
           本規約の解釈にあたっては、日本法を準拠法とします。本サービスに関して紛争が生じた場合には、[管轄裁判所]を専属的合意管轄とします。
         </p>
       </section>
+
+      <p className="mt-4 text-xs text-gray-500">
+        ※当サイトは各適性検査の運営会社とは関係のない非公式の対策サービスです。「SPI」は株式会社リクルートマネジメントソリューションズ等、各社の登録商標または商標です。
+      </p>
 
       <p className="mt-4 text-sm text-gray-500">最終改定日: [YYYY年MM月DD日]</p>
     </>
