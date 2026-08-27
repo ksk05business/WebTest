@@ -367,8 +367,10 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white">
                   <f.icon className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">{f.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-600 [word-break:keep-all]">
+                <h3 className="break-words text-base font-bold text-gray-900 sm:text-lg">
+                  {f.title}
+                </h3>
+                <p className="break-words text-sm leading-relaxed text-gray-600">
                   {f.description}
                 </p>
               </div>
@@ -428,7 +430,7 @@ export default function Home() {
             {STEPS.map((s, i) => (
               <div
                 key={s.title}
-                className="relative flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+                className="relative flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className="flex items-center gap-3">
                   <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-sm font-bold text-white">
@@ -436,8 +438,8 @@ export default function Home() {
                   </span>
                   <s.icon className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="font-bold text-gray-900">{s.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-600 [word-break:keep-all]">
+                <h3 className="break-words font-bold text-gray-900">{s.title}</h3>
+                <p className="break-words text-sm leading-normal text-gray-600">
                   {s.description}
                 </p>
               </div>
