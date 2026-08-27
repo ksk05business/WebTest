@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
-import { DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
+import { CATEGORY_TO_TEST_ID, DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 
 function formatElapsed(seconds: number): string {
@@ -25,7 +25,18 @@ function getUserEmail(): string | null {
   }
 }
 
-function BackToUnitsLink({ testId }: { testId: string }) {
+function BackToUnitsLink({ testId, scope }: { testId: string; scope: string | null }) {
+  if (scope === "memorization") {
+    return (
+      <Link
+        href="/dashboard"
+        className="inline-flex min-h-12 items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-700"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        ダッシュボードに戻る
+      </Link>
+    );
+  }
   return (
     <Link
       href={`/practice?testType=${testId}`}
@@ -52,6 +63,9 @@ function PracticePageInner() {
   const subCategory = searchParams.get("subCategory");
   const testId = searchParams.get("testType") ?? DEFAULT_TEST_ID;
   const statusFilter = searchParams.get("statusFilter"); // 'wrong_uncertain' | 'unanswered' | null
+  // scope: 'wrong'（このテストの復習ノート、testTypeで絞り込み）
+  //      | 'memorization'（ダッシュボードのスキマ暗記復習、全テスト横断）
+  const scope = searchParams.get("scope");
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -62,7 +76,7 @@ function PracticePageInner() {
   const [authChecked, setAuthChecked] = useState(false);
   const [finished, setFinished] = useState(false);
   const [results, setResults] = useState<
-    { questionId: number; category: string; correct: boolean }[]
+    { questionId: number; category: string; rawCategory?: string; correct: boolean }[]
   >([]);
 
   const question = questions?.[currentIndex];
@@ -77,14 +91,22 @@ function PracticePageInner() {
   }, [router]);
 
   function loadQuestions() {
-    // statusFilter（未回答のみ/×＋△のみ復習）指定時は該当する全問題を出題するため、上限を大きく取る。
-    const params = new URLSearchParams({ limit: statusFilter ? "300" : "20" });
-    if (category) {
-      params.set("category", category);
-      if (subCategory) params.set("subCategory", subCategory);
-    }
-    if (statusFilter) params.set("statusFilter", statusFilter);
-    fetch(`/api/questions?${params.toString()}`)
+    const fetchUrl =
+      scope === "memorization"
+        ? "/api/practice/history?scope=memorization&limit=20"
+        : scope === "wrong"
+          ? `/api/practice/history?testType=${encodeURIComponent(testId)}&limit=20`
+          : (() => {
+              // statusFilter（未回答のみ/×＋△のみ復習）指定時は該当する全問題を出題するため、上限を大きく取る。
+              const params = new URLSearchParams({ limit: statusFilter ? "300" : "20" });
+              if (category) {
+                params.set("category", category);
+                if (subCategory) params.set("subCategory", subCategory);
+              }
+              if (statusFilter) params.set("statusFilter", statusFilter);
+              return `/api/questions?${params.toString()}`;
+            })();
+    fetch(fetchUrl)
       .then((res) => {
         if (res.status === 401) {
           redirectToLogin(router);
@@ -95,7 +117,7 @@ function PracticePageInner() {
       .then((data: { questions?: Question[]; error?: string }) => {
         if (!data.questions || data.questions.length === 0) {
           setLoadError(
-            statusFilter
+            statusFilter || scope
               ? "対象の問題がありません。すべて解答済みか、該当する問題がまだありません。"
               : "出題できる問題がありません。時間をおいて再度お試しください。"
           );
@@ -107,10 +129,10 @@ function PracticePageInner() {
   }
 
   useEffect(() => {
-    if (!authChecked || !category) return;
+    if (!authChecked || !(category || scope)) return;
     loadQuestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authChecked, category, subCategory, statusFilter]);
+  }, [authChecked, category, subCategory, statusFilter, scope]);
 
   function handleRestart() {
     setQuestions(null);
@@ -153,7 +175,12 @@ function PracticePageInner() {
     const isCorrectAnswer = label === question.answer;
     setResults((r) => [
       ...r,
-      { questionId: question.id, category: question.category, correct: isCorrectAnswer },
+      {
+        questionId: question.id,
+        category: question.category,
+        rawCategory: question.rawCategory,
+        correct: isCorrectAnswer,
+      },
     ]);
     if (isCorrectAnswer) {
       setScore((s) => s + 1);
@@ -172,37 +199,54 @@ function PracticePageInner() {
 
   async function handleNext() {
     if (isLast && questions) {
-      const total = questions.length;
-      const categoryScores: Record<string, { correct: number; total: number }> = {};
+      // rawCategoryから実際のテストIDを解決し、テストごとにグルーピングして送信する
+      // （scope=memorization時は複数テストの問題が混在しうるため、テストごとに分けてPOSTし、
+      // 各テストの復習ノート・成績データが正しく更新されるようにする）。
+      const groups = new Map<
+        string,
+        { questionId: number; category: string; correct: boolean }[]
+      >();
       for (const r of results) {
-        const entry = categoryScores[r.category] ?? { correct: 0, total: 0 };
-        entry.total += 1;
-        if (r.correct) entry.correct += 1;
-        categoryScores[r.category] = entry;
+        const groupTestId = (r.rawCategory && CATEGORY_TO_TEST_ID[r.rawCategory]) || testId;
+        const list = groups.get(groupTestId) ?? [];
+        list.push({ questionId: r.questionId, category: r.category, correct: r.correct });
+        groups.set(groupTestId, list);
       }
 
       try {
         const email = getUserEmail();
         if (email) {
-          const answers = results.map((r) => ({ questionId: r.questionId, correct: r.correct }));
-          await fetch("/api/exam-results", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email,
-              testType: testId,
-              score,
-              total,
-              categoryScores,
-              answers,
-              isPractice: true,
-            }),
-          });
-          await fetch("/api/practice/history", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, testType: testId, answers, isPractice: true }),
-          });
+          for (const [groupTestId, groupResults] of groups) {
+            const groupCategoryScores: Record<string, { correct: number; total: number }> = {};
+            for (const r of groupResults) {
+              const entry = groupCategoryScores[r.category] ?? { correct: 0, total: 0 };
+              entry.total += 1;
+              if (r.correct) entry.correct += 1;
+              groupCategoryScores[r.category] = entry;
+            }
+            const groupAnswers = groupResults.map((r) => ({
+              questionId: r.questionId,
+              correct: r.correct,
+            }));
+            await fetch("/api/exam-results", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email,
+                testType: groupTestId,
+                score: groupResults.filter((r) => r.correct).length,
+                total: groupResults.length,
+                categoryScores: groupCategoryScores,
+                answers: groupAnswers,
+                isPractice: true,
+              }),
+            });
+            await fetch("/api/practice/history", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, testType: groupTestId, answers: groupAnswers, isPractice: true }),
+            });
+          }
         }
       } catch {
         // 保存に失敗しても練習の完了画面自体は表示する
@@ -220,14 +264,14 @@ function PracticePageInner() {
     return null;
   }
 
-  if (!category) {
+  if (!category && !scope) {
     return <PracticeUnitSelector testId={testId} />;
   }
 
   if (loadError) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
-        <BackToUnitsLink testId={testId} />
+        <BackToUnitsLink testId={testId} scope={scope} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <p className="text-sm font-medium text-red-600">{loadError}</p>
         </div>
@@ -238,7 +282,7 @@ function PracticePageInner() {
   if (finished && questions) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
-        <BackToUnitsLink testId={testId} />
+        <BackToUnitsLink testId={testId} scope={scope} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
           <p className="text-lg font-semibold text-gray-900">練習お疲れ様でした！</p>
           <p className="text-sm text-gray-700">
@@ -270,7 +314,7 @@ function PracticePageInner() {
   if (!question || !questions) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
-        <BackToUnitsLink testId={testId} />
+        <BackToUnitsLink testId={testId} scope={scope} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
         </div>
@@ -282,14 +326,14 @@ function PracticePageInner() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
-      <BackToUnitsLink testId={testId} />
+      <BackToUnitsLink testId={testId} scope={scope} />
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-gray-500">
         <span className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
             練習モード
           </span>
-          {subCategory && (
+          {(subCategory || scope) && (
             <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
               {question.category}
             </span>
@@ -302,6 +346,16 @@ function PracticePageInner() {
           {statusFilter === "unanswered" && (
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
               未回答のみ
+            </span>
+          )}
+          {scope === "wrong" && (
+            <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700">
+              🔥 復習ノート
+            </span>
+          )}
+          {scope === "memorization" && (
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+              スキマ暗記復習
             </span>
           )}
           <span className="whitespace-nowrap">

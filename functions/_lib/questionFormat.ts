@@ -30,6 +30,13 @@ const CATEGORY_CODE: Record<string, { test: string; unit: string }> = {
   tamatebako_verbal: { test: "TAM", unit: "L" },
   tamatebako_english: { test: "TAM", unit: "E" },
   scoa_language: { test: "SCOA", unit: "L" },
+  scoa_math: { test: "SCOA", unit: "M" },
+  scoa_logic: { test: "SCOA", unit: "LG" },
+  scoa_common_sense: { test: "SCOA", unit: "CS" },
+  scoa_english: { test: "SCOA", unit: "E" },
+  tgweb_verbal: { test: "TGW", unit: "L" },
+  tgweb_math: { test: "TGW", unit: "M" },
+  tgweb_english: { test: "TGW", unit: "E" },
 };
 
 function buildQuestionCode(category: string, seq: number | undefined): string | undefined {

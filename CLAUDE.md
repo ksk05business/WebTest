@@ -6,6 +6,18 @@
 画面は `/`（トップ）、`/register`（会員登録）、`/login`（ログイン）、`/dashboard`（ログイン後のホーム、ログイン必須）、`/test`（試験実行、ログイン必須）、`/result`（結果表示）。
 登録・ログインに成功すると`localStorage`の`spiUser`にセットし、そのまま`/dashboard`へ遷移する（別途ログインを挟まない）。
 
+## ダッシュボード横断「スキマ暗記復習」と各テスト単元選択ページ「復習ノート」の分離（2026-08-27）
+
+過去のセッションで復習UIがドリフトしていた点に注意: `app/practice/page.tsx`の`category==="wrong_review"`分岐は既に廃止済みで、単元カードクリックは`UnitStatusSummaryModal`（`user_question_statuses`の〇/△/×ベース）に置き換わっている。また`enqueueWrongLanguageAnswers`は`enqueueWrongAnswers`に改名され、対象カテゴリは`functions/_lib/knowledgeCategories.ts`の`KNOWLEDGE_REVIEW_CATEGORIES`（現状`verbal`/`english`/`tamatebako_verbal`/`tamatebako_english`のみ、TG-WEB・SCOAは未対応）で管理されている。`reviewSchedule.ts`も1/3/7/14/30日の5段階制に変わっている。このセッションではこれらの`user_question_reviews`（忘却曲線）システムには一切手を入れず、**別系統の`user_question_history`（誤答履歴、全テスト共通）ベースで新規に集計ロジックを実装**した。
+
+**単元の「暗記系」判定**: `src/data/practiceUnits.ts`の`PracticeUnit`型に`memorization?: boolean`を追加し、各単元に個別付与した。判定基準はユーザー要求により「カテゴリ単位」ではなく「スマホの移動中に1問単位でサクッと解けるか（長文読解等、まとまった文章を読む必要がある単元は同じ言語・英語カテゴリでも除外）」という単元単位の基準にした。例えばSPIの言語では二語の関係・熟語の成り立ち・語彙・語句の用法・文の並べ替えは対象だが長文読解は対象外、SCOAの言語は熟語・ことわざ・慣用句・故事成語のみ対象（長文読解＝接続詞穴埋めは対象外）、常識（理科・社会）は対象、玉手箱は現状すべて長文ベースの実データのため対象単元なし。`getMemorizationUnitKeys()`でこの一覧を`{category, subCategory}`ペアとして導出し、`functions/api/practice/history.ts`（`../../src/data/practiceUnits`を相対importして共用、`functions/api/me.ts`等と同じ既存パターン）から参照する。`CATEGORY_TO_TEST_ID`（category→testId逆引きマップ）も同ファイルに追加し、`app/practice/page.tsx`が問題の`rawCategory`から実際のテストを判定するのに使う。
+
+**`GET /api/practice/history`の拡張**: 既存の`?testType=<id>&countOnly=1`（そのテストの全分野を対象、非言語も言語も問わず要復習数をカウント）はそのまま「各テスト単元選択ページ上部の復習ノート」（オレンジ系、`PracticeUnitSelector.tsx`）用として復活・再利用した。新たに`?scope=memorization`（testType省略時）を追加し、`memorization: true`単元のみを対象にテスト種別を問わず横断集計する「ダッシュボードのスキマ暗記復習」（エメラルド系、`PerformanceDashboard.tsx`）用のクエリを実装した。POST（回答記録）自体は無変更。
+
+**`app/practice/page.tsx`の`scope`クエリパラメータ**: `?scope=wrong`（`testType`と併用、単一テストの誤答のみ出題）と`?scope=memorization`（全テスト横断の暗記系誤答のみ出題）を追加。`scope=memorization`時は複数テストの問題が1セッションに混在しうるため、`handleNext()`の完了時POSTを`rawCategory→testId`でグルーピングし、テストごとに`/api/exam-results`・`/api/practice/history`を個別に呼ぶよう変更した（1回のPOSTに単一の`testType`しか持てない既存API形状を維持したまま対応）。
+
+**リアルタイム連動の検証**: ローカルD1でテストユーザーを作成し、`/api/practice/history`のPOST/GETを直接叩いて確認した。SPIの非言語（推論、暗記系対象外）を誤答にしても横断カウントは変化せず、SPIの言語（語彙、暗記系対象）とSCOA言語（熟語、暗記系対象・別テスト）を誤答にすると横断カウントのみ両方加算され、各テスト単体カウント（`testType=spi`/`testType=scoa`）は自テスト分のみ独立して増減し、正解に訂正すると両方のカウントが即座に減ることを確認済み。検証用アカウントは削除済み。
+
 ## 本番D1のスキーマドリフトに注意（実際に発生した障害）
 
 `schema.sql`の`CREATE TABLE IF NOT EXISTS`は既存テーブルには効かないため、コードで新しいカラムを参照し始めても本番D1には反映されず、テーブルは作られるがカラムが古いまま、という状態になりやすい。2026-08-20に実際にこれで障害が発生した：`users.terms_agreed_at`と`users.scout_consent`が本番`users`テーブルに存在しないまま`functions/api/register.ts`・`functions/api/consent.ts`がこれらを参照しており、新規登録は他カラムのおかげで見かけ上動いていたが（実際は登録自体が失敗していた可能性が高い）、マイページのスカウト同意更新は500エラーで「更新に失敗しました」となっていた。`ALTER TABLE users ADD COLUMN ...`で復旧済み。

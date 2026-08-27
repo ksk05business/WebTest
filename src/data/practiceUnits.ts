@@ -7,6 +7,10 @@ export type PracticeUnit = {
   id: string;
   subCategory: string;
   label: string;
+  // trueの単元は「スキマ暗記復習」（ダッシュボードの全テスト横断カード）の対象になる。
+  // 判定基準は「スマホの移動中に1問単位でサクッと解ける暗記・知識系単元」で、長文読解など
+  // まとまった文章を読む必要がある単元（同じ言語・英語カテゴリでも）は対象外とする。
+  memorization?: boolean;
 };
 
 export type PracticeUnitGroup = {
@@ -36,11 +40,21 @@ const SPI_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "verbal",
     groupLabel: "言語（能力）",
     units: [
-      { id: "word_relation", subCategory: "二語の関係", label: "二語の関係" },
-      { id: "idiom_structure", subCategory: "熟語の成り立ち", label: "熟語の成り立ち" },
-      { id: "vocabulary", subCategory: "語彙", label: "語彙・意味" },
-      { id: "word_usage", subCategory: "語句の用法", label: "語句の用法" },
-      { id: "sentence_reorder", subCategory: "文の並べ替え", label: "文の並べ替え" },
+      { id: "word_relation", subCategory: "二語の関係", label: "二語の関係", memorization: true },
+      {
+        id: "idiom_structure",
+        subCategory: "熟語の成り立ち",
+        label: "熟語の成り立ち",
+        memorization: true,
+      },
+      { id: "vocabulary", subCategory: "語彙", label: "語彙・意味", memorization: true },
+      { id: "word_usage", subCategory: "語句の用法", label: "語句の用法", memorization: true },
+      {
+        id: "sentence_reorder",
+        subCategory: "文の並べ替え",
+        label: "文の並べ替え",
+        memorization: true,
+      },
       { id: "reading_comprehension", subCategory: "長文読解", label: "長文読解" },
     ],
   },
@@ -56,9 +70,14 @@ const SPI_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "english",
     groupLabel: "英語（能力）",
     units: [
-      { id: "english_vocab", subCategory: "語意（同意語・反意語）", label: "語意（同意語・反意語）" },
-      { id: "english_dictionary", subCategory: "英英辞典", label: "英英辞典" },
-      { id: "english_fill_blank", subCategory: "空欄補充", label: "空欄補充" },
+      {
+        id: "english_vocab",
+        subCategory: "語意（同意語・反意語）",
+        label: "語意（同意語・反意語）",
+        memorization: true,
+      },
+      { id: "english_dictionary", subCategory: "英英辞典", label: "英英辞典", memorization: true },
+      { id: "english_fill_blank", subCategory: "空欄補充", label: "空欄補充", memorization: true },
       { id: "english_reading", subCategory: "長文読解（英語）", label: "長文読解（英語）" },
     ],
   },
@@ -98,8 +117,8 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "tgweb_verbal",
     groupLabel: "言語",
     units: [
-      { id: "tgweb_fill_blank", subCategory: "空欄補充", label: "空欄補充" },
-      { id: "tgweb_reorder", subCategory: "並べ替え", label: "並べ替え" },
+      { id: "tgweb_fill_blank", subCategory: "空欄補充", label: "空欄補充", memorization: true },
+      { id: "tgweb_reorder", subCategory: "並べ替え", label: "並べ替え", memorization: true },
       { id: "tgweb_reading", subCategory: "長文読解", label: "長文読解" },
     ],
   },
@@ -119,7 +138,7 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     groupLabel: "英語",
     units: [
       { id: "tgweb_reading_en", subCategory: "長文読解", label: "長文読解" },
-      { id: "tgweb_grammar", subCategory: "文法", label: "文法" },
+      { id: "tgweb_grammar", subCategory: "文法", label: "文法", memorization: true },
     ],
   },
 ];
@@ -133,6 +152,7 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
         id: "scoa_idiom",
         subCategory: "熟語・ことわざ・慣用句・故事成語",
         label: "熟語・ことわざ・慣用句・故事成語",
+        memorization: true,
       },
       { id: "scoa_reading", subCategory: "長文読解", label: "長文読解" },
     ],
@@ -158,16 +178,21 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "scoa_common_sense",
     groupLabel: "常識",
     units: [
-      { id: "scoa_science", subCategory: "理科", label: "理科" },
-      { id: "scoa_social", subCategory: "社会", label: "社会" },
+      { id: "scoa_science", subCategory: "理科", label: "理科", memorization: true },
+      { id: "scoa_social", subCategory: "社会", label: "社会", memorization: true },
     ],
   },
   {
     category: "scoa_english",
     groupLabel: "英語",
     units: [
-      { id: "scoa_word", subCategory: "単語・文法・イディオム", label: "単語・文法・イディオム" },
-      { id: "scoa_fill_blank", subCategory: "穴埋め", label: "穴埋め" },
+      {
+        id: "scoa_word",
+        subCategory: "単語・文法・イディオム",
+        label: "単語・文法・イディオム",
+        memorization: true,
+      },
+      { id: "scoa_fill_blank", subCategory: "穴埋め", label: "穴埋め", memorization: true },
     ],
   },
 ];
@@ -182,3 +207,25 @@ export const PRACTICE_UNIT_GROUPS_BY_TEST: Record<string, PracticeUnitGroup[]> =
 };
 
 export const DEFAULT_TEST_ID = "spi";
+
+// category（大分類）→ テスト種別id の逆引きマップ。practice/page.tsxで、問題のrawCategoryから
+// 実際にどのテストの回答として記録すべきかを判定するために使う
+// （スキマ暗記復習は複数テストの問題が混在するため、テストごとに分けて保存する必要がある）。
+export const CATEGORY_TO_TEST_ID: Record<string, string> = Object.fromEntries(
+  Object.entries(PRACTICE_UNIT_GROUPS_BY_TEST).flatMap(([testId, groups]) =>
+    groups.map((group) => [group.category, testId])
+  )
+);
+
+// 「スキマ暗記復習」（ダッシュボードの全テスト横断カード）の対象単元一覧を
+// {category, subCategory} のペアで返す。バックエンド（functions/api/practice/history.ts）から
+// SQLのWHERE条件を組み立てるために使う。
+export function getMemorizationUnitKeys(): { category: string; subCategory: string }[] {
+  return Object.values(PRACTICE_UNIT_GROUPS_BY_TEST).flatMap((groups) =>
+    groups.flatMap((group) =>
+      group.units
+        .filter((unit) => unit.memorization)
+        .map((unit) => ({ category: group.category, subCategory: unit.subCategory }))
+    )
+  );
+}

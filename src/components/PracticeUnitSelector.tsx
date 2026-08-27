@@ -20,7 +20,8 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
     subCategory: string;
     label: string;
   } | null>(null);
-  // 復習ノート（エビングハウスの忘却曲線に基づく間隔反復キュー）の今日分の件数。
+  // 復習ノート: このテスト（testId）に限定した「直近の解答が不正解のまま」の問題数
+  // （非言語・言語を問わず、そのテストの全分野が対象）。
   const [dueReviewCount, setDueReviewCount] = useState(0);
   const [dueReviewLoading, setDueReviewLoading] = useState(true);
 
@@ -40,14 +41,15 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
   }, []);
 
   useEffect(() => {
-    fetch("/api/review")
+    setDueReviewLoading(true);
+    fetch(`/api/practice/history?testType=${encodeURIComponent(testId)}&countOnly=1`)
       .then((res) => res.json())
-      .then((data: { reviews?: unknown[] }) => setDueReviewCount(data.reviews?.length ?? 0))
+      .then((data: { count?: number }) => setDueReviewCount(data.count ?? 0))
       .catch(() => {
         // 取得に失敗しても復習カード自体は表示する（0件扱いになるだけ）
       })
       .finally(() => setDueReviewLoading(false));
-  }, []);
+  }, [testId]);
 
   useEffect(() => {
     if (!toast) return;
@@ -69,8 +71,8 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
   }
 
   function handleReviewNoteClick() {
-    if (dueReviewLoading) return;
-    router.push("/review");
+    if (dueReviewLoading || dueReviewCount === 0) return;
+    router.push(`/practice?testType=${testId}&scope=wrong`);
   }
 
   return (
@@ -85,18 +87,16 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
       <button
         type="button"
         onClick={handleReviewNoteClick}
-        className="flex min-h-12 items-center justify-between gap-2 rounded-xl border-2 border-orange-200 bg-orange-50 p-4 text-left transition-colors hover:border-orange-300 hover:bg-orange-100"
+        disabled={dueReviewLoading || dueReviewCount === 0}
+        className="flex min-h-12 items-center justify-between gap-2 rounded-xl border-2 border-orange-200 bg-orange-50 p-4 text-left transition-colors hover:border-orange-300 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-orange-200 disabled:hover:bg-orange-50"
       >
         <span className="flex min-w-0 items-center gap-2 font-bold text-orange-900">
           <Flame className="h-5 w-5 flex-shrink-0 text-orange-600" />
-          <span className="truncate">復習ノート（今日復習すべき問題）</span>
-        </span>
-        <span className="flex flex-shrink-0 items-center gap-2">
-          <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-orange-700">
-            {dueReviewLoading ? "..." : `${dueReviewCount}問`}
+          <span className="truncate">
+            {testName} 復習ノート（今日復習すべき問題 {dueReviewLoading ? "…" : dueReviewCount}件）
           </span>
-          <ChevronRight className="h-4 w-4 text-orange-400" />
         </span>
+        <ChevronRight className="h-4 w-4 flex-shrink-0 text-orange-400" />
       </button>
 
       {groups.map((group) => (

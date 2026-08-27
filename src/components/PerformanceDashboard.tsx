@@ -66,7 +66,9 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
 export function PerformanceDashboard({ email }: { email: string }) {
   const router = useRouter();
   const [examData, setExamData] = useState<ExamData | null>(null);
-  const [reviewDueCount, setReviewDueCount] = useState(0);
+  // 全テスト種別（SPI3・玉手箱・TG-WEB・SCOA等）を横断した「直近の解答が不正解のまま」の
+  // 暗記系単元（語彙・語句・文法等、長文読解等は除く）の問題数。
+  const [memorizationDueCount, setMemorizationDueCount] = useState(0);
 
   useEffect(() => {
     if (!email) return;
@@ -84,14 +86,14 @@ export function PerformanceDashboard({ email }: { email: string }) {
         // 成績サマリーの取得に失敗してもマイページ自体は表示する
       });
 
-    fetch(`/api/review?email=${encodeURIComponent(email)}`)
+    fetch("/api/practice/history?scope=memorization&countOnly=1")
       .then((res) => res.json())
-      .then((data: { reviews?: unknown[]; error?: string }) => {
+      .then((data: { count?: number; error?: string }) => {
         if (data.error === "ログインが必要です") {
           redirectToLogin(router);
           return;
         }
-        if (data.reviews) setReviewDueCount(data.reviews.length);
+        setMemorizationDueCount(data.count ?? 0);
       })
       .catch(() => {
         // 復習件数の取得に失敗してもマイページ自体は表示する
@@ -100,18 +102,20 @@ export function PerformanceDashboard({ email }: { email: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {reviewDueCount > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-amber-400 bg-amber-50 p-4">
+      {memorizationDueCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-emerald-400 bg-emerald-50 p-4">
           <div>
-            <p className="font-bold text-amber-800">今日復習すべき問題（{reviewDueCount}件）</p>
-            <p className="mt-0.5 text-xs text-amber-700">
-              移動中のスキマ時間に最適！忘却曲線に基づいた言語・英語の暗記復習問題です。
+            <p className="font-bold text-emerald-800">
+              全テスト共通：今日のスキマ暗記復習（{memorizationDueCount}件）
+            </p>
+            <p className="mt-0.5 text-xs text-emerald-700">
+              移動中に最適！すべてのWebテストの言語・英語・暗記系問題を横断して復習できます。
             </p>
           </div>
           <button
             type="button"
-            onClick={() => router.push("/review")}
-            className="rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+            onClick={() => router.push("/practice?scope=memorization")}
+            className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
           >
             今すぐ復習する
           </button>
