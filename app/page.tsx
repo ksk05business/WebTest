@@ -29,13 +29,13 @@ const BADGES = [
   { icon: ShieldCheck, text: "2段階開示で安心" },
 ];
 
-const TEST_BRAND_DETAILS: { id: string; slug: string; displayName: string; subtitle: string }[] = [
-  { id: "spi", slug: "spi", displayName: "SPI3", subtitle: "言語・非言語・構造的把握・英語" },
-  { id: "tamatebako", slug: "tamatebako", displayName: "玉手箱", subtitle: "計数・言語・英語" },
-  { id: "tgweb", slug: "tg-web", displayName: "TG-WEB", subtitle: "従来型・新型" },
-  { id: "gab_cgab", slug: "gab", displayName: "GAB / C-GAB", subtitle: "言語・計数・英語" },
-  { id: "cab", slug: "cab", displayName: "CAB", subtitle: "暗号・法則性・命令表（エンジニア・IT職向け）" },
-  { id: "scoa", slug: "scoa", displayName: "SCOA", subtitle: "言語・数理・論理・常識・英語（公務員・地銀・中堅企業で頻出）" },
+const TEST_BRAND_DETAILS: { id: string; slug: string; displayName: string; subjects: string; pitch: string }[] = [
+  { id: "spi", slug: "spi", displayName: "SPI3", subjects: "言語・非言語・構造的把握・英語", pitch: "日本最大級の圧倒的採用実績" },
+  { id: "tamatebako", slug: "tamatebako", displayName: "玉手箱", subjects: "言語・計数・英語", pitch: "とにかく時間との勝負" },
+  { id: "tgweb", slug: "tg-web", displayName: "TG-WEB", subjects: "従来型・新型", pitch: "PwC・三菱UFJ銀行・資生堂・三菱地所などのトップ企業" },
+  { id: "gab_cgab", slug: "gab", displayName: "C-GAB / Web-GAB", subjects: "言語・計数・英語", pitch: "総合商社・インフラ業界等で頻出" },
+  { id: "cab", slug: "cab", displayName: "CAB", subjects: "暗算・法則性・命令表・暗号", pitch: "IT・システムエンジニア職向け" },
+  { id: "scoa", slug: "scoa", displayName: "SCOA", subjects: "言語・数理・論理・常識・英語", pitch: "公務員・地方銀行・中堅企業で頻出" },
 ];
 
 const TEST_BRANDS = TEST_BRAND_DETAILS.map((d) => ({
@@ -132,7 +132,7 @@ const JSON_LD = {
       hasCourse: TEST_BRAND_DETAILS.map((brand) => ({
         "@type": "Course",
         name: `${brand.displayName} 無料対策講座`,
-        description: `${brand.displayName}（${brand.subtitle}）の練習問題・模試・解き方ガイドを無料で提供する対策講座。`,
+        description: `${brand.displayName}（${brand.subjects}）の練習問題・模試・解き方ガイドを無料で提供する対策講座。`,
         provider: { "@type": "EducationalOrganization", name: SITE_NAME, url: SITE_URL },
         isAccessibleForFree: true,
         hasCourseInstance: {
@@ -312,7 +312,10 @@ export default function Home() {
                     {b.available ? "対応済み" : "準備中"}
                   </span>
                 </div>
-                <p className="text-xs leading-relaxed text-gray-500">{b.subtitle}</p>
+                <p className="text-xs leading-relaxed text-gray-500">{b.subjects}</p>
+                <span className="w-fit rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                  {b.pitch}
+                </span>
               </Link>
             ))}
           </div>
