@@ -250,6 +250,18 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 - GET: `?email=`で受験履歴（最大20件、新しい順）・最新偏差値・最高正答率・受験回数・カテゴリ別内訳等を返す。`src/components/PerformanceDashboard.tsx`（`/dashboard`から描画）がこれを叩いて表示している（`/mypage`はプロフィール専用画面になったため2026-08-21にこの呼び出しを削除）。
 - `app/test/page.tsx`は`src/data/questions.ts`の`Question.category`（分野）ごとに正誤を集計し、試験終了時に`categoryScores`として送信する。localStorageへの保存（`spiResult`/`spiResultHistory`）は従来通り維持しており、D1保存が失敗しても結果画面表示は継続する（fire-and-forgetでtry/catch）。
 
+## 企業プロフィール設定・パスワード変更・「おすすめ企業」25字メッセージ＆アピールタグ（2026-08-27）
+
+新規`/company/profile`（`CompanyHeader`の「ログアウト」左隣に導線追加）で、企業担当者が氏名・会社用メールアドレス・学生向け「あなたへのおすすめ企業」掲載用の25字メッセージ・アピールタグ（`src/data/formOptions.ts`の`APPEAL_TAGS`、12種の固定選択肢から複数選択）を編集できる。パスワード変更は別フォーム（現在のパスワード照合必須、新パスワードは学生側`reset-password.ts`と同じ8文字以上ルール）。
+
+**API**: `functions/api/company/profile.ts`（GET/PUT、`getAuthenticatedSubjectId(..., "company")`のセッションのみで本人確認、bodyの`email`等は認可に使わない、他IDOR対策済みAPIと同じモデル）と`functions/api/company/change-password.ts`（POST、現在パスワードを`verifyPassword`で照合してから更新）を新設。プロフィールのメールアドレス変更時は`isFreeEmailDomain`チェックと自分以外のレコードとの重複チェック（`WHERE email = ? AND id != ?`）を`apply.ts`と同様に行う。`short_message`は25文字超をサーバー側でも拒否、`appeal_tags`は`APPEAL_TAGS`一覧に無い値を含む場合400を返す。
+
+**DB**: `company_profiles`に`short_message TEXT`・`appeal_tags TEXT`（JSON文字列配列）を追加（本番D1へも`ALTER TABLE`適用済み）。
+
+**学生側連携**: `functions/api/company-recommendations.ts`のSELECTに`short_message`・`appeal_tags`を追加し、`RecommendedCompanies.tsx`が未設定時は既存の業種ベースの案内文にフォールバックしつつ、設定されていれば25字メッセージをそのまま表示、アピールタグをバッジ行として企業カード下部に表示する。
+
+**UI文言統一**: `/company/dashboard`の見出し「候補者を探す」→「スカウト」、検索ボタン「検索する」→「候補者を検索」に変更（`CompanyHeader`のナビ文言「候補者検索」「送信履歴」は今回のユーザー要求の対象外のため変更していない）。
+
 # 応答・進め方のルール
 
 - ユーザーへの応答は常に日本語で行う。
