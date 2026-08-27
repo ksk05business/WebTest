@@ -132,6 +132,10 @@ LPのFAQ見出しを「登録前によくいただく質問」→「よくある
 
 **お問い合わせ導線**: `src/components/Footer.tsx`（`app/layout.tsx`でサイト全体に適用済み、LPにも自動的に反映される）に`/contact`リンクを追加。新規`app/contact/page.tsx`は`/company/apply`と同じ構成（フォーム→`POST /api/contact`→D1保存→完了画面）のシンプルなお問い合わせフォーム（お名前・メールアドレス・お問い合わせ内容）。新規`contact_inquiries`テーブル（`functions/api/contact.ts`が保存）。**`/company/apply`と同様、メール送信機能は未設定のため自動返信・通知メールは送らず、D1に保存するのみ**（運営が直接D1を確認する運用。閲覧用の管理画面は今回のユーザー要求に含まれていなかったため未実装、必要になれば`/admin/companies`と同様の簡易admin-token方式で追加できる）。
 
+## AIチャットボットのルールベースFAQへの巻き戻し・APIクレジット消費ゼロ化（2026-08-27）
+
+上記2026-08-22の「AIサポートチャットボットの刷新」（Cloudflare Workers AI・`@cf/meta/llama-3.1-8b-instruct-fp8`による自由入力応答）はユーザー要求により**完全に撤回**した。`functions/api/chat.ts`を削除し、`wrangler.jsonc`の`"ai": {"binding": "AI"}`も削除済み（バインディング自体を外すことで、コード上のミスで誤って呼び出してしまうリスクごと排除する意図）。`src/components/SupportChatWidget.tsx`は外部通信を一切行わない、ハードコードされたFAQ質問ボタン＋固定回答のみのコンポーネントに戻した（`fetch`呼び出し・自由入力欄・送信ボタン・タイピングアニメーションはすべて削除）。LP（`app/page.tsx`）に加えて2026-08-26に`/dashboard`へも同コンポーネントを設置済みだが、いずれもクライアント側で完結するため、この巻き戻しによる追加の連携作業は不要だった。
+
 ## 全テスト種別・全単元共通の問題ID表示／汎用誤答復習機能（2026-08-22）
 
 **問題ID表示**: 新しいDBカラムは追加せず、`questions.category`（大分類）とD1側で計算する`ROW_NUMBER() OVER (PARTITION BY category ORDER BY id)`から`#SPI-NV-005`のような表示用コードを動的に導出する方式にした（`functions/_lib/questionFormat.ts`の`CATEGORY_CODE`マップ＋`buildQuestionCode()`、`toClientQuestion()`が`questionCode`として返す）。`category`は複数のsub_categoryにまたがる大分類なので、`ROW_NUMBER()`のPARTITION BYを`category`単位にすることで、`subCategory`や`difficulty`等の絞り込み条件を変えても同じ問題には常に同じ連番が振られる（＝WHERE句の内容に依存しない安定したID）ようにしている。このCTEを`functions/api/questions.ts`・`functions/api/review.ts`・新設の`functions/api/practice/history.ts`（GET）の3箇所すべてに適用した。**新しいテスト種別・大分類の問題を追加する際は`CATEGORY_CODE`にも接頭辞を追記すること**（未登録のcategoryは`questionCode`が`undefined`になり、バッジ自体が表示されないだけで動作は壊れない）。`/practice`・`/test`・`/review`の全問題解答画面に「問ID: #...」バッジとして表示している。
