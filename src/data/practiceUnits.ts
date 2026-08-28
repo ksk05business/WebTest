@@ -174,9 +174,8 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "scoa_logic",
     groupLabel: "論理",
     units: [
-      { id: "scoa_dice", subCategory: "サイコロ・場合の数", label: "サイコロ・場合の数" },
+      { id: "scoa_dice", subCategory: "場合の数確率", label: "場合の数確率" },
       { id: "scoa_inference", subCategory: "推論", label: "推論" },
-      { id: "scoa_figure", subCategory: "図形", label: "図形" },
     ],
   },
   {
