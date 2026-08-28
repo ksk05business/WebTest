@@ -17,12 +17,18 @@ const BASIC_EXAM_VERBAL_SEC = 17 * 60;
 const BASIC_EXAM_POOL_LIMIT = 150;
 
 const EXAM_PARTS = {
-  spi_basic: { categories: ["verbal", "non_verbal"], label: "基礎能力試験（言語・非言語）" },
-  spi_english: { categories: ["english"], label: "英語" },
-  spi_structural: { categories: ["structural"], label: "構造把握" },
-  // SCOAは現状、言語分野（熟語・ことわざ・慣用句・故事成語／長文読解）のみ実データがあるため、
-  // 単一パートの模試として提供する（src/data/testTypes.tsのSCOA hrefから遷移）。
-  scoa: { categories: ["scoa_language"], label: "SCOA（言語）" },
+  spi_basic: { categories: ["verbal", "non_verbal"], label: "基礎能力試験（言語・非言語）", mockOnly: false },
+  spi_english: { categories: ["english"], label: "英語", mockOnly: false },
+  spi_structural: { categories: ["structural"], label: "構造把握", mockOnly: false },
+  // SCOAは言語・数理・論理・常識・英語の全分野に実データがあるため、単一パートの模試として
+  // 全カテゴリを対象に出題する（src/data/testTypes.tsのSCOA hrefから遷移）。
+  // mockOnly: true により、練習問題プール（is_mock_only=0）とは別に確保した本番模試専用の
+  // 問題プール（is_mock_only=1、各分野からランダム抽出済み）からのみ出題する。
+  scoa: {
+    categories: ["scoa_language", "scoa_math", "scoa_logic", "scoa_common_sense", "scoa_english"],
+    label: "SCOA",
+    mockOnly: true,
+  },
 } as const;
 
 type ExamPartId = keyof typeof EXAM_PARTS;
@@ -132,7 +138,14 @@ function TestPageInner() {
   if (partId === "spi_basic") {
     return <BasicExamFlow />;
   }
-  return <StandardExamFlow partId={partId} categories={part.categories} label={part.label} />;
+  return (
+    <StandardExamFlow
+      partId={partId}
+      categories={part.categories}
+      label={part.label}
+      mockOnly={part.mockOnly}
+    />
+  );
 }
 
 // 基礎能力試験（言語・非言語）: 35分のタイムボックス制。前半17分は言語、後半18分は非言語から
@@ -406,10 +419,12 @@ function StandardExamFlow({
   partId,
   categories,
   label,
+  mockOnly,
 }: {
   partId: ExamPartId;
   categories: readonly string[];
   label: string;
+  mockOnly: boolean;
 }) {
   const router = useRouter();
   const [questions, setQuestions] = useState<Question[] | null>(null);
@@ -429,6 +444,7 @@ function StandardExamFlow({
   useEffect(() => {
     const params = new URLSearchParams();
     categories.forEach((c) => params.append("category", c));
+    if (mockOnly) params.set("mockOnly", "1");
     fetch(`/api/questions?${params.toString()}`)
       .then((res) => res.json())
       .then((data: { questions?: Question[]; error?: string }) => {

@@ -181,10 +181,16 @@ CREATE TABLE IF NOT EXISTS questions (
   image_data_uri TEXT, -- 図表読み取り問題等で使うグラフ画像（data:image/png;base64,...形式）。R2等の外部ストレージは未導入のため、当面はD1に直接テキストとして保持する
   -- 管理者ダッシュボードの問題検品機能で「内容確認済み」としてチェックしたかどうか（0/1）。
   is_reviewed INTEGER NOT NULL DEFAULT 0,
+  -- 1なら本番模試専用の問題（練習問題モードの一覧・出題からは除外し、/testの本番模試でのみ出題する）。
+  -- デフォルト0（練習問題プール）。既存の全テスト種別の問題は0のまま据え置き、この分離が必要なテスト
+  -- （現状SCOAのみ）で対象の問題だけを1にランダム抽出して切り替える運用。
+  is_mock_only INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_questions_passage_group ON questions(passage_group_id);
+
+CREATE INDEX IF NOT EXISTS idx_questions_mock_only ON questions(is_mock_only);
 
 CREATE INDEX IF NOT EXISTS idx_questions_category_status ON questions(category, status);
 

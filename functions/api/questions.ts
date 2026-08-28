@@ -31,6 +31,9 @@ function shuffle<T>(arr: T[]): T[] {
 // ?statusFilter= は練習問題の自己評価ステータス（user_question_statuses）による絞り込み。
 // 'wrong_uncertain'（×不正解＋△自信なしのみ）または 'unanswered'（未回答のみ）を指定するとログイン必須になる
 // （ユーザー自身のステータスに基づく絞り込みのため）。未指定時は従来通り誰でも取得できる。
+// ?mockOnly=1 を指定すると is_mock_only=1（本番模試専用に切り分けた問題）のみを対象にする。
+// 未指定時（デフォルト）は is_mock_only=0 のみを対象とし、練習問題モードの一覧・出題には
+// 模試専用問題が一切混ざらないようにする（SCOAのみ現状この分離運用、他テストは全問is_mock_only=0のまま）。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const params = new URL(context.request.url).searchParams;
   const categories = params.getAll("category").filter(Boolean);
@@ -38,6 +41,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const difficultyRaw = params.get("difficulty");
   const difficulty = difficultyRaw !== null ? Number(difficultyRaw) : null;
   const statusFilter = params.get("statusFilter");
+  const mockOnly = params.get("mockOnly") === "1";
   const effectiveMaxLimit =
     statusFilter === "wrong_uncertain" || statusFilter === "unanswered" ? STATUS_FILTER_MAX_LIMIT : MAX_LIMIT;
   const limitRaw = params.get("limit");
@@ -54,8 +58,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
   }
 
-  const conditions = ["status = 'published'"];
-  const binds: (string | number)[] = [];
+  const conditions = ["status = 'published'", "is_mock_only = ?"];
+  const binds: (string | number)[] = [mockOnly ? 1 : 0];
 
   if (categories.length > 0) {
     conditions.push(`category IN (${categories.map(() => "?").join(",")})`);

@@ -116,7 +116,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const countRow = await context.env.DB.prepare(
     `WITH latest AS (${latestCte})
-     SELECT COUNT(*) AS cnt FROM latest WHERE rn = 1 AND correct = 0`
+     SELECT COUNT(*) AS cnt
+     FROM latest l
+     JOIN questions q ON q.id = l.question_id
+     WHERE l.rn = 1 AND l.correct = 0 AND q.is_mock_only = 0`
   )
     .bind(...latestBinds)
     .first<{ cnt: number }>();
@@ -138,7 +141,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      FROM wrong w
      JOIN questions q ON q.id = w.question_id
      JOIN ranked r ON r.id = q.id
-     WHERE q.status = 'published'
+     WHERE q.status = 'published' AND q.is_mock_only = 0
      ORDER BY RANDOM()
      LIMIT ?`
   )
