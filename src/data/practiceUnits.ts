@@ -192,11 +192,10 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     units: [
       {
         id: "scoa_word",
-        subCategory: "単語・文法・イディオム",
-        label: "単語・文法・イディオム",
+        subCategory: "文法・語彙・イディオム・アクセント",
+        label: "文法・語彙・イディオム・アクセント",
         memorization: true,
       },
-      { id: "scoa_fill_blank", subCategory: "穴埋め", label: "穴埋め", memorization: true },
     ],
   },
 ];

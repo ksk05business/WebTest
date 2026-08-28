@@ -120,7 +120,7 @@ export const TEST_EXPLAINERS: Record<string, TestExplainer> = {
           { label: "数理", items: ["四則計算", "方程式・数列", "計算問題"] },
           { label: "論理", items: ["場合の数確率", "推論"] },
           { label: "常識", items: ["中学〜高校レベルの理科・社会の一般常識"] },
-          { label: "英語", items: ["単語・文法・イディオム", "穴埋め"] },
+          { label: "英語", items: ["文法・語彙・イディオム・アクセント"] },
         ],
       },
       {
