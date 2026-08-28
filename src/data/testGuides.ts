@@ -347,12 +347,12 @@ export const TEST_GUIDES: TestGuide[] = [
       {
         question: "Webテストナビ でSCOAは練習できますか？",
         answer:
-          "SCOA専用の練習問題は現在準備中です。公開までは対応済みのSPI3で言語・非言語分野の基礎力を鍛えておくことをおすすめします。",
+          "現在は言語分野（熟語・ことわざ・慣用句・故事成語、長文読解）の単元別練習問題および本番模試に対応しています。数理・論理・常識・英語は準備中です。",
       },
     ],
-    practiceAvailable: false,
-    practiceHref: "/register",
-    practiceNote: "SCOAの練習問題は準備中です。公開までは対応済みのSPI3・玉手箱で対策を進めましょう。",
+    practiceAvailable: true,
+    practiceHref: "/practice?testType=scoa",
+    practiceNote: "SCOAの言語分野（熟語・ことわざ・慣用句・故事成語、長文読解）は単元別練習問題・本番模試ともに今すぐ無料で挑戦できます。",
   },
 ];
 

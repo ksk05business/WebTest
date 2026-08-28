@@ -2,9 +2,21 @@
 
 # プロジェクト概要
 
-サービス名「Webテストナビ」（2026-08-21に「SPIナビ」から改称）。「本を買わない就活生向けのWebテスト模試アプリ」。SPI3のほか玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOAにも対応する想定だが、実際に受験できる（`questions`テーブルにデータがあり`/test`で出題される）のは現状SPIのみで、他は`src/data/testTypes.ts`の`TEST_TYPES`で`available: false`（準備中）としてLP・ダッシュボードに掲載している。**2026-08-21にラインナップを整理し、従来別カードだった「GAB」「C-GAB」を`id: "gab_cgab"`の1カード「GAB / C-GAB」に統合、新たに`id: "scoa"`の「SCOA」を追加した**（公務員・地銀・中堅企業で頻出のSCOA性格・能力検査）。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
+サービス名「Webテストナビ」（2026-08-21に「SPIナビ」から改称）。「本を買わない就活生向けのWebテスト模試アプリ」。SPI3のほか玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOAにも対応する想定。実際に受験できる（`questions`テーブルにデータがあり`/test`で出題される）のは**SPI（3パート）とSCOA（言語分野のみ、2026-08-28に本番模試を追加）**で、他（玉手箱・TG-WEB・GAB/C-GAB・CAB）は`src/data/testTypes.ts`の`TEST_TYPES`で`available: false`（練習問題のみ、または準備中）としてLP・ダッシュボードに掲載している。**2026-08-21にラインナップを整理し、従来別カードだった「GAB」「C-GAB」を`id: "gab_cgab"`の1カード「GAB / C-GAB」に統合、新たに`id: "scoa"`の「SCOA」を追加した**（公務員・地銀・中堅企業で頻出のSCOA性格・能力検査）。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
 画面は `/`（トップ）、`/register`（会員登録）、`/login`（ログイン）、`/dashboard`（ログイン後のホーム、ログイン必須）、`/test`（試験実行、ログイン必須）、`/result`（結果表示）。
 登録・ログインに成功すると`localStorage`の`spiUser`にセットし、そのまま`/dashboard`へ遷移する（別途ログインを挟まない）。
+
+## SCOA本番模試の追加（2026-08-28）
+
+SPI以外で初めて`available: true`（本番模試を実際に受験できる）とした事例。`app/test/page.tsx`の`EXAM_PARTS`に`scoa: { categories: ["scoa_language"], label: "SCOA（言語）" }`を追加しただけで、`StandardExamFlow`（英語・構造把握と同じ、1問60秒・固定問題数・即時正誤表示の形式）をそのまま再利用できた（`resolvePartId`が`EXAM_PARTS`のキーを見て自動的に有効なpartIdと認識するため）。`src/data/testTypes.ts`のSCOAエントリを`available: true`・`href: "/test?part=scoa"`に変更し、`functions/_lib/mockExamCycle.ts`の`MOCK_EXAM_TEST_TYPES`には元々`"scoa"`が含まれていた（未使用のまま先に用意されていた）ためこちらは無変更で動いた。`ExamModeSelectModal.tsx`もSPI以外の`testType.available`汎用パス（`/api/exam-eligibility?testType=<id>`→`testType.href`へ遷移）が既に実装済みだったため無変更。
+
+**SCOAは現状「言語分野のみ」の単一パート模試**（`categories: ["scoa_language"]`、10問固定・`DEFAULT_LIMIT`）である点に注意。数理・論理・常識・英語（`scoa_math`/`scoa_logic`/`scoa_common_sense`/`scoa_english`）は実データが無いため対象外。将来これらに実データを追加する場合、SPIの3パート方式（`spi_basic`/`spi_english`/`spi_structural`、パートごとに独立した受験可否・偏差値母集団）を参考に、EXAM_PARTSへの追加とtestTypes.ts側のUI（複数パートをリスト表示するSPI固有のexistsチェックがExamModeSelectModal.tsx内`isSpi`分岐にハードコードされている）の一般化が必要になる。
+
+模試と練習問題（`/practice`）は同じ`questions`テーブル・同じcategory/sub_categoryを共有する設計のため（SPIの既存パートと同様）、新規に問題を追加する際の投入先テーブル・データは完全に共通。今回投入した120問（熟語・慣用句・四字熟語・故事成語各20問＋長文読解40問）は、既存の練習問題単元（`熟語・ことわざ・慣用句・故事成語`／`長文読解`）にそのまま統合した。
+
+`src/data/testGuides.ts`のSCOAエントリ（`practiceAvailable`/`practiceHref`/`practiceNote`/FAQ）が「練習問題は準備中です」のまま古くなっていたため、実態（言語分野は練習問題・本番模試とも利用可能）に合わせて更新した。
+
+エンドツーエンドの動作確認（ローカルD1・テストアカウント）: ①`/api/exam-eligibility?testType=scoa`が初回`eligible:true`を返す、②`/api/questions?category=scoa_language`が10問（熟語系・長文読解混在）を返す、③模試終了後の`/api/exam-results`・`/api/practice/history`POSTが成功し`exam_results`に記録される、④受験直後は`eligibility`が`eligible:false`になり次回リセット日（次の奇数月1日）が正しく表示される、⑤誤答時に単元選択ページの復習ノート（`testType=scoa`スコープ）とダッシュボードのスキマ暗記復習（`scope=memorization`、熟語系のみ対象・長文読解は対象外）の両方が正しく連動してカウントされる、をすべて確認済み。検証用アカウントはローカルのみで作成し本番には未作成。
 
 ## ダッシュボード横断「スキマ暗記復習」と各テスト単元選択ページ「復習ノート」の分離（2026-08-27）
 

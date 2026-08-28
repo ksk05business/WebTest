@@ -20,6 +20,9 @@ const EXAM_PARTS = {
   spi_basic: { categories: ["verbal", "non_verbal"], label: "基礎能力試験（言語・非言語）" },
   spi_english: { categories: ["english"], label: "英語" },
   spi_structural: { categories: ["structural"], label: "構造把握" },
+  // SCOAは現状、言語分野（熟語・ことわざ・慣用句・故事成語／長文読解）のみ実データがあるため、
+  // 単一パートの模試として提供する（src/data/testTypes.tsのSCOA hrefから遷移）。
+  scoa: { categories: ["scoa_language"], label: "SCOA（言語）" },
 } as const;
 
 type ExamPartId = keyof typeof EXAM_PARTS;
