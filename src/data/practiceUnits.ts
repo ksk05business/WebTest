@@ -163,6 +163,11 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     units: [
       { id: "scoa_arithmetic", subCategory: "四則計算", label: "四則計算" },
       { id: "scoa_equation", subCategory: "方程式・数列", label: "方程式・数列" },
+      {
+        id: "scoa_pattern_concentration",
+        subCategory: "規則性・濃度算",
+        label: "規則性・濃度算",
+      },
     ],
   },
   {
