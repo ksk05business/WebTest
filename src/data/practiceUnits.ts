@@ -112,34 +112,49 @@ const TAMATEBAKO_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   },
 ];
 
+// TG-WEBは「従来型」（高難易度・パズル的思考）と「新型」（スピード重視）で出題内容が
+// まったく異なるため、単元選択もこの2形式＋英語（従来型・新型共通）の3系統に分けて構成する
+// （src/data/testExplainers.tsの「各形式の問題数と制限時間」解説と対応）。
 const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
-    category: "tgweb_verbal",
-    groupLabel: "言語",
+    category: "tgweb_traditional_verbal",
+    groupLabel: "従来型・言語",
     units: [
-      { id: "tgweb_fill_blank", subCategory: "空欄補充", label: "空欄補充", memorization: true },
-      { id: "tgweb_reorder", subCategory: "並べ替え", label: "並べ替え", memorization: true },
-      { id: "tgweb_reading", subCategory: "長文読解", label: "長文読解" },
+      { id: "tgweb_trad_fill_blank", subCategory: "空欄補充", label: "空欄補充", memorization: true },
+      { id: "tgweb_trad_reorder", subCategory: "並べ替え", label: "並べ替え", memorization: true },
+      { id: "tgweb_trad_reading", subCategory: "長文読解", label: "長文読解" },
     ],
   },
   {
-    category: "tgweb_math",
-    groupLabel: "計数",
+    category: "tgweb_traditional_math",
+    groupLabel: "従来型・非言語",
     units: [
-      { id: "tgweb_cipher", subCategory: "暗号", label: "暗号" },
-      { id: "tgweb_one_stroke", subCategory: "一筆書き", label: "一筆書き" },
-      { id: "tgweb_origami", subCategory: "折り紙", label: "折り紙" },
-      { id: "tgweb_dice", subCategory: "サイコロ", label: "サイコロ" },
-      { id: "tgweb_inference", subCategory: "推論", label: "推論" },
+      { id: "tgweb_trad_figure", subCategory: "図形問題", label: "図形問題" },
+      { id: "tgweb_trad_inference", subCategory: "推論", label: "推論" },
+    ],
+  },
+  {
+    category: "tgweb_new_verbal",
+    groupLabel: "新型・言語",
+    units: [
+      { id: "tgweb_new_synonym", subCategory: "同義語・対義語", label: "同義語・対義語", memorization: true },
+      { id: "tgweb_new_proverb", subCategory: "ことわざ・慣用句", label: "ことわざ・慣用句", memorization: true },
+      { id: "tgweb_new_yoji", subCategory: "四字熟語", label: "四字熟語", memorization: true },
+      { id: "tgweb_new_reading", subCategory: "長文読解", label: "長文読解" },
+    ],
+  },
+  {
+    category: "tgweb_new_math",
+    groupLabel: "新型・非言語",
+    units: [
+      { id: "tgweb_new_arithmetic", subCategory: "四則演算", label: "四則演算" },
+      { id: "tgweb_new_graphics", subCategory: "図表の読み取り", label: "図表の読み取り" },
     ],
   },
   {
     category: "tgweb_english",
-    groupLabel: "英語",
-    units: [
-      { id: "tgweb_reading_en", subCategory: "長文読解", label: "長文読解" },
-      { id: "tgweb_grammar", subCategory: "文法", label: "文法", memorization: true },
-    ],
+    groupLabel: "共通・英語",
+    units: [{ id: "tgweb_common_reading_en", subCategory: "長文問題", label: "長文問題" }],
   },
 ];
 

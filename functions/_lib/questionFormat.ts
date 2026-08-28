@@ -34,8 +34,10 @@ const CATEGORY_CODE: Record<string, { test: string; unit: string }> = {
   scoa_logic: { test: "SCOA", unit: "LG" },
   scoa_common_sense: { test: "SCOA", unit: "CS" },
   scoa_english: { test: "SCOA", unit: "E" },
-  tgweb_verbal: { test: "TGW", unit: "L" },
-  tgweb_math: { test: "TGW", unit: "M" },
+  tgweb_traditional_verbal: { test: "TGW", unit: "TL" },
+  tgweb_traditional_math: { test: "TGW", unit: "TM" },
+  tgweb_new_verbal: { test: "TGW", unit: "NL" },
+  tgweb_new_math: { test: "TGW", unit: "NM" },
   tgweb_english: { test: "TGW", unit: "E" },
 };
 
