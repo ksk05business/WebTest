@@ -129,6 +129,7 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "tgweb_traditional_math",
     groupLabel: "従来型・非言語",
     units: [
+      { id: "tgweb_trad_cipher", subCategory: "暗号", label: "暗号" },
       { id: "tgweb_trad_figure", subCategory: "図形問題", label: "図形問題" },
       { id: "tgweb_trad_inference", subCategory: "推論", label: "推論" },
     ],
