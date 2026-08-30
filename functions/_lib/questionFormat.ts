@@ -39,6 +39,7 @@ const CATEGORY_CODE: Record<string, { test: string; unit: string }> = {
   tgweb_new_verbal: { test: "TGW", unit: "NL" },
   tgweb_new_math: { test: "TGW", unit: "NM" },
   tgweb_english: { test: "TGW", unit: "E" },
+  tgweb_verbal_reading: { test: "TGW", unit: "R" },
 };
 
 function buildQuestionCode(category: string, seq: number | undefined): string | undefined {

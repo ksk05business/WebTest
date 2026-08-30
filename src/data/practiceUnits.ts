@@ -11,6 +11,10 @@ export type PracticeUnit = {
   // 判定基準は「スマホの移動中に1問単位でサクッと解ける暗記・知識系単元」で、長文読解など
   // まとまった文章を読む必要がある単元（同じ言語・英語カテゴリでも）は対象外とする。
   memorization?: boolean;
+  // 指定時、この単元だけグループの category ではなくこの値でDBを照会する
+  // （例: TG-WEBの長文読解は従来型・新型で同一問題を共有するため、両方のユニットに
+  // 同じ専用カテゴリを指定し、出題データ・学習履歴を1本化している）。
+  category?: string;
 };
 
 export type PracticeUnitGroup = {
@@ -115,6 +119,9 @@ const TAMATEBAKO_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
 // TG-WEBは「従来型」（高難易度・パズル的思考）と「新型」（スピード重視）で出題内容が
 // まったく異なるため、単元選択もこの2形式＋英語（従来型・新型共通）の3系統に分けて構成する
 // （src/data/testExplainers.tsの「各形式の問題数と制限時間」解説と対応）。
+// ただし「長文読解」は従来型・新型どちらの言語問題でも実質同じ形式（内容真偽判定）のため、
+// 両方の単元カードから同一のquestions（category: "tgweb_verbal_reading"）を参照させ、
+// 出題データと学習履歴（誤答復習等）を1本化している（PracticeUnit.categoryによる上書き）。
 const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
     category: "tgweb_traditional_verbal",
@@ -122,7 +129,12 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     units: [
       { id: "tgweb_trad_fill_blank", subCategory: "空欄補充", label: "空欄補充", memorization: true },
       { id: "tgweb_trad_reorder", subCategory: "並べ替え", label: "並べ替え", memorization: true },
-      { id: "tgweb_trad_reading", subCategory: "長文読解", label: "長文読解" },
+      {
+        id: "tgweb_trad_reading",
+        subCategory: "長文読解",
+        label: "長文読解",
+        category: "tgweb_verbal_reading",
+      },
     ],
   },
   {
@@ -141,7 +153,12 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
       { id: "tgweb_new_synonym", subCategory: "同義語・対義語", label: "同義語・対義語", memorization: true },
       { id: "tgweb_new_proverb", subCategory: "ことわざ・慣用句", label: "ことわざ・慣用句", memorization: true },
       { id: "tgweb_new_yoji", subCategory: "四字熟語", label: "四字熟語", memorization: true },
-      { id: "tgweb_new_reading", subCategory: "長文読解", label: "長文読解" },
+      {
+        id: "tgweb_new_reading",
+        subCategory: "長文読解",
+        label: "長文読解",
+        category: "tgweb_verbal_reading",
+      },
     ],
   },
   {
@@ -232,7 +249,12 @@ export const DEFAULT_TEST_ID = "spi";
 // （スキマ暗記復習は複数テストの問題が混在するため、テストごとに分けて保存する必要がある）。
 export const CATEGORY_TO_TEST_ID: Record<string, string> = Object.fromEntries(
   Object.entries(PRACTICE_UNIT_GROUPS_BY_TEST).flatMap(([testId, groups]) =>
-    groups.map((group) => [group.category, testId])
+    groups.flatMap((group) => [
+      [group.category, testId] as const,
+      ...group.units
+        .filter((unit) => unit.category)
+        .map((unit) => [unit.category as string, testId] as const),
+    ])
   )
 );
 
@@ -244,7 +266,7 @@ export function getMemorizationUnitKeys(): { category: string; subCategory: stri
     groups.flatMap((group) =>
       group.units
         .filter((unit) => unit.memorization)
-        .map((unit) => ({ category: group.category, subCategory: unit.subCategory }))
+        .map((unit) => ({ category: unit.category ?? group.category, subCategory: unit.subCategory }))
     )
   );
 }
