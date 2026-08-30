@@ -104,14 +104,13 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
           <p className="text-sm font-semibold text-gray-700">{group.groupLabel}</p>
           <div className="flex flex-col gap-2">
             {group.units.map((unit) => {
-              const unitCategory = unit.category ?? group.category;
-              const count = countFor(unitCategory, unit.subCategory);
+              const count = countFor(group.category, unit.subCategory);
               const disabled = !loading && count === 0;
               return (
                 <button
                   key={unit.id}
                   type="button"
-                  onClick={() => handleUnitClick(unitCategory, unit.subCategory, unit.label)}
+                  onClick={() => handleUnitClick(group.category, unit.subCategory, unit.label)}
                   className={`flex min-h-12 items-center justify-between gap-2 rounded-xl border p-3 text-left transition-colors ${
                     disabled
                       ? "border-gray-200 bg-white opacity-50"
