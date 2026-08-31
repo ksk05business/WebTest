@@ -222,13 +222,35 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   },
 ];
 
+// GABは「言語理解」「計数理解」「英語」の3科目構成（C-GABも同一形式のため単一のテスト種別として
+// 扱う。src/data/testTypes.tsの"gab_cgab"に対応）。言語理解・英語は正誤（3択）判定形式、
+// 計数理解は表・グラフの読み取り形式で、SPIの「資料の読み取り」と同じsubCategory名を使う。
+const GAB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
+  {
+    category: "gab_verbal",
+    groupLabel: "言語理解",
+    units: [{ id: "gab_verbal_reading", subCategory: "論理的読解", label: "論理的読解" }],
+  },
+  {
+    category: "gab_quantitative",
+    groupLabel: "計数理解",
+    units: [{ id: "gab_data_reading", subCategory: "資料の読み取り", label: "資料の読み取り" }],
+  },
+  {
+    category: "gab_english",
+    groupLabel: "英語",
+    units: [{ id: "gab_english_reading", subCategory: "長文読解", label: "長文読解" }],
+  },
+];
+
 // テスト種別id（src/data/testTypes.tsのTestType.id）ごとの単元グループ。
-// 未定義のテスト種別（GAB/C-GAB・CAB）は分野・単元一覧自体をまだ用意していない。
+// 未定義のテスト種別（CAB）は分野・単元一覧自体をまだ用意していない。
 export const PRACTICE_UNIT_GROUPS_BY_TEST: Record<string, PracticeUnitGroup[]> = {
   spi: SPI_PRACTICE_UNIT_GROUPS,
   tamatebako: TAMATEBAKO_PRACTICE_UNIT_GROUPS,
   tgweb: TGWEB_PRACTICE_UNIT_GROUPS,
   scoa: SCOA_PRACTICE_UNIT_GROUPS,
+  gab_cgab: GAB_PRACTICE_UNIT_GROUPS,
 };
 
 export const DEFAULT_TEST_ID = "spi";
