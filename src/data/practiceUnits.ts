@@ -140,7 +140,8 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     groupLabel: "新型・言語",
     units: [
       { id: "tgweb_new_synonym", subCategory: "同義語・対義語", label: "同義語・対義語", memorization: true },
-      { id: "tgweb_new_proverb", subCategory: "ことわざ・慣用句", label: "ことわざ・慣用句", memorization: true },
+      { id: "tgweb_new_kotowaza", subCategory: "ことわざ", label: "ことわざ", memorization: true },
+      { id: "tgweb_new_kanyouku", subCategory: "慣用句", label: "慣用句", memorization: true },
       { id: "tgweb_new_yoji", subCategory: "四字熟語", label: "四字熟語", memorization: true },
     ],
   },
