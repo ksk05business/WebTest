@@ -16,6 +16,13 @@ const SPI_EXAM_PARTS = [
   { id: "spi_structural", label: "構造把握" },
 ] as const;
 
+// TG-WEBの本番模試は「従来型」「新型」で出題内容がまったく異なるため、SPIと同様にパートごとに
+// 独立した受験可否（2ヶ月に1回リセット）を持つ（app/test/page.tsxのEXAM_PARTS参照）。
+const TGWEB_EXAM_PARTS = [
+  { id: "tgweb_traditional", label: "従来型" },
+  { id: "tgweb_new", label: "新型" },
+] as const;
+
 type PartEligibility = { eligible: boolean; nextResetAt: string };
 
 export function ExamModeSelectModal({
@@ -29,16 +36,20 @@ export function ExamModeSelectModal({
   const explainer = TEST_EXPLAINERS[testType.id];
   const hasPracticeContent = Boolean(PRACTICE_UNIT_GROUPS_BY_TEST[testType.id]);
   const isSpi = testType.id === "spi";
+  const isTgweb = testType.id === "tgweb";
+  const isMultiPart = isSpi || isTgweb;
 
   // テスト種別ごとに2ヶ月に1回（奇数月1日に一斉リセット）のみ受験可能。
   const [eligibility, setEligibility] = useState<{ eligible: boolean; nextResetAt: string } | null>(
     null
   );
-  // SPIのみ、基礎能力試験・英語・構造把握の3パートそれぞれの受験可否を個別に持つ。
-  const [spiPartEligibility, setSpiPartEligibility] = useState<Record<string, PartEligibility>>({});
+  // SPI・TG-WEBは複数パートに分かれており、それぞれの受験可否を個別に持つ。
+  const [multiPartEligibility, setMultiPartEligibility] = useState<Record<string, PartEligibility>>(
+    {}
+  );
 
   useEffect(() => {
-    if (!testType.available || isSpi) return;
+    if (!testType.available || isMultiPart) return;
     fetch(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
       .then((res) => res.json())
       .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
@@ -46,23 +57,24 @@ export function ExamModeSelectModal({
         setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
       })
       .catch(() => {});
-  }, [testType.available, testType.id, isSpi]);
+  }, [testType.available, testType.id, isMultiPart]);
 
   useEffect(() => {
-    if (!testType.available || !isSpi) return;
-    SPI_EXAM_PARTS.forEach((part) => {
+    if (!testType.available || !isMultiPart) return;
+    const parts = isSpi ? SPI_EXAM_PARTS : TGWEB_EXAM_PARTS;
+    parts.forEach((part) => {
       fetch(`/api/exam-eligibility?testType=${part.id}`)
         .then((res) => res.json())
         .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
           if (data.error) return;
-          setSpiPartEligibility((prev) => ({
+          setMultiPartEligibility((prev) => ({
             ...prev,
             [part.id]: { eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" },
           }));
         })
         .catch(() => {});
     });
-  }, [testType.available, isSpi]);
+  }, [testType.available, isMultiPart, isSpi]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
@@ -127,15 +139,16 @@ export function ExamModeSelectModal({
               <p className="text-sm leading-relaxed text-gray-600">
                 本番同様の制限時間で出題。成績・偏差値が記録され、企業スカウトの評価対象になります。
                 {isSpi && "「基礎能力試験（言語・非言語）」「英語」「構造把握」の3つに分かれており、それぞれ独立して受験できます。"}
+                {isTgweb && "「従来型」「新型」の2つに分かれており、それぞれ独立して受験できます。"}
               </p>
               {!testType.available ? (
                 <p className="mt-1 rounded-full bg-gray-100 py-2.5 text-center text-sm font-semibold text-gray-400">
                   本番模試は準備中です
                 </p>
-              ) : isSpi ? (
+              ) : isMultiPart ? (
                 <div className="mt-1 flex flex-col gap-2">
-                  {SPI_EXAM_PARTS.map((part) => {
-                    const partEligibility = spiPartEligibility[part.id];
+                  {(isSpi ? SPI_EXAM_PARTS : TGWEB_EXAM_PARTS).map((part) => {
+                    const partEligibility = multiPartEligibility[part.id];
                     return (
                       <div
                         key={part.id}

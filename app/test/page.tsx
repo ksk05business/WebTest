@@ -16,6 +16,45 @@ const BASIC_EXAM_VERBAL_SEC = 17 * 60;
 // （不足した場合は末尾に達し次第、プール内で先頭から繰り返す）。
 const BASIC_EXAM_POOL_LIMIT = 150;
 
+type ExamSubPart = { category: string; subCategory: string; limit: number };
+
+type ExamPartConfig = {
+  label: string;
+  mockOnly: boolean;
+  // 単一カテゴリ（または複数カテゴリをOR条件で束ねただけ）から出題する場合はこちら。
+  categories?: readonly string[];
+  // カテゴリ×小分類ごとに出題数を指定したい場合はこちら（TG-WEB模試のように、1つの模試が
+  // 複数の小分類から決まった問数ずつ出題される構成のため）。指定時はcategoriesより優先される。
+  subParts?: readonly ExamSubPart[];
+};
+
+// TG-WEB従来型模試: 言語12問（空欄補充5/並べ替え4/長文読解3）・非言語9問（推論4/図形3/暗号2）・
+// 英語10問（共通、新型と共有のtgweb_english/長文問題プールから出題）。
+// 長文読解は従来型・新型で共有のtgweb_verbal_readingカテゴリから出題する
+// （src/data/practiceUnits.tsの「共通・言語」グループと同じ設計）。
+const TGWEB_TRADITIONAL_SUB_PARTS: readonly ExamSubPart[] = [
+  { category: "tgweb_traditional_verbal", subCategory: "空欄補充", limit: 5 },
+  { category: "tgweb_traditional_verbal", subCategory: "並べ替え", limit: 4 },
+  { category: "tgweb_verbal_reading", subCategory: "長文読解", limit: 3 },
+  { category: "tgweb_traditional_math", subCategory: "推論", limit: 4 },
+  { category: "tgweb_traditional_math", subCategory: "図形問題", limit: 3 },
+  { category: "tgweb_traditional_math", subCategory: "暗号", limit: 2 },
+  { category: "tgweb_english", subCategory: "長文問題", limit: 10 },
+];
+
+// TG-WEB新型模試: 言語34問（同義語・対義語8/ことわざ8/慣用句7/四字熟語7/長文読解4）・
+// 非言語36問（四則演算30/図表の読み取り6）・英語10問（共通、従来型と共有）。
+const TGWEB_NEW_SUB_PARTS: readonly ExamSubPart[] = [
+  { category: "tgweb_new_verbal", subCategory: "同義語・対義語", limit: 8 },
+  { category: "tgweb_new_verbal", subCategory: "ことわざ", limit: 8 },
+  { category: "tgweb_new_verbal", subCategory: "慣用句", limit: 7 },
+  { category: "tgweb_new_verbal", subCategory: "四字熟語", limit: 7 },
+  { category: "tgweb_verbal_reading", subCategory: "長文読解", limit: 4 },
+  { category: "tgweb_new_math", subCategory: "四則演算", limit: 30 },
+  { category: "tgweb_new_math", subCategory: "図表の読み取り", limit: 6 },
+  { category: "tgweb_english", subCategory: "長文問題", limit: 10 },
+];
+
 const EXAM_PARTS = {
   spi_basic: { categories: ["verbal", "non_verbal"], label: "基礎能力試験（言語・非言語）", mockOnly: false },
   spi_english: { categories: ["english"], label: "英語", mockOnly: false },
@@ -29,7 +68,12 @@ const EXAM_PARTS = {
     label: "SCOA",
     mockOnly: true,
   },
-} as const;
+  // TG-WEBは「従来型」「新型」で出題内容がまったく異なるため、SPIの3パート方式と同様に
+  // 独立した受験可否（2ヶ月に1回リセット）を持つ別々のtest_typeとして扱う
+  // （src/components/ExamModeSelectModal.tsxのTGWEB_EXAM_PARTS参照）。
+  tgweb_traditional: { subParts: TGWEB_TRADITIONAL_SUB_PARTS, label: "TG-WEB従来型", mockOnly: true },
+  tgweb_new: { subParts: TGWEB_NEW_SUB_PARTS, label: "TG-WEB新型", mockOnly: true },
+} satisfies Record<string, ExamPartConfig>;
 
 type ExamPartId = keyof typeof EXAM_PARTS;
 
@@ -58,7 +102,7 @@ function TestPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const partId = resolvePartId(searchParams.get("part"));
-  const part = EXAM_PARTS[partId];
+  const part: ExamPartConfig = EXAM_PARTS[partId];
 
   const [authChecked, setAuthChecked] = useState(false);
   const [eligibility, setEligibility] = useState<{ eligible: boolean; nextResetAt: string } | null>(
@@ -142,6 +186,7 @@ function TestPageInner() {
     <StandardExamFlow
       partId={partId}
       categories={part.categories}
+      subParts={part.subParts}
       label={part.label}
       mockOnly={part.mockOnly}
     />
@@ -418,11 +463,13 @@ function BasicExamFlow() {
 function StandardExamFlow({
   partId,
   categories,
+  subParts,
   label,
   mockOnly,
 }: {
   partId: ExamPartId;
-  categories: readonly string[];
+  categories?: readonly string[];
+  subParts?: readonly ExamSubPart[];
   label: string;
   mockOnly: boolean;
 }) {
@@ -442,8 +489,36 @@ function StandardExamFlow({
   const isLast = questions !== null && currentIndex === questions.length - 1;
 
   useEffect(() => {
+    // subParts指定時: カテゴリ×小分類ごとに個別のlimitで取得し、指定順（セクション順）のまま連結する
+    // （/api/questionsはcategory/subCategoryをOR条件でしか絞り込めず、小分類ごとに異なる出題数を
+    // 一度のリクエストで指定できないため、TG-WEB模試のように複数の小分類を決まった問数ずつ
+    // 組み合わせる構成にはこの方式が必要）。
+    if (subParts && subParts.length > 0) {
+      Promise.all(
+        subParts.map((sp) => {
+          const spParams = new URLSearchParams({
+            category: sp.category,
+            subCategory: sp.subCategory,
+            limit: String(sp.limit),
+          });
+          if (mockOnly) spParams.set("mockOnly", "1");
+          return fetch(`/api/questions?${spParams.toString()}`).then((r) => r.json());
+        })
+      )
+        .then((results: { questions?: Question[]; error?: string }[]) => {
+          const combined = results.flatMap((r) => r.questions ?? []);
+          if (combined.length === 0) {
+            setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
+            return;
+          }
+          setQuestions(combined);
+        })
+        .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+      return;
+    }
+
     const params = new URLSearchParams();
-    categories.forEach((c) => params.append("category", c));
+    (categories ?? []).forEach((c) => params.append("category", c));
     if (mockOnly) params.set("mockOnly", "1");
     fetch(`/api/questions?${params.toString()}`)
       .then((res) => res.json())
