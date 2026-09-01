@@ -8,7 +8,7 @@ import { RecommendedCompanies } from "@/src/components/RecommendedCompanies";
 import { NoticeBoard } from "@/src/components/NoticeBoard";
 import { SupportChatWidget } from "@/src/components/SupportChatWidget";
 import { ExamModeSelectModal } from "@/src/components/ExamModeSelectModal";
-import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
+import { TEST_TYPES, MULTI_PART_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 
 type Eligibility = { eligible: boolean; nextResetAt: string };
@@ -32,19 +32,37 @@ export default function DashboardPage() {
   }, [router]);
 
   // 受験可能なテスト種別ごとに、本番模試の今期受験状況（2ヶ月に1回・奇数月1日一斉リセット）を取得する。
+  // SPI・TG-WEBはTestType.idそのものがtest_typeではなく複数パートに分かれているため
+  // （MULTI_PART_EXAM_PARTS参照）、/api/exam-eligibility?testType=spi のような単純な問い合わせは
+  // 「不正なテスト種別です」エラーとなり、以前はエラー時に何も状態更新しないままだったため
+  // カードが「受験状況を確認中...」から永久に進まなかった。全パートを取得し、いずれか1つでも
+  // 受験可能なら「受験可能」、全パート受験済みなら最も早い次回リセット日を表示する。
   useEffect(() => {
     if (!authChecked) return;
     TEST_TYPES.filter((t) => t.available).forEach((t) => {
-      fetch(`/api/exam-eligibility?testType=${encodeURIComponent(t.id)}`)
-        .then((res) => res.json())
-        .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
-          if (data.error) return;
-          setEligibilityByType((prev) => ({
-            ...prev,
-            [t.id]: { eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" },
-          }));
-        })
-        .catch(() => {});
+      const parts = MULTI_PART_EXAM_PARTS[t.id];
+      const partIds = parts ? parts.map((p) => p.id) : [t.id];
+      Promise.all(
+        partIds.map((id) =>
+          fetch(`/api/exam-eligibility?testType=${encodeURIComponent(id)}`)
+            .then((res) => res.json())
+            .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) =>
+              data.error ? null : data
+            )
+            .catch(() => null)
+        )
+      ).then((results) => {
+        const valid = results.filter(
+          (r): r is { eligible?: boolean; nextResetAt?: string } => r !== null
+        );
+        if (valid.length === 0) return;
+        const eligible = valid.some((r) => Boolean(r.eligible));
+        const nextResetAt = valid
+          .map((r) => r.nextResetAt ?? "")
+          .filter(Boolean)
+          .sort()[0] ?? "";
+        setEligibilityByType((prev) => ({ ...prev, [t.id]: { eligible, nextResetAt } }));
+      });
     });
   }, [authChecked]);
 

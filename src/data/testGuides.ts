@@ -129,7 +129,7 @@ export const TEST_GUIDES: TestGuide[] = [
       {
         question: "玉手箱の模試機能は利用できますか？",
         answer:
-          "現在、玉手箱は単元別の練習問題（四則逆算・図表の読み取り・論理的読解・趣旨判定・英語等）を無料でご利用いただけます。本番同様の通しの模試機能は準備中です。",
+          "はい、単元別の練習問題に加えて、言語（論理的読解15分32問）・計数（四則逆算9分50問、図表の読み取り15分29問）・英語（論理的読解10分24問）のセクションタイマー付き本番模試も今すぐ無料で受験できます。",
       },
       {
         question: "玉手箱とGABは同じ問題が出ますか？",
@@ -139,7 +139,7 @@ export const TEST_GUIDES: TestGuide[] = [
     ],
     practiceAvailable: true,
     practiceHref: "/practice?testType=tamatebako",
-    practiceNote: "四則逆算・図表の読み取り・論理的読解など単元別の練習問題を今すぐ無料で解けます。",
+    practiceNote: "四則逆算・図表の読み取り・論理的読解など単元別の練習問題・本番模試ともに今すぐ無料で挑戦できます。",
   },
   {
     slug: "tg-web",

@@ -7,11 +7,12 @@ import { formatJapaneseDate } from "@/src/lib/formatDate";
 
 const TIME_PER_QUESTION = 60; // spi_english / spi_structural / scoa（1問ごとの制限時間）
 
-// 基礎能力試験（言語・非言語）は35分間のタイムボックス制、問題数の上限なし。
-// 前半17分は言語、後半18分は非言語から連続的に出題する。実際のSPIテストセンター形式に合わせ、
+// 基礎能力試験（言語・非言語）は35分間のタイムボックス制、問題数の上限なし
+// （標準的な出題数の目安は言語約30〜35問・非言語約20問だが、実際の問題数は回答速度で変動する）。
+// 前半15分は言語、後半20分は非言語から連続的に出題する。実際のSPIテストセンター形式に合わせ、
 // 1問ごとの制限時間・即時の正誤表示は行わず、正誤・解説は試験終了後に/resultで一覧確認する。
 const BASIC_EXAM_TOTAL_SEC = 35 * 60;
-const BASIC_EXAM_VERBAL_SEC = 17 * 60;
+const BASIC_EXAM_VERBAL_SEC = 15 * 60;
 // 各フェーズで事前に取得しておく問題プールの件数。35分間で通常使い切らない余裕を持たせている
 // （不足した場合は末尾に達し次第、プール内で先頭から繰り返す）。
 const BASIC_EXAM_POOL_LIMIT = 150;
@@ -91,6 +92,32 @@ const TGWEB_NEW_SECTIONS: readonly ExamSection[] = [
   },
 ];
 
+// 玉手箱模試: 言語（論理的読解GAB形式）15分32問・計数（四則逆算9分50問／図表の読み取り15分29問）・
+// 英語（論理的読解GAB形式）10分24問の4セクション。計数は制限時間の異なる2単元のため
+// 別々のセクションとして扱う（TG-WEBのsubParts方式は同一セクション内で時間を共有するため使えない）。
+const TAMATEBAKO_SECTIONS: readonly ExamSection[] = [
+  {
+    label: "言語（論理的読解）",
+    timeLimitSec: 15 * 60,
+    subParts: [{ category: "tamatebako_verbal", subCategory: "論理的読解（GAB形式）", limit: 32 }],
+  },
+  {
+    label: "計数（四則逆算）",
+    timeLimitSec: 9 * 60,
+    subParts: [{ category: "tamatebako_math", subCategory: "四則逆算", limit: 50 }],
+  },
+  {
+    label: "計数（図表の読み取り）",
+    timeLimitSec: 15 * 60,
+    subParts: [{ category: "tamatebako_math", subCategory: "図表の読み取り", limit: 29 }],
+  },
+  {
+    label: "英語（論理的読解）",
+    timeLimitSec: 10 * 60,
+    subParts: [{ category: "tamatebako_english", subCategory: "論理的読解（GAB形式）", limit: 24 }],
+  },
+];
+
 // C-GAB（GAB）模試: 言語理解15分32問・計数理解15分29問（電卓使用不可）・英語10分24問の3セクション。
 // 各セクションはis_mock_only=1（練習問題プールとは別に確保した模試専用プール、3回分の問題量）から出題する。
 const GAB_CGAB_SECTIONS: readonly ExamSection[] = [
@@ -133,6 +160,8 @@ const EXAM_PARTS = {
   // C-GAB/GAB: TG-WEBと異なり単一の受験フローのため、SCOAと同様testTypes.tsのidをそのまま
   // partIdとして使う（ExamModeSelectModal.tsxのisMultiPart分岐には含めない）。
   gab_cgab: { sections: GAB_CGAB_SECTIONS, label: "GAB/C-GAB", mockOnly: true },
+  // 玉手箱もGAB/C-GABと同様、testTypes.tsのid（"tamatebako"）をそのままpartIdとして使う単一パート。
+  tamatebako: { sections: TAMATEBAKO_SECTIONS, label: "玉手箱", mockOnly: true },
 } satisfies Record<string, ExamPartConfig>;
 
 type ExamPartId = keyof typeof EXAM_PARTS;

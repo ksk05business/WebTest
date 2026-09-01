@@ -3,25 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Info } from "lucide-react";
-import type { TestType } from "@/src/data/testTypes";
+import { SPI_EXAM_PARTS, TGWEB_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_EXPLAINERS } from "@/src/data/testExplainers";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
-
-// SPIの本番模試は「基礎能力試験（言語・非言語）」「英語」「構造把握」の3パートに分けて受験する。
-// パートごとに独立した受験可否（2ヶ月に1回リセット）を持つ（functions/api/exam-eligibility.tsのtestType）。
-const SPI_EXAM_PARTS = [
-  { id: "spi_basic", label: "基礎能力試験（言語・非言語）" },
-  { id: "spi_english", label: "英語" },
-  { id: "spi_structural", label: "構造把握" },
-] as const;
-
-// TG-WEBの本番模試は「従来型」「新型」で出題内容がまったく異なるため、SPIと同様にパートごとに
-// 独立した受験可否（2ヶ月に1回リセット）を持つ（app/test/page.tsxのEXAM_PARTS参照）。
-const TGWEB_EXAM_PARTS = [
-  { id: "tgweb_traditional", label: "従来型" },
-  { id: "tgweb_new", label: "新型" },
-] as const;
 
 type PartEligibility = { eligible: boolean; nextResetAt: string };
 
