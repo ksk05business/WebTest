@@ -53,16 +53,6 @@ export default function ResultPage() {
 
       <p className="text-gray-700">{getComment(rate)}</p>
 
-      <a
-        href="#"
-        className="block w-full rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 p-4 text-amber-800 hover:bg-amber-100"
-      >
-        <span className="font-bold">
-          高スコア者向け就活エージェントに無料登録 →
-        </span>
-        <p className="mt-1 text-sm">（広告枠プレースホルダー）</p>
-      </a>
-
       <div className="flex flex-wrap justify-center gap-3">
         <Link
           href={retryHref}

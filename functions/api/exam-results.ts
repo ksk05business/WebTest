@@ -2,6 +2,8 @@ import { INITIAL_REVIEW_INTERVAL_DAYS, daysFromNowModifier } from "../_lib/revie
 import { getAuthenticatedSubjectId } from "../_lib/session";
 import { checkExamEligibility } from "../_lib/mockExamCycle";
 import { KNOWLEDGE_REVIEW_CATEGORIES } from "../_lib/knowledgeCategories";
+import { PRACTICE_UNIT_GROUPS_BY_TEST } from "../../src/data/practiceUnits";
+import { MULTI_PART_EXAM_PARTS } from "../../src/data/testTypes";
 
 interface Env {
   DB: D1Database;
@@ -184,7 +186,21 @@ type ExamResultRow = {
   taken_at: string;
 };
 
-const BROAD_CATEGORIES = ["verbal", "non_verbal", "structural", "english"] as const;
+// テスト種別（TestType.id、例: "tamatebako"）→ そのテストの本番模試が使うtest_type一覧。
+// 複数パート方式（MULTI_PART_EXAM_PARTS参照）ならそのパートid一覧、単一パート方式（scoa等）なら
+// TestType.id自身がtest_typeとして使われる。
+function testTypesForFamily(testTypeFamily: string): string[] {
+  const parts = MULTI_PART_EXAM_PARTS[testTypeFamily];
+  return parts ? parts.map((p) => p.id) : [testTypeFamily];
+}
+
+// テスト種別（TestType.id）→ そのテストの大分類（questions.category）一覧＋表示ラベル。
+// src/data/practiceUnits.tsの単元グループ定義（groupLabel）をそのまま流用し、テストごとに
+// ハードコードした分類名を持たなくて済むようにする。
+function categoriesForFamily(testTypeFamily: string): { category: string; label: string }[] {
+  const groups = PRACTICE_UNIT_GROUPS_BY_TEST[testTypeFamily] ?? [];
+  return groups.map((g) => ({ category: g.category, label: g.groupLabel }));
+}
 
 function bucketBySubCategory(
   scores: CategoryScores,
@@ -206,12 +222,25 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
-  const rows = await context.env.DB.prepare(
-    `SELECT test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
-     FROM exam_results WHERE user_id = ? ORDER BY taken_at DESC LIMIT 20`
-  )
-    .bind(userId)
-    .all<ExamResultRow>();
+  // ?testType=<TestType.id>（例: "tamatebako"）を指定すると、そのテスト種別の受験履歴・
+  // カテゴリ分析のみに絞り込む（試験別専用ページ用）。省略時は全テスト種別を横断した集計。
+  const testTypeFamily = new URL(context.request.url).searchParams.get("testType");
+  const testTypesFilter = testTypeFamily ? testTypesForFamily(testTypeFamily) : null;
+
+  const rows = testTypesFilter
+    ? await context.env.DB.prepare(
+        `SELECT test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
+         FROM exam_results WHERE user_id = ? AND test_type IN (${testTypesFilter.map(() => "?").join(",")})
+         ORDER BY taken_at DESC LIMIT 20`
+      )
+        .bind(userId, ...testTypesFilter)
+        .all<ExamResultRow>()
+    : await context.env.DB.prepare(
+        `SELECT test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
+         FROM exam_results WHERE user_id = ? ORDER BY taken_at DESC LIMIT 20`
+      )
+        .bind(userId)
+        .all<ExamResultRow>();
 
   const history = (rows.results ?? []).map((r) => ({
     testType: r.test_type,
@@ -242,9 +271,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   // 母集団（全ユーザーの過去の受験ごとの大分類別正答率）を集める。直近500件までに抑える簡易実装。
-  const allScoreRows = await context.env.DB.prepare(
-    "SELECT category_scores_json FROM exam_results WHERE category_scores_json IS NOT NULL ORDER BY taken_at DESC LIMIT 500"
-  ).all<{ category_scores_json: string }>();
+  // testType指定時は同じテスト種別の受験のみを母集団とする。
+  const allScoreRows = testTypesFilter
+    ? await context.env.DB.prepare(
+        `SELECT category_scores_json FROM exam_results
+         WHERE category_scores_json IS NOT NULL AND test_type IN (${testTypesFilter.map(() => "?").join(",")})
+         ORDER BY taken_at DESC LIMIT 500`
+      )
+        .bind(...testTypesFilter)
+        .all<{ category_scores_json: string }>()
+    : await context.env.DB.prepare(
+        "SELECT category_scores_json FROM exam_results WHERE category_scores_json IS NOT NULL ORDER BY taken_at DESC LIMIT 500"
+      ).all<{ category_scores_json: string }>();
   const populationByBroad: Record<string, number[]> = {};
   for (const row of allScoreRows.results ?? []) {
     try {
@@ -272,12 +310,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
   }
 
-  const categoryBreakdown = BROAD_CATEGORIES.map((broad) => {
+  // testType未指定時（全テスト横断）はSPIの4分類、指定時はそのテスト自身の大分類グループを使う
+  // （src/data/practiceUnits.tsのgroupLabelをそのまま表示ラベルとして使う）。
+  const broadCategories = testTypeFamily
+    ? categoriesForFamily(testTypeFamily)
+    : categoriesForFamily("spi");
+
+  const categoryBreakdown = broadCategories.map(({ category: broad, label }) => {
     const totals = userTotalsByBroad[broad] ?? { correct: 0, total: 0 };
     const rate = totals.total > 0 ? totals.correct / totals.total : null;
     const deviation = rate !== null ? calculateDeviationScore(rate, populationByBroad[broad] ?? []) : null;
     return {
       category: broad,
+      label,
       correct: totals.correct,
       total: totals.total,
       accuracyRate: rate,

@@ -3,22 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
-import { PerformanceDashboard } from "@/src/components/PerformanceDashboard";
+import { MemorizationReviewBanner } from "@/src/components/MemorizationReviewBanner";
 import { RecommendedCompanies } from "@/src/components/RecommendedCompanies";
 import { NoticeBoard } from "@/src/components/NoticeBoard";
 import { SupportChatWidget } from "@/src/components/SupportChatWidget";
-import { ExamModeSelectModal } from "@/src/components/ExamModeSelectModal";
-import { TEST_TYPES, MULTI_PART_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
-import { formatJapaneseDate } from "@/src/lib/formatDate";
+import { TEST_TYPES } from "@/src/data/testTypes";
 
-type Eligibility = { eligible: boolean; nextResetAt: string };
-
+// メインダッシュボードは「試験の種類を選ぶ」ことに専念したシンプルな構成にする
+// （成績・偏差値・カテゴリ別分析は各試験の専用ページ/dashboard/[testId]へ移動済み）。
+// カードをクリックすると、その場でモーダルを開くのではなく専用ページへ遷移する。
 export default function DashboardPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [selectedTestType, setSelectedTestType] = useState<TestType | null>(null);
-  const [eligibilityByType, setEligibilityByType] = useState<Record<string, Eligibility>>({});
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -30,41 +27,6 @@ export default function DashboardPage() {
     if (user.email) setUserEmail(user.email);
     setAuthChecked(true);
   }, [router]);
-
-  // 受験可能なテスト種別ごとに、本番模試の今期受験状況（2ヶ月に1回・奇数月1日一斉リセット）を取得する。
-  // SPI・TG-WEBはTestType.idそのものがtest_typeではなく複数パートに分かれているため
-  // （MULTI_PART_EXAM_PARTS参照）、/api/exam-eligibility?testType=spi のような単純な問い合わせは
-  // 「不正なテスト種別です」エラーとなり、以前はエラー時に何も状態更新しないままだったため
-  // カードが「受験状況を確認中...」から永久に進まなかった。全パートを取得し、いずれか1つでも
-  // 受験可能なら「受験可能」、全パート受験済みなら最も早い次回リセット日を表示する。
-  useEffect(() => {
-    if (!authChecked) return;
-    TEST_TYPES.filter((t) => t.available).forEach((t) => {
-      const parts = MULTI_PART_EXAM_PARTS[t.id];
-      const partIds = parts ? parts.map((p) => p.id) : [t.id];
-      Promise.all(
-        partIds.map((id) =>
-          fetch(`/api/exam-eligibility?testType=${encodeURIComponent(id)}`)
-            .then((res) => res.json())
-            .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) =>
-              data.error ? null : data
-            )
-            .catch(() => null)
-        )
-      ).then((results) => {
-        const valid = results.filter(
-          (r): r is { eligible?: boolean; nextResetAt?: string } => r !== null
-        );
-        if (valid.length === 0) return;
-        const eligible = valid.some((r) => Boolean(r.eligible));
-        const nextResetAt = valid
-          .map((r) => r.nextResetAt ?? "")
-          .filter(Boolean)
-          .sort()[0] ?? "";
-        setEligibilityByType((prev) => ({ ...prev, [t.id]: { eligible, nextResetAt } }));
-      });
-    });
-  }, [authChecked]);
 
   if (!authChecked) {
     return null;
@@ -81,39 +43,27 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-3">
               <h2 className="text-lg font-bold text-gray-900">試験の種類</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {TEST_TYPES.map((t) =>
-                  t.available ? (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setSelectedTestType(t)}
-                      className="min-h-12 rounded-lg border border-blue-200 bg-blue-50 p-4 text-center font-semibold text-blue-700 hover:bg-blue-100"
-                    >
-                      {t.name}
-                      <p className="mt-1 text-[10px] font-normal text-gray-500">
-                        {!eligibilityByType[t.id]
-                          ? "受験状況を確認中..."
-                          : eligibilityByType[t.id].eligible
-                          ? "今期 受験可能（2ヶ月に1回）"
-                          : `受験済み（次回リセット: ${formatJapaneseDate(eligibilityByType[t.id].nextResetAt)}）`}
-                      </p>
-                    </button>
-                  ) : (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setSelectedTestType(t)}
-                      className="min-h-12 rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-gray-400 hover:bg-gray-100"
-                    >
-                      {t.name}
-                      <p className="mt-1 text-xs">準備中</p>
-                    </button>
-                  )
-                )}
+                {TEST_TYPES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => router.push(`/dashboard/${t.id}`)}
+                    className={
+                      t.available
+                        ? "min-h-16 rounded-lg border border-blue-200 bg-blue-50 p-4 text-center font-semibold text-blue-700 hover:bg-blue-100"
+                        : "min-h-16 rounded-lg border border-gray-200 bg-gray-50 p-4 text-center text-gray-400 hover:bg-gray-100"
+                    }
+                  >
+                    {t.name}
+                    <p className="mt-1 text-xs font-normal">
+                      {t.available ? "練習問題・模試を受験する" : "準備中"}
+                    </p>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {userEmail && <PerformanceDashboard email={userEmail} />}
+            {userEmail && <MemorizationReviewBanner email={userEmail} />}
 
             <RecommendedCompanies />
           </div>
@@ -138,13 +88,6 @@ export default function DashboardPage() {
       </main>
 
       <SupportChatWidget />
-
-      {selectedTestType && (
-        <ExamModeSelectModal
-          testType={selectedTestType}
-          onClose={() => setSelectedTestType(null)}
-        />
-      )}
     </div>
   );
 }

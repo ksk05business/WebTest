@@ -14,7 +14,8 @@ import {
 } from "recharts";
 
 type CategoryBreakdownItem = {
-  category: string; // "verbal" | "non_verbal" | "structural"
+  category: string;
+  label: string;
   correct: number;
   total: number;
   accuracyRate: number | null;
@@ -38,22 +39,6 @@ type ExamData = {
   categoryBreakdown: CategoryBreakdownItem[];
 };
 
-const CATEGORY_LABEL: Record<string, string> = {
-  verbal: "言語",
-  non_verbal: "非言語",
-  structural: "構造的把握",
-  english: "英語",
-};
-
-function getRank(deviation: number | null): string {
-  if (deviation === null) return "-";
-  if (deviation >= 70) return "S";
-  if (deviation >= 60) return "A";
-  if (deviation >= 50) return "B";
-  if (deviation >= 40) return "C";
-  return "D";
-}
-
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-3 text-center">
@@ -63,17 +48,18 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function PerformanceDashboard({ email }: { email: string }) {
+// 特定のテスト種別（testType、例: "tamatebako"）に絞った成績サマリー（最高/直近偏差値・
+// 受検回数・偏差値推移グラフ・カテゴリ別分析）を表示する。試験別専用ページ（/dashboard/[testId]）
+// 専用のコンポーネントで、メインダッシュボードには表示しない（成績・偏差値表示は
+// 各試験の専用ページに一本化したため）。
+export function PerformanceDashboard({ email, testType }: { email: string; testType: string }) {
   const router = useRouter();
   const [examData, setExamData] = useState<ExamData | null>(null);
-  // 全テスト種別（SPI3・玉手箱・TG-WEB・SCOA等）を横断した「直近の解答が不正解のまま」の
-  // 暗記系単元（語彙・語句・文法等、長文読解等は除く）の問題数。
-  const [memorizationDueCount, setMemorizationDueCount] = useState(0);
 
   useEffect(() => {
     if (!email) return;
 
-    fetch(`/api/exam-results?email=${encodeURIComponent(email)}`)
+    fetch(`/api/exam-results?testType=${encodeURIComponent(testType)}`)
       .then((res) => res.json())
       .then((data: (ExamData & { error?: string }) | { error: string }) => {
         if ("error" in data) {
@@ -83,59 +69,25 @@ export function PerformanceDashboard({ email }: { email: string }) {
         setExamData(data);
       })
       .catch(() => {
-        // 成績サマリーの取得に失敗してもマイページ自体は表示する
+        // 成績サマリーの取得に失敗してもページ自体は表示する
       });
-
-    fetch("/api/practice/history?scope=memorization&countOnly=1")
-      .then((res) => res.json())
-      .then((data: { count?: number; error?: string }) => {
-        if (data.error === "ログインが必要です") {
-          redirectToLogin(router);
-          return;
-        }
-        setMemorizationDueCount(data.count ?? 0);
-      })
-      .catch(() => {
-        // 復習件数の取得に失敗してもマイページ自体は表示する
-      });
-  }, [email]);
+  }, [email, testType, router]);
 
   return (
     <div className="flex flex-col gap-4">
-      {memorizationDueCount > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 border-emerald-400 bg-emerald-50 p-4">
-          <div>
-            <p className="font-bold text-emerald-800">
-              全テスト共通：今日のスキマ暗記復習（{memorizationDueCount}件）
-            </p>
-            <p className="mt-0.5 text-xs text-emerald-700">
-              移動中に最適！すべてのWebテストの言語・英語・暗記系問題を横断して復習できます。
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => router.push("/practice?scope=memorization")}
-            className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
-            今すぐ復習する
-          </button>
-        </div>
-      )}
-
       {!examData || examData.attemptCount === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
-          まだ模試を受験していません。模試を受けると成績推移・弱点分析がここに表示されます。
+          まだこのテストの模試を受験していません。模試を受けると成績推移・弱点分析がここに表示されます。
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-3 gap-3">
             <SummaryCard label="最高偏差値" value={examData.bestDeviationScore?.toFixed(1) ?? "-"} />
             <SummaryCard
               label="直近偏差値"
               value={examData.latestDeviationScore?.toFixed(1) ?? "-"}
             />
-            <SummaryCard label="累計受検回数" value={`${examData.attemptCount}回`} />
-            <SummaryCard label="評価ランク" value={getRank(examData.latestDeviationScore)} />
+            <SummaryCard label="受検回数" value={`${examData.attemptCount}回`} />
           </div>
 
           {(() => {
@@ -192,9 +144,7 @@ export function PerformanceDashboard({ email }: { email: string }) {
                   {examData.categoryBreakdown.map((c) => (
                     <div key={c.category}>
                       <div className="flex items-center justify-between text-xs text-gray-600">
-                        <span className="font-medium text-gray-800">
-                          {CATEGORY_LABEL[c.category] ?? c.category}
-                        </span>
+                        <span className="font-medium text-gray-800">{c.label}</span>
                         <span>
                           {c.total > 0
                             ? `正解率 ${Math.round((c.accuracyRate ?? 0) * 100)}% ／偏差値 ${
@@ -216,12 +166,12 @@ export function PerformanceDashboard({ email }: { email: string }) {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {strongest && (
                       <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
-                        得意分野: {CATEGORY_LABEL[strongest.category] ?? strongest.category}
+                        得意分野: {strongest.label}
                       </span>
                     )}
                     {weakest && weakest.category !== strongest?.category && (
                       <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">
-                        克服すべき弱点: {CATEGORY_LABEL[weakest.category] ?? weakest.category}
+                        克服すべき弱点: {weakest.label}
                       </span>
                     )}
                   </div>
