@@ -14,7 +14,7 @@ const TABS = [
   { id: "contact", label: "お問い合わせ", icon: Mail },
   { id: "companies", label: "直接採用企業", icon: Building2 },
   { id: "students", label: "学生", icon: Users },
-  { id: "questions", label: "問題検品・編集", icon: ListChecks },
+  { id: "questions", label: "問題データ管理", icon: ListChecks },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];

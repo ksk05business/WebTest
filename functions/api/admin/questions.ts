@@ -22,6 +22,7 @@ type QuestionRow = {
   passage_group_id: number | null;
   image_data_uri: string | null;
   is_reviewed: number;
+  is_mock_only: number;
   created_at: string;
 };
 
@@ -60,6 +61,7 @@ function toAdminQuestion(row: QuestionRow) {
     passageGroupId: row.passage_group_id,
     imageDataUri: row.image_data_uri,
     isReviewed: row.is_reviewed === 1,
+    isMockOnly: row.is_mock_only === 1,
     createdAt: row.created_at,
   };
 }
@@ -70,6 +72,9 @@ function toAdminQuestion(row: QuestionRow) {
 // クエリパラメータ:
 //   category, subCategory（複数指定可、いずれも省略時は全件対象）
 //   reviewed = "true" | "false"（省略時はレビュー状態を問わず全件）
+//   mockOnly = "true" | "false"（省略時は練習問題・模試専用問わず全件。"true"で模試専用のみ、
+//     "false"で練習問題のみ。問題データ管理ダッシュボードのフィルタ用）
+//   search（問題文・タイトルの部分一致キーワード検索）
 //   limit（デフォルト50、最大200）, offset（デフォルト0）
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const authError = checkAdminAuth(context);
@@ -79,6 +84,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const categories = params.getAll("category").filter(Boolean);
   const subCategories = params.getAll("subCategory").filter(Boolean);
   const reviewed = params.get("reviewed");
+  const mockOnly = params.get("mockOnly");
+  const search = params.get("search")?.trim();
   const limitRaw = params.get("limit");
   const offsetRaw = params.get("offset");
   const limit = Math.min(
@@ -103,6 +110,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   } else if (reviewed === "false") {
     conditions.push("is_reviewed = 0");
   }
+  if (mockOnly === "true") {
+    conditions.push("is_mock_only = 1");
+  } else if (mockOnly === "false") {
+    conditions.push("is_mock_only = 0");
+  }
+  if (search) {
+    conditions.push("(question_text LIKE ? ESCAPE '\\' OR title LIKE ? ESCAPE '\\')");
+    const escaped = search.replace(/[\\%_]/g, (c) => `\\${c}`);
+    binds.push(`%${escaped}%`, `%${escaped}%`);
+  }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
@@ -112,7 +129,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const rows = await context.env.DB.prepare(
     `SELECT id, category, sub_category, title, question_text, tables_json, options, correct_answer, explanation,
-            difficulty, status, originality_note, passage_group_id, image_data_uri, is_reviewed, created_at
+            difficulty, status, originality_note, passage_group_id, image_data_uri, is_reviewed, is_mock_only, created_at
      FROM questions
      ${whereClause}
      ORDER BY id DESC

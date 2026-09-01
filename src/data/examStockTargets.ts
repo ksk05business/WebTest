@@ -1,0 +1,66 @@
+// 模試専用プール（questions.is_mock_only=1）の「3回分」在庫目標を、テスト種別・単元ごとに定義する。
+// 値はapp/test/page.tsxのEXAM_PARTS（ExamSection.subParts[].limit、1回の模試で実際に出題される件数）
+// と完全に一致させること。同じcategory/subCategoryが複数のEXAM_PARTSエントリから参照される場合
+// （例: tgweb_verbal_readingは従来型・新型の両方の言語セクションから出題される）はperCycleを合算する。
+// 管理画面の在庫集計ダッシュボード（functions/api/admin/question-stats.ts）専用の参照データであり、
+// 出題ロジック自体はこのファイルを参照しない（page.tsx側の変更時はこちらも手動で同期すること）。
+export type ExamStockTarget = {
+  category: string;
+  subCategory: string;
+  sectionLabel: string;
+  // 2ヶ月に1回のリセット周期内に、独立して受験可能な模試（複数選択可能な場合は合算）が
+  // 1回あたり出題する件数の合計。
+  perCycle: number;
+};
+
+export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
+  // 玉手箱
+  { category: "tamatebako_math", subCategory: "四則逆算", sectionLabel: "計数・四則計算", perCycle: 50 },
+  { category: "tamatebako_math", subCategory: "図表の読み取り", sectionLabel: "計数・図表読取", perCycle: 29 },
+  { category: "tamatebako_math", subCategory: "表の空欄推測", sectionLabel: "計数・表推測", perCycle: 20 },
+  { category: "tamatebako_verbal", subCategory: "論理的読解（GAB形式）", sectionLabel: "言語・論理的読解", perCycle: 32 },
+  { category: "tamatebako_verbal", subCategory: "趣旨判定（IMAGES形式）", sectionLabel: "言語・趣旨判定", perCycle: 32 },
+  { category: "tamatebako_verbal", subCategory: "趣旨把握", sectionLabel: "言語・趣旨把握", perCycle: 10 },
+  { category: "tamatebako_english", subCategory: "論理的読解（GAB形式）", sectionLabel: "英語・論理的読解", perCycle: 24 },
+  { category: "tamatebako_english", subCategory: "長文読解（IMAGES形式）", sectionLabel: "英語・長文読解", perCycle: 24 },
+
+  // TG-WEB
+  { category: "tgweb_traditional_verbal", subCategory: "空欄補充", sectionLabel: "従来型・言語", perCycle: 5 },
+  { category: "tgweb_traditional_verbal", subCategory: "並べ替え", sectionLabel: "従来型・言語", perCycle: 4 },
+  // 従来型・言語(3問)＋新型・言語(4問)の両方から出題されるため合算。
+  { category: "tgweb_verbal_reading", subCategory: "長文読解", sectionLabel: "従来型・新型 言語（共通）", perCycle: 3 + 4 },
+  { category: "tgweb_traditional_math", subCategory: "推論", sectionLabel: "従来型・非言語", perCycle: 4 },
+  { category: "tgweb_traditional_math", subCategory: "図形問題", sectionLabel: "従来型・非言語", perCycle: 3 },
+  { category: "tgweb_traditional_math", subCategory: "暗号", sectionLabel: "従来型・非言語", perCycle: 2 },
+  { category: "tgweb_new_verbal", subCategory: "同義語・対義語", sectionLabel: "新型・言語", perCycle: 8 },
+  { category: "tgweb_new_verbal", subCategory: "ことわざ", sectionLabel: "新型・言語", perCycle: 8 },
+  { category: "tgweb_new_verbal", subCategory: "慣用句", sectionLabel: "新型・言語", perCycle: 7 },
+  { category: "tgweb_new_verbal", subCategory: "四字熟語", sectionLabel: "新型・言語", perCycle: 7 },
+  { category: "tgweb_new_math", subCategory: "四則演算", sectionLabel: "新型・非言語", perCycle: 30 },
+  { category: "tgweb_new_math", subCategory: "図表の読み取り", sectionLabel: "新型・非言語", perCycle: 6 },
+  { category: "tgweb_english", subCategory: "長文問題", sectionLabel: "英語（共通）", perCycle: 10 },
+
+  // GAB/C-GAB
+  { category: "gab_verbal", subCategory: "論理的読解", sectionLabel: "言語理解", perCycle: 32 },
+  { category: "gab_quantitative", subCategory: "資料の読み取り", sectionLabel: "計数理解", perCycle: 29 },
+  { category: "gab_english", subCategory: "長文読解", sectionLabel: "英語", perCycle: 24 },
+
+  // SCOA（全10単元が同じ1つの統合模試を構成する）
+  { category: "scoa_language", subCategory: "熟語・ことわざ・慣用句・故事成語", sectionLabel: "統合模試", perCycle: 12 },
+  { category: "scoa_language", subCategory: "長文読解", sectionLabel: "統合模試", perCycle: 12 },
+  { category: "scoa_math", subCategory: "四則計算", sectionLabel: "統合模試", perCycle: 8 },
+  { category: "scoa_math", subCategory: "方程式・数列", sectionLabel: "統合模試", perCycle: 8 },
+  { category: "scoa_math", subCategory: "規則性・濃度算", sectionLabel: "統合模試", perCycle: 8 },
+  { category: "scoa_logic", subCategory: "場合の数確率", sectionLabel: "統合模試", perCycle: 12 },
+  { category: "scoa_logic", subCategory: "推論", sectionLabel: "統合模試", perCycle: 12 },
+  { category: "scoa_common_sense", subCategory: "理科", sectionLabel: "統合模試", perCycle: 12 },
+  { category: "scoa_common_sense", subCategory: "社会", sectionLabel: "統合模試", perCycle: 12 },
+  { category: "scoa_english", subCategory: "文法・語彙・イディオム・アクセント", sectionLabel: "統合模試", perCycle: 24 },
+];
+
+// 「3回分」を在庫目標の基準とする（複数サイクルにわたり出題が重複しにくくするための目安）。
+export const STOCK_CYCLES = 3;
+
+export function findStockTarget(category: string, subCategory: string): ExamStockTarget | undefined {
+  return EXAM_STOCK_TARGETS.find((t) => t.category === category && t.subCategory === subCategory);
+}
