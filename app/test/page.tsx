@@ -91,6 +91,26 @@ const TGWEB_NEW_SECTIONS: readonly ExamSection[] = [
   },
 ];
 
+// C-GAB（GAB）模試: 言語理解15分32問・計数理解15分29問（電卓使用不可）・英語10分24問の3セクション。
+// 各セクションはis_mock_only=1（練習問題プールとは別に確保した模試専用プール、3回分の問題量）から出題する。
+const GAB_CGAB_SECTIONS: readonly ExamSection[] = [
+  {
+    label: "言語理解",
+    timeLimitSec: 15 * 60,
+    subParts: [{ category: "gab_verbal", subCategory: "論理的読解", limit: 32 }],
+  },
+  {
+    label: "計数理解（電卓使用不可）",
+    timeLimitSec: 15 * 60,
+    subParts: [{ category: "gab_quantitative", subCategory: "資料の読み取り", limit: 29 }],
+  },
+  {
+    label: "英語",
+    timeLimitSec: 10 * 60,
+    subParts: [{ category: "gab_english", subCategory: "長文読解", limit: 24 }],
+  },
+];
+
 const EXAM_PARTS = {
   spi_basic: { categories: ["verbal", "non_verbal"], label: "基礎能力試験（言語・非言語）", mockOnly: false },
   spi_english: { categories: ["english"], label: "英語", mockOnly: false },
@@ -110,6 +130,9 @@ const EXAM_PARTS = {
   // さらに言語・非言語・英語のセクションごとに独立した制限時間を持つ（SectionedExamFlow）。
   tgweb_traditional: { sections: TGWEB_TRADITIONAL_SECTIONS, label: "TG-WEB従来型", mockOnly: true },
   tgweb_new: { sections: TGWEB_NEW_SECTIONS, label: "TG-WEB新型", mockOnly: true },
+  // C-GAB/GAB: TG-WEBと異なり単一の受験フローのため、SCOAと同様testTypes.tsのidをそのまま
+  // partIdとして使う（ExamModeSelectModal.tsxのisMultiPart分岐には含めない）。
+  gab_cgab: { sections: GAB_CGAB_SECTIONS, label: "GAB/C-GAB", mockOnly: true },
 } satisfies Record<string, ExamPartConfig>;
 
 type ExamPartId = keyof typeof EXAM_PARTS;

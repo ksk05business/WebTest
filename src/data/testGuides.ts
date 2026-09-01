@@ -238,12 +238,12 @@ export const TEST_GUIDES: TestGuide[] = [
       {
         question: "GAB専用の問題は解けますか？",
         answer:
-          "GAB単体の練習問題は準備中ですが、本サイトの玉手箱「論理的読解（GAB形式）」の単元は今すぐ無料で練習できます。",
+          "GAB・C-GABコーナーの言語理解・計数理解・英語は単元別練習問題・本番模試（言語理解15分32問・計数理解15分29問・英語10分24問の3セクション）ともに今すぐ無料で挑戦できます。",
       },
     ],
     practiceAvailable: true,
-    practiceHref: "/practice?testType=tamatebako&category=tamatebako_verbal&subCategory=%E8%AB%96%E7%90%86%E7%9A%84%E8%AA%AD%E8%A7%A3%EF%BC%88GAB%E5%BD%A2%E5%BC%8F%EF%BC%89",
-    practiceNote: "玉手箱コーナーの「論理的読解（GAB形式）」がGAB・C-GAB対策として今すぐ無料で練習できます。",
+    practiceHref: "/practice?testType=gab_cgab",
+    practiceNote: "GAB・C-GABの言語理解・計数理解・英語は単元別練習問題・本番模試ともに今すぐ無料で挑戦できます。",
   },
   {
     slug: "cab",
