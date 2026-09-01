@@ -11,14 +11,29 @@ export type ExamEligibility = {
 
 // SPIの本番模試は「基礎能力試験（言語・非言語）」「英語」「構造把握」の3パートに分けて受験する仕様のため、
 // 単一の"spi"ではなくパートごとに独立したtest_typeを用いる（受験可否・偏差値母集団もパートごとに別集計される）。
+// 玉手箱・TG-WEB・GAB/C-GABは2026-09-01以降、形式・セクションごとに独立して受験できる方式に変更した
+// ため、旧来の1テスト1test_type（tamatebako, tgweb_traditional, tgweb_new, gab_cgab）は廃止し、
+// セクション単位の細かいtest_typeに置き換えている（app/test/page.tsxのEXAM_PARTS参照）。
 export const MOCK_EXAM_TEST_TYPES = [
   "spi_basic",
   "spi_english",
   "spi_structural",
-  "tamatebako",
-  "tgweb_traditional",
-  "tgweb_new",
-  "gab_cgab",
+  "tamatebako_math_arithmetic",
+  "tamatebako_math_graph",
+  "tamatebako_math_table",
+  "tamatebako_verbal_gab",
+  "tamatebako_verbal_images",
+  "tamatebako_verbal_summary",
+  "tamatebako_english_gab",
+  "tamatebako_english_images",
+  "tgweb_traditional_verbal",
+  "tgweb_traditional_nonverbal",
+  "tgweb_new_verbal",
+  "tgweb_new_nonverbal",
+  "tgweb_english",
+  "gab_verbal_exam",
+  "gab_quantitative_exam",
+  "gab_english_exam",
   "cab",
   "scoa",
 ] as const;

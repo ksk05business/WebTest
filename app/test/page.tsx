@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { ExamReviewEntry, Question } from "@/src/data/questions";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 
-const TIME_PER_QUESTION = 60; // spi_english / spi_structural / scoa（1問ごとの制限時間）
+const TIME_PER_QUESTION = 60; // spi_english / spi_structural（1問ごとの制限時間）
 
 // 基礎能力試験（言語・非言語）は35分間のタイムボックス制、問題数の上限なし
 // （標準的な出題数の目安は言語約30〜35問・非言語約20問だが、実際の問題数は回答速度で変動する）。
@@ -33,135 +33,163 @@ type ExamPartConfig = {
   sections?: readonly ExamSection[];
 };
 
-// TG-WEB従来型模試: 言語12分12問（空欄補充5/並べ替え4/長文読解3）・非言語18分9問（推論4/図形3/暗号2）・
-// 英語15分10問（共通、新型と共有のtgweb_english/長文問題プールから出題）。
-// 長文読解は従来型・新型で共有のtgweb_verbal_readingカテゴリから出題する
-// （src/data/practiceUnits.tsの「共通・言語」グループと同じ設計）。
-const TGWEB_TRADITIONAL_SECTIONS: readonly ExamSection[] = [
-  {
-    label: "言語",
-    timeLimitSec: 12 * 60,
-    subParts: [
-      { category: "tgweb_traditional_verbal", subCategory: "空欄補充", limit: 5 },
-      { category: "tgweb_traditional_verbal", subCategory: "並べ替え", limit: 4 },
-      { category: "tgweb_verbal_reading", subCategory: "長文読解", limit: 3 },
-    ],
-  },
-  {
-    label: "非言語",
-    timeLimitSec: 18 * 60,
-    subParts: [
-      { category: "tgweb_traditional_math", subCategory: "推論", limit: 4 },
-      { category: "tgweb_traditional_math", subCategory: "図形問題", limit: 3 },
-      { category: "tgweb_traditional_math", subCategory: "暗号", limit: 2 },
-    ],
-  },
-  {
-    label: "英語",
-    timeLimitSec: 15 * 60,
-    subParts: [{ category: "tgweb_english", subCategory: "長文問題", limit: 10 }],
-  },
-];
+// 玉手箱・TG-WEB・GAB/C-GABは2026-09-01以降、形式・セクションごとに独立して受験できる方式に変更した
+// （旧: 1つのtest_typeで複数セクションを通しで受験する方式）。それぞれのセクションが単独で
+// 独立した受験可否（2ヶ月に1回リセット）とタイマーを持つ、1セクションのみのSectionedExamFlowとして
+// 扱う（src/data/testTypes.tsのMULTI_PART_EXAM_PARTSで各テスト種別の部品一覧を定義）。
 
-// TG-WEB新型模試: 言語7分34問（同義語・対義語8/ことわざ8/慣用句7/四字熟語7/長文読解4）・
-// 非言語8分36問（四則演算30/図表の読み取り6）・英語15分10問（共通、従来型と共有）。
-const TGWEB_NEW_SECTIONS: readonly ExamSection[] = [
-  {
-    label: "言語",
-    timeLimitSec: 7 * 60,
-    subParts: [
-      { category: "tgweb_new_verbal", subCategory: "同義語・対義語", limit: 8 },
-      { category: "tgweb_new_verbal", subCategory: "ことわざ", limit: 8 },
-      { category: "tgweb_new_verbal", subCategory: "慣用句", limit: 7 },
-      { category: "tgweb_new_verbal", subCategory: "四字熟語", limit: 7 },
-      { category: "tgweb_verbal_reading", subCategory: "長文読解", limit: 4 },
-    ],
-  },
-  {
-    label: "非言語",
-    timeLimitSec: 8 * 60,
-    subParts: [
-      { category: "tgweb_new_math", subCategory: "四則演算", limit: 30 },
-      { category: "tgweb_new_math", subCategory: "図表の読み取り", limit: 6 },
-    ],
-  },
-  {
-    label: "英語",
-    timeLimitSec: 15 * 60,
-    subParts: [{ category: "tgweb_english", subCategory: "長文問題", limit: 10 }],
-  },
-];
+// TG-WEB従来型・言語: 空欄補充5・並べ替え4・長文読解3（tgweb_verbal_readingは新型と共有）。
+const TGWEB_TRADITIONAL_VERBAL_SECTION: ExamSection = {
+  label: "従来型・言語",
+  timeLimitSec: 12 * 60,
+  subParts: [
+    { category: "tgweb_traditional_verbal", subCategory: "空欄補充", limit: 5 },
+    { category: "tgweb_traditional_verbal", subCategory: "並べ替え", limit: 4 },
+    { category: "tgweb_verbal_reading", subCategory: "長文読解", limit: 3 },
+  ],
+};
+// TG-WEB従来型・非言語: 推論4・図形問題3・暗号2。
+const TGWEB_TRADITIONAL_NONVERBAL_SECTION: ExamSection = {
+  label: "従来型・非言語",
+  timeLimitSec: 18 * 60,
+  subParts: [
+    { category: "tgweb_traditional_math", subCategory: "推論", limit: 4 },
+    { category: "tgweb_traditional_math", subCategory: "図形問題", limit: 3 },
+    { category: "tgweb_traditional_math", subCategory: "暗号", limit: 2 },
+  ],
+};
+// TG-WEB新型・言語: 同義語・対義語8・ことわざ8・慣用句7・四字熟語7・長文読解4。
+const TGWEB_NEW_VERBAL_SECTION: ExamSection = {
+  label: "新型・言語",
+  timeLimitSec: 7 * 60,
+  subParts: [
+    { category: "tgweb_new_verbal", subCategory: "同義語・対義語", limit: 8 },
+    { category: "tgweb_new_verbal", subCategory: "ことわざ", limit: 8 },
+    { category: "tgweb_new_verbal", subCategory: "慣用句", limit: 7 },
+    { category: "tgweb_new_verbal", subCategory: "四字熟語", limit: 7 },
+    { category: "tgweb_verbal_reading", subCategory: "長文読解", limit: 4 },
+  ],
+};
+// TG-WEB新型・非言語: 四則演算30・図表の読み取り6。
+const TGWEB_NEW_NONVERBAL_SECTION: ExamSection = {
+  label: "新型・非言語",
+  timeLimitSec: 8 * 60,
+  subParts: [
+    { category: "tgweb_new_math", subCategory: "四則演算", limit: 30 },
+    { category: "tgweb_new_math", subCategory: "図表の読み取り", limit: 6 },
+  ],
+};
+// TG-WEB英語: 従来型・新型で共有する長文問題プールから出題（単独で受験可能な1セクション）。
+const TGWEB_ENGLISH_SECTION: ExamSection = {
+  label: "英語（従来型・新型共通）",
+  timeLimitSec: 15 * 60,
+  subParts: [{ category: "tgweb_english", subCategory: "長文問題", limit: 10 }],
+};
 
-// 玉手箱模試: 言語（論理的読解GAB形式）15分32問・計数（四則逆算9分50問／図表の読み取り15分29問）・
-// 英語（論理的読解GAB形式）10分24問の4セクション。計数は制限時間の異なる2単元のため
-// 別々のセクションとして扱う（TG-WEBのsubParts方式は同一セクション内で時間を共有するため使えない）。
-const TAMATEBAKO_SECTIONS: readonly ExamSection[] = [
-  {
-    label: "言語（論理的読解）",
-    timeLimitSec: 15 * 60,
-    subParts: [{ category: "tamatebako_verbal", subCategory: "論理的読解（GAB形式）", limit: 32 }],
-  },
-  {
-    label: "計数（四則逆算）",
-    timeLimitSec: 9 * 60,
-    subParts: [{ category: "tamatebako_math", subCategory: "四則逆算", limit: 50 }],
-  },
-  {
-    label: "計数（図表の読み取り）",
-    timeLimitSec: 15 * 60,
-    subParts: [{ category: "tamatebako_math", subCategory: "図表の読み取り", limit: 29 }],
-  },
-  {
-    label: "英語（論理的読解）",
-    timeLimitSec: 10 * 60,
-    subParts: [{ category: "tamatebako_english", subCategory: "論理的読解（GAB形式）", limit: 24 }],
-  },
-];
+// 玉手箱・計数: 四則計算50/9分・図表読取29/15分・表推測20/20分（各単独で受験可能な1セクション）。
+const TAMATEBAKO_MATH_ARITHMETIC_SECTION: ExamSection = {
+  label: "計数・四則計算",
+  timeLimitSec: 9 * 60,
+  subParts: [{ category: "tamatebako_math", subCategory: "四則逆算", limit: 50 }],
+};
+const TAMATEBAKO_MATH_GRAPH_SECTION: ExamSection = {
+  label: "計数・図表読取",
+  timeLimitSec: 15 * 60,
+  subParts: [{ category: "tamatebako_math", subCategory: "図表の読み取り", limit: 29 }],
+};
+const TAMATEBAKO_MATH_TABLE_SECTION: ExamSection = {
+  label: "計数・表推測",
+  timeLimitSec: 20 * 60,
+  subParts: [{ category: "tamatebako_math", subCategory: "表の空欄推測", limit: 20 }],
+};
+// 玉手箱・言語: 論理的読解（GAB形式）32/15分・趣旨判定（IMAGES形式）32/10分・趣旨把握10/12分。
+const TAMATEBAKO_VERBAL_GAB_SECTION: ExamSection = {
+  label: "言語・論理的読解（GAB形式）",
+  timeLimitSec: 15 * 60,
+  subParts: [{ category: "tamatebako_verbal", subCategory: "論理的読解（GAB形式）", limit: 32 }],
+};
+const TAMATEBAKO_VERBAL_IMAGES_SECTION: ExamSection = {
+  label: "言語・趣旨判定（IMAGES形式）",
+  timeLimitSec: 10 * 60,
+  subParts: [{ category: "tamatebako_verbal", subCategory: "趣旨判定（IMAGES形式）", limit: 32 }],
+};
+const TAMATEBAKO_VERBAL_SUMMARY_SECTION: ExamSection = {
+  label: "言語・趣旨把握",
+  timeLimitSec: 12 * 60,
+  subParts: [{ category: "tamatebako_verbal", subCategory: "趣旨把握", limit: 10 }],
+};
+// 玉手箱・英語: 論理的読解（GAB形式）24/10分・長文読解（IMAGES形式）24/10分。
+const TAMATEBAKO_ENGLISH_GAB_SECTION: ExamSection = {
+  label: "英語・論理的読解（GAB形式）",
+  timeLimitSec: 10 * 60,
+  subParts: [{ category: "tamatebako_english", subCategory: "論理的読解（GAB形式）", limit: 24 }],
+};
+const TAMATEBAKO_ENGLISH_IMAGES_SECTION: ExamSection = {
+  label: "英語・長文読解（IMAGES形式）",
+  timeLimitSec: 10 * 60,
+  subParts: [{ category: "tamatebako_english", subCategory: "長文読解（IMAGES形式）", limit: 24 }],
+};
 
-// C-GAB（GAB）模試: 言語理解15分32問・計数理解15分29問（電卓使用不可）・英語10分24問の3セクション。
-// 各セクションはis_mock_only=1（練習問題プールとは別に確保した模試専用プール、3回分の問題量）から出題する。
-const GAB_CGAB_SECTIONS: readonly ExamSection[] = [
-  {
-    label: "言語理解",
-    timeLimitSec: 15 * 60,
-    subParts: [{ category: "gab_verbal", subCategory: "論理的読解", limit: 32 }],
-  },
-  {
-    label: "計数理解（電卓使用不可）",
-    timeLimitSec: 15 * 60,
-    subParts: [{ category: "gab_quantitative", subCategory: "資料の読み取り", limit: 29 }],
-  },
-  {
-    label: "英語",
-    timeLimitSec: 10 * 60,
-    subParts: [{ category: "gab_english", subCategory: "長文読解", limit: 24 }],
-  },
-];
+// GAB/C-GAB: 言語理解32/15分・計数理解29/15分（電卓使用不可）・英語24/10分。
+const GAB_VERBAL_SECTION: ExamSection = {
+  label: "言語理解",
+  timeLimitSec: 15 * 60,
+  subParts: [{ category: "gab_verbal", subCategory: "論理的読解", limit: 32 }],
+};
+const GAB_QUANTITATIVE_SECTION: ExamSection = {
+  label: "計数理解（電卓使用不可）",
+  timeLimitSec: 15 * 60,
+  subParts: [{ category: "gab_quantitative", subCategory: "資料の読み取り", limit: 29 }],
+};
+const GAB_ENGLISH_SECTION: ExamSection = {
+  label: "英語",
+  timeLimitSec: 10 * 60,
+  subParts: [{ category: "gab_english", subCategory: "長文読解", limit: 24 }],
+};
+
+// SCOA: 言語・数理・論理・常識・英語の全分野を横断する単一の統合模試（全120問・60分）。
+// 内訳は各分野の在庫（is_mock_only=1プール）に応じて大分類ごとに均等配分している。
+const SCOA_SECTION: ExamSection = {
+  label: "SCOA",
+  timeLimitSec: 60 * 60,
+  subParts: [
+    { category: "scoa_language", subCategory: "熟語・ことわざ・慣用句・故事成語", limit: 12 },
+    { category: "scoa_language", subCategory: "長文読解", limit: 12 },
+    { category: "scoa_math", subCategory: "四則計算", limit: 8 },
+    { category: "scoa_math", subCategory: "方程式・数列", limit: 8 },
+    { category: "scoa_math", subCategory: "規則性・濃度算", limit: 8 },
+    { category: "scoa_logic", subCategory: "場合の数確率", limit: 12 },
+    { category: "scoa_logic", subCategory: "推論", limit: 12 },
+    { category: "scoa_common_sense", subCategory: "理科", limit: 12 },
+    { category: "scoa_common_sense", subCategory: "社会", limit: 12 },
+    { category: "scoa_english", subCategory: "文法・語彙・イディオム・アクセント", limit: 24 },
+  ],
+};
 
 const EXAM_PARTS = {
   spi_basic: { categories: ["verbal", "non_verbal"], label: "基礎能力試験（言語・非言語）", mockOnly: false },
   spi_english: { categories: ["english"], label: "英語", mockOnly: false },
   spi_structural: { categories: ["structural"], label: "構造把握", mockOnly: false },
-  // SCOAは言語・数理・論理・常識・英語の全分野に実データがあるため、単一パートの模試として
-  // 全カテゴリを対象に出題する（src/data/testTypes.tsのSCOA hrefから遷移）。
-  // mockOnly: true により、練習問題プール（is_mock_only=0）とは別に確保した本番模試専用の
-  // 問題プール（is_mock_only=1、各分野からランダム抽出済み）からのみ出題する。
-  scoa: {
-    categories: ["scoa_language", "scoa_math", "scoa_logic", "scoa_common_sense", "scoa_english"],
-    label: "SCOA",
-    mockOnly: true,
-  },
-  // TG-WEBは「従来型」「新型」で出題内容がまったく異なるため、SPIの3パート方式と同様に
-  // 独立した受験可否（2ヶ月に1回リセット）を持つ別々のtest_typeとして扱う
-  // （src/components/ExamModeSelectModal.tsxのTGWEB_EXAM_PARTS参照）。
-  // さらに言語・非言語・英語のセクションごとに独立した制限時間を持つ（SectionedExamFlow）。
-  tgweb_traditional: { sections: TGWEB_TRADITIONAL_SECTIONS, label: "TG-WEB従来型", mockOnly: true },
-  tgweb_new: { sections: TGWEB_NEW_SECTIONS, label: "TG-WEB新型", mockOnly: true },
-  // C-GAB/GAB: TG-WEBと異なり単一の受験フローのため、SCOAと同様testTypes.tsのidをそのまま
-  // partIdとして使う（ExamModeSelectModal.tsxのisMultiPart分岐には含めない）。
-  gab_cgab: { sections: GAB_CGAB_SECTIONS, label: "GAB/C-GAB", mockOnly: true },
-  // 玉手箱もGAB/C-GABと同様、testTypes.tsのid（"tamatebako"）をそのままpartIdとして使う単一パート。
-  tamatebako: { sections: TAMATEBAKO_SECTIONS, label: "玉手箱", mockOnly: true },
+  scoa: { sections: [SCOA_SECTION], label: "SCOA", mockOnly: true },
+
+  tgweb_traditional_verbal: { sections: [TGWEB_TRADITIONAL_VERBAL_SECTION], label: "TG-WEB従来型・言語", mockOnly: true },
+  tgweb_traditional_nonverbal: { sections: [TGWEB_TRADITIONAL_NONVERBAL_SECTION], label: "TG-WEB従来型・非言語", mockOnly: true },
+  tgweb_new_verbal: { sections: [TGWEB_NEW_VERBAL_SECTION], label: "TG-WEB新型・言語", mockOnly: true },
+  tgweb_new_nonverbal: { sections: [TGWEB_NEW_NONVERBAL_SECTION], label: "TG-WEB新型・非言語", mockOnly: true },
+  tgweb_english: { sections: [TGWEB_ENGLISH_SECTION], label: "TG-WEB英語（共通）", mockOnly: true },
+
+  tamatebako_math_arithmetic: { sections: [TAMATEBAKO_MATH_ARITHMETIC_SECTION], label: "玉手箱・計数（四則計算）", mockOnly: true },
+  tamatebako_math_graph: { sections: [TAMATEBAKO_MATH_GRAPH_SECTION], label: "玉手箱・計数（図表読取）", mockOnly: true },
+  tamatebako_math_table: { sections: [TAMATEBAKO_MATH_TABLE_SECTION], label: "玉手箱・計数（表推測）", mockOnly: true },
+  tamatebako_verbal_gab: { sections: [TAMATEBAKO_VERBAL_GAB_SECTION], label: "玉手箱・言語（論理的読解）", mockOnly: true },
+  tamatebako_verbal_images: { sections: [TAMATEBAKO_VERBAL_IMAGES_SECTION], label: "玉手箱・言語（趣旨判定）", mockOnly: true },
+  tamatebako_verbal_summary: { sections: [TAMATEBAKO_VERBAL_SUMMARY_SECTION], label: "玉手箱・言語（趣旨把握）", mockOnly: true },
+  tamatebako_english_gab: { sections: [TAMATEBAKO_ENGLISH_GAB_SECTION], label: "玉手箱・英語（論理的読解）", mockOnly: true },
+  tamatebako_english_images: { sections: [TAMATEBAKO_ENGLISH_IMAGES_SECTION], label: "玉手箱・英語（長文読解）", mockOnly: true },
+
+  gab_verbal_exam: { sections: [GAB_VERBAL_SECTION], label: "GAB/C-GAB・言語理解", mockOnly: true },
+  gab_quantitative_exam: { sections: [GAB_QUANTITATIVE_SECTION], label: "GAB/C-GAB・計数理解", mockOnly: true },
+  gab_english_exam: { sections: [GAB_ENGLISH_SECTION], label: "GAB/C-GAB・英語", mockOnly: true },
 } satisfies Record<string, ExamPartConfig>;
 
 type ExamPartId = keyof typeof EXAM_PARTS;
