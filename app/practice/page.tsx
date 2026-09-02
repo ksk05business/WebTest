@@ -117,9 +117,11 @@ function PracticePageInner() {
       .then((data: { questions?: Question[]; error?: string }) => {
         if (!data.questions || data.questions.length === 0) {
           setLoadError(
-            statusFilter || scope
-              ? "対象の問題がありません。すべて解答済みか、該当する問題がまだありません。"
-              : "出題できる問題がありません。時間をおいて再度お試しください。"
+            scope === "wrong"
+              ? "現在復習する問題はありません（全問正解中）。"
+              : statusFilter || scope
+                ? "対象の問題がありません。すべて解答済みか、該当する問題がまだありません。"
+                : "出題できる問題がありません。時間をおいて再度お試しください。"
           );
           return;
         }

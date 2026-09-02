@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Info } from "lucide-react";
 import { MULTI_PART_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
-import { TEST_EXPLAINERS } from "@/src/data/testExplainers";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 
 type PartEligibility = { eligible: boolean; nextResetAt: string };
@@ -18,7 +16,6 @@ export function ExamModeSelectModal({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const explainer = TEST_EXPLAINERS[testType.id];
   const hasPracticeContent = Boolean(PRACTICE_UNIT_GROUPS_BY_TEST[testType.id]);
   // SPI・玉手箱・TG-WEB・GAB/C-GABは形式・セクションごとに個別選択して受験する複数パート方式
   // （MULTI_PART_EXAM_PARTS参照）。SCOA等、単一パートのテスト種別はここに含まれない。
@@ -85,47 +82,8 @@ export function ExamModeSelectModal({
           </div>
         ) : (
           <div className="mt-4 flex flex-col gap-3">
-            {explainer && (
-              <details className="group rounded-xl border border-gray-200">
-                <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-gray-800">
-                  <span className="flex items-center gap-1.5">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    {explainer.heading}
-                  </span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform group-open:rotate-180" />
-                </summary>
-                <div className="flex flex-col gap-3 border-t border-gray-100 px-4 py-3 text-sm text-gray-600">
-                  {explainer.sections.map((section) => (
-                    <div key={section.title}>
-                      <p className="font-semibold text-gray-700">{section.title}</p>
-                      {section.body && <p>{section.body}</p>}
-                      {section.groups && (
-                        <div className="mt-1.5 flex flex-col gap-2">
-                          {section.groups.map((group) => (
-                            <div key={group.label}>
-                              <p className="text-xs font-bold text-gray-500">【{group.label}】</p>
-                              <ul className="list-disc space-y-0.5 pl-5">
-                                {group.items.map((item) => (
-                                  <li key={item}>{item}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </details>
-            )}
-
             <div className="flex flex-col gap-2 rounded-xl border border-gray-200 p-4">
               <p className="font-bold text-gray-900">模擬試験（本番モード）</p>
-              <p className="text-sm leading-relaxed text-gray-600">
-                本番同様の制限時間で出題。成績・偏差値が記録され、企業スカウトの評価対象になります。
-                {isMultiPart &&
-                  "形式・セクションごとに分かれており、それぞれ個別に選択して独立して受験できます。"}
-              </p>
               {!testType.available ? (
                 <p className="mt-1 rounded-full bg-gray-100 py-2.5 text-center text-sm font-semibold text-gray-400">
                   本番模試は準備中です
