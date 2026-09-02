@@ -168,9 +168,10 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
 // 2026-09-02にSCOAの単元構成を5科目18単元へ改修（従来は5科目10単元）。DB上の既存問題データも
 // 新単元へ再振り分け済み（src/data/examStockTargets.tsのコメント参照）。同日中に言語の
 // 「漢字・語句の意味」と「熟語・ことわざ・慣用句」を1単元（漢字・語句・熟語・ことわざ・慣用句）へ
-// 統合し17単元に、さらに同日中に「類義語・対義語」（既存問題0件のまま）を廃止し16単元に。
-// 新設単元のうち「サイコロ・空間図形」「ベン図」「暗号・法則性」（論理）は対応する既存データが
-// 無いため、実データが投入されるまで0問（準備中）表示となる。
+// 統合し17単元に、さらに同日中に「類義語・対義語」（既存問題0件のまま）を廃止し16単元に、続けて
+// 論理の「推論・命題」「ベン図」「暗号・法則性」「順序・位置関係」を1単元
+// （論理（推論・命題・ベン図・暗号・順序）、20問/回）へ統合し13単元に。「サイコロ・空間図形」は
+// 統合対象外で単独単元のまま維持している。
 const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
     category: "scoa_language",
@@ -203,11 +204,12 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "scoa_logic",
     groupLabel: "論理",
     units: [
-      { id: "scoa_inference_proposition", subCategory: "推論・命題", label: "推論・命題" },
+      {
+        id: "scoa_logic_combined",
+        subCategory: "論理（推論・命題・ベン図・暗号・順序）",
+        label: "論理（推論・命題・ベン図・暗号・順序）",
+      },
       { id: "scoa_dice_space", subCategory: "サイコロ・空間図形", label: "サイコロ・空間図形" },
-      { id: "scoa_venn", subCategory: "ベン図", label: "ベン図" },
-      { id: "scoa_cipher_pattern", subCategory: "暗号・法則性", label: "暗号・法則性" },
-      { id: "scoa_order_position", subCategory: "順序・位置関係", label: "順序・位置関係" },
     ],
   },
   {

@@ -1,0 +1,384 @@
+[
+  {
+    "results": [
+      {
+        "id": 1417,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1418,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1419,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1420,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1421,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1422,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1423,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1424,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1425,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1426,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1427,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1428,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1429,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1430,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1431,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1432,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1433,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1434,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1435,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1436,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1445,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1446,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1447,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1448,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1883,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1884,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1885,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1886,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1887,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1888,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1889,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1890,
+        "category": "scoa_logic",
+        "sub_category": "順序・位置関係"
+      },
+      {
+        "id": 1907,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1908,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1909,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1910,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1911,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1912,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1913,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1914,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1915,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1916,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1917,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1918,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1919,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1920,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1921,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1922,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1923,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1924,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1925,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1926,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1927,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1928,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1929,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1930,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1931,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1932,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1933,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1934,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1935,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1936,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1937,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1938,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1939,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1940,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1941,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1942,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1943,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1944,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1945,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      },
+      {
+        "id": 1946,
+        "category": "scoa_logic",
+        "sub_category": "推論・命題"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "APAC",
+      "served_by_colo": "SIN",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.678
+      },
+      "duration": 0.678,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 20058112,
+      "rows_read": 113,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

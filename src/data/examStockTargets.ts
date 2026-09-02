@@ -45,10 +45,11 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "gab_quantitative", subCategory: "資料の読み取り", sectionLabel: "計数理解", perCycle: 29 },
   { category: "gab_english", subCategory: "長文読解", sectionLabel: "英語", perCycle: 24 },
 
-  // SCOA（全16単元が同じ1つの統合模試を構成する。2026-09-02に5科目18単元構成へ改修、
+  // SCOA（全13単元が同じ1つの統合模試を構成する。2026-09-02に5科目18単元構成へ改修、
   // 既存問題データもDB上でこの構成へ再振り分け済み。同日中に言語の「漢字・語句の意味」と
   // 「熟語・ことわざ・慣用句」を1単元へ統合し17単元に、さらに同日中に「類義語・対義語」
-  // （既存問題0件のまま）を廃止し16単元に。sectionLabelは科目名とし、
+  // （既存問題0件のまま）を廃止し16単元に、続けて論理の「推論・命題」「ベン図」「暗号・法則性」
+  // 「順序・位置関係」を1単元へ統合し13単元に。sectionLabelは科目名とし、
   // 「長文読解」など単元名が科目間で重複するケースを区別できるようにしている）。
   // 言語（計20問/回）。2026-09-02に「漢字・語句の意味」と「熟語・ことわざ・慣用句」を
   // 「漢字・語句・熟語・ことわざ・慣用句」1単元へ統合後、同日中に「類義語・対義語」を廃止し
@@ -60,12 +61,11 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "scoa_math", subCategory: "方程式・不等式", sectionLabel: "数理", perCycle: 5 },
   { category: "scoa_math", subCategory: "数列・規則性", sectionLabel: "数理", perCycle: 4 },
   { category: "scoa_math", subCategory: "文章題（割合・確率・濃度など）", sectionLabel: "数理", perCycle: 11 },
-  // 論理（計25問/回）
-  { category: "scoa_logic", subCategory: "推論・命題", sectionLabel: "論理", perCycle: 6 },
+  // 論理（計25問/回）。2026-09-02に「推論・命題」「ベン図」「暗号・法則性」「順序・位置関係」の
+  // 4単元を「論理（推論・命題・ベン図・暗号・順序）」1単元へ統合（旧4単元の合計6+4+5+5=20問/回）。
+  // 「サイコロ・空間図形」は統合対象外で単独単元のまま維持。
+  { category: "scoa_logic", subCategory: "論理（推論・命題・ベン図・暗号・順序）", sectionLabel: "論理", perCycle: 20 },
   { category: "scoa_logic", subCategory: "サイコロ・空間図形", sectionLabel: "論理", perCycle: 5 },
-  { category: "scoa_logic", subCategory: "ベン図", sectionLabel: "論理", perCycle: 4 },
-  { category: "scoa_logic", subCategory: "暗号・法則性", sectionLabel: "論理", perCycle: 5 },
-  { category: "scoa_logic", subCategory: "順序・位置関係", sectionLabel: "論理", perCycle: 5 },
   // 英語（計25問/回）
   { category: "scoa_english", subCategory: "単語・熟語・アクセント", sectionLabel: "英語", perCycle: 10 },
   { category: "scoa_english", subCategory: "英文法・語法", sectionLabel: "英語", perCycle: 5 },
