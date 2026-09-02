@@ -63,6 +63,13 @@ export default function MyPage() {
   const [saving, setSaving] = useState(false);
   const [savedProfile, setSavedProfile] = useState<Profile | null>(null);
 
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+
   function applyProfile(data: Profile) {
     setEmail(data.email);
     setLastName(data.last_name);
@@ -221,6 +228,51 @@ export default function MyPage() {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handlePasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(false);
+
+    if (!currentPassword) {
+      setPasswordError("現在のパスワードを入力してください");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("新しいパスワードは8文字以上にしてください");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("新しいパスワード（確認用）が一致しません");
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      const res = await fetch("/api/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401 && data.error === "ログインが必要です") {
+          redirectToLogin(router);
+          return;
+        }
+        setPasswordError(data.error ?? `変更に失敗しました（status: ${res.status}）`);
+        return;
+      }
+      setPasswordSuccess(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      setPasswordError("通信エラーが発生しました。時間をおいて再度お試しください。");
+    } finally {
+      setSavingPassword(false);
     }
   }
 
@@ -470,6 +522,58 @@ export default function MyPage() {
                 {saving ? "保存中..." : "変更を保存"}
               </button>
             </div>
+          </form>
+        )}
+
+        {!loading && (
+          <form
+            onSubmit={handlePasswordSubmit}
+            className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4"
+          >
+            <h2 className="text-sm font-bold text-gray-900">パスワード変更</h2>
+
+            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              現在のパスワード
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              新しいパスワード（8文字以上）
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
+              新しいパスワード（確認用）
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+              />
+            </label>
+
+            {passwordError && <p className="text-sm font-medium text-red-600">{passwordError}</p>}
+            {passwordSuccess && (
+              <p className="text-sm font-medium text-green-600">パスワードを変更しました。</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={savingPassword}
+              className="min-h-12 rounded-full bg-gray-800 py-3 font-semibold text-white hover:bg-gray-900 disabled:opacity-50"
+            >
+              {savingPassword ? "変更中..." : "パスワードを変更"}
+            </button>
           </form>
         )}
       </main>

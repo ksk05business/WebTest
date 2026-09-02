@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Bell, ListChecks, Menu, X } from "lucide-react";
 
 export function DashboardHeader() {
   const router = useRouter();
@@ -67,39 +67,41 @@ export function DashboardHeader() {
           </button>
         </div>
 
-        {/* スマホ幅（sm未満）: ハンバーガーメニュー */}
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
-          aria-expanded={menuOpen}
-          className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 sm:hidden"
-        >
-          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          {!menuOpen && unreadCount > 0 && (
-            <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-              {unreadCount}
-            </span>
-          )}
-        </button>
+        {/* スマホ幅（sm未満）: お知らせ・ボーダー一覧は常時表示し、それ以外はハンバーガーへ格納 */}
+        <div className="flex items-center gap-1 sm:hidden">
+          <Link
+            href="/dashboard#notices"
+            aria-label="お知らせ"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
+          >
+            <Bell className="h-5 w-5" />
+          </Link>
+          <Link
+            href="/dashboard#border-list"
+            aria-label="ボーダー一覧"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
+          >
+            <ListChecks className="h-5 w-5" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
+            aria-expanded={menuOpen}
+            className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
+          >
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {!menuOpen && unreadCount > 0 && (
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {menuOpen && (
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 pb-3 sm:hidden sm:px-6">
-          <Link
-            href="/dashboard#notices"
-            onClick={() => setMenuOpen(false)}
-            className="flex min-h-12 items-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            お知らせ
-          </Link>
-          <Link
-            href="/dashboard#border-list"
-            onClick={() => setMenuOpen(false)}
-            className="flex min-h-12 items-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            ボーダー一覧
-          </Link>
           <Link
             href="/dashboard/scouts"
             onClick={() => setMenuOpen(false)}
