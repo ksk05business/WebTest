@@ -61,6 +61,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       practiceCount: u.practiceCount,
       mockCount: u.mockCount,
       total: u.practiceCount + u.mockCount,
+      perCycle: target?.perCycle ?? null,
       mockTarget,
       stockShortfall: mockTarget !== null ? Math.max(0, mockTarget - u.mockCount) : 0,
       stockStatus,

@@ -36,6 +36,7 @@ type StockUnit = {
   practiceCount: number;
   mockCount: number;
   total: number;
+  perCycle: number | null;
   mockTarget: number | null;
   stockShortfall: number;
   stockStatus: "not_applicable" | "achieved" | "insufficient";
@@ -295,6 +296,7 @@ export function QuestionAuditTab({
                         <tr className="text-left text-xs text-gray-400">
                           <th className="px-2 py-1 font-medium">単元・形式</th>
                           <th className="px-2 py-1 font-medium">練習問題</th>
+                          <th className="px-2 py-1 font-medium">模試1回出題数</th>
                           <th className="px-2 py-1 font-medium">模試専用</th>
                           <th className="px-2 py-1 font-medium">在庫状況</th>
                         </tr>
@@ -313,6 +315,9 @@ export function QuestionAuditTab({
                               )}
                             </td>
                             <td className="px-2 py-1.5 text-gray-600">{u.practiceCount}問</td>
+                            <td className="px-2 py-1.5 text-gray-600">
+                              {u.perCycle !== null ? `${u.perCycle}問/回` : "-"}
+                            </td>
                             <td className="px-2 py-1.5 text-gray-600">{u.mockCount}問</td>
                             <td className="px-2 py-1.5">
                               {u.stockStatus === "achieved" && (
