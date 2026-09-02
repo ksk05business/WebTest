@@ -166,22 +166,22 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
 ];
 
 // 2026-09-02にSCOAの単元構成を5科目18単元へ改修（従来は5科目10単元）。DB上の既存問題データも
-// 新単元へ再振り分け済み（src/data/examStockTargets.tsのコメント参照）。新設単元のうち
-// 「漢字・語句の意味」「類義語・対義語」（言語）、「サイコロ・空間図形」「ベン図」「暗号・法則性」
-// （論理）は対応する既存データが無いため、実データが投入されるまで0問（準備中）表示となる。
+// 新単元へ再振り分け済み（src/data/examStockTargets.tsのコメント参照）。同日中に言語の
+// 「漢字・語句の意味」と「熟語・ことわざ・慣用句」を1単元（漢字・語句・熟語・ことわざ・慣用句）へ
+// 統合し17単元に。新設単元のうち「類義語・対義語」（言語）、「サイコロ・空間図形」「ベン図」
+// 「暗号・法則性」（論理）は対応する既存データが無いため、実データが投入されるまで0問（準備中）表示となる。
 const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
     category: "scoa_language",
     groupLabel: "言語",
     units: [
-      { id: "scoa_kanji_meaning", subCategory: "漢字・語句の意味", label: "漢字・語句の意味", memorization: true },
-      { id: "scoa_synonym_antonym", subCategory: "類義語・対義語", label: "類義語・対義語", memorization: true },
       {
-        id: "scoa_idiom",
-        subCategory: "熟語・ことわざ・慣用句",
-        label: "熟語・ことわざ・慣用句",
+        id: "scoa_kanji_idiom",
+        subCategory: "漢字・語句・熟語・ことわざ・慣用句",
+        label: "漢字・語句・熟語・ことわざ・慣用句",
         memorization: true,
       },
+      { id: "scoa_synonym_antonym", subCategory: "類義語・対義語", label: "類義語・対義語", memorization: true },
       { id: "scoa_reading", subCategory: "長文読解", label: "長文読解" },
     ],
   },

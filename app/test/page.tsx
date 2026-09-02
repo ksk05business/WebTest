@@ -151,16 +151,17 @@ const GAB_ENGLISH_SECTION: ExamSection = {
 // 2026-09-02に5科目18単元構成へ改修（src/data/examStockTargets.ts参照）。ただし
 // SectionedExamFlowは1つのsubPartでも0件だとセクション全体を「出題できる問題がありません」で
 // 失敗させる仕様のため、新設単元でis_mock_only=1の在庫がまだ0件のもの
-// （言語: 漢字・語句の意味／類義語・対義語、論理: サイコロ・空間図形／ベン図／暗号・法則性）は、
+// （言語: 類義語・対義語、論理: サイコロ・空間図形／ベン図／暗号・法則性）は、
 // 実問題データが投入されるまでこのsubPartsから除外している（在庫が揃い次第、
-// examStockTargets.tsの全18単元と一致させること。除外中は満点が120問ではなく98問になる）。
+// examStockTargets.tsの全17単元と一致させること。除外中は満点が120問ではなく98問になる）。
 // 英語・長文読解は2026-09-02の練習問題→模試専用への振り替えマイグレーションで在庫を確保できた
-// ため復帰済み。
+// ため復帰済み。同日中に言語の「漢字・語句の意味」と「熟語・ことわざ・慣用句」を
+// 「漢字・語句・熟語・ことわざ・慣用句」1単元（8問/回）へ統合済み。
 const SCOA_SECTION: ExamSection = {
   label: "SCOA",
   timeLimitSec: 60 * 60,
   subParts: [
-    { category: "scoa_language", subCategory: "熟語・ことわざ・慣用句", limit: 4 },
+    { category: "scoa_language", subCategory: "漢字・語句・熟語・ことわざ・慣用句", limit: 8 },
     { category: "scoa_language", subCategory: "長文読解", limit: 8 },
     { category: "scoa_math", subCategory: "四則計算", limit: 5 },
     { category: "scoa_math", subCategory: "方程式・不等式", limit: 5 },
