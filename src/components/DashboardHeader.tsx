@@ -87,6 +87,20 @@ export function DashboardHeader() {
       {menuOpen && (
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 pb-3 sm:hidden sm:px-6">
           <Link
+            href="/dashboard#notices"
+            onClick={() => setMenuOpen(false)}
+            className="flex min-h-12 items-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            お知らせ
+          </Link>
+          <Link
+            href="/dashboard#border-list"
+            onClick={() => setMenuOpen(false)}
+            className="flex min-h-12 items-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            ボーダー一覧
+          </Link>
+          <Link
             href="/dashboard/scouts"
             onClick={() => setMenuOpen(false)}
             className="flex min-h-12 items-center justify-between rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50"

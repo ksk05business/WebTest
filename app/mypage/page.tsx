@@ -36,7 +36,6 @@ type Profile = {
   desired_occupations: string[];
   graduation_year: number;
   graduation_month: number;
-  scout_consent: number;
   mbti: string | null;
 };
 
@@ -62,9 +61,6 @@ export default function MyPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [scoutConsent, setScoutConsent] = useState(false);
-  const [consentSaving, setConsentSaving] = useState(false);
-  const [consentMessage, setConsentMessage] = useState<string | null>(null);
   const [savedProfile, setSavedProfile] = useState<Profile | null>(null);
 
   function applyProfile(data: Profile) {
@@ -89,7 +85,6 @@ export default function MyPage() {
     setMbti(data.mbti ?? "");
     setGraduationYear(String(data.graduation_year));
     setGraduationMonth(String(data.graduation_month));
-    setScoutConsent(Boolean(data.scout_consent));
     setSavedProfile(data);
   }
 
@@ -219,7 +214,6 @@ export default function MyPage() {
         mbti: mbti || null,
         graduation_year: Number(graduationYear),
         graduation_month: Number(graduationMonth),
-        scout_consent: scoutConsent ? 1 : 0,
       });
       setSuccess(true);
       setMode("view");
@@ -227,35 +221,6 @@ export default function MyPage() {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleScoutConsentChange(next: boolean) {
-    setScoutConsent(next);
-    setConsentSaving(true);
-    setConsentMessage(null);
-    try {
-      const res = await fetch("/api/consent", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, scoutConsent: next }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        if (res.status === 401) {
-          redirectToLogin(router);
-          return;
-        }
-        setScoutConsent(!next);
-        setConsentMessage(data.error ?? `更新に失敗しました（status: ${res.status}）`);
-        return;
-      }
-      setConsentMessage(next ? "スカウト目的での情報提供に同意しました。" : "同意を撤回しました。");
-    } catch {
-      setScoutConsent(!next);
-      setConsentMessage("通信エラーが発生しました。時間をおいて再度お試しください。");
-    } finally {
-      setConsentSaving(false);
     }
   }
 
@@ -506,33 +471,6 @@ export default function MyPage() {
               </button>
             </div>
           </form>
-        )}
-
-        {!loading && (
-          <div className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <h2 className="text-sm font-semibold text-gray-900">スカウト目的でのデータ共有</h2>
-            <label className="flex items-start gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={scoutConsent}
-                disabled={consentSaving}
-                onChange={(e) => handleScoutConsentChange(e.target.checked)}
-                className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-600"
-              />
-              <span>
-                成績・大学名・志望業界などの情報を、提携するご利用企業様からのスカウト目的で共有することに同意します（任意）。詳しくは
-                <a href="/terms" target="_blank" className="text-blue-600 underline">
-                  利用規約
-                </a>
-                をご確認ください。
-                <br />
-                <span className="font-semibold text-blue-700">
-                  Webテストナビでは、人材紹介業者を通さず、企業様から直接スカウトが届きます。
-                </span>
-              </span>
-            </label>
-            {consentMessage && <p className="text-xs text-gray-600">{consentMessage}</p>}
-          </div>
         )}
       </main>
     </div>

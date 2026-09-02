@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 type CompanyRecommendation = {
   id: number;
@@ -12,6 +12,24 @@ type CompanyRecommendation = {
   appealTags: string[];
   isFeatured: boolean;
 };
+
+// 企業PRカードの合間に挟み込む「就活記事コラム」の告知カード（旧・ダッシュボード右サイドバーの
+// 独立セクションから、PR一覧の中に挟み込むインライン形式に変更した）。コンテンツは現状プレースホルダーのみ。
+function ColumnPromoRow() {
+  return (
+    <div className="flex flex-col gap-1 bg-emerald-50/50 p-4">
+      <div className="flex items-center gap-2">
+        <span className="flex-shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
+          コラム
+        </span>
+        <p className="font-semibold text-gray-900">就活記事・コラム</p>
+      </div>
+      <p className="text-xs leading-relaxed text-gray-500">
+        近日公開予定です。就活準備に役立つ記事・コラムをここに掲載していきます。
+      </p>
+    </div>
+  );
+}
 
 // /dashboardの「あなたへのおすすめ企業」セクション。旧ScoutInboxの表示枠を置き換えたもの。
 // 現状はマッチングロジックを持たない簡易実装（functions/api/company-recommendations.ts参照）。
@@ -44,64 +62,70 @@ export function RecommendedCompanies() {
       {companies === null ? (
         <p className="text-sm text-gray-500">読み込み中...</p>
       ) : companies.length === 0 ? (
-        <p className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-500">
-          現在掲載中のおすすめ企業はありません。
-        </p>
+        <div className="rounded-lg border border-gray-200 bg-white">
+          <p className="p-4 text-sm text-gray-500">現在掲載中のおすすめ企業はありません。</p>
+          <div className="border-t border-gray-100">
+            <ColumnPromoRow />
+          </div>
+        </div>
       ) : (
         <div className="max-h-96 scroll-smooth overflow-y-auto rounded-lg border border-gray-200 bg-white">
           <div className="divide-y divide-gray-100">
-            {companies.map((c) => (
-              <div key={c.id} className="flex flex-col gap-2 p-4">
-                <div className="flex flex-wrap items-center gap-3">
-                  {c.isFeatured && (
-                    <span className="flex-shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 px-2 py-0.5 text-xs font-bold text-white">
-                      PR
-                    </span>
-                  )}
-                  <p className="flex-shrink-0 truncate font-semibold text-gray-900 sm:w-44">
-                    {c.companyName}
-                  </p>
-                  {c.industry && (
-                    <span className="flex-shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-                      {c.industry}
-                    </span>
-                  )}
-                  <p className="min-w-0 flex-1 truncate text-xs text-gray-500">
-                    {c.shortMessage
-                      ? c.shortMessage
-                      : c.industry
-                      ? `${c.industry}分野で求人情報を掲載中です。`
-                      : "求人情報の詳細は企業サイトをご確認ください。"}
-                  </p>
-                  {c.corporateSiteUrl && (
-                    <span className="flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap">
-                      <a
-                        href={c.corporateSiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-medium text-blue-600 underline"
-                      >
-                        企業サイトを見る
-                      </a>
-                      <span className="inline-block rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+            {companies.map((c, index) => (
+              <Fragment key={c.id}>
+                <div className="flex flex-col gap-2 p-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    {c.isFeatured && (
+                      <span className="flex-shrink-0 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 px-2 py-0.5 text-xs font-bold text-white">
                         PR
                       </span>
-                    </span>
+                    )}
+                    <p className="flex-shrink-0 truncate font-semibold text-gray-900 sm:w-44">
+                      {c.companyName}
+                    </p>
+                    {c.industry && (
+                      <span className="flex-shrink-0 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                        {c.industry}
+                      </span>
+                    )}
+                    <p className="min-w-0 flex-1 truncate text-xs text-gray-500">
+                      {c.shortMessage
+                        ? c.shortMessage
+                        : c.industry
+                        ? `${c.industry}分野で求人情報を掲載中です。`
+                        : "求人情報の詳細は企業サイトをご確認ください。"}
+                    </p>
+                    {c.corporateSiteUrl && (
+                      <span className="flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap">
+                        <a
+                          href={c.corporateSiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-medium text-blue-600 underline"
+                        >
+                          企業サイトを見る
+                        </a>
+                        <span className="inline-block rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+                          PR
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                  {c.appealTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {c.appealTags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
-                {c.appealTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {c.appealTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+                {index === 0 && <ColumnPromoRow />}
+              </Fragment>
             ))}
           </div>
         </div>
