@@ -65,9 +65,11 @@ const STATUS_STYLE: Record<string, string> = {
 export function CompanyManagementPanel({
   adminToken,
   onAuthError,
+  onDataChanged,
 }: {
   adminToken: string;
   onAuthError: () => void;
+  onDataChanged?: () => void;
 }) {
   const [requestTypeFilter, setRequestTypeFilter] = useState<string>("account_apply");
   const [statusFilter, setStatusFilter] = useState<string>("pending");
@@ -137,6 +139,7 @@ export function CompanyManagementPanel({
         });
       }
       loadCompanies(requestTypeFilter, statusFilter);
+      onDataChanged?.();
     } catch {
       setActionError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {

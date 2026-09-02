@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, ListChecks, LogOut, Mail, Users } from "lucide-react";
 import { ContactInquiriesTab } from "@/src/components/admin/ContactInquiriesTab";
@@ -10,14 +10,28 @@ import { QuestionAuditTab } from "@/src/components/admin/QuestionAuditTab";
 
 const TOKEN_STORAGE_KEY = "adminApiToken";
 
+// 「問題データ管理」は最も頻繁に使う運用作業（問題の追加・修正確認）のため先頭に配置し、
+// リロード時のデフォルト着地タブにもしている。
 const TABS = [
+  { id: "questions", label: "問題データ管理", icon: ListChecks },
   { id: "contact", label: "お問い合わせ", icon: Mail },
   { id: "companies", label: "直接採用企業", icon: Building2 },
   { id: "students", label: "学生", icon: Users },
-  { id: "questions", label: "問題データ管理", icon: ListChecks },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
+
+type BadgeCounts = {
+  contactUnhandled: number;
+  companiesPending: number;
+  studentsRecent: number;
+};
+
+const BADGE_KEY_BY_TAB: Partial<Record<TabId, keyof BadgeCounts>> = {
+  contact: "contactUnhandled",
+  companies: "companiesPending",
+  students: "studentsRecent",
+};
 
 // 運営専用の統合管理画面。LP・共通ヘッダー/フッターからのリンクは一切無く、URLを直接知っている
 // 運営担当者のみがアクセスする想定（/admin/companies等と同じ、x-admin-token簡易認証モデル）。
@@ -26,7 +40,8 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabId>("contact");
+  const [activeTab, setActiveTab] = useState<TabId>("questions");
+  const [badgeCounts, setBadgeCounts] = useState<BadgeCounts | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem(TOKEN_STORAGE_KEY);
@@ -38,6 +53,25 @@ export default function AdminDashboardPage() {
     setChecked(true);
   }, [router]);
 
+  const refreshBadgeCounts = useCallback((token: string) => {
+    fetch("/api/admin/badge-counts", { headers: { "x-admin-token": token } })
+      .then((res) => res.json())
+      .then((data: Partial<BadgeCounts> & { error?: string }) => {
+        if (data.error) return;
+        setBadgeCounts({
+          contactUnhandled: data.contactUnhandled ?? 0,
+          companiesPending: data.companiesPending ?? 0,
+          studentsRecent: data.studentsRecent ?? 0,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!adminToken) return;
+    refreshBadgeCounts(adminToken);
+  }, [adminToken, refreshBadgeCounts]);
+
   function handleAuthError() {
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     router.replace("/admin/login");
@@ -46,6 +80,10 @@ export default function AdminDashboardPage() {
   function handleLogout() {
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     router.replace("/admin/login");
+  }
+
+  function handleDataChanged() {
+    if (adminToken) refreshBadgeCounts(adminToken);
   }
 
   if (!checked || !adminToken) {
@@ -70,35 +108,53 @@ export default function AdminDashboardPage() {
       </div>
 
       <nav className="flex flex-wrap gap-2 border-b border-gray-200 pb-2">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-              activeTab === tab.id
-                ? "bg-blue-600 text-white"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            <tab.icon className="h-4 w-4" />
-            {tab.label}
-          </button>
-        ))}
+        {TABS.map((tab) => {
+          const badgeKey = BADGE_KEY_BY_TAB[tab.id];
+          const badgeCount = badgeKey ? badgeCounts?.[badgeKey] ?? 0 : 0;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (adminToken) refreshBadgeCounts(adminToken);
+              }}
+              className={`relative flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                activeTab === tab.id ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <tab.icon className="h-4 w-4" />
+              {tab.label}
+              {badgeCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {badgeCount > 99 ? "99+" : badgeCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
       <div>
+        {activeTab === "questions" && (
+          <QuestionAuditTab adminToken={adminToken} onAuthError={handleAuthError} />
+        )}
         {activeTab === "contact" && (
-          <ContactInquiriesTab adminToken={adminToken} onAuthError={handleAuthError} />
+          <ContactInquiriesTab
+            adminToken={adminToken}
+            onAuthError={handleAuthError}
+            onDataChanged={handleDataChanged}
+          />
         )}
         {activeTab === "companies" && (
-          <CompanyManagementPanel adminToken={adminToken} onAuthError={handleAuthError} />
+          <CompanyManagementPanel
+            adminToken={adminToken}
+            onAuthError={handleAuthError}
+            onDataChanged={handleDataChanged}
+          />
         )}
         {activeTab === "students" && (
           <StudentsTab adminToken={adminToken} onAuthError={handleAuthError} />
-        )}
-        {activeTab === "questions" && (
-          <QuestionAuditTab adminToken={adminToken} onAuthError={handleAuthError} />
         )}
       </div>
     </main>

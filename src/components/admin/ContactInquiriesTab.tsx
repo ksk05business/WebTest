@@ -24,9 +24,11 @@ const STATUS_STYLE: Record<string, string> = {
 export function ContactInquiriesTab({
   adminToken,
   onAuthError,
+  onDataChanged,
 }: {
   adminToken: string;
   onAuthError: () => void;
+  onDataChanged?: () => void;
 }) {
   const [inquiries, setInquiries] = useState<ContactInquiry[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -69,6 +71,7 @@ export function ContactInquiriesTab({
       setInquiries((list) =>
         (list ?? []).map((i) => (i.id === inquiry.id ? { ...i, status: nextStatus } : i))
       );
+      onDataChanged?.();
     } catch {
       setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
