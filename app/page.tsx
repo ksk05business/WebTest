@@ -58,7 +58,7 @@ const FEATURES = [
   },
   {
     icon: Mail,
-    title: "成績・MBTI・志望で届く「特別スカウト」",
+    title: "成績・MBTIで届く「特別スカウト」",
     description:
       "2段階開示で個人情報を守りつつ、Webテスト成績や志望動向、MBTI相性を総合考慮した本気度の高い優良企業から特別オファーが届きます。",
   },
