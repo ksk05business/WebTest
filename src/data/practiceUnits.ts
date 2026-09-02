@@ -165,15 +165,21 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   },
 ];
 
+// 2026-09-02にSCOAの単元構成を5科目18単元へ改修（従来は5科目10単元）。DB上の既存問題データも
+// 新単元へ再振り分け済み（src/data/examStockTargets.tsのコメント参照）。新設単元のうち
+// 「漢字・語句の意味」「類義語・対義語」（言語）、「サイコロ・空間図形」「ベン図」「暗号・法則性」
+// （論理）は対応する既存データが無いため、実データが投入されるまで0問（準備中）表示となる。
 const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
     category: "scoa_language",
     groupLabel: "言語",
     units: [
+      { id: "scoa_kanji_meaning", subCategory: "漢字・語句の意味", label: "漢字・語句の意味", memorization: true },
+      { id: "scoa_synonym_antonym", subCategory: "類義語・対義語", label: "類義語・対義語", memorization: true },
       {
         id: "scoa_idiom",
-        subCategory: "熟語・ことわざ・慣用句・故事成語",
-        label: "熟語・ことわざ・慣用句・故事成語",
+        subCategory: "熟語・ことわざ・慣用句",
+        label: "熟語・ことわざ・慣用句",
         memorization: true,
       },
       { id: "scoa_reading", subCategory: "長文読解", label: "長文読解" },
@@ -184,11 +190,12 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     groupLabel: "数理",
     units: [
       { id: "scoa_arithmetic", subCategory: "四則計算", label: "四則計算" },
-      { id: "scoa_equation", subCategory: "方程式・数列", label: "方程式・数列" },
+      { id: "scoa_equation_inequality", subCategory: "方程式・不等式", label: "方程式・不等式" },
+      { id: "scoa_sequence_pattern", subCategory: "数列・規則性", label: "数列・規則性" },
       {
-        id: "scoa_pattern_concentration",
-        subCategory: "規則性・濃度算",
-        label: "規則性・濃度算",
+        id: "scoa_word_problem",
+        subCategory: "文章題（割合・確率・濃度など）",
+        label: "文章題（割合・確率・濃度など）",
       },
     ],
   },
@@ -196,8 +203,11 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "scoa_logic",
     groupLabel: "論理",
     units: [
-      { id: "scoa_dice", subCategory: "場合の数確率", label: "場合の数確率" },
-      { id: "scoa_inference", subCategory: "推論", label: "推論" },
+      { id: "scoa_inference_proposition", subCategory: "推論・命題", label: "推論・命題" },
+      { id: "scoa_dice_space", subCategory: "サイコロ・空間図形", label: "サイコロ・空間図形" },
+      { id: "scoa_venn", subCategory: "ベン図", label: "ベン図" },
+      { id: "scoa_cipher_pattern", subCategory: "暗号・法則性", label: "暗号・法則性" },
+      { id: "scoa_order_position", subCategory: "順序・位置関係", label: "順序・位置関係" },
     ],
   },
   {
@@ -212,12 +222,9 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "scoa_english",
     groupLabel: "英語",
     units: [
-      {
-        id: "scoa_word",
-        subCategory: "文法・語彙・イディオム・アクセント",
-        label: "文法・語彙・イディオム・アクセント",
-        memorization: true,
-      },
+      { id: "scoa_word", subCategory: "単語・熟語・アクセント", label: "単語・熟語・アクセント", memorization: true },
+      { id: "scoa_grammar", subCategory: "英文法・語法", label: "英文法・語法", memorization: true },
+      { id: "scoa_english_reading", subCategory: "長文読解", label: "長文読解" },
     ],
   },
 ];

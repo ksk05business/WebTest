@@ -44,6 +44,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     byUnit.set(key, entry);
   }
 
+  // 在庫目標が定義されているのに実問題データが1件も無い単元（新設単元等）も、
+  // 0問（不足）として管理画面に表示できるよう、EXAM_STOCK_TARGETS側からも補完する。
+  for (const target of EXAM_STOCK_TARGETS) {
+    const key = `${target.category}::${target.subCategory}`;
+    if (!byUnit.has(key)) {
+      byUnit.set(key, {
+        category: target.category,
+        subCategory: target.subCategory,
+        practiceCount: 0,
+        mockCount: 0,
+      });
+    }
+  }
+
   const units = Array.from(byUnit.values()).map((u) => {
     const target = EXAM_STOCK_TARGETS.find(
       (t) => t.category === u.category && t.subCategory === u.subCategory

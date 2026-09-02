@@ -45,17 +45,32 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "gab_quantitative", subCategory: "資料の読み取り", sectionLabel: "計数理解", perCycle: 29 },
   { category: "gab_english", subCategory: "長文読解", sectionLabel: "英語", perCycle: 24 },
 
-  // SCOA（全10単元が同じ1つの統合模試を構成する）
-  { category: "scoa_language", subCategory: "熟語・ことわざ・慣用句・故事成語", sectionLabel: "統合模試", perCycle: 12 },
-  { category: "scoa_language", subCategory: "長文読解", sectionLabel: "統合模試", perCycle: 12 },
-  { category: "scoa_math", subCategory: "四則計算", sectionLabel: "統合模試", perCycle: 8 },
-  { category: "scoa_math", subCategory: "方程式・数列", sectionLabel: "統合模試", perCycle: 8 },
-  { category: "scoa_math", subCategory: "規則性・濃度算", sectionLabel: "統合模試", perCycle: 8 },
-  { category: "scoa_logic", subCategory: "場合の数確率", sectionLabel: "統合模試", perCycle: 12 },
-  { category: "scoa_logic", subCategory: "推論", sectionLabel: "統合模試", perCycle: 12 },
-  { category: "scoa_common_sense", subCategory: "理科", sectionLabel: "統合模試", perCycle: 12 },
-  { category: "scoa_common_sense", subCategory: "社会", sectionLabel: "統合模試", perCycle: 12 },
-  { category: "scoa_english", subCategory: "文法・語彙・イディオム・アクセント", sectionLabel: "統合模試", perCycle: 24 },
+  // SCOA（全18単元が同じ1つの統合模試を構成する。2026-09-02に5科目18単元構成へ改修、
+  // 既存問題データもDB上でこの構成へ再振り分け済み。sectionLabelは科目名とし、
+  // 「長文読解」など単元名が科目間で重複するケースを区別できるようにしている）。
+  // 言語（計20問/回）
+  { category: "scoa_language", subCategory: "漢字・語句の意味", sectionLabel: "言語", perCycle: 4 },
+  { category: "scoa_language", subCategory: "類義語・対義語", sectionLabel: "言語", perCycle: 4 },
+  { category: "scoa_language", subCategory: "熟語・ことわざ・慣用句", sectionLabel: "言語", perCycle: 4 },
+  { category: "scoa_language", subCategory: "長文読解", sectionLabel: "言語", perCycle: 8 },
+  // 数理（計25問/回）
+  { category: "scoa_math", subCategory: "四則計算", sectionLabel: "数理", perCycle: 5 },
+  { category: "scoa_math", subCategory: "方程式・不等式", sectionLabel: "数理", perCycle: 5 },
+  { category: "scoa_math", subCategory: "数列・規則性", sectionLabel: "数理", perCycle: 4 },
+  { category: "scoa_math", subCategory: "文章題（割合・確率・濃度など）", sectionLabel: "数理", perCycle: 11 },
+  // 論理（計25問/回）
+  { category: "scoa_logic", subCategory: "推論・命題", sectionLabel: "論理", perCycle: 6 },
+  { category: "scoa_logic", subCategory: "サイコロ・空間図形", sectionLabel: "論理", perCycle: 5 },
+  { category: "scoa_logic", subCategory: "ベン図", sectionLabel: "論理", perCycle: 4 },
+  { category: "scoa_logic", subCategory: "暗号・法則性", sectionLabel: "論理", perCycle: 5 },
+  { category: "scoa_logic", subCategory: "順序・位置関係", sectionLabel: "論理", perCycle: 5 },
+  // 英語（計25問/回）
+  { category: "scoa_english", subCategory: "単語・熟語・アクセント", sectionLabel: "英語", perCycle: 10 },
+  { category: "scoa_english", subCategory: "英文法・語法", sectionLabel: "英語", perCycle: 5 },
+  { category: "scoa_english", subCategory: "長文読解", sectionLabel: "英語", perCycle: 10 },
+  // 常識（計25問/回）
+  { category: "scoa_common_sense", subCategory: "社会", sectionLabel: "常識", perCycle: 13 },
+  { category: "scoa_common_sense", subCategory: "理科", sectionLabel: "常識", perCycle: 12 },
 ];
 
 // 「3回分」を在庫目標の基準とする（複数サイクルにわたり出題が重複しにくくするための目安）。
