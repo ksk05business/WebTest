@@ -138,7 +138,7 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
       ))}
 
       <Link
-        href="/dashboard"
+        href={`/dashboard/${testId}`}
         className="mt-2 flex min-h-12 items-center justify-center rounded-full border border-gray-300 py-3 text-center font-semibold text-gray-700 hover:bg-gray-50"
       >
         戻る（モード選択へ）

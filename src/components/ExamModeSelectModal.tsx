@@ -135,22 +135,6 @@ export function ExamModeSelectModal({
                 </button>
               )}
             </div>
-
-            {hasPracticeContent && (
-              <div className="flex flex-col gap-2 rounded-xl border border-gray-200 p-4">
-                <p className="font-bold text-gray-900">練習問題（トレーニングモード）</p>
-                <p className="text-sm leading-relaxed text-gray-600">
-                  1問ごとに丁寧な解説つき。時間制限を気にせず分野・単元ごとに自分のペースで練習できます。
-                </p>
-                <button
-                  type="button"
-                  onClick={() => router.push(`/practice?testType=${testType.id}`)}
-                  className="mt-1 rounded-full border border-blue-300 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-                >
-                  練習問題をスタート
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>
