@@ -224,7 +224,13 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     units: [
       { id: "scoa_word", subCategory: "単語・熟語・アクセント", label: "単語・熟語・アクセント", memorization: true },
       { id: "scoa_grammar", subCategory: "英文法・語法", label: "英文法・語法", memorization: true },
-      { id: "scoa_english_reading", subCategory: "長文読解", label: "長文読解" },
+      {
+        id: "scoa_translation_conversation",
+        subCategory: "和文英訳・英文和訳・英会話",
+        label: "和文英訳・英文和訳・英会話",
+        // 長文読解とは異なり1文単位で完結する短文の翻訳・会話問題のため、暗記系単元として扱う。
+        memorization: true,
+      },
     ],
   },
 ];

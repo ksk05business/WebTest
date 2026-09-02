@@ -68,7 +68,9 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   // 英語（計25問/回）
   { category: "scoa_english", subCategory: "単語・熟語・アクセント", sectionLabel: "英語", perCycle: 10 },
   { category: "scoa_english", subCategory: "英文法・語法", sectionLabel: "英語", perCycle: 5 },
-  { category: "scoa_english", subCategory: "長文読解", sectionLabel: "英語", perCycle: 10 },
+  // 2026-09-02に「長文読解」から改称。既存問題（和文英訳・英文和訳・英会話の3タグ、計30問）が
+  // そのままこの単元名と完全一致する内容だったため、内容変更を伴わない改称のみで対応した。
+  { category: "scoa_english", subCategory: "和文英訳・英文和訳・英会話", sectionLabel: "英語", perCycle: 10 },
   // 常識（計25問/回）
   { category: "scoa_common_sense", subCategory: "社会", sectionLabel: "常識", perCycle: 13 },
   { category: "scoa_common_sense", subCategory: "理科", sectionLabel: "常識", perCycle: 12 },

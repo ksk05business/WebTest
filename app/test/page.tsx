@@ -154,9 +154,9 @@ const GAB_ENGLISH_SECTION: ExamSection = {
 // （言語: 類義語・対義語、論理: サイコロ・空間図形／ベン図／暗号・法則性）は、
 // 実問題データが投入されるまでこのsubPartsから除外している（在庫が揃い次第、
 // examStockTargets.tsの全17単元と一致させること。除外中は満点が120問ではなく98問になる）。
-// 英語・長文読解は2026-09-02の練習問題→模試専用への振り替えマイグレーションで在庫を確保できた
-// ため復帰済み。同日中に言語の「漢字・語句の意味」と「熟語・ことわざ・慣用句」を
-// 「漢字・語句・熟語・ことわざ・慣用句」1単元（8問/回）へ統合済み。
+// 英語・長文読解（現「和文英訳・英文和訳・英会話」に改称）は2026-09-02の練習問題→模試専用への
+// 振り替えマイグレーションで在庫を確保できたため復帰済み。同日中に言語の「漢字・語句の意味」と
+// 「熟語・ことわざ・慣用句」を「漢字・語句・熟語・ことわざ・慣用句」1単元（8問/回）へ統合済み。
 const SCOA_SECTION: ExamSection = {
   label: "SCOA",
   timeLimitSec: 60 * 60,
@@ -171,7 +171,7 @@ const SCOA_SECTION: ExamSection = {
     { category: "scoa_logic", subCategory: "順序・位置関係", limit: 5 },
     { category: "scoa_english", subCategory: "単語・熟語・アクセント", limit: 10 },
     { category: "scoa_english", subCategory: "英文法・語法", limit: 5 },
-    { category: "scoa_english", subCategory: "長文読解", limit: 10 },
+    { category: "scoa_english", subCategory: "和文英訳・英文和訳・英会話", limit: 10 },
     { category: "scoa_common_sense", subCategory: "社会", limit: 13 },
     { category: "scoa_common_sense", subCategory: "理科", limit: 12 },
   ],
