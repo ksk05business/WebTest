@@ -13,9 +13,10 @@ const TIME_PER_QUESTION = 60; // spi_english / spi_structural（1問ごとの制
 // 1問ごとの制限時間・即時の正誤表示は行わず、正誤・解説は試験終了後に/resultで一覧確認する。
 const BASIC_EXAM_TOTAL_SEC = 35 * 60;
 const BASIC_EXAM_VERBAL_SEC = 15 * 60;
-// 各フェーズで事前に取得しておく問題プールの件数。35分間で通常使い切らない余裕を持たせている
-// （不足した場合は末尾に達し次第、プール内で先頭から繰り返す）。
-const BASIC_EXAM_POOL_LIMIT = 150;
+// 事前に取得しておく問題プールは、SPI_VERBAL_SUBPARTS/SPI_NON_VERBAL_SUBPARTSの単元別配分比率を
+// 保ったまま、この倍率でスケールアップして深さを持たせる（35分間で通常使い切らない余裕を持たせる
+// ため。不足した場合は末尾に達し次第、プール内で先頭から繰り返す）。
+const BASIC_EXAM_POOL_MULTIPLIER = 4;
 
 type ExamSubPart = { category: string; subCategory: string; limit: number };
 
@@ -26,12 +27,79 @@ type ExamSection = { label: string; timeLimitSec: number; subParts: readonly Exa
 type ExamPartConfig = {
   label: string;
   mockOnly: boolean;
-  // 単一時間制限で通しの問題リストから出題する場合（SPI英語・構造把握・SCOA等）はこちら。
-  categories?: readonly string[];
+  // 単一時間制限で通しの問題リストから出題する場合（SPI英語・構造把握等）はこちら。
+  // 小分類ごとの出題数配分を指定する（src/data/examStockTargets.tsのperCycleと一致させること）。
+  subParts?: readonly ExamSubPart[];
   // セクション（言語・非言語・英語等）ごとに独立した制限時間を設ける場合（TG-WEB）はこちら。
-  // 指定時はcategoriesより優先される。
+  // 指定時はsubPartsより優先される。
   sections?: readonly ExamSection[];
 };
+
+// SPI3: 2026-09-02改修。言語40問＋非言語30問＋英語30問＋構造把握20問＝計120問/回
+// （src/data/examStockTargets.tsのsharesPoolWithPractice: trueなSPIエントリと完全に一致させること。
+// SPIは模試専用プールを分離せず練習問題と同一のis_mock_only=0プールから出題するため、
+// 以下のsubPartsもmockOnly指定なし＝is_mock_only=0のみを対象にする）。
+const SPI_VERBAL_SUBPARTS: readonly ExamSubPart[] = [
+  { category: "verbal", subCategory: "語彙", limit: 12 },
+  { category: "verbal", subCategory: "二語の関係", limit: 6 },
+  { category: "verbal", subCategory: "熟語の成り立ち", limit: 5 },
+  { category: "verbal", subCategory: "語句の用法", limit: 5 },
+  { category: "verbal", subCategory: "文の並べ替え", limit: 5 },
+  { category: "verbal", subCategory: "長文読解", limit: 7 },
+];
+const SPI_NON_VERBAL_SUBPARTS: readonly ExamSubPart[] = [
+  { category: "non_verbal", subCategory: "推論", limit: 9 },
+  { category: "non_verbal", subCategory: "損益算", limit: 3 },
+  { category: "non_verbal", subCategory: "場合の数・確率", limit: 4 },
+  { category: "non_verbal", subCategory: "資料の読み取り", limit: 3 },
+  { category: "non_verbal", subCategory: "集合", limit: 2 },
+  { category: "non_verbal", subCategory: "仕事算", limit: 2 },
+  { category: "non_verbal", subCategory: "速さ・時間・距離", limit: 2 },
+  { category: "non_verbal", subCategory: "割合・比", limit: 2 },
+  { category: "non_verbal", subCategory: "濃度算", limit: 2 },
+  { category: "non_verbal", subCategory: "分割払い", limit: 1 },
+];
+const SPI_ENGLISH_SUBPARTS: readonly ExamSubPart[] = [
+  { category: "english", subCategory: "語意（同意語・反意語）", limit: 9 },
+  { category: "english", subCategory: "空欄補充", limit: 9 },
+  { category: "english", subCategory: "英英辞典", limit: 5 },
+  { category: "english", subCategory: "長文読解（英語）", limit: 7 },
+];
+const SPI_STRUCTURAL_SUBPARTS: readonly ExamSubPart[] = [
+  { category: "structural", subCategory: "文章の構造化", limit: 10 },
+  { category: "structural", subCategory: "分類・グループ化", limit: 10 },
+];
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// subPartsで指定した小分類ごとにlimit×multiplier件ずつ並行取得し、結合してシャッフルする
+// （単一のcategory一括取得だと小分類の出題比率を制御できないため、小分類ごとに個別取得する）。
+async function fetchSubPartsPool(
+  subParts: readonly ExamSubPart[],
+  multiplier: number,
+  mockOnly: boolean
+): Promise<Question[]> {
+  const results = await Promise.all(
+    subParts.map((sp) => {
+      const params = new URLSearchParams({
+        category: sp.category,
+        subCategory: sp.subCategory,
+        limit: String(sp.limit * multiplier),
+      });
+      if (mockOnly) params.set("mockOnly", "1");
+      return fetch(`/api/questions?${params.toString()}`).then((r) => r.json());
+    })
+  );
+  const combined = (results as { questions?: Question[] }[]).flatMap((r) => r.questions ?? []);
+  return shuffleArray(combined);
+}
 
 // 玉手箱・TG-WEB・GAB/C-GABは2026-09-01以降、形式・セクションごとに独立して受験できる方式に変更した
 // （旧: 1つのtest_typeで複数セクションを通しで受験する方式）。それぞれのセクションが単独で
@@ -180,9 +248,9 @@ const SCOA_SECTION: ExamSection = {
 };
 
 const EXAM_PARTS = {
-  spi_basic: { categories: ["verbal", "non_verbal"], label: "基礎能力試験（言語・非言語）", mockOnly: false },
-  spi_english: { categories: ["english"], label: "英語", mockOnly: false },
-  spi_structural: { categories: ["structural"], label: "構造把握", mockOnly: false },
+  spi_basic: { label: "基礎能力試験（言語・非言語）", mockOnly: false },
+  spi_english: { subParts: SPI_ENGLISH_SUBPARTS, label: "英語", mockOnly: false },
+  spi_structural: { subParts: SPI_STRUCTURAL_SUBPARTS, label: "構造把握", mockOnly: false },
   scoa: { sections: [SCOA_SECTION], label: "SCOA", mockOnly: true },
 
   tgweb_traditional_verbal: { sections: [TGWEB_TRADITIONAL_VERBAL_SECTION], label: "TG-WEB従来型・言語", mockOnly: true },
@@ -457,7 +525,7 @@ function TestPageInner() {
   return (
     <StandardExamFlow
       partId={partId}
-      categories={part.categories ?? []}
+      subParts={part.subParts ?? []}
       label={part.label}
       mockOnly={part.mockOnly}
     />
@@ -482,28 +550,18 @@ function BasicExamFlow() {
   const resultsRef = useRef<ExamReviewEntry[]>([]);
 
   useEffect(() => {
-    const verbalParams = new URLSearchParams({ category: "verbal", limit: String(BASIC_EXAM_POOL_LIMIT) });
-    const nonVerbalParams = new URLSearchParams({
-      category: "non_verbal",
-      limit: String(BASIC_EXAM_POOL_LIMIT),
-    });
     Promise.all([
-      fetch(`/api/questions?${verbalParams.toString()}`).then((r) => r.json()),
-      fetch(`/api/questions?${nonVerbalParams.toString()}`).then((r) => r.json()),
+      fetchSubPartsPool(SPI_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, false),
+      fetchSubPartsPool(SPI_NON_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, false),
     ])
-      .then(
-        ([verbalData, nonVerbalData]: [
-          { questions?: Question[]; error?: string },
-          { questions?: Question[]; error?: string }
-        ]) => {
-          if (!verbalData.questions?.length || !nonVerbalData.questions?.length) {
-            setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
-            return;
-          }
-          setPools({ verbal: verbalData.questions, non_verbal: nonVerbalData.questions });
-          setCurrentQuestion(verbalData.questions[0]);
+      .then(([verbalQuestions, nonVerbalQuestions]) => {
+        if (!verbalQuestions.length || !nonVerbalQuestions.length) {
+          setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
+          return;
         }
-      )
+        setPools({ verbal: verbalQuestions, non_verbal: nonVerbalQuestions });
+        setCurrentQuestion(verbalQuestions[0]);
+      })
       .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
   }, []);
 
@@ -613,12 +671,12 @@ function BasicExamFlow() {
 // 選択肢をクリックした瞬間（または時間切れ時点）に次の問題へ進み、全問終了後にまとめて採点する。
 function StandardExamFlow({
   partId,
-  categories,
+  subParts,
   label,
   mockOnly,
 }: {
   partId: ExamPartId;
-  categories: readonly string[];
+  subParts: readonly ExamSubPart[];
   label: string;
   mockOnly: boolean;
 }) {
@@ -633,17 +691,13 @@ function StandardExamFlow({
   const question = questions?.[currentIndex];
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    categories.forEach((c) => params.append("category", c));
-    if (mockOnly) params.set("mockOnly", "1");
-    fetch(`/api/questions?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data: { questions?: Question[]; error?: string }) => {
-        if (!data.questions || data.questions.length === 0) {
+    fetchSubPartsPool(subParts, 1, mockOnly)
+      .then((qs) => {
+        if (qs.length === 0) {
           setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
           return;
         }
-        setQuestions(data.questions);
+        setQuestions(qs);
       })
       .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
     // eslint-disable-next-line react-hooks/exhaustive-deps

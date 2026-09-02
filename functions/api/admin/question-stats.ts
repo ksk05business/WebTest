@@ -64,8 +64,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     );
     const testId = CATEGORY_TO_TEST_ID[u.category] ?? null;
     const mockTarget = target ? target.perCycle * STOCK_CYCLES : null;
+    // SPI等、模試専用プール（is_mock_only=1）を持たず練習問題と同一プールから出題する単元は、
+    // mockCountが常に0のままになるため、在庫達成判定はpracticeCountを基準にする。
+    const stockBasis = target?.sharesPoolWithPractice ? u.practiceCount : u.mockCount;
     const stockStatus: "not_applicable" | "achieved" | "insufficient" =
-      mockTarget === null ? "not_applicable" : u.mockCount >= mockTarget ? "achieved" : "insufficient";
+      mockTarget === null ? "not_applicable" : stockBasis >= mockTarget ? "achieved" : "insufficient";
     return {
       testId,
       testName: testId ? TEST_NAME_BY_ID[testId] ?? testId : "その他",
@@ -77,7 +80,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       total: u.practiceCount + u.mockCount,
       perCycle: target?.perCycle ?? null,
       mockTarget,
-      stockShortfall: mockTarget !== null ? Math.max(0, mockTarget - u.mockCount) : 0,
+      stockShortfall: mockTarget !== null ? Math.max(0, mockTarget - stockBasis) : 0,
       stockStatus,
     };
   });

@@ -11,6 +11,11 @@ export type ExamStockTarget = {
   // 2ヶ月に1回のリセット周期内に、独立して受験可能な模試（複数選択可能な場合は合算）が
   // 1回あたり出題する件数の合計。
   perCycle: number;
+  // trueの場合、その単元は模試専用プール（is_mock_only=1）を持たず、練習問題と同一のプール
+  // （is_mock_only=0）から模試も出題する設計であることを示す（2026-09-02時点ではSPIのみ）。
+  // 在庫達成判定（question-stats.ts）は、この場合mockCountではなくpracticeCountを基準にする
+  // （SPIをis_mock_only=1へ振り替えると、練習問題モード・模試モード双方から見えなくなってしまうため）。
+  sharesPoolWithPractice?: boolean;
 };
 
 export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
@@ -75,6 +80,80 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   // 常識（計25問/回）
   { category: "scoa_common_sense", subCategory: "社会", sectionLabel: "常識", perCycle: 13 },
   { category: "scoa_common_sense", subCategory: "理科", sectionLabel: "常識", perCycle: 12 },
+
+  // SPI3（2026-09-02改修。言語40問＋非言語30問＋英語30問＋構造把握20問＝計120問/回。
+  // 全単元sharesPoolWithPractice: true——SPIは模試専用プールを分離せず、練習問題と同一の
+  // is_mock_only=0プールから出題する設計のため）。
+  // 言語（計40問/回）
+  { category: "verbal", subCategory: "語彙", sectionLabel: "言語", perCycle: 12, sharesPoolWithPractice: true },
+  { category: "verbal", subCategory: "二語の関係", sectionLabel: "言語", perCycle: 6, sharesPoolWithPractice: true },
+  { category: "verbal", subCategory: "熟語の成り立ち", sectionLabel: "言語", perCycle: 5, sharesPoolWithPractice: true },
+  { category: "verbal", subCategory: "語句の用法", sectionLabel: "言語", perCycle: 5, sharesPoolWithPractice: true },
+  { category: "verbal", subCategory: "文の並べ替え", sectionLabel: "言語", perCycle: 5, sharesPoolWithPractice: true },
+  { category: "verbal", subCategory: "長文読解", sectionLabel: "言語", perCycle: 7, sharesPoolWithPractice: true },
+  // 非言語（計30問/回）。「濃度算」「分割払い」はユーザー仕様上「濃度算 / 分割払い: 3問/回」と
+  // 1行にまとめて示されていたため、既存の2つの独立単元のまま2:1で按分した（濃度算のほうが
+  // 出題頻度の高い定番論点のため多めに配分）。
+  { category: "non_verbal", subCategory: "推論", sectionLabel: "非言語", perCycle: 9, sharesPoolWithPractice: true },
+  { category: "non_verbal", subCategory: "損益算", sectionLabel: "非言語", perCycle: 3, sharesPoolWithPractice: true },
+  {
+    category: "non_verbal",
+    subCategory: "場合の数・確率",
+    sectionLabel: "非言語",
+    perCycle: 4,
+    sharesPoolWithPractice: true,
+  },
+  {
+    category: "non_verbal",
+    subCategory: "資料の読み取り",
+    sectionLabel: "非言語",
+    perCycle: 3,
+    sharesPoolWithPractice: true,
+  },
+  { category: "non_verbal", subCategory: "集合", sectionLabel: "非言語", perCycle: 2, sharesPoolWithPractice: true },
+  { category: "non_verbal", subCategory: "仕事算", sectionLabel: "非言語", perCycle: 2, sharesPoolWithPractice: true },
+  {
+    category: "non_verbal",
+    subCategory: "速さ・時間・距離",
+    sectionLabel: "非言語",
+    perCycle: 2,
+    sharesPoolWithPractice: true,
+  },
+  { category: "non_verbal", subCategory: "割合・比", sectionLabel: "非言語", perCycle: 2, sharesPoolWithPractice: true },
+  { category: "non_verbal", subCategory: "濃度算", sectionLabel: "非言語", perCycle: 2, sharesPoolWithPractice: true },
+  { category: "non_verbal", subCategory: "分割払い", sectionLabel: "非言語", perCycle: 1, sharesPoolWithPractice: true },
+  // 英語（計30問/回）
+  {
+    category: "english",
+    subCategory: "語意（同意語・反意語）",
+    sectionLabel: "英語",
+    perCycle: 9,
+    sharesPoolWithPractice: true,
+  },
+  { category: "english", subCategory: "空欄補充", sectionLabel: "英語", perCycle: 9, sharesPoolWithPractice: true },
+  { category: "english", subCategory: "英英辞典", sectionLabel: "英語", perCycle: 5, sharesPoolWithPractice: true },
+  {
+    category: "english",
+    subCategory: "長文読解（英語）",
+    sectionLabel: "英語",
+    perCycle: 7,
+    sharesPoolWithPractice: true,
+  },
+  // 構造的把握力（計20問/回）
+  {
+    category: "structural",
+    subCategory: "文章の構造化",
+    sectionLabel: "構造把握",
+    perCycle: 10,
+    sharesPoolWithPractice: true,
+  },
+  {
+    category: "structural",
+    subCategory: "分類・グループ化",
+    sectionLabel: "構造把握",
+    perCycle: 10,
+    sharesPoolWithPractice: true,
+  },
 ];
 
 // 「3回分」を在庫目標の基準とする（複数サイクルにわたり出題が重複しにくくするための目安）。
