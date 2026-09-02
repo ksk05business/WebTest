@@ -73,6 +73,38 @@ export function TestDashboardClient({ testId }: { testId: string }) {
                 <div key={section.title}>
                   <p className="font-semibold text-gray-700">{section.title}</p>
                   {section.body && <p className="mt-0.5">{section.body}</p>}
+                  {section.table && (
+                    <div className="mt-2 overflow-x-auto">
+                      <table className="w-full min-w-max border-collapse text-xs">
+                        <thead>
+                          <tr>
+                            {section.table.headers.map((header) => (
+                              <th
+                                key={header}
+                                className="border border-gray-300 bg-gray-100 px-3 py-1.5 text-left font-semibold text-gray-800"
+                              >
+                                {header}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {section.table.rows.map((row, ri) => (
+                            <tr key={ri}>
+                              {row.map((cell, ci) => (
+                                <td
+                                  key={ci}
+                                  className="border border-gray-300 px-3 py-1.5 align-top text-gray-700"
+                                >
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                   {section.groups && (
                     <div className="mt-1.5 flex flex-col gap-2">
                       {section.groups.map((group) => (
