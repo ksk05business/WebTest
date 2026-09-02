@@ -31,12 +31,12 @@ const BADGES = [
 ];
 
 const TEST_BRAND_DETAILS: { id: string; slug: string; displayName: string; subjects: string; pitch: string }[] = [
-  { id: "spi", slug: "spi", displayName: "SPI3", subjects: "言語・非言語・構造的把握・英語", pitch: "日本最大級の圧倒的採用実績" },
-  { id: "tamatebako", slug: "tamatebako", displayName: "玉手箱", subjects: "言語・計数・英語", pitch: "とにかく時間との勝負" },
-  { id: "tgweb", slug: "tg-web", displayName: "TG-WEB", subjects: "従来型・新型", pitch: "PwC・三菱UFJ銀行・資生堂・三菱地所などのトップ企業" },
+  { id: "spi", slug: "spi", displayName: "SPI3", subjects: "言語・非言語・構造的把握・英語", pitch: "Webテストの代名詞" },
+  { id: "tamatebako", slug: "tamatebako", displayName: "玉手箱", subjects: "言語・計数・英語", pitch: "大企業・大手企業で圧倒的採用" },
+  { id: "tgweb", slug: "tg-web", displayName: "TG-WEB", subjects: "従来型・新型", pitch: "PwC・三菱地所などのトップ企業が採用" },
   { id: "gab_cgab", slug: "gab", displayName: "C-GAB / Web-GAB", subjects: "言語・計数・英語", pitch: "総合商社・インフラ業界等で頻出" },
   { id: "cab", slug: "cab", displayName: "CAB", subjects: "暗算・法則性・命令表・暗号", pitch: "IT・システムエンジニア職向け" },
-  { id: "scoa", slug: "scoa", displayName: "SCOA", subjects: "言語・数理・論理・常識・英語", pitch: "公務員・地方銀行・中堅企業で頻出" },
+  { id: "scoa", slug: "scoa", displayName: "SCOA", subjects: "言語・数理・論理・常識・英語", pitch: "公務員・地方銀行等で頻出" },
 ];
 
 const TEST_BRANDS = TEST_BRAND_DETAILS.map((d) => ({
@@ -331,10 +331,7 @@ export default function Home() {
       {/* 安心感バナー */}
       <section className="border-y border-gray-100 bg-blue-50/60 px-6 py-10">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
-          <p className="text-balance text-xl font-extrabold text-blue-900 sm:text-2xl">
-            学生は完全無料
-            <span className="ml-1.5 text-blue-600">（全機能￥0）</span>
-          </p>
+          <p className="text-balance text-xl font-extrabold text-blue-900 sm:text-2xl">学生は完全無料</p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {BADGES.map((b) => (
               <span
