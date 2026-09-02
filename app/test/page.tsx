@@ -36,9 +36,10 @@ type ExamPartConfig = {
 };
 
 // SPI3: 2026-09-02改修。言語40問＋非言語30問＋英語30問＋構造把握20問＝計120問/回
-// （src/data/examStockTargets.tsのsharesPoolWithPractice: trueなSPIエントリと完全に一致させること。
-// SPIは模試専用プールを分離せず練習問題と同一のis_mock_only=0プールから出題するため、
-// 以下のsubPartsもmockOnly指定なし＝is_mock_only=0のみを対象にする）。
+// （src/data/examStockTargets.tsのSPIエントリと完全に一致させること）。同日中に他テスト
+// （GAB/TG-WEB等）と同じ「模試専用プール分離」方式へ完全移行し、EXAM_PARTSのmockOnlyを
+// trueにしたため、以下のsubPartsはis_mock_only=1（模試専用に振り替え済みの問題）のみを
+// 対象に出題する。
 const SPI_VERBAL_SUBPARTS: readonly ExamSubPart[] = [
   { category: "verbal", subCategory: "語彙", limit: 12 },
   { category: "verbal", subCategory: "二語の関係", limit: 6 },
@@ -248,9 +249,12 @@ const SCOA_SECTION: ExamSection = {
 };
 
 const EXAM_PARTS = {
-  spi_basic: { label: "基礎能力試験（言語・非言語）", mockOnly: false },
-  spi_english: { subParts: SPI_ENGLISH_SUBPARTS, label: "英語", mockOnly: false },
-  spi_structural: { subParts: SPI_STRUCTURAL_SUBPARTS, label: "構造把握", mockOnly: false },
+  // 2026-09-02に他テスト（GAB/TG-WEB等）と同じ「模試専用プール分離」方式へ完全移行した
+  // （旧: 練習問題と同一のis_mock_only=0プールから出題。src/data/examStockTargets.tsの
+  // sharesPoolWithPractice: trueは移行前の名残であり、この変更に合わせて撤去済み）。
+  spi_basic: { label: "基礎能力試験（言語・非言語）", mockOnly: true },
+  spi_english: { subParts: SPI_ENGLISH_SUBPARTS, label: "英語", mockOnly: true },
+  spi_structural: { subParts: SPI_STRUCTURAL_SUBPARTS, label: "構造把握", mockOnly: true },
   scoa: { sections: [SCOA_SECTION], label: "SCOA", mockOnly: true },
 
   tgweb_traditional_verbal: { sections: [TGWEB_TRADITIONAL_VERBAL_SECTION], label: "TG-WEB従来型・言語", mockOnly: true },
@@ -551,8 +555,8 @@ function BasicExamFlow() {
 
   useEffect(() => {
     Promise.all([
-      fetchSubPartsPool(SPI_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, false),
-      fetchSubPartsPool(SPI_NON_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, false),
+      fetchSubPartsPool(SPI_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, true),
+      fetchSubPartsPool(SPI_NON_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, true),
     ])
       .then(([verbalQuestions, nonVerbalQuestions]) => {
         if (!verbalQuestions.length || !nonVerbalQuestions.length) {
