@@ -7,7 +7,7 @@ export function PrivacyContent() {
 
       <section className="mt-4 flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-gray-900">1. 取得する個人情報</h2>
-        <p className="text-sm text-gray-700">当社は、本サービスの提供にあたり、以下の情報を取得します。</p>
+        <p className="text-sm text-gray-700">当方は、本サービスの提供にあたり、以下の情報を取得します。</p>
         <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
           <li>氏名（漢字・ローマ字）、メールアドレス、パスワード（ハッシュ化して保存）</li>
           <li>大学名・大学区分、学部・区分、志望業界、希望職種、卒業年月</li>
@@ -34,7 +34,7 @@ export function PrivacyContent() {
           3. 第三者提供（スカウト機能）に関する同意事項
         </h2>
         <p className="text-sm text-gray-700">
-          当社は、法令に基づく場合を除き、ユーザーの同意なく個人データを第三者に提供しません。登録時またはマイページで「スカウト目的での情報提供」に個別に同意したユーザーについてのみ、以下の目的・範囲で、以下の方法により提携企業に情報を提供します。同意は任意であり、同意しなくても模試・練習問題機能は利用できます。同意はマイページからいつでも撤回でき、撤回後は以後の新たな提供を停止します。
+          当方は、法令に基づく場合を除き、ユーザーの同意なく個人データを第三者に提供しません。登録時またはマイページで「スカウト目的での情報提供」に個別に同意したユーザーについてのみ、以下の目的・範囲で、以下の方法により提携企業に情報を提供します。同意は任意であり、同意しなくても模試・練習問題機能は利用できます。同意はマイページからいつでも撤回でき、撤回後は以後の新たな提供を停止します。
         </p>
         <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
           <li>
@@ -65,7 +65,7 @@ export function PrivacyContent() {
           </li>
         </ul>
         <p className="text-sm text-gray-700">
-          当社は、この情報提供に関連して提携企業から紹介手数料等の対価を受け取る場合があります。
+          当方は、この情報提供に関連して提携企業から紹介手数料等の対価を受け取る場合があります。
         </p>
       </section>
 
@@ -88,14 +88,18 @@ export function PrivacyContent() {
       <section className="mt-4 flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-gray-900">6. 開示・訂正・削除等の請求</h2>
         <p className="text-sm text-gray-700">
-          ユーザーは、当社が保有する自己の個人情報について、開示・訂正・利用停止・削除等を請求できます。氏名・大学・志望業界等の多くの項目はマイページからご自身で確認・修正いただけます。アカウントの削除等、マイページから対応できない請求については、下記の問い合わせ窓口までご連絡ください。
+          ユーザーは、当方が保有する自己の個人情報について、開示・訂正・利用停止・削除等を請求できます。氏名・大学・志望業界等の多くの項目はマイページからご自身で確認・修正いただけます。アカウントの削除等、マイページから対応できない請求については、下記の問い合わせ窓口までご連絡ください。
         </p>
       </section>
 
       <section className="mt-4 flex flex-col gap-2">
-        <h2 className="text-lg font-semibold text-gray-900">7. お問い合わせ窓口</h2>
+        <h2 className="text-lg font-semibold text-gray-900">7. 個人情報取扱事業者・お問い合わせ窓口</h2>
         <p className="text-sm text-gray-700">
-          運営者: 福井敬介
+          屋号: Nika
+          <br />
+          代表: 福井敬介
+          <br />
+          所在地: 東京都府中市清水が丘1－14－1
           <br />
           連絡先: ksk05business@gmail.com
         </p>
