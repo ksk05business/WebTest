@@ -66,19 +66,25 @@ export const INDUSTRY_GROUPS: readonly IndustryGroup[] = [
 export const INDUSTRIES = INDUSTRY_GROUPS.flatMap((g) => g.items);
 
 // 希望職種（最大3つまで選択可）。DBのdesired_occupationsにはJSON文字列配列として保存する。
+// 2026-09-03に志望業界の細分化（INDUSTRY_GROUPS）に合わせて全12種へ更新
+// （旧: フラットな9種類。既存ユーザーの登録データはscripts/migrate-occupation-values.mtsで
+// 新分類へマッピング済み。functions/_lib/desiredOccupations.tsのマスター一覧も同時に修正すること）。
 export const DESIRED_OCCUPATIONS = [
-  "営業・顧客交渉",
+  "営業・セールス",
   "企画・マーケティング・事業開発",
-  "IT・エンジニア・Web制作",
-  "研究・開発・技術職",
-  "コンサルタント・アナリスト",
-  "コーポレート・管理部門（人事・総務・経理・法務等）",
-  "クリエイティブ・編集・デザイン",
-  "サービス・店舗運営・各種専門職",
-  "こだわりなし・幅広く検討したい",
+  "コンサルタント・M&Aアドバイザリー・アナリスト",
+  "金融系専門職（投資銀行・運用・アクチュアリー等）",
+  "ITエンジニア・データサイエンティスト",
+  "研究開発・設計・生産技術・建築技術",
+  "クリエイティブ・編集・メディア制作",
+  "コーポレート・管理部門（人事・財務・経理・法務等）",
+  "物流・購買・サプライチェーン管理 (SCM)",
+  "サービス・接客・販売・店舗運営",
+  "公務員・教員・団体職員",
+  "こだわりなし・総合職（オープンコース）等",
 ] as const;
 
-export const DEFAULT_DESIRED_OCCUPATIONS = ["こだわりなし・幅広く検討したい"];
+export const DEFAULT_DESIRED_OCCUPATIONS = ["こだわりなし・総合職（オープンコース）等"];
 export const MAX_DESIRED_OCCUPATIONS = 3;
 
 // 企業プロフィール画面で設定する、学生向け「あなたへのおすすめ企業」用のアピールタグ（複数選択可）。
