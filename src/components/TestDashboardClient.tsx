@@ -7,7 +7,6 @@ import { ChevronLeft, Info } from "lucide-react";
 import { DashboardHeader } from "./DashboardHeader";
 import { ExamModeSelectModal } from "./ExamModeSelectModal";
 import { PerformanceDashboard } from "./PerformanceDashboard";
-import { ShareButtons } from "./ShareButtons";
 import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_EXPLAINERS } from "@/src/data/testExplainers";
@@ -162,11 +161,6 @@ export function TestDashboardClient({ testId }: { testId: string }) {
           <section className="flex flex-col gap-3">
             <h2 className="text-lg font-bold text-gray-900">{testType.name}の成績</h2>
             <PerformanceDashboard email={userEmail} testType={testId} />
-            <ShareButtons
-              url="https://shukatsu-webtest.com"
-              text="WEBテストナビでWEBテスト対策中！無料で本番環境そっくりの模試が受けられるよ"
-              className="justify-end"
-            />
           </section>
         )}
       </main>

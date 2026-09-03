@@ -6,6 +6,7 @@ import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { MemorizationReviewBanner } from "@/src/components/MemorizationReviewBanner";
 import { RecommendedCompanies } from "@/src/components/RecommendedCompanies";
 import { NoticeBoard } from "@/src/components/NoticeBoard";
+import { ShareButtons } from "@/src/components/ShareButtons";
 import { SupportChatWidget } from "@/src/components/SupportChatWidget";
 import { TEST_TYPES } from "@/src/data/testTypes";
 
@@ -86,6 +87,11 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      <ShareButtons
+        variant="floating"
+        url="https://shukatsu-webtest.com"
+        text="WEBテストナビでWEBテスト対策中！無料で本番環境そっくりの模試が受けられるよ"
+      />
       <SupportChatWidget />
     </div>
   );

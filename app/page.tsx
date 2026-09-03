@@ -264,16 +264,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SNSシェア */}
-      <div className="border-b border-gray-100 bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-3xl items-center justify-center">
-          <ShareButtons
-            url={SITE_URL}
-            text="無料で本番環境そっくりのWEBテスト対策ができる『WEBテストナビ』"
-          />
-        </div>
-      </div>
-
       {/* 危機感訴求 */}
       <section className="relative overflow-hidden bg-gray-900 px-6 py-16 text-center sm:py-20">
         <div
@@ -555,6 +545,11 @@ export default function Home() {
         </div>
       </section>
 
+      <ShareButtons
+        variant="floating"
+        url={SITE_URL}
+        text="無料で本番環境そっくりのWEBテスト対策ができる『WEBテストナビ』"
+      />
       <SupportChatWidget />
     </div>
   );
