@@ -356,7 +356,7 @@ UIは`src/components/ScoutDetailModal.tsx`（新規）に集約: カード一覧
 - `app/forgot-password/page.tsx`: クライアントコンポーネント。メール送信→OTP入力＋新パスワード設定の2ステップ。`/api/forgot-password`と`/api/reset-password`を呼ぶ。
 - `app/mypage/page.tsx`（画面タイトル「プロフィール設定」、ヘッダーのリンク文言は「プロフィール」、URLは既存の`/mypage`のまま）: 個人属性情報（氏名・大学・学部・志望業界・希望職種・卒業年月）専用の管理画面。2026-08-21に成績ダッシュボード・スカウト受信ボックスを`/dashboard`へ移動し、このページからは削除した（スカウト目的でのデータ共有トグルのみ、個人の同意設定としてこのページに残している）。**閲覧/編集の2モード制**（`mode: "view" | "edit"`）: 初期表示は`<dl>`によるテキスト閲覧のみで、「プロフィールを編集」ボタンで編集フォームに切り替わる。編集フォーム内の「編集をキャンセル」は`savedProfile`（最後にサーバーから取得/保存した値のスナップショット）から`applyProfile()`で各フィールドを復元してから閲覧モードへ戻す。「変更を保存」で`PUT /api/me`を呼び、成功時はローカルの`savedProfile`も更新したうえで閲覧モードへ自動的に戻る。ユーザー要求では更新APIとして`/api/user/profile`が例示されていたが、既存の`/api/me`（GET/PUT）がまったく同じ機能を持つため、新規エンドポイントは作らずそのまま使っている。
 - `app/review/page.tsx`: エビングハウスの忘却曲線に基づく反復復習モード。`GET /api/review`で当日分を取得し、1問1答形式で出題・`POST /api/review`で結果を即時送信する。
-- `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシーの下書き（要弁護士レビュー）。
+- `app/terms/page.tsx` / `app/privacy/page.tsx`: 利用規約・プライバシーポリシー（2026-09-03に弁護士レビュー済みの正式版として公開。運営者は福井敬介）。
 - `app/company/login/page.tsx`: 企業ログインフォーム。成功時は`localStorage`の`spiCompanyUser`（`companyName`/`email`/`approved`）を保存して`/company/dashboard`へ遷移する。未登録者向けに`/company/apply`への導線を表示する。
 - `app/company/apply/page.tsx`: 企業・エージェント向けの公開利用審査申請フォーム。`POST /api/company/apply`を呼ぶだけで、ログイン等の状態は持たない。
 - `app/admin/companies/page.tsx`: 管理者用の審査申請一覧・承認/却下画面。`sessionStorage`の管理APIトークンで`GET/POST /api/admin/companies`を叩く（詳細は「企業・エージェント向け利用審査申請フロー」の節を参照）。

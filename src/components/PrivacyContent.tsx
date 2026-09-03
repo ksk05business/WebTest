@@ -3,14 +3,7 @@
 export function PrivacyContent() {
   return (
     <>
-      <div className="rounded-lg border-2 border-amber-400 bg-amber-50 p-4 text-sm text-amber-800">
-        <p className="font-bold">これは仮ドラフトです。</p>
-        <p className="mt-1">
-          実際の公開前に、必ず弁護士のレビューを受けてください。個人情報保護法（第三者提供の同意・記録義務・オプトアウト等）に照らした確認が必要です。
-        </p>
-      </div>
-
-      <h1 className="mt-6 text-2xl font-bold text-gray-900">プライバシーポリシー</h1>
+      <h1 className="text-2xl font-bold text-gray-900">プライバシーポリシー</h1>
 
       <section className="mt-4 flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-gray-900">1. 取得する個人情報</h2>
@@ -89,23 +82,26 @@ export function PrivacyContent() {
           <li>パスワードおよびパスワード再設定用のワンタイムパスワードは、いずれも不可逆なハッシュ化処理を施して保存し、平文では保持しません。</li>
           <li>通信は暗号化（HTTPS/TLS）した経路で行います。</li>
           <li>個人データへのアクセスは、業務上必要な範囲に限定します。</li>
-          <li>[その他、委託先の監督体制等、実施している安全管理措置があれば記載]</li>
         </ul>
       </section>
 
       <section className="mt-4 flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-gray-900">6. 開示・訂正・削除等の請求</h2>
         <p className="text-sm text-gray-700">
-          ユーザーは、当社が保有する自己の個人情報について、開示・訂正・利用停止・削除等を請求できます。氏名・大学・志望業界等の多くの項目はマイページからご自身で確認・修正いただけます。アカウントの削除等、マイページから対応できない請求については、[問い合わせ窓口]までご連絡ください。
+          ユーザーは、当社が保有する自己の個人情報について、開示・訂正・利用停止・削除等を請求できます。氏名・大学・志望業界等の多くの項目はマイページからご自身で確認・修正いただけます。アカウントの削除等、マイページから対応できない請求については、下記の問い合わせ窓口までご連絡ください。
         </p>
       </section>
 
       <section className="mt-4 flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-gray-900">7. お問い合わせ窓口</h2>
-        <p className="text-sm text-gray-700">[運営者名 / 住所 / 連絡先を記載]</p>
+        <p className="text-sm text-gray-700">
+          運営者: 福井敬介
+          <br />
+          連絡先: ksk05business@gmail.com
+        </p>
       </section>
 
-      <p className="mt-4 text-sm text-gray-500">最終改定日: [YYYY年MM月DD日]</p>
+      <p className="mt-4 text-sm text-gray-500">最終改定日: 2026年9月3日</p>
     </>
   );
 }

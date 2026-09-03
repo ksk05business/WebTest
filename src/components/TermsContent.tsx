@@ -3,20 +3,13 @@
 export function TermsContent() {
   return (
     <>
-      <div className="rounded-lg border-2 border-amber-400 bg-amber-50 p-4 text-sm text-amber-800">
-        <p className="font-bold">これは仮ドラフトです。</p>
-        <p className="mt-1">
-          実際の公開前に、必ず弁護士（可能であれば職業安定法にも詳しい方）のレビューを受けてください。特に第三者提供・スカウト目的でのデータ共有に関する条項は、事業モデル（有料職業紹介事業の許可要否を含む）とあわせて確認が必要です。
-        </p>
-      </div>
-
-      <h1 className="mt-6 text-2xl font-bold text-gray-900">利用規約</h1>
+      <h1 className="text-2xl font-bold text-gray-900">利用規約</h1>
 
       <section className="mt-4 flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-gray-900">第1条（適用）</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm text-gray-700">
           <li>
-            本規約は、[運営者名/法人名]（以下「当社」）が提供する「Webテストナビ」（以下「本サービス」）の利用条件を定めるものです。ユーザーは、本規約に同意のうえ本サービスを利用するものとします。
+            本規約は、福井敬介（以下「当社」）が提供する「Webテストナビ」（以下「本サービス」）の利用条件を定めるものです。ユーザーは、本規約に同意のうえ本サービスを利用するものとします。
           </li>
           <li>本規約のほか、本サービス上に掲載するプライバシーポリシー、ガイドライン、ヘルプ等も本規約の一部を構成するものとします。</li>
         </ol>
@@ -198,7 +191,7 @@ export function TermsContent() {
         <ol className="list-decimal space-y-2 pl-5 text-sm text-gray-700">
           <li>本規約の解釈にあたっては、日本法を準拠法とします。</li>
           <li>
-            本サービスに関して当社とユーザーとの間で紛争が生じた場合、当社の本社所在地を管轄する裁判所（例: 東京地方裁判所）を第一審の専属的合意管轄裁判所とします。
+            本サービスに関して当社とユーザーとの間で紛争が生じた場合、東京地方裁判所を第一審の専属的合意管轄裁判所とします。
           </li>
         </ol>
       </section>
@@ -207,7 +200,7 @@ export function TermsContent() {
         ※当サイトは各適性検査の運営会社とは関係のない非公式の対策サービスです。「SPI」は株式会社リクルートマネジメントソリューションズ等、各社の登録商標または商標です。
       </p>
 
-      <p className="mt-4 text-sm text-gray-500">最終改定日: 2026年9月2日</p>
+      <p className="mt-4 text-sm text-gray-500">最終改定日: 2026年9月3日</p>
     </>
   );
 }
