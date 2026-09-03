@@ -91,7 +91,7 @@ export default function DashboardPage() {
         variant="floating"
         url="https://shukatsu-webtest.com"
         text="WEBテストナビでWEBテスト対策中！無料で本番環境そっくりの模試が受けられるよ"
-        calloutText="無料で試せる対策ツールを友達に共有 リンクをコピー"
+        calloutText="友達に共有"
       />
       <SupportChatWidget />
     </div>

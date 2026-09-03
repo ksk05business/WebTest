@@ -110,40 +110,39 @@ export function ShareButtons({
           </div>
         )}
 
-        <div className="flex flex-col items-end gap-2 rounded-2xl border border-gray-200 bg-white/90 p-2 shadow-lg backdrop-blur-sm">
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex h-10 items-center gap-2 rounded-full border border-gray-300 bg-white pl-3 pr-4 text-gray-700 shadow-sm transition hover:bg-gray-100"
-          >
-            <span className="flex h-6 w-6 items-center justify-center">
+        <div className="flex flex-col items-center gap-2 rounded-full border border-gray-200 bg-white/90 p-2 shadow-lg backdrop-blur-sm">
+          <div className="relative">
+            {copied && (
+              <span className="absolute right-full top-1/2 mr-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-green-600 px-2 py-1 text-xs font-semibold text-white shadow">
+                コピーしました
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleCopy}
+              aria-label="リンクをコピー"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 transition hover:bg-gray-100"
+            >
               {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-            </span>
-            <span className="whitespace-nowrap text-xs font-bold">
-              {copied ? "コピーしました！" : "リンクをコピー"}
-            </span>
-          </button>
+            </button>
+          </div>
           <a
             href={lineHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-10 items-center gap-2 rounded-full bg-[#06C755] pl-3 pr-4 text-white shadow-sm transition hover:opacity-80"
+            aria-label="LINEでシェア"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#06C755] text-white shadow transition hover:opacity-80"
           >
-            <span className="flex h-6 w-6 items-center justify-center">
-              <LineLogo className="h-4 w-4" />
-            </span>
-            <span className="whitespace-nowrap text-xs font-bold">友達に送る</span>
+            <LineLogo className="h-4 w-4" />
           </a>
           <a
             href={twitterHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-10 items-center gap-2 rounded-full bg-black pl-3 pr-4 text-white shadow-sm transition hover:opacity-80"
+            aria-label="Xでシェア"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white shadow transition hover:opacity-80"
           >
-            <span className="flex h-6 w-6 items-center justify-center">
-              <XLogo className="h-4 w-4" />
-            </span>
-            <span className="whitespace-nowrap text-xs font-bold">フォロワーに共有</span>
+            <XLogo className="h-4 w-4" />
           </a>
         </div>
       </div>

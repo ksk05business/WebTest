@@ -549,7 +549,7 @@ export default function Home() {
         variant="floating"
         url={SITE_URL}
         text="無料で本番環境そっくりのWEBテスト対策ができる『WEBテストナビ』"
-        calloutText="就活仲間に教えてあげよう！ 🤝"
+        calloutText="友達に共有"
       />
       <SupportChatWidget />
     </div>
