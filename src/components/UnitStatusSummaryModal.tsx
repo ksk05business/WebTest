@@ -122,9 +122,9 @@ export function UnitStatusSummaryModal({
                 type="button"
                 onClick={() => startPractice("wrong_uncertain")}
                 disabled={reviewCount === 0}
-                className="min-h-12 rounded-full bg-orange-500 px-3 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="min-h-12 rounded-full border border-orange-300 bg-orange-100 px-3 py-2.5 text-sm font-semibold text-gray-800 hover:bg-orange-200 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                × 不正解 ＋ △ 自信なし のみを復習する（推奨）
+                × 不正解 ＋ △ 自信なし のみを復習する
               </button>
               <button
                 type="button"

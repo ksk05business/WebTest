@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 import { CATEGORY_TO_TEST_ID, DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
@@ -72,6 +72,7 @@ function PracticePageInner() {
   const [selected, setSelected] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(true);
   const [score, setScore] = useState(0);
   const [authChecked, setAuthChecked] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -143,18 +144,25 @@ function PracticePageInner() {
     setSelected(null);
     setAnswered(false);
     setElapsed(0);
+    setTimerRunning(true);
     setScore(0);
     setFinished(false);
     setResults([]);
     loadQuestions();
   }
 
-  // 経過時間のカウントアップ（制限時間による自動送りは行わない）
+  // 経過時間のカウントアップ（制限時間による自動送りは行わない）。
+  // 解答済み（解説エリア表示中）はカウントを停止し、次の問題に進むと自動的に再開する。
   useEffect(() => {
-    if (!authChecked || finished) return;
+    if (!authChecked || finished || !timerRunning) return;
     const id = setInterval(() => setElapsed((t) => t + 1), 1000);
     return () => clearInterval(id);
-  }, [authChecked, finished]);
+  }, [authChecked, finished, timerRunning]);
+
+  function handleTimerReset() {
+    setElapsed(0);
+    setTimerRunning(true);
+  }
 
   // 練習問題の自己評価ステータス（〇known/△uncertain/×wrong）をupsertする。
   // 失敗しても練習の進行自体は継続する（fire-and-forget）。
@@ -174,6 +182,7 @@ function PracticePageInner() {
     if (answered || !question) return;
     setSelected(label);
     setAnswered(true);
+    setTimerRunning(false);
     const isCorrectAnswer = label === question.answer;
     setResults((r) => [
       ...r,
@@ -260,6 +269,7 @@ function PracticePageInner() {
     setCurrentIndex((i) => i + 1);
     setSelected(null);
     setAnswered(false);
+    setTimerRunning(true);
   }
 
   if (!authChecked) {
@@ -364,8 +374,17 @@ function PracticePageInner() {
             第{currentIndex + 1}問 / 全{questions.length}問
           </span>
         </span>
-        <span className="flex-shrink-0 whitespace-nowrap font-mono text-lg font-bold text-gray-500">
-          経過 {formatElapsed(elapsed)}
+        <span className="flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap">
+          <span className="font-mono text-lg font-bold text-gray-500">経過 {formatElapsed(elapsed)}</span>
+          <button
+            type="button"
+            onClick={handleTimerReset}
+            title="タイマーをリセットして再スタート"
+            aria-label="タイマーをリセットして再スタート"
+            className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </button>
         </span>
       </div>
 
