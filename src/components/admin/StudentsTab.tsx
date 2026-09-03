@@ -205,10 +205,18 @@ export function StudentsTab({
                     <MbtiBadge code={s.mbti} />
                   </td>
                   <td className="max-w-[14rem] px-3 py-2 text-xs text-gray-700">
-                    {s.industries.join(" / ")}
+                    <div className="flex flex-col gap-0.5">
+                      {s.industries.map((i, idx) => (
+                        <p key={idx}>{i}</p>
+                      ))}
+                    </div>
                   </td>
                   <td className="max-w-[14rem] px-3 py-2 text-xs text-gray-700">
-                    {s.desiredOccupations.join(" / ")}
+                    <div className="flex flex-col gap-0.5">
+                      {s.desiredOccupations.map((o, idx) => (
+                        <p key={idx}>{o}</p>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-3 py-2 text-gray-700">{s.examCount}回</td>
                 </tr>
