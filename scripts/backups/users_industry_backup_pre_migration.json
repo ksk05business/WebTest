@@ -1,0 +1,120 @@
+[
+  {
+    "results": [
+      {
+        "id": 1,
+        "industry_first": "コンサル・シンクタンク",
+        "industry_second": "商社（総合・専門）",
+        "industry_third": "金融（銀行・証券・保険・投資）"
+      },
+      {
+        "id": 7,
+        "industry_first": "コンサル・シンクタンク",
+        "industry_second": "金融（銀行・証券・保険・投資）",
+        "industry_third": "商社（総合・専門）"
+      },
+      {
+        "id": 8,
+        "industry_first": "メーカー（自動車・食品・化学・製薬等）",
+        "industry_second": "IT・通信・Web",
+        "industry_third": "商社（総合・専門）"
+      },
+      {
+        "id": 9,
+        "industry_first": "マスコミ・広告・出版",
+        "industry_second": "IT・通信・Web",
+        "industry_third": "サービス・インフラ（運輸・エネルギー・人材・旅行等）"
+      },
+      {
+        "id": 10,
+        "industry_first": "金融（銀行・証券・保険・投資）",
+        "industry_second": "コンサル・シンクタンク",
+        "industry_third": "商社（総合・専門）"
+      },
+      {
+        "id": 11,
+        "industry_first": "サービス・インフラ（運輸・エネルギー・人材・旅行等）",
+        "industry_second": "マスコミ・広告・出版",
+        "industry_third": "その他"
+      },
+      {
+        "id": 12,
+        "industry_first": "不動産・建設・デベロッパー",
+        "industry_second": "商社（総合・専門）",
+        "industry_third": "金融（銀行・証券・保険・投資）"
+      },
+      {
+        "id": 13,
+        "industry_first": "メーカー（自動車・食品・化学・製薬等）",
+        "industry_second": "IT・通信・Web",
+        "industry_third": "公的機関・公務員"
+      },
+      {
+        "id": 14,
+        "industry_first": "IT・通信・Web",
+        "industry_second": "メーカー（自動車・食品・化学・製薬等）",
+        "industry_third": "コンサル・シンクタンク"
+      },
+      {
+        "id": 15,
+        "industry_first": "メーカー（自動車・食品・化学・製薬等）",
+        "industry_second": "コンサル・シンクタンク",
+        "industry_third": "IT・通信・Web"
+      },
+      {
+        "id": 16,
+        "industry_first": "IT・通信・Web",
+        "industry_second": "メーカー（自動車・食品・化学・製薬等）",
+        "industry_third": "商社（総合・専門）"
+      },
+      {
+        "id": 17,
+        "industry_first": "公的機関・公務員",
+        "industry_second": "金融（銀行・証券・保険・投資）",
+        "industry_third": "サービス・インフラ（運輸・エネルギー・人材・旅行等）"
+      },
+      {
+        "id": 18,
+        "industry_first": "商社（総合・専門）",
+        "industry_second": "金融（銀行・証券・保険・投資）",
+        "industry_third": "マスコミ・広告・出版"
+      },
+      {
+        "id": 19,
+        "industry_first": "マスコミ・広告・出版",
+        "industry_second": "サービス・インフラ（運輸・エネルギー・人材・旅行等）",
+        "industry_third": "IT・通信・Web"
+      },
+      {
+        "id": 20,
+        "industry_first": "IT・通信・Web",
+        "industry_second": "メーカー（自動車・食品・化学・製薬等）",
+        "industry_third": "コンサル・シンクタンク"
+      },
+      {
+        "id": 21,
+        "industry_first": "コンサル・シンクタンク",
+        "industry_second": "金融（銀行・証券・保険・投資）",
+        "industry_third": "公的機関・公務員"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "APAC",
+      "served_by_colo": "SIN",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.9417
+      },
+      "duration": 0.9417,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 20508672,
+      "rows_read": 16,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

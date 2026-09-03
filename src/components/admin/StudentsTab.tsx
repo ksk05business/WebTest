@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MbtiBadge } from "@/src/components/MbtiBadge";
 import { UNIVERSITY_CATEGORIES } from "@/src/data/universityCategories";
 import { MBTI_TYPES } from "@/src/data/mbti";
-import { INDUSTRIES, DESIRED_OCCUPATIONS } from "@/src/data/formOptions";
+import { INDUSTRY_GROUPS, DESIRED_OCCUPATIONS } from "@/src/data/formOptions";
 
 type Student = {
   id: number;
@@ -145,10 +145,14 @@ export function StudentsTab({
           className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700"
         >
           <option value={ALL}>志望業界: すべて</option>
-          {INDUSTRIES.map((i) => (
-            <option key={i} value={i}>
-              {i}
-            </option>
+          {INDUSTRY_GROUPS.map((g) => (
+            <optgroup key={g.group} label={g.group}>
+              {g.items.map((i) => (
+                <option key={i} value={i}>
+                  {i}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
         <select
