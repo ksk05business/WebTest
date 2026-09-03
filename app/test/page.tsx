@@ -329,10 +329,15 @@ async function finalizeExam(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, testType: partId, score, total, categoryScores, answers }),
       });
+      const answersWithTime = results.map((r) => ({
+        questionId: r.questionId,
+        correct: r.correct,
+        answerTimeSeconds: r.answerTimeSeconds,
+      }));
       await fetch("/api/practice/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, testType: partId, answers, isPractice: false }),
+        body: JSON.stringify({ email, testType: partId, answers: answersWithTime, isPractice: false }),
       });
     }
   } catch {
@@ -552,6 +557,7 @@ function BasicExamFlow() {
   const [finishing, setFinishing] = useState(false);
 
   const resultsRef = useRef<ExamReviewEntry[]>([]);
+  const questionStartedAtRef = useRef<number>(Date.now());
 
   useEffect(() => {
     Promise.all([
@@ -568,6 +574,11 @@ function BasicExamFlow() {
       })
       .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
   }, []);
+
+  // 現在の問題が表示された時点を計測開始とする（解答時間の計測用、試験中はUI非表示）。
+  useEffect(() => {
+    questionStartedAtRef.current = Date.now();
+  }, [currentQuestion]);
 
   const finalize = useCallback(async () => {
     setFinishing(true);
@@ -589,6 +600,7 @@ function BasicExamFlow() {
     if (!pools || !currentQuestion || finishing || timeLeft <= 0) return;
 
     const isCorrectAnswer = label === currentQuestion.answer;
+    const timeTaken = Math.max(0, Math.round((Date.now() - questionStartedAtRef.current) / 1000));
     resultsRef.current.push({
       questionId: currentQuestion.id,
       questionCode: currentQuestion.questionCode,
@@ -600,6 +612,8 @@ function BasicExamFlow() {
       correct: isCorrectAnswer,
       explanation: currentQuestion.explanation,
       category: currentQuestion.category,
+      rawCategory: currentQuestion.rawCategory,
+      answerTimeSeconds: timeTaken,
     });
     setAnsweredCount((c) => c + 1);
 
@@ -717,7 +731,7 @@ function StandardExamFlow({
     await finalizeExam(router, partId, resultsRef.current);
   }, [router, partId]);
 
-  function pushResult(q: Question, selectedLabel: string | null) {
+  function pushResult(q: Question, selectedLabel: string | null, answerTimeSeconds: number | null) {
     resultsRef.current.push({
       questionId: q.id,
       questionCode: q.questionCode,
@@ -729,6 +743,8 @@ function StandardExamFlow({
       correct: selectedLabel === q.answer,
       explanation: q.explanation,
       category: q.category,
+      rawCategory: q.rawCategory,
+      answerTimeSeconds,
     });
   }
 
@@ -746,7 +762,7 @@ function StandardExamFlow({
   useEffect(() => {
     if (!question || finishing) return;
     if (timeLeft <= 0) {
-      pushResult(question, null);
+      pushResult(question, null, null);
       advance();
       return;
     }
@@ -757,7 +773,7 @@ function StandardExamFlow({
 
   function handleSelect(label: string) {
     if (!question || finishing) return;
-    pushResult(question, label);
+    pushResult(question, label, TIME_PER_QUESTION - timeLeft);
     advance();
   }
 
@@ -835,6 +851,13 @@ function SectionedExamFlow({
   const [finishing, setFinishing] = useState(false);
 
   const resultsRef = useRef<ExamReviewEntry[]>([]);
+  const questionStartedAtRef = useRef<number>(Date.now());
+
+  // 現在の問題が表示された時点を計測開始とする（セクション単位の残り時間とは別に、問題ごとの
+  // 解答時間を計測する。試験中はUIに表示しない）。
+  useEffect(() => {
+    questionStartedAtRef.current = Date.now();
+  }, [sectionIndex, questionIndex]);
 
   useEffect(() => {
     Promise.all(
@@ -871,7 +894,7 @@ function SectionedExamFlow({
     await finalizeExam(router, partId, resultsRef.current);
   }, [router, partId]);
 
-  function pushResult(q: Question, selectedLabel: string | null) {
+  function pushResult(q: Question, selectedLabel: string | null, answerTimeSeconds: number | null) {
     resultsRef.current.push({
       questionId: q.id,
       questionCode: q.questionCode,
@@ -883,6 +906,8 @@ function SectionedExamFlow({
       correct: selectedLabel === q.answer,
       explanation: q.explanation,
       category: q.category,
+      rawCategory: q.rawCategory,
+      answerTimeSeconds,
     });
   }
 
@@ -894,7 +919,7 @@ function SectionedExamFlow({
       if (fillRemainingAsUnanswered) {
         const currentQuestions = sectionQuestions[sectionIndex];
         for (let i = questionIndex; i < currentQuestions.length; i++) {
-          pushResult(currentQuestions[i], null);
+          pushResult(currentQuestions[i], null, null);
         }
       }
       const nextSectionIndex = sectionIndex + 1;
@@ -926,7 +951,8 @@ function SectionedExamFlow({
     if (!sectionQuestions || finishing) return;
     const currentQuestions = sectionQuestions[sectionIndex];
     const q = currentQuestions[questionIndex];
-    pushResult(q, label);
+    const timeTaken = Math.max(0, Math.round((Date.now() - questionStartedAtRef.current) / 1000));
+    pushResult(q, label, timeTaken);
 
     const nextQuestionIndex = questionIndex + 1;
     if (nextQuestionIndex >= currentQuestions.length) {

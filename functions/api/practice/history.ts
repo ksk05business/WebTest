@@ -6,7 +6,7 @@ interface Env {
   DB: D1Database;
 }
 
-type AnswerInput = { questionId: number; correct: boolean };
+type AnswerInput = { questionId: number; correct: boolean; answerTimeSeconds?: number | null };
 
 type PostBody = {
   testType?: unknown;
@@ -21,7 +21,10 @@ function isAnswers(value: unknown): value is AnswerInput[] {
       typeof v === "object" &&
       v !== null &&
       typeof (v as { questionId?: unknown }).questionId === "number" &&
-      typeof (v as { correct?: unknown }).correct === "boolean"
+      typeof (v as { correct?: unknown }).correct === "boolean" &&
+      ((v as { answerTimeSeconds?: unknown }).answerTimeSeconds === undefined ||
+        (v as { answerTimeSeconds?: unknown }).answerTimeSeconds === null ||
+        typeof (v as { answerTimeSeconds?: unknown }).answerTimeSeconds === "number")
   );
 }
 
@@ -50,10 +53,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   for (const a of answers) {
     await context.env.DB.prepare(
-      `INSERT INTO user_question_history (user_id, question_id, test_type, correct, is_practice)
-       VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO user_question_history (user_id, question_id, test_type, correct, is_practice, answer_time_seconds)
+       VALUES (?, ?, ?, ?, ?, ?)`
     )
-      .bind(userId, a.questionId, testType, a.correct ? 1 : 0, isPractice ? 1 : 0)
+      .bind(
+        userId,
+        a.questionId,
+        testType,
+        a.correct ? 1 : 0,
+        isPractice ? 1 : 0,
+        typeof a.answerTimeSeconds === "number" ? a.answerTimeSeconds : null
+      )
       .run();
   }
 

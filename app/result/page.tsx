@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { ExamReviewEntry } from "@/src/data/questions";
 import { IndustryBenchmarkCard } from "@/src/components/IndustryBenchmarkCard";
+import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 
 type Result = { score: number; total: number; part?: string };
 
@@ -134,6 +135,23 @@ export default function ResultPage() {
                       <li key={si}>{step}</li>
                     ))}
                   </ol>
+
+                  {entry.answerTimeSeconds !== null &&
+                    (() => {
+                      const targetSeconds = getTargetTimeSeconds(entry.rawCategory, entry.category);
+                      const overTarget = entry.answerTimeSeconds > targetSeconds;
+                      return (
+                        <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-200 pt-2 text-xs text-gray-500">
+                          <span>目標時間: {targetSeconds}秒</span>
+                          <span>
+                            あなたの解答時間:{" "}
+                            <span className={`font-bold ${overTarget ? "text-red-500" : "text-green-600"}`}>
+                              {entry.answerTimeSeconds}秒
+                            </span>
+                          </span>
+                        </p>
+                      );
+                    })()}
                 </div>
               </div>
             ))}

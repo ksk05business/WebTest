@@ -35,4 +35,9 @@ export type ExamReviewEntry = {
   correct: boolean;
   explanation: string[];
   category: string;
+  // questions.category（大分類、例: "non_verbal"）。目標解答時間（src/data/targetTimes.ts）を
+  // category（=sub_category）とあわせて引くために使う。
+  rawCategory?: string;
+  // 問題が表示されてから解答するまでの経過秒数。時間切れ・未回答の場合はnull。
+  answerTimeSeconds: number | null;
 };

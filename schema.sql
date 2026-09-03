@@ -235,6 +235,9 @@ CREATE TABLE IF NOT EXISTS user_question_history (
   test_type TEXT NOT NULL, -- 'spi' | 'tamatebako' 等（src/data/testTypes.tsのTestType.idと同じ値）
   correct INTEGER NOT NULL, -- 0 or 1
   is_practice INTEGER NOT NULL DEFAULT 1, -- 練習問題=1、模擬試験（本番モード）=0
+  -- 問題が表示されてから解答（選択肢クリック）するまでの経過秒数（任意）。目標解答時間との比較UI
+  -- （src/data/targetTimes.ts）に使う。タイムアウトによる未回答等、計測できない場合はNULL。
+  answer_time_seconds INTEGER,
   answered_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (question_id) REFERENCES questions(id)

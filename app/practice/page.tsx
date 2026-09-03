@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 import { CATEGORY_TO_TEST_ID, DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
+import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 
 function formatElapsed(seconds: number): string {
@@ -77,11 +78,27 @@ function PracticePageInner() {
   const [authChecked, setAuthChecked] = useState(false);
   const [finished, setFinished] = useState(false);
   const [results, setResults] = useState<
-    { questionId: number; category: string; rawCategory?: string; correct: boolean }[]
+    {
+      questionId: number;
+      category: string;
+      rawCategory?: string;
+      correct: boolean;
+      answerTimeSeconds: number | null;
+    }[]
   >([]);
+  const [answerTimeSeconds, setAnswerTimeSeconds] = useState<number | null>(null);
+  const questionStartedAtRef = useRef<number>(Date.now());
 
   const question = questions?.[currentIndex];
   const isLast = questions !== null && currentIndex === questions.length - 1;
+
+  // 現在の問題が表示された時点を計測開始とする（解答済みで再表示された場合は計測し直さない）。
+  useEffect(() => {
+    if (!answered) {
+      questionStartedAtRef.current = Date.now();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, questions]);
 
   useEffect(() => {
     if (!localStorage.getItem("spiUser")) {
@@ -148,6 +165,7 @@ function PracticePageInner() {
     setScore(0);
     setFinished(false);
     setResults([]);
+    setAnswerTimeSeconds(null);
     loadQuestions();
   }
 
@@ -180,9 +198,11 @@ function PracticePageInner() {
 
   function handleSelect(label: string) {
     if (answered || !question) return;
+    const timeTaken = Math.max(0, Math.round((Date.now() - questionStartedAtRef.current) / 1000));
     setSelected(label);
     setAnswered(true);
     setTimerRunning(false);
+    setAnswerTimeSeconds(timeTaken);
     const isCorrectAnswer = label === question.answer;
     setResults((r) => [
       ...r,
@@ -191,6 +211,7 @@ function PracticePageInner() {
         category: question.category,
         rawCategory: question.rawCategory,
         correct: isCorrectAnswer,
+        answerTimeSeconds: timeTaken,
       },
     ]);
     if (isCorrectAnswer) {
@@ -215,12 +236,17 @@ function PracticePageInner() {
       // 各テストの復習ノート・成績データが正しく更新されるようにする）。
       const groups = new Map<
         string,
-        { questionId: number; category: string; correct: boolean }[]
+        { questionId: number; category: string; correct: boolean; answerTimeSeconds: number | null }[]
       >();
       for (const r of results) {
         const groupTestId = (r.rawCategory && CATEGORY_TO_TEST_ID[r.rawCategory]) || testId;
         const list = groups.get(groupTestId) ?? [];
-        list.push({ questionId: r.questionId, category: r.category, correct: r.correct });
+        list.push({
+          questionId: r.questionId,
+          category: r.category,
+          correct: r.correct,
+          answerTimeSeconds: r.answerTimeSeconds,
+        });
         groups.set(groupTestId, list);
       }
 
@@ -252,10 +278,20 @@ function PracticePageInner() {
                 isPractice: true,
               }),
             });
+            const groupAnswersWithTime = groupResults.map((r) => ({
+              questionId: r.questionId,
+              correct: r.correct,
+              answerTimeSeconds: r.answerTimeSeconds,
+            }));
             await fetch("/api/practice/history", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, testType: groupTestId, answers: groupAnswers, isPractice: true }),
+              body: JSON.stringify({
+                email,
+                testType: groupTestId,
+                answers: groupAnswersWithTime,
+                isPractice: true,
+              }),
             });
           }
         }
@@ -270,6 +306,7 @@ function PracticePageInner() {
     setSelected(null);
     setAnswered(false);
     setTimerRunning(true);
+    setAnswerTimeSeconds(null);
   }
 
   if (!authChecked) {
@@ -488,6 +525,23 @@ function PracticePageInner() {
               <li key={i}>{step}</li>
             ))}
           </ol>
+
+          {answerTimeSeconds !== null &&
+            (() => {
+              const targetSeconds = getTargetTimeSeconds(question.rawCategory, question.category);
+              const overTarget = answerTimeSeconds > targetSeconds;
+              return (
+                <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-gray-200 pt-3 text-xs text-gray-500">
+                  <span>目標時間: {targetSeconds}秒</span>
+                  <span>
+                    あなたの解答時間:{" "}
+                    <span className={`font-bold ${overTarget ? "text-red-500" : "text-green-600"}`}>
+                      {answerTimeSeconds}秒
+                    </span>
+                  </span>
+                </p>
+              );
+            })()}
 
           {isCorrect ? (
             <div className="mt-4 flex flex-col gap-2">
