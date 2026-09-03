@@ -58,9 +58,9 @@ const FEATURES = [
   },
   {
     icon: Mail,
-    title: "成績・MBTIで届く「特別スカウト」",
+    title: "成績・MBTIで届く「匿名スカウト」",
     description:
-      "2段階開示で個人情報を守りつつ、Webテスト成績や志望動向、MBTI相性を総合考慮した本気度の高い優良企業から特別オファーが届きます。",
+      "最初は「匿名（大学群・偏差値等）」で企業に公開され、オファーを【承諾】した企業にだけ連絡先が開示される安心の2段階システムです。あなたの努力（成績）や適性（MBTI）を評価した優良企業から特別スカウトが届きます。",
   },
 ];
 
@@ -269,7 +269,7 @@ export default function Home() {
             就活生への警告
           </span>
           <h2 className="text-balance text-2xl font-bold leading-snug text-white sm:text-3xl">
-            どんなに志望度が高くても、
+            どんなにガクチカが強くても、
             <br />
             <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">
               Webテストで落とされたら面接すら受けられない。
