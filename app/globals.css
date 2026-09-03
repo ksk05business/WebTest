@@ -17,3 +17,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 画面右下フローティングシェアボタンの吹き出しポップアップ用、控えめな浮遊アニメーション。 */
+@keyframes float-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.animate-float-gentle {
+  animation: float-gentle 2.6s ease-in-out infinite;
+}

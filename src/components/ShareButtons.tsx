@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Copy, Check, X as CloseIcon } from "lucide-react";
+
+// 吹き出しポップアップを一度閉じたら、同じブラウザタブのセッション中は再表示しない
+// （sessionStorage。LP・マイページどちらで閉じても、以降は両方で表示しない挙動を意図している）。
+const BUBBLE_DISMISSED_KEY = "shareBubbleDismissed";
 
 // X（旧Twitter）・LINEの公式ブランドアイコン（Simple Icons由来のパスデータ、fill=currentColorで着色）。
 // lucide-reactには正確なブランドロゴが含まれないため、SVGパスを直接埋め込んでいる。
@@ -29,16 +33,46 @@ function LineLogo({ className }: { className?: string }) {
 // variant="floating": 画面右下に固定表示する縦積みの浮遊ツールバー。
 //   SupportChatWidget（fixed bottom-6 right-6, h-14のアイコン, z-50）の直上に積み重なるよう、
 //   bottom-24（chatボタンの上端80px+余白16px）・right-6・z-40（チャットパネル展開時はそちらを優先）で配置する。
+//   calloutTextを指定すると、ボタン群の上に拡散を促す吹き出しポップアップを表示する
+//   （×で閉じるとsessionStorageに記録し、以降そのタブでは再表示しない。あわせて控えめな浮遊アニメーションを付与）。
 type ShareButtonsProps = {
   // 未指定時は現在のページURLを使う（サーバー側レンダリング時はSITE_URLへフォールバック）。
   url?: string;
   text: string;
   className?: string;
   variant?: "inline" | "floating";
+  calloutText?: string;
 };
 
-export function ShareButtons({ url, text, className = "", variant = "inline" }: ShareButtonsProps) {
+export function ShareButtons({
+  url,
+  text,
+  className = "",
+  variant = "inline",
+  calloutText,
+}: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
+  const [bubbleVisible, setBubbleVisible] = useState(false);
+
+  useEffect(() => {
+    if (!calloutText) return;
+    try {
+      if (sessionStorage.getItem(BUBBLE_DISMISSED_KEY) !== "1") {
+        setBubbleVisible(true);
+      }
+    } catch {
+      // sessionStorageが使えない環境ではポップアップは表示しない（安全側に倒す）。
+    }
+  }, [calloutText]);
+
+  function dismissBubble() {
+    setBubbleVisible(false);
+    try {
+      sessionStorage.setItem(BUBBLE_DISMISSED_KEY, "1");
+    } catch {
+      // 保存できなくても、少なくとも今回の表示は閉じられるので問題ない。
+    }
+  }
 
   const shareUrl =
     url ?? (typeof window !== "undefined" ? window.location.href : "https://shukatsu-webtest.com");
@@ -59,41 +93,59 @@ export function ShareButtons({ url, text, className = "", variant = "inline" }: 
   if (variant === "floating") {
     return (
       <div
-        className={`fixed bottom-24 right-6 z-40 flex flex-col items-center gap-2 rounded-full border border-gray-200 bg-white/90 p-2 shadow-lg backdrop-blur-sm ${className}`}
+        className={`fixed bottom-24 right-6 z-40 flex max-w-[calc(100vw-3rem)] flex-col items-end gap-3 ${className}`}
       >
-        <div className="relative">
-          {copied && (
-            <span className="absolute right-full top-1/2 mr-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-green-600 px-2 py-1 text-xs font-semibold text-white shadow">
-              コピーしました
-            </span>
-          )}
+        {bubbleVisible && calloutText && (
+          <div className="relative max-w-[220px] animate-float-gentle rounded-2xl bg-white px-4 py-3 text-sm font-semibold leading-snug text-gray-800 shadow-xl ring-1 ring-gray-200">
+            <button
+              type="button"
+              onClick={dismissBubble}
+              aria-label="ポップアップを閉じる"
+              className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-gray-400 text-white shadow hover:bg-gray-500"
+            >
+              <CloseIcon className="h-3 w-3" />
+            </button>
+            {calloutText}
+            <div className="absolute -bottom-1.5 right-5 h-3 w-3 rotate-45 bg-white ring-1 ring-gray-200" />
+          </div>
+        )}
+
+        <div className="flex flex-col items-end gap-2 rounded-2xl border border-gray-200 bg-white/90 p-2 shadow-lg backdrop-blur-sm">
           <button
             type="button"
             onClick={handleCopy}
-            aria-label="リンクをコピー"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 transition hover:bg-gray-100"
+            className="flex h-10 items-center gap-2 rounded-full border border-gray-300 bg-white pl-3 pr-4 text-gray-700 shadow-sm transition hover:bg-gray-100"
           >
-            {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+            <span className="flex h-6 w-6 items-center justify-center">
+              {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+            </span>
+            <span className="whitespace-nowrap text-xs font-bold">
+              {copied ? "コピーしました！" : "リンクをコピー"}
+            </span>
           </button>
+          <a
+            href={lineHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-10 items-center gap-2 rounded-full bg-[#06C755] pl-3 pr-4 text-white shadow-sm transition hover:opacity-80"
+          >
+            <span className="flex h-6 w-6 items-center justify-center">
+              <LineLogo className="h-4 w-4" />
+            </span>
+            <span className="whitespace-nowrap text-xs font-bold">友達に送る</span>
+          </a>
+          <a
+            href={twitterHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-10 items-center gap-2 rounded-full bg-black pl-3 pr-4 text-white shadow-sm transition hover:opacity-80"
+          >
+            <span className="flex h-6 w-6 items-center justify-center">
+              <XLogo className="h-4 w-4" />
+            </span>
+            <span className="whitespace-nowrap text-xs font-bold">フォロワーに共有</span>
+          </a>
         </div>
-        <a
-          href={lineHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="LINEでシェア"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#06C755] text-white shadow transition hover:opacity-80"
-        >
-          <LineLogo className="h-4 w-4" />
-        </a>
-        <a
-          href={twitterHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Xでシェア"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white shadow transition hover:opacity-80"
-        >
-          <XLogo className="h-4 w-4" />
-        </a>
       </div>
     );
   }
