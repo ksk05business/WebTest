@@ -115,6 +115,7 @@ const JSON_LD = {
     {
       "@type": "WebSite",
       name: SITE_NAME,
+      alternateName: "SPIナビ",
       url: SITE_URL,
       description: SITE_DESCRIPTION,
       inLanguage: "ja",

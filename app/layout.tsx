@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/icon.svg",
   },
+  appleWebApp: {
+    title: SITE_NAME,
+  },
   verification: {
     google: "7TvvUNJL8RKelS2kkKt8tWp_iN5YPyYEW4kZAo8lx98",
   },
