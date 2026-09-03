@@ -3,7 +3,14 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { Footer } from "@/src/components/Footer";
-import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL } from "@/src/lib/site";
+import {
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_OGP_IMAGE,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/src/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,13 +47,15 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     siteName: SITE_NAME,
     url: SITE_URL,
+    images: [{ url: SITE_OGP_IMAGE, width: 1200, height: 630, alt: SITE_NAME }],
     locale: "ja_JP",
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [SITE_OGP_IMAGE],
   },
 };
 
