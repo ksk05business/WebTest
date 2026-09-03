@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
+import { BackLink } from "@/src/components/BackLink";
 import {
   ScoutDetailPanel,
   SCOUT_STATUS_LABEL,
@@ -134,7 +135,8 @@ export default function DashboardScoutsPage() {
       <DashboardHeader />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
-        <h1 className="mb-6 text-xl font-bold text-gray-900">スカウト</h1>
+        <BackLink href="/dashboard" label="ダッシュボードへ戻る" />
+        <h1 className="mb-6 mt-3 text-xl font-bold text-gray-900">スカウト</h1>
 
         {loadError && <p className="mb-4 text-sm font-medium text-red-600">{loadError}</p>}
         {respondError && <p className="mb-4 text-sm font-medium text-red-600">{respondError}</p>}

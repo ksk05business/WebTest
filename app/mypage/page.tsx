@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
+import { BackLink } from "@/src/components/BackLink";
 import { UniversityField } from "@/src/components/UniversityField";
 import { IndustrySelect } from "@/src/components/IndustrySelect";
 import {
@@ -281,6 +282,7 @@ export default function MyPage() {
       <DashboardHeader />
 
       <main className="mx-auto flex max-w-md flex-col gap-6 px-6 py-10">
+        <BackLink href="/dashboard" label="マイページへ戻る" />
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">プロフィール設定</h1>
           {!loading && mode === "view" && (

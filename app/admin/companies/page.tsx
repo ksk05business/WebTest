@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CompanyManagementPanel } from "@/src/components/admin/CompanyManagementPanel";
+import { BackLink } from "@/src/components/BackLink";
 
 const TOKEN_STORAGE_KEY = "adminApiToken";
 
@@ -53,6 +54,7 @@ export default function AdminCompaniesPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 px-6 py-10">
+      <BackLink href="/admin/dashboard" label="運営管理画面へ戻る" />
       <h1 className="text-xl font-bold text-gray-900">直接採用企業 お申し込み管理（利用審査申請・資料請求）</h1>
       <CompanyManagementPanel adminToken={adminToken} onAuthError={handleAuthError} />
     </main>

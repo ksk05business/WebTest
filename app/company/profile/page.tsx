@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
+import { BackLink } from "@/src/components/BackLink";
 import { APPEAL_TAGS, SHORT_MESSAGE_MAX_LENGTH } from "@/src/data/formOptions";
 import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 
@@ -163,6 +164,7 @@ export default function CompanyProfilePage() {
       <CompanyHeader companyName={companyName} />
 
       <main className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-10">
+        <BackLink href="/company/dashboard" label="ダッシュボードへ戻る" />
         <h1 className="text-lg font-bold text-gray-900">プロフィール設定</h1>
 
         {loading ? (

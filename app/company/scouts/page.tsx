@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyHeader } from "@/src/components/CompanyHeader";
+import { BackLink } from "@/src/components/BackLink";
 import { MbtiBadge } from "@/src/components/MbtiBadge";
 import { redirectToCompanyLogin } from "@/src/lib/authRedirect";
 
@@ -99,6 +100,7 @@ export default function CompanyScoutsPage() {
       <CompanyHeader companyName={companyName} />
 
       <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-10">
+        <BackLink href="/company/dashboard" label="ダッシュボードへ戻る" />
         <h1 className="text-lg font-bold text-gray-900">スカウト送信履歴・ステータス管理</h1>
 
         {!approved ? (
