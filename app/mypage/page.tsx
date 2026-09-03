@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { BackLink } from "@/src/components/BackLink";
+import { IndustryBenchmarkCard } from "@/src/components/IndustryBenchmarkCard";
 import { UniversityField } from "@/src/components/UniversityField";
 import { IndustrySelect } from "@/src/components/IndustrySelect";
 import {
@@ -298,6 +299,8 @@ export default function MyPage() {
             </button>
           )}
         </div>
+
+        {!loading && <IndustryBenchmarkCard />}
 
         {loading ? (
           <p className="text-sm text-gray-500">読み込み中...</p>

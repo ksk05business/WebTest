@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { ExamReviewEntry } from "@/src/data/questions";
+import { IndustryBenchmarkCard } from "@/src/components/IndustryBenchmarkCard";
 
 type Result = { score: number; total: number; part?: string };
 
@@ -63,6 +64,10 @@ export default function ResultPage() {
         <Link href="/dashboard" className="rounded-full px-4 py-3 text-sm text-gray-500 underline">
           ダッシュボードに戻る
         </Link>
+      </div>
+
+      <div className="w-full text-left">
+        <IndustryBenchmarkCard />
       </div>
 
       {review && review.length > 0 && (
