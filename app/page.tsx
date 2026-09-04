@@ -242,9 +242,9 @@ export default function Home() {
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="rounded-full bg-white px-8 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="whitespace-nowrap rounded-full bg-white px-6 py-4 text-sm font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:px-8 sm:text-base"
             >
-              【完全無料】今すぐ会員登録して対策を始める
+              【完全無料】今すぐ対策を始める
             </Link>
             <Link
               href="/login"
