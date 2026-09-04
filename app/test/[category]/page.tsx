@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CheckCircle2, ChevronLeft, HelpCircle, ListChecks, Sparkles } from "lucide-react";
 import { TEST_GUIDES, findTestGuide } from "@/src/data/testGuides";
-import { SITE_NAME, SITE_URL } from "@/src/lib/site";
+import { SITE_NAME, SITE_OGP_IMAGE, SITE_URL } from "@/src/lib/site";
 
 export function generateStaticParams() {
   return TEST_GUIDES.map((guide) => ({ category: guide.slug }));
@@ -30,11 +30,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName: SITE_NAME,
       url,
       type: "website",
+      images: [{ url: SITE_OGP_IMAGE, width: 1200, height: 630, alt: SITE_NAME }],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: guide.title,
       description: guide.metaDescription,
+      images: [SITE_OGP_IMAGE],
     },
   };
 }
