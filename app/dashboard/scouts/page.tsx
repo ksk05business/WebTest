@@ -32,7 +32,6 @@ export default function DashboardScoutsPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [scouts, setScouts] = useState<ScoutItem[] | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterTab>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [selectedScoutId, setSelectedScoutId] = useState<number | null>(null);
@@ -62,15 +61,10 @@ export default function DashboardScoutsPage() {
         return res.json();
       })
       .then((data: { scouts?: ScoutItem[]; error?: string }) => {
-        if (data.error) {
-          setLoadError(data.error);
-          return;
-        }
-        setScouts(data.scouts ?? []);
+        // 取得エラー時もユーザーにはシステムエラーを見せず、0件の空状態として自然に表示する
+        setScouts(data.error ? [] : data.scouts ?? []);
       })
-      .catch(() =>
-        setLoadError((prev) => prev ?? "スカウト一覧の取得に失敗しました。時間をおいて再度お試しください。")
-      );
+      .catch(() => setScouts([]));
   }
 
   async function handleRespond(scoutId: number, action: "accept" | "decline") {
@@ -138,10 +132,9 @@ export default function DashboardScoutsPage() {
         <BackLink href="/dashboard" label="ダッシュボードへ戻る" />
         <h1 className="mb-6 mt-3 text-xl font-bold text-gray-900">スカウト</h1>
 
-        {loadError && <p className="mb-4 text-sm font-medium text-red-600">{loadError}</p>}
         {respondError && <p className="mb-4 text-sm font-medium text-red-600">{respondError}</p>}
 
-        {scouts === null && !loadError ? (
+        {scouts === null ? (
           <p className="text-sm text-gray-500">読み込み中...</p>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr]">
@@ -178,7 +171,7 @@ export default function DashboardScoutsPage() {
 
               {filteredScouts.length === 0 ? (
                 <p className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-500">
-                  該当するスカウトはありません。
+                  {filter === "all" ? "現在、届いているスカウトはありません。" : "該当するスカウトはありません。"}
                 </p>
               ) : (
                 <div className="flex flex-col gap-2 lg:max-h-[calc(100vh-260px)] lg:overflow-y-auto lg:pr-1">
