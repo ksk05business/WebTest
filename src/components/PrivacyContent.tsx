@@ -99,7 +99,7 @@ export function PrivacyContent() {
           <br />
           代表: 福井敬介
           <br />
-          所在地: 東京都府中市清水が丘1－14－1
+          所在地: 〒940-2012 新潟県長岡市荻野1-2-19 Navia205
           <br />
           連絡先: ksk05business@gmail.com
         </p>
