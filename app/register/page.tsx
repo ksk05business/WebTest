@@ -404,6 +404,11 @@ export default function RegisterPage() {
           </p>
         )}
 
+        <p className="flex items-start gap-1 text-xs text-gray-500">
+          <Lock className="mt-0.5 h-3 w-3 flex-shrink-0" />
+          ご入力いただいた氏名・メールアドレスは暗号化して厳重に保管されます。本人の同意なく企業に公開されることは一切ありません。
+        </p>
+
         <button
           type="submit"
           disabled={
