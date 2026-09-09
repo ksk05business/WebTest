@@ -236,6 +236,9 @@ export default function Home() {
             <br />
             模試 ✕ スカウト
           </h1>
+          <p className="rounded-full bg-white/15 px-4 py-1.5 text-sm font-bold text-white">
+            【デプロイテスト完了！】
+          </p>
           <p className="text-balance text-base leading-relaxed text-blue-50 sm:text-lg">
             SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA
             に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
