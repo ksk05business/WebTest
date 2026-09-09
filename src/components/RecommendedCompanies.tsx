@@ -1,19 +1,60 @@
 "use client";
 
-// 企業PRカードの合間に挟み込む「就活記事コラム」の告知カード（旧・ダッシュボード右サイドバーの
-// 独立セクションから、PR一覧の中に挟み込むインライン形式に変更した）。コンテンツは現状プレースホルダーのみ。
+import Link from "next/link";
+import { useBlogSummaries } from "@/src/components/BlogSummaryProvider";
+
+// 企業PRカードの合間に挟み込む「就活記事コラム」カード（旧・ダッシュボード右サイドバーの
+// 独立セクションから、PR一覧の中に挟み込むインライン形式に変更した）。
+// ブログ記事一覧（最大3件）はapp/dashboard/layout.tsxがビルド時に取得し、
+// BlogSummaryProvider経由でContextとして渡している（このファイル自体は"use client"のため
+// node:fsを使うgetAllBlogPosts()を直接呼べない）。
 function ColumnPromoRow() {
+  const posts = useBlogSummaries();
+
   return (
-    <div className="flex flex-col gap-1 bg-emerald-50/50 p-4">
-      <div className="flex items-center gap-2">
-        <span className="flex-shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
-          コラム
-        </span>
-        <p className="font-semibold text-gray-900">就活記事・コラム</p>
+    <div className="flex flex-col gap-3 bg-emerald-50/50 p-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="flex-shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
+            コラム
+          </span>
+          <p className="font-semibold text-gray-900">就活記事・コラム</p>
+        </div>
+        <Link href="/blog" className="flex-shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700">
+          記事一覧を見る →
+        </Link>
       </div>
-      <p className="text-xs leading-relaxed text-gray-500">
-        近日公開予定です。就活準備に役立つ記事・コラムをここに掲載していきます。
-      </p>
+
+      {posts.length === 0 ? (
+        <p className="text-xs leading-relaxed text-gray-500">
+          近日公開予定です。就活準備に役立つ記事・コラムをここに掲載していきます。
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {posts.map((post) => (
+            <Link
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              className="group flex flex-col gap-1.5 rounded-lg border border-gray-200 bg-white p-3 transition-shadow hover:shadow-md"
+            >
+              <div className="flex flex-wrap gap-1">
+                {post.tags.slice(0, 2).map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <p className="text-sm font-bold leading-snug text-gray-900 group-hover:text-blue-600">
+                {post.title}
+              </p>
+              <p className="text-[11px] text-gray-400">{post.date}</p>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
