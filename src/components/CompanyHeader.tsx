@@ -44,8 +44,8 @@ export function CompanyHeader({ companyName }: { companyName: string }) {
           <Link href="/company/scouts" className="hover:text-blue-700">
             送信履歴
           </Link>
-          <Link href="/company/tokens" className="hover:text-blue-700">
-            トークン
+          <Link href="/company/quotation" className="hover:text-blue-700">
+            見積作成
           </Link>
         </nav>
       </div>
