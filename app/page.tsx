@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { TEST_TYPES } from "@/src/data/testTypes";
 import { BusinessLink } from "@/src/components/BusinessLink";
+import { FadeInSection } from "@/src/components/FadeInSection";
 import { ForgettingCurveChart } from "@/src/components/ForgettingCurveChart";
 import { ShareButtons } from "@/src/components/ShareButtons";
 import { SupportChatWidget } from "@/src/components/SupportChatWidget";
@@ -279,7 +280,7 @@ export default function Home() {
           className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-red-600/20 blur-3xl"
         />
 
-        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5">
+        <FadeInSection className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5">
           <span className="flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-1.5 text-xs font-bold text-red-400 ring-1 ring-red-500/30">
             <AlertTriangle className="h-4 w-4" />
             就活生への警告
@@ -300,12 +301,12 @@ export default function Home() {
           >
             手遅れになる前に【無料】で対策を始める
           </Link>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* 対応Webテスト網羅 */}
       <section className="px-6 py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl">
+        <FadeInSection className="mx-auto max-w-6xl">
           <div className="mx-auto mb-4 flex max-w-2xl flex-col items-center gap-3 text-center">
             <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
               <Layers className="h-3.5 w-3.5" />
@@ -342,12 +343,12 @@ export default function Home() {
               </Link>
             ))}
           </div>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* 安心感バナー */}
       <section className="border-y border-gray-100 bg-blue-50/60 px-6 py-10">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
+        <FadeInSection className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
           <p className="text-balance text-xl font-extrabold text-blue-900 sm:text-2xl">学生は完全無料</p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {BADGES.map((b) => (
@@ -360,12 +361,12 @@ export default function Home() {
               </span>
             ))}
           </div>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* 特徴 */}
       <section className="px-6 py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl">
+        <FadeInSection className="mx-auto max-w-6xl">
           <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-3 text-center">
             <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">3つのコア機能</h2>
             <p className="text-sm text-gray-500 sm:text-base">
@@ -390,12 +391,12 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* 忘却曲線グラフ */}
       <section className="border-y border-purple-100 bg-purple-50/40 px-6 py-20 sm:py-24">
-        <div className="mx-auto max-w-5xl">
+        <FadeInSection className="mx-auto max-w-5xl">
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
             <div className="flex flex-col gap-4">
               <span className="flex w-fit items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
@@ -430,12 +431,12 @@ export default function Home() {
               </p>
             </div>
           </div>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* 利用の流れ */}
       <section className="bg-gray-50 px-6 py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl">
+        <FadeInSection className="mx-auto max-w-6xl">
           <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-3 text-center">
             <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">ご利用の流れ</h2>
             <p className="text-sm text-gray-500 sm:text-base">5ステップで、対策からスカウト獲得まで。</p>
@@ -459,12 +460,12 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* 企業様向け */}
       <section id="business" className="scroll-mt-20 bg-gray-50 px-6 py-20 sm:py-24">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm sm:p-12">
+        <FadeInSection className="mx-auto flex max-w-4xl flex-col items-center gap-6 rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm sm:p-12">
           <span className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
             <Building2 className="h-3.5 w-3.5" />
             採用ご担当者様へ
@@ -491,12 +492,12 @@ export default function Home() {
               企業様ログイン
             </Link>
           </div>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* FAQ */}
       <section className="px-6 py-20 sm:py-24">
-        <div className="mx-auto max-w-3xl">
+        <FadeInSection className="mx-auto max-w-3xl">
           <div className="mx-auto mb-10 flex max-w-2xl flex-col items-center gap-3 text-center">
             <span className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
               <HelpCircle className="h-3.5 w-3.5" />
@@ -518,7 +519,7 @@ export default function Home() {
               </details>
             ))}
           </div>
-        </div>
+        </FadeInSection>
       </section>
 
       {/* ボトムCTA */}
@@ -531,7 +532,7 @@ export default function Home() {
           aria-hidden
           className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl"
         />
-        <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center gap-6">
+        <FadeInSection className="relative z-10 mx-auto flex max-w-2xl flex-col items-center gap-6">
           <CheckCircle2 className="h-10 w-10 text-white" />
           <h2 className="text-balance text-2xl font-bold text-white sm:text-3xl">
             対策も、スカウトも。すべて無料ではじめよう。
@@ -542,7 +543,7 @@ export default function Home() {
           >
             完全無料でWebテスト対策を始める
           </Link>
-        </div>
+        </FadeInSection>
       </section>
 
       <ShareButtons
