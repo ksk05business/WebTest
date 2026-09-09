@@ -1,0 +1,94 @@
+---
+name: seo-blog-authoring
+description: SEOブログ（/blog、content/blog/*.mdx）の新規記事作成・既存記事の編集・カスタムMDXコンポーネントの追加を行うときに読む。目的は検索流入からの無料会員登録数の最大化。MDX環境の構成、記事の型（構成・トーン・CTA配置）、SEO/GEO/AIO/LLMO対応方針、既存コンポーネント（CallToActionCTA/ChatBubble/PointBox/CheckList/RelatedArticles）の正確なProps・スタイリング規約をまとめている。
+---
+
+# SEOブログ記事の書き方（/blog）
+
+## このスキルの前提：記事の目的はKPIであって作品ではない
+
+ブログ記事は「検索エンジン・AI検索経由で流入した27卒・28卒の就活生を、無料会員登録まで導く」ためのコンテンツマーケティング施策である。読み物として優れているだけでは不十分で、**構成・CTA配置・トーンすべてを登録率（CVR）から逆算して設計する**。装飾やコンポーネントを増やすこと自体を目的化しないこと。
+
+## アーキテクチャ
+
+- 記事本体: `content/blog/<slug>.mdx`（1ファイル=1記事、フロントマター必須: `title, description, date, tags`）。
+- 読み込み: `src/lib/blog.ts`（`getAllBlogPosts()` / `getBlogPost(slug)` / `getRelatedPosts(slug, tags, limit)`。`gray-matter`でフロントマター分離）。
+- 一覧ページ: `app/blog/page.tsx`。詳細ページ: `app/blog/[slug]/page.tsx`（`generateStaticParams`・`generateMetadata`でSEOメタデータ、JSON-LD（`BlogPosting`）、末尾に`<RelatedArticles>`を自動配置）。
+- MDXレンダリング: `src/components/MdxWrapper.tsx`（`next-mdx-remote/rsc`のServer Component。`remark-math`+`rehype-katex`で数式、`components`にカスタムコンポーネントを登録）。**新しいMDXカスタムコンポーネントを作ったら、このファイルの`MDX_COMPONENTS`に必ず追加すること**（登録し忘れると本文中で`<MyComponent />`と書いてもただのテキストとして出力される）。
+- サイトマップ: `app/sitemap.ts`が`getAllBlogPosts()`を使って`/blog`配下を自動列挙する（新しい記事を追加するだけで自動的にサイトマップに載る、手動追記不要）。
+
+## 記事の型（構成テンプレート）
+
+これまでの実記事（`content/blog/spi-suiron-jikan-tarinai.mdx`）で確立した型。新規記事は基本的にこの順序に従う。
+
+1. **導入（共感）**: 「〜だと感じているなら」のような読者の悩みへの共感で始める。2〜3文の短い段落。
+2. **`<ChatBubble>`のやり取り（1往復）**: 就活生の悩み→公式の一言回答、で導入の共感を対話形式でも表現する（精読率対策）。
+3. **重要な一文のハイライト**: `<PointBox>`または黄色背景の`<p>`で、記事の核心（「なぜ簡単に解けるようになるか」等）を視覚的に止める。
+4. **ソフトCTA（1つ目）**: いきなり登録を迫らない。見出し・本文は「これから紹介する内容を実践する前に、まず現状を診断しよう」のように**これから得る情報の“前段”として実力診断を提案する文脈**にする（唐突な勧誘だと警戒され離脱率が上がる。実際にこの理由で一度書き直した経緯がある）。
+5. **本編（例題とステップ解説）**: `##`見出しで例題を提示し、`###`でステップ1・2・3に分割。各ステップは「操作の説明1文＋数式（$$）」の短い塊にする。数式にはLaTeX（`$inline$` / `$$display$$`）を使い、記号化する意味（なぜ読み返しが減るか等）を必ず一言添える。
+6. **`<PointBox>`でステップのまとめ**: 「全部書き出すのではなく〇〇の順で処理する」のような一般化可能なコツを1つに凝縮する。
+7. **もう少しだけ煽る（マイルドに）**: 「〇〇した経験はありませんか？」という共感的な問いかけで、対策を怠るとどうなるかを軽く示す。恐怖を煽りすぎない（プロジェクト全体のトーン規約）。
+8. **`<ChatBubble>`のやり取り（2往復目）**: 上記の悩みを対話でも繰り返し、自社機能（忘却曲線復習等）への自然な橋渡しにする。
+9. **`<CheckList>`でメリット列挙**: 文章を続けず、3項目程度のチェックマーク付き箇条書きにする（流し読み対策）。
+10. **強いCTA（最後）**: ここまで来た読者は既に価値を理解しているので、直接的な「完全無料で今すぐ始める」系の文言でよい。見出しはサービス独自の強み（忘却曲線エンジン等）を具体的に言語化する。
+
+`<RelatedArticles>`は`app/blog/[slug]/page.tsx`側で自動描画されるため、MDX本文に書く必要はない。
+
+## コピーライティング原則
+
+- **段落は2〜3文**。スマホのスクロール読了を前提にする。
+- トーンは「これなら自分にも解けるかも」と思わせる論理的・親身な語り口。焦燥感は使ってよいが、**具体的な「あるある」による共感喚起にとどめ、脅すような表現は避ける**。
+- 見出し（`##`/`###`）には検索されやすいサジェストキーワード（無料・コツ・時間足りない、等）を自然に含める。
+- **事実に基づかない訴求は書かない**（重要な制約）。過去に指示された「※メアドのみで登録完了」（実際は氏名・大学等の複数項目が必須）、「〇〇人利用中！」やユーザーの声（実データが存在しない）は、いずれも虚偽表示になるため実装せず、正確な代替文言に置き換えた実例がある。実績・数値を訴求に使う場合は、実データが存在することを必ず確認してから使うこと。
+
+## 利用可能なMDXカスタムコンポーネント
+
+すべて`src/components/`に配置、`MdxWrapper.tsx`の`MDX_COMPONENTS`に登録済み。
+
+### `<CallToActionCTA title? description? buttonText? />`
+会員登録への主導線。全て任意propで、未指定時は汎用文言にフォールバックする。**titleに`"`を含む強調表現を入れる場合はJSX属性をシングルクォートで囲む**（例: `title='忘却曲線エンジンで、推論の苦手を"自動で"克服する'`、ダブルクォート同士は属性デリミタと衝突する）。padding等の見た目は`px-5 py-5`（外枠）・`px-6 py-2.5`（ボタン）に調整済み（初期実装は`py-8`で大きすぎるとフィードバックを受け縮小した）。
+
+### `<ChatBubble speaker="student"|"official">本文</ChatBubble>`
+就活生⇄Webテストナビ公式の対話UI（Instagram DM風）。**重要な実装上の注意**: 吹き出し本体には必ず`w-fit`を付けること。付け忘れると、親の`flex-col`コンテナがデフォルトで子要素をstretchさせるため、短いメッセージでも列の最大幅いっぱいに間延びして表示される（実際にこの不具合が発生し、`w-fit max-w-[80%]`に修正した）。左右の位置揃えは`items-start`（student）/`items-end`（official）で行う。padding`px-4 py-2`、`leading-snug`、外側マージン`my-1.5`が現在の確定値。
+
+### `<PointBox label?="ポイント">本文</PointBox>`
+青背景・左ボーダーの要約ボックス。`px-4 py-2.5`、外側`my-4`。
+
+### `<CheckList><CheckItem>...</CheckItem></CheckList>`
+チェックマーク付き箇条書き。`CheckList`と`CheckItem`はセットで使う（`CheckList`単体は`<ul>`のみ、中身は`CheckItem`を並べる）。
+
+### `<RelatedArticles posts={...} />`（MDX内には書かない）
+`app/blog/[slug]/page.tsx`が`getRelatedPosts()`の結果を渡して自動描画する。関連記事が0件（タグが被る他記事が無い、または記事がまだ1本しかない）の場合は`null`を返し何も表示しない。新しい記事を追加するときにMDX側で気にする必要はない。
+
+## 数式・タイポグラフィのグローバル調整（`app/globals.css`）
+
+ブログ記事の`.prose`スコープに対して以下をカスタマイズ済み。新しい記事を書く上で意識しておくべき前提:
+
+- `.katex-mathml { user-select: none; }`: KaTeXは視覚非表示のMathML（読み上げ用）をDOMに残すため、ページを全選択コピーすると見た目のHTMLと重複してテキストが取得される。これを選択対象から除外済み（**実際の画面表示は正常**なので、コピペ結果に数式が二重に見えても画面のバグではない）。
+- `.katex-display { text-align:left; background:#f8fafc; border-radius:.5rem; padding:.75rem 1rem; overflow-x:auto; }`: ブロック数式（`$$...$$`）を「計算式ブロック」として視覚的に区別する。中央揃えのままだと間延びして見えるため左揃え＋グレー背景にした。インライン数式（`$...$`）はこの対象外。
+- `.prose p { line-height:2; margin:1.75em 0; }` / `.prose h2 { margin-top:4.5em; }` / `.prose h3 { margin-top:3.5em; }`: 段落内の行間と、話題の切れ目（見出し）の余白を広めに取る調整。Tailwind Typographyの既定スタイルは`:where()`で詳細度0のため、通常のクラスセレクタで安全に上書きできている。
+
+## SEO / GEO / AIO / LLMO 対応方針
+
+検索エンジン（SEO）だけでなく、AI検索・生成AIの回答内での引用（GEO/AIO/LLMO）も流入経路として意識する。
+
+**実装済み（`app/blog/[slug]/page.tsx`）**:
+- `generateMetadata()`でtitle/description/canonical/OGP/Twitterカードを自動生成。
+- JSON-LD構造化データ（`@type: "BlogPosting"`）を埋め込み済み。
+- `getAllBlogSlugs()`ベースの`generateStaticParams`で全記事を静的生成、`sitemap.ts`にも自動登録。
+- `<RelatedArticles>`による内部リンク（回遊率・クロール性向上）。
+
+**新規記事執筆時に意識すること（GEO/AIO/LLMO寄り）**:
+- **結論ファースト**: 導入段落の中で、記事が何を解決するかを1〜2文で明確に述べる。生成AIの回答エンジンは冒頭の要約的な文を引用・要約に使いやすい。
+- **断定的で抽出しやすい文**: 「〜かもしれません」より「〜です」「〜という意味です」のような明確な事実文・定義文を使う（`<PointBox>`のまとめ文は特にこの形式を徹底する）。
+- **構造化**: 箇条書き（`<CheckList>`）・番号付きステップ（`###`）・表は、AIが抽出・要約しやすいフォーマットとして積極的に使う。だらだらとした地の文だけの段落は避ける。
+- **FAQ形式の追加を検討する**: まだ既存記事には未実装だが、記事末尾に想定質問と回答を2〜4個並べる「よくある質問」セクションを追加し、`FAQPage`のJSON-LDを付与すると、Google検索のリッチリザルトとAI回答エンジン双方からの引用可能性が上がる。今後の記事、または既存記事の改訂で導入を検討すること（実装する場合はMDXに素のQ&A見出しを書き、`generateMetadata`と同じ場所にFAQPage用JSON-LDを`<script type="application/ld+json">`で追加する）。
+- **タグ（frontmatterの`tags`）は実際の検索語彙に寄せる**: `getRelatedPosts()`のスコアリング・SEOキーワード網羅の両方に使われるため、思いつきではなく想定検索クエリを反映させる。
+
+## 新規記事作成〜検証の手順
+
+1. `content/blog/<slug>.mdx`を作成（フロントマター必須）。上記の構成テンプレートに沿って執筆する。
+2. 新しいカスタムコンポーネントを使う場合は先に`src/components/`に作成し、`MdxWrapper.tsx`の`MDX_COMPONENTS`に登録する。
+3. `npx next build`でビルドし、`out/blog/<slug>.html`に対して`node -e`のワンショットスクリプトで期待する文字列・クラスが含まれているかを機械的に確認する（太字化・CTA文言・コンポーネントのclassName等。目視だけでなくgrep/nodeでの確認を併用すると細かい崩れに気づきやすい）。
+4. `npm run pages:dev`相当（`wrangler pages dev out`）でローカルサーバーを起動し、ブラウザで実際の見た目を確認する。**この環境ではプロセスの停止漏れが頻発するため、起動前に必ず`netstat -ano | grep ":8788" | grep LISTENING`で残存プロセスを確認し、`Get-CimInstance Win32_Process`で`wrangler pages dev out`を検索して見つかったbash.exeの最上位（親が自セッションのシェルではないもの）を`taskkill //PID <pid> //T //F`で止めてから起動し直すこと**。子孫プロセスだけ個別に殺すと親が再度spawnしてしまい終わらない。
+5. サイトマップ（`/sitemap.xml`）に自動反映されているか確認する（新規追加時のみでよい）。

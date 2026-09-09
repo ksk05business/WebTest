@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { GUIDE_ARTICLES } from "@/src/data/guideArticles";
 import { TEST_GUIDES } from "@/src/data/testGuides";
+import { getAllBlogPosts } from "@/src/lib/blog";
 import { SITE_URL } from "@/src/lib/site";
 
 // 静的サイト出力（output: "export"）ではビルド時に一度だけ生成されるため force-static を明示する。
@@ -18,6 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/test`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/practice`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/guide`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/contact`, changeFrequency: "yearly", priority: 0.4 },
     { url: `${SITE_URL}/company/apply`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/company/login`, changeFrequency: "monthly", priority: 0.3 },
@@ -37,5 +39,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticEntries, ...testCategoryEntries, ...guideEntries];
+  const blogEntries: MetadataRoute.Sitemap = getAllBlogPosts().map((post) => ({
+    url: `${SITE_URL}/blog/${post.slug}`,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  return [...staticEntries, ...testCategoryEntries, ...guideEntries, ...blogEntries];
 }

@@ -1,4 +1,45 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
+@plugin "@tailwindcss/typography";
+
+/* KaTeXは視覚非表示のMathML（読み上げ用）レイヤーをclip-pathで隠すのみでDOMには残すため、
+   全選択コピー時に見た目のHTMLレイヤーと重複して数式テキストが取得されてしまう。
+   選択・コピー対象から除外し、コピー&ペースト時に重複しないようにする。 */
+.katex-mathml {
+  user-select: none;
+}
+
+/* ブロック数式（$$...$$）を「計算式ブロック」として視覚的に区別する。
+   中央揃え＋余白多めだと間延びして見えるため、左寄せ＋薄いグレー背景の枠に変更する。 */
+.katex-display {
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 0.5rem;
+  background-color: #f8fafc;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+/* ブログ記事（MdxWrapperの.prose）の可読性向上。Tailwind Typographyのデフォルトは
+   :where()でラップされ詳細度0のため、通常のクラスセレクタで安全に上書きできる。
+   段落内の行間を広めにし、見出し（話の切れ目）前後の余白はさらに広く取って、
+   段落の続きと話題の切り替わりが視覚的に区別できるようにする。 */
+.prose p {
+  line-height: 2;
+  margin-top: 1.75em;
+  margin-bottom: 1.75em;
+}
+
+.prose h2 {
+  margin-top: 4.5em;
+  margin-bottom: 1.5em;
+}
+
+.prose h3 {
+  margin-top: 3.5em;
+  margin-bottom: 1.25em;
+}
 
 html {
   scroll-behavior: smooth;

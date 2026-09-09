@@ -21,6 +21,7 @@
 | 練習問題/模試モードのUI、単元選択、忘却曲線復習・誤答復習 | `practice-review-modes` |
 | 会員登録フォーム、大学名・希望職種・志望業界の選択肢とマッピング | `student-registration` |
 | D1スキーマ変更・本番マイグレーション、Pages Functionsのルーティング、メール送信設定 | `cloudflare-pages-gotchas` |
+| SEOブログ（/blog）記事の新規作成・編集、MDXカスタムコンポーネント追加 | `seo-blog-authoring` |
 
 # 応答・進め方のルール
 
