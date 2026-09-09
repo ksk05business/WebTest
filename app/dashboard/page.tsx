@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { MemorizationReviewBanner } from "@/src/components/MemorizationReviewBanner";
@@ -74,15 +75,16 @@ export default function DashboardPage() {
             <div id="notices">
               <NoticeBoard />
             </div>
-            <div
+            <Link
+              href="/borders"
               id="border-list"
-              className="flex flex-col gap-2 rounded-lg border border-gray-200 bg-white p-4"
+              className="flex cursor-pointer flex-col gap-2 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
             >
               <h3 className="text-sm font-bold text-gray-900">適性検査 実施企業・ボーダー一覧</h3>
               <p className="text-xs leading-relaxed text-gray-500">
-                近日公開予定です。SPI・玉手箱等の適性検査を実施している企業や、ボーダーラインの目安をここに掲載していきます。
+                SPI・玉手箱等の適性検査を実施している企業や、ボーダーラインの目安を検索できます。
               </p>
-            </div>
+            </Link>
           </aside>
         </div>
       </main>

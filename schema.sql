@@ -298,3 +298,23 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_sessions_subject ON sessions(subject_type, subject_id);
+
+-- ============================================================
+-- 企業ボーダー（各企業の適性検査ボーダーライン参考情報）。学生が「志望企業の選考でどの検査種別が
+-- 出るか・どの程度の難易度か」を事前に把握できるよう、`/borders`で検索・閲覧できる参考データベース。
+-- company_profiles（求人企業のログインアカウント）とは無関係の、運営が管理するマスタデータ。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS company_borders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  company_name TEXT NOT NULL,
+  industry TEXT NOT NULL,
+  test_type TEXT NOT NULL, -- 例: 'SPI3' | '玉手箱' | 'TG-WEB' | 'GAB / C-GAB' | 'CAB' | 'SCOA'
+  border_level TEXT NOT NULL, -- ボーダー難易度ランク。例: 'S' | 'A' | 'B' | 'C' | 'D'
+  selection_timing TEXT NOT NULL, -- 選考時期の目安。例: '3月〜6月（本選考）'
+  description TEXT NOT NULL, -- 詳細解説（対策のポイント等）
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_company_borders_company_name ON company_borders(company_name);
+CREATE INDEX IF NOT EXISTS idx_company_borders_industry ON company_borders(industry);
+CREATE INDEX IF NOT EXISTS idx_company_borders_test_type ON company_borders(test_type);
