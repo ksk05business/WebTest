@@ -43,6 +43,15 @@ export function getBlogPost(slug: string): BlogPost | null {
   }
 }
 
+// フロントマターのdateは"2026-09-09"のような日付のみ、"2026-09-11T17:00:00+09:00"のような
+// 日時+タイムゾーン付きの両方を許容する（後者はJSON-LDのdatePublishedに正確な時刻を渡すため）。
+// 表示用には人間が読みやすい日本語形式（例: 2026年9月11日）に変換する。
+export function formatBlogDate(date: string): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return date;
+  return new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "long", day: "numeric" }).format(d);
+}
+
 export function getAllBlogPosts(): BlogPost[] {
   return getAllBlogSlugs()
     .map((slug) => getBlogPost(slug))

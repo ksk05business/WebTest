@@ -31,8 +31,10 @@ description: SEOブログ（/blog、content/blog/*.mdx）の新規記事作成�
 - 記事本体: `content/blog/<slug>.mdx`（1ファイル=1記事、フロントマター必須: `title, description, date, tags`）。
 - 読み込み: `src/lib/blog.ts`（`getAllBlogPosts()` / `getBlogPost(slug)` / `getRelatedPosts(slug, tags, limit)`。`gray-matter`でフロントマター分離）。
 - 一覧ページ: `app/blog/page.tsx`。詳細ページ: `app/blog/[slug]/page.tsx`（`generateStaticParams`・`generateMetadata`でSEOメタデータ、JSON-LD（`BlogPosting`）、末尾に`<RelatedArticles>`を自動配置）。
-- MDXレンダリング: `src/components/MdxWrapper.tsx`（`next-mdx-remote/rsc`のServer Component。`remark-math`+`rehype-katex`で数式、`components`にカスタムコンポーネントを登録）。**新しいMDXカスタムコンポーネントを作ったら、このファイルの`MDX_COMPONENTS`に必ず追加すること**（登録し忘れると本文中で`<MyComponent />`と書いてもただのテキストとして出力される）。
+- MDXレンダリング: `src/components/MdxWrapper.tsx`（`next-mdx-remote/rsc`のServer Component。`remark-gfm`+`remark-math`+`rehype-katex`で表・数式、`components`にカスタムコンポーネントを登録）。**新しいMDXカスタムコンポーネントを作ったら、このファイルの`MDX_COMPONENTS`に必ず追加すること**（登録し忘れると本文中で`<MyComponent />`と書いてもただのテキストとして出力される）。
+- **Markdownの表記法（`| a | b |`）を使うには`remark-gfm`が必須**。標準のMDX/CommonMarkにはテーブル記法が含まれておらず、`remark-gfm`を`remarkPlugins`に追加していないと`| a | b |`はただの地の文としてそのまま出力される（実際にこの不具合が発生し、`MdxWrapper.tsx`に追加して解決した実例がある）。表を使う記事を書いたら、ビルド後に`out/blog/<slug>.html`で`<table>`タグが実際に出力されているか必ず確認すること。
 - サイトマップ: `app/sitemap.ts`が`getAllBlogPosts()`を使って`/blog`配下を自動列挙する（新しい記事を追加するだけで自動的にサイトマップに載る、手動追記不要）。
+- 公開日時: フロントマターの`date`は`"2026-09-09"`のような日付のみ、`"2026-09-11T17:00:00+09:00"`のような日時+タイムゾーン付きの両方に対応する。一覧・詳細ページの表示には`formatBlogDate()`（`src/lib/blog.ts`）で人間が読みやすい形式（例: 2026年9月11日）に変換してから表示する。JSON-LDの`datePublished`・OGPの`publishedTime`には生の文字列をそのまま渡す（ISO8601形式の方がSEO上正確なため）。
 
 ## 記事の型（構成テンプレート）
 

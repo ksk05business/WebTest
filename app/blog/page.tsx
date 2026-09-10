@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ChevronRight } from "lucide-react";
-import { getAllBlogPosts } from "@/src/lib/blog";
+import { formatBlogDate, getAllBlogPosts } from "@/src/lib/blog";
 import { SITE_NAME } from "@/src/lib/site";
 
 export const metadata: Metadata = {
@@ -48,7 +48,7 @@ export default function BlogIndexPage() {
                 <div>
                   <p className="font-bold text-gray-900">{post.title}</p>
                   <p className="mt-1 text-xs text-gray-500">{post.description}</p>
-                  <p className="mt-2 text-[11px] text-gray-400">{post.date}</p>
+                  <p className="mt-2 text-[11px] text-gray-400">{formatBlogDate(post.date)}</p>
                 </div>
                 <ChevronRight className="h-5 w-5 flex-shrink-0 text-gray-400" />
               </Link>

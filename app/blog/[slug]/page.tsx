@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ChevronLeft } from "lucide-react";
-import { getAllBlogSlugs, getBlogPost, getRelatedPosts } from "@/src/lib/blog";
+import { formatBlogDate, getAllBlogSlugs, getBlogPost, getRelatedPosts } from "@/src/lib/blog";
 import { MdxWrapper } from "@/src/components/MdxWrapper";
 import { RelatedArticles } from "@/src/components/RelatedArticles";
 import { SITE_NAME, SITE_OGP_IMAGE, SITE_URL } from "@/src/lib/site";
@@ -97,7 +97,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               ))}
             </div>
             <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">{post.title}</h1>
-            <p className="text-xs text-gray-400">{post.date}</p>
+            <p className="text-xs text-gray-400">{formatBlogDate(post.date)}</p>
           </div>
 
           <MdxWrapper source={post.content} />
