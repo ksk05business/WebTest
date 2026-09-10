@@ -6,10 +6,11 @@ import { CallToActionCTA } from "@/src/components/CallToActionCTA";
 import { ChatBubble } from "@/src/components/ChatBubble";
 import { PointBox } from "@/src/components/PointBox";
 import { CheckList, CheckItem } from "@/src/components/CheckList";
+import { CarrollDiagram } from "@/src/components/CarrollDiagram";
 
 // MDX本文中から直接呼び出せるコンポーネント一覧。新しいカスタムコンポーネントを
 // MDX記事内で使いたい場合はここに追加すること。
-const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem };
+const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem, CarrollDiagram };
 
 // SEOブログ記事（MDX）を描画する共通コンポーネント。Server Component（RSC）として動作し、
 // Next.jsの静的エクスポート（output: "export"）でもビルド時にレンダリングされる。

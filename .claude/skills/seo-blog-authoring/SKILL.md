@@ -86,6 +86,8 @@ SPIの推論や玉手箱など、条件（①②③…）が複数提示され�
 
 すべて`src/components/`に配置、`MdxWrapper.tsx`の`MDX_COMPONENTS`に登録済み。
 
+**【重要・実際にハマった不具合】MDX内でカスタムコンポーネントに数値をpropsとして渡すとき、`prop={8}`のようなJSX式（波括弧）は`next-mdx-remote/rsc`のこの構成では値が渡らず`undefined`になる。** ネストしたオブジェクトリテラル（`data={{ inner: 8 }}`）はもちろん、フラットな単一の数値式（`topLeftInner={8}`）でも同様に失敗する（`console.error`でpropsの中身をダンプして実際に検証済み）。一方、**文字列として`prop="8"`のように渡すと正常に届く**。そのため、数値を表示するだけのpropsは常に文字列（`"8"`）で渡し、コンポーネント側で`number | string`として受け取るか、必要な場合のみ`Number(...)`で変換すること。真偽値・オブジェクトなど文字列化できない値が必要な場合は、propsで渡さずコンポーネント内部の分岐ロジックに倒す（例: `variant="highlighted"`のような文字列propで表現する）。新しいコンポーネントを作る際は、実際にビルドして`out/blog/<slug>.html`の該当箇所に期待した値が出力されているか、`grep`等で緩すぎない検証（ページ全体からの部分一致ではなく、対象要素の直近だけを切り出して確認）をすること——ページ内の別の場所に同じ数字がたまたま存在すると、実際には失敗しているのに検証が「OK」と誤判定してしまう（この記事のQA中に実際に一度誤判定した）。
+
 ### `<CallToActionCTA title? description? buttonText? />`
 会員登録への主導線。全て任意propで、未指定時は汎用文言にフォールバックする。**titleに`"`を含む強調表現を入れる場合はJSX属性をシングルクォートで囲む**（例: `title='忘却曲線エンジンで、推論の苦手を"自動で"克服する'`、ダブルクォート同士は属性デリミタと衝突する）。padding等の見た目は`px-5 py-5`（外枠）・`px-6 py-2.5`（ボタン）に調整済み（初期実装は`py-8`で大きすぎるとフィードバックを受け縮小した）。
 
@@ -97,6 +99,9 @@ SPIの推論や玉手箱など、条件（①②③…）が複数提示され�
 
 ### `<CheckList><CheckItem>...</CheckItem></CheckList>`
 チェックマーク付き箇条書き。`CheckList`と`CheckItem`はセットで使う（`CheckList`単体は`<ul>`のみ、中身は`CheckItem`を並べる）。
+
+### `<CarrollDiagram colLeftLabel colRightLabel rowTopLabel rowBottomLabel innerLabel outerLabel topLeftInner? topLeftOuter? topRightInner? topRightOuter? bottomLeftInner? bottomLeftOuter? bottomRightInner? bottomRightOuter? caption? />`
+3条件の集合問題（SPIの「キャロル表」）を、大きな四角を十字で4分割し各区画に◯囲みの数字（3つ目の条件「あり」）とその下に「なし」の数字を添える伝統的な見た目で描画する。2条件（col×row）で4区画、各区画の中でさらに3つ目の条件（inner/outer）を表す。値を省略すると「？」を表示するため、解説の途中経過（未確定のマス）を示すのに使える。**数値系propsは必ず`topLeftInner="8"`のように文字列で渡すこと**（上記「数値をJSX式`{8}`で渡すと失敗する」不具合の該当箇所）。
 
 ### `<RelatedArticles posts={...} />`（MDX内には書かない）
 `app/blog/[slug]/page.tsx`が`getRelatedPosts()`の結果を渡して自動描画する。関連記事が0件（タグが被る他記事が無い、または記事がまだ1本しかない）の場合は`null`を返し何も表示しない。新しい記事を追加するときにMDX側で気にする必要はない。

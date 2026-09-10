@@ -25,10 +25,15 @@ tags: ["SPI", "非言語", "推論・集合"]
 
 まず基本形を確認しましょう。2つの条件（A・B）の組み合わせを横軸に、残り1つの条件（C）の「ある・なし」を縦軸に取り、2行×4列＝8マスの表を作ります。
 
-| 　 | Aあり×Bあり | Aあり×Bなし | Aなし×Bあり | Aなし×Bなし |
-|---|---|---|---|---|
-| Cあり |  |  |  |  |
-| Cなし |  |  |  |  |
+<CarrollDiagram
+  colLeftLabel="Aあり"
+  colRightLabel="Aなし"
+  rowTopLabel="Bあり"
+  rowBottomLabel="Bなし"
+  innerLabel="Cあり"
+  outerLabel="Cなし"
+  caption="○の中＝Cあり（3つとも該当）の人数、下の段＝Cなしの人数"
+/>
 
 この8マスが、3条件のすべての組み合わせ（ⒶⒷⒸの○×パターン全8通り）に1対1で対応しています。ベン図で言えば「3つの円が作る7つの重なり領域＋どの円にも入らない領域」と同じものを、重ならない8個のマスに展開しているだけです。
 
@@ -59,10 +64,18 @@ tags: ["SPI", "非言語", "推論・集合"]
 
 「3つすべて利用」「2つだけ利用」という条件は、該当するマスへそのまま書き込めます。
 
-| 　 | Xあり×Yあり | Xあり×Yなし | Xなし×Yあり | Xなし×Yなし |
-|---|---|---|---|---|
-| Zあり | 8 | 12 | 15 |  |
-| Zなし | 18 |  |  |  |
+<CarrollDiagram
+  colLeftLabel="Xあり"
+  colRightLabel="Xなし"
+  rowTopLabel="Yあり"
+  rowBottomLabel="Yなし"
+  innerLabel="Zあり"
+  outerLabel="Zなし"
+  topLeftInner="8"
+  topLeftOuter="18"
+  topRightInner="15"
+  bottomLeftInner="12"
+/>
 
 ### ステップ2：単独条件の合計から「その条件だけ」を引き算で求める
 
@@ -82,10 +95,20 @@ $$
 Z\text{だけ} = 38 - 8 - 12 - 15 = 3
 $$
 
-| 　 | Xあり×Yあり | Xあり×Yなし | Xなし×Yあり | Xなし×Yなし |
-|---|---|---|---|---|
-| Zあり | 8 | 12 | 15 | 3 |
-| Zなし | 18 | 14 | 4 |  |
+<CarrollDiagram
+  colLeftLabel="Xあり"
+  colRightLabel="Xなし"
+  rowTopLabel="Yあり"
+  rowBottomLabel="Yなし"
+  innerLabel="Zあり"
+  outerLabel="Zなし"
+  topLeftInner="8"
+  topLeftOuter="18"
+  topRightInner="15"
+  topRightOuter="4"
+  bottomLeftInner="12"
+  bottomLeftOuter="14"
+/>
 
 ### ステップ3：全体の合計から残り1マスを引き算で求める
 
@@ -95,10 +118,22 @@ $$
 \text{該当なし} = 100 - (8+12+15+3+18+14+4) = 26
 $$
 
-| 　 | Xあり×Yあり | Xあり×Yなし | Xなし×Yあり | Xなし×Yなし |
-|---|---|---|---|---|
-| Zあり | 8 | 12 | 15 | 3 |
-| Zなし | 18 | 14 | 4 | 26 |
+<CarrollDiagram
+  colLeftLabel="Xあり"
+  colRightLabel="Xなし"
+  rowTopLabel="Yあり"
+  rowBottomLabel="Yなし"
+  innerLabel="Zあり"
+  outerLabel="Zなし"
+  topLeftInner="8"
+  topLeftOuter="18"
+  topRightInner="15"
+  topRightOuter="4"
+  bottomLeftInner="12"
+  bottomLeftOuter="14"
+  bottomRightInner="3"
+  bottomRightOuter="26"
+/>
 
 **答え：いずれも利用していない人は26人**です。8マスの合計が`8+12+15+3+18+14+4+26＝100`と一致することも確認できます（このセルフチェックができるのもキャロル表の強みです）。
 
