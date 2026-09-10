@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Landmark, ListChecks, LogOut, Mail, Users } from "lucide-react";
+import { BookOpen, Building2, Landmark, ListChecks, LogOut, Mail, Users } from "lucide-react";
 import { ContactInquiriesTab } from "@/src/components/admin/ContactInquiriesTab";
 import { CompanyManagementPanel } from "@/src/components/admin/CompanyManagementPanel";
 import { StudentsTab } from "@/src/components/admin/StudentsTab";
 import { QuestionAuditTab } from "@/src/components/admin/QuestionAuditTab";
 import { CompanyBordersTab } from "@/src/components/admin/CompanyBordersTab";
+import { BlogPostsTab } from "@/src/components/admin/BlogPostsTab";
 
 const TOKEN_STORAGE_KEY = "adminApiToken";
 
@@ -18,6 +19,7 @@ const TABS = [
   { id: "contact", label: "お問い合わせ", icon: Mail },
   { id: "companies", label: "直接採用企業", icon: Building2 },
   { id: "borders", label: "ボーダー企業管理", icon: Landmark },
+  { id: "blog", label: "ブログ記事管理", icon: BookOpen },
   { id: "students", label: "学生", icon: Users },
 ] as const;
 
@@ -164,6 +166,9 @@ export default function AdminDashboardPage() {
             onAuthError={handleAuthError}
             onDataChanged={handleDataChanged}
           />
+        )}
+        {activeTab === "blog" && (
+          <BlogPostsTab adminToken={adminToken} onAuthError={handleAuthError} />
         )}
         {activeTab === "students" && (
           <StudentsTab adminToken={adminToken} onAuthError={handleAuthError} />
