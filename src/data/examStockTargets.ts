@@ -76,16 +76,18 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "scoa_common_sense", subCategory: "社会", sectionLabel: "常識", perCycle: 13 },
   { category: "scoa_common_sense", subCategory: "理科", sectionLabel: "常識", perCycle: 12 },
 
-  // SPI3（2026-09-02改修。言語40問＋非言語30問＋英語30問＋構造把握20問＝計120問/回。
+  // SPI3（2026-09-02改修。言語39問＋非言語30問＋英語29問＋構造把握20問＝計118問/回。
   // 同日中に他テスト（GAB/TG-WEB等）と同じ「模試専用プール分離」方式へ完全移行したため、
   // sharesPoolWithPracticeフラグは撤去済み＝他テストと同じmockCount基準で在庫判定される）。
-  // 言語（計40問/回）
+  // 言語（計39問/回。長文読解は3問1組のpassage_group_id単位でしか選出されないため、本来の
+  // 目安7問ではなく実際に配信可能な6問をperCycleとしている。app/test/page.tsxの
+  // SPI_VERBAL_SUBPARTSのコメント参照）
   { category: "verbal", subCategory: "語彙", sectionLabel: "言語", perCycle: 12 },
   { category: "verbal", subCategory: "二語の関係", sectionLabel: "言語", perCycle: 6 },
   { category: "verbal", subCategory: "熟語の成り立ち", sectionLabel: "言語", perCycle: 5 },
   { category: "verbal", subCategory: "語句の用法", sectionLabel: "言語", perCycle: 5 },
   { category: "verbal", subCategory: "文の並べ替え", sectionLabel: "言語", perCycle: 5 },
-  { category: "verbal", subCategory: "長文読解", sectionLabel: "言語", perCycle: 7 },
+  { category: "verbal", subCategory: "長文読解", sectionLabel: "言語", perCycle: 6 },
   // 非言語（計30問/回）。「濃度算」「分割払い」はユーザー仕様上「濃度算 / 分割払い: 3問/回」と
   // 1行にまとめて示されていたため、既存の2つの独立単元のまま2:1で按分した（濃度算のほうが
   // 出題頻度の高い定番論点のため多めに配分）。
@@ -99,11 +101,11 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "non_verbal", subCategory: "割合・比", sectionLabel: "非言語", perCycle: 2 },
   { category: "non_verbal", subCategory: "濃度算", sectionLabel: "非言語", perCycle: 2 },
   { category: "non_verbal", subCategory: "分割払い", sectionLabel: "非言語", perCycle: 1 },
-  // 英語（計30問/回）
+  // 英語（計29問/回。長文読解（英語）も3問1組のため本来の目安7問ではなく6問で計上）
   { category: "english", subCategory: "語意（同意語・反意語）", sectionLabel: "英語", perCycle: 9 },
   { category: "english", subCategory: "空欄補充", sectionLabel: "英語", perCycle: 9 },
   { category: "english", subCategory: "英英辞典", sectionLabel: "英語", perCycle: 5 },
-  { category: "english", subCategory: "長文読解（英語）", sectionLabel: "英語", perCycle: 7 },
+  { category: "english", subCategory: "長文読解（英語）", sectionLabel: "英語", perCycle: 6 },
   // 構造的把握力（計20問/回）
   { category: "structural", subCategory: "文章の構造化", sectionLabel: "構造把握", perCycle: 10 },
   { category: "structural", subCategory: "分類・グループ化", sectionLabel: "構造把握", perCycle: 10 },

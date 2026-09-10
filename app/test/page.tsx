@@ -7,19 +7,17 @@ import { formatJapaneseDate } from "@/src/lib/formatDate";
 
 const TIME_PER_QUESTION = 60; // spi_english / spi_structural（1問ごとの制限時間）
 
-// 基礎能力試験（言語・非言語）は35分間のタイムボックス制、問題数の上限なし
-// （標準的な出題数の目安は言語約30〜35問・非言語約20問だが、実際の問題数は回答速度で変動する）。
-// 前半15分は言語、後半20分は非言語から連続的に出題する。実際のSPIテストセンター形式に合わせ、
-// 1問ごとの制限時間・即時の正誤表示は行わず、正誤・解説は試験終了後に/resultで一覧確認する。
+// 基礎能力試験（言語・非言語）は「言語39問＋非言語30問＝計69問の固定ロースター」を、35分間
+// （2100秒）のタイムボックス内で解く方式（言語は本来40問が目安だが、長文読解が3問1組の
+// passage_group_id単位でしか選出できないため39問に調整している。詳細はSPI_VERBAL_SUBPARTSの
+// コメント参照）。src/data/targetTimes.tsのSUBCATEGORY_OVERRIDE_SECONDS（verbal::* /
+// non_verbal::*）は、この69問すべてを目標ペースちょうどで解いた場合の合計が言語900秒＋
+// 非言語1200秒＝2100秒（35分）にぴったり一致するよう逆算済みなので、出題数（各SubPartの
+// limit値）を変更する場合は必ずtargetTimes.ts側の秒数も再計算すること。
+// 69問すべてに解答し終えた場合はタイマー残りに関わらずその時点で試験終了。35分経過時点で69問に
+// 到達していない場合は、そこまでに実際に解答した分のみを/resultの解答一覧に表示する
+// （未到達分はプレースホルダー表示せず、単に一覧に含めない）。
 const BASIC_EXAM_TOTAL_SEC = 35 * 60;
-const BASIC_EXAM_VERBAL_SEC = 15 * 60;
-// 事前に取得しておく問題プールは、SPI_VERBAL_SUBPARTS/SPI_NON_VERBAL_SUBPARTSの単元別配分比率を
-// 保ったまま、この倍率でスケールアップして深さを持たせる（不足した場合は末尾に達し次第、
-// プール内で先頭から繰り返す）。fetchSubPartsPoolが小分類ごとにグループ化して連結する方式に
-// なったため（同じ形式の問題が連続して出題される）、倍率を大きくしすぎると1つの小分類だけで
-// 時間を使い切ってしまい、後半の小分類（長文読解等）に時間内でたどり着けなくなる。そのため
-// 「快足の受験者が涸れないための最小限のバッファ」程度の低めの倍率に留めている。
-const BASIC_EXAM_POOL_MULTIPLIER = 2;
 
 type ExamSubPart = { category: string; subCategory: string; limit: number };
 
@@ -38,18 +36,23 @@ type ExamPartConfig = {
   sections?: readonly ExamSection[];
 };
 
-// SPI3: 2026-09-02改修。言語40問＋非言語30問＋英語30問＋構造把握20問＝計120問/回
+// SPI3: 2026-09-02改修。言語39問＋非言語30問＋英語29問＋構造把握20問＝計118問/回
 // （src/data/examStockTargets.tsのSPIエントリと完全に一致させること）。同日中に他テスト
 // （GAB/TG-WEB等）と同じ「模試専用プール分離」方式へ完全移行し、EXAM_PARTSのmockOnlyを
 // trueにしたため、以下のsubPartsはis_mock_only=1（模試専用に振り替え済みの問題）のみを
 // 対象に出題する。
+// 言語「長文読解」はlimit=6（本来の目安は7だが、長文読解は1つの長文につき3問1組
+// （passage_group_id）で構成されており、/api/questions側は長文の途中で問い合わせを打ち切らず
+// 「3問1組を丸ごと含むか、丸ごと除外するか」でしか選出しないため、7を指定しても実際には常に
+// 6問（2組）しか返らない。それに合わせてlimitを6に設定し、src/data/targetTimes.tsの
+// verbal::長文読解の目安秒数もこの6問前提で35分ちょうどになるよう逆算している）。
 const SPI_VERBAL_SUBPARTS: readonly ExamSubPart[] = [
   { category: "verbal", subCategory: "語彙", limit: 12 },
   { category: "verbal", subCategory: "二語の関係", limit: 6 },
   { category: "verbal", subCategory: "熟語の成り立ち", limit: 5 },
   { category: "verbal", subCategory: "語句の用法", limit: 5 },
   { category: "verbal", subCategory: "文の並べ替え", limit: 5 },
-  { category: "verbal", subCategory: "長文読解", limit: 7 },
+  { category: "verbal", subCategory: "長文読解", limit: 6 },
 ];
 const SPI_NON_VERBAL_SUBPARTS: readonly ExamSubPart[] = [
   { category: "non_verbal", subCategory: "推論", limit: 9 },
@@ -67,27 +70,26 @@ const SPI_ENGLISH_SUBPARTS: readonly ExamSubPart[] = [
   { category: "english", subCategory: "語意（同意語・反意語）", limit: 9 },
   { category: "english", subCategory: "空欄補充", limit: 9 },
   { category: "english", subCategory: "英英辞典", limit: 5 },
-  { category: "english", subCategory: "長文読解（英語）", limit: 7 },
+  // 長文読解（英語）もverbal::長文読解と同じ理由（3問1組のpassage_group_id単位でしか
+  // 選出されない）でlimitを6にしている。
+  { category: "english", subCategory: "長文読解（英語）", limit: 6 },
 ];
 const SPI_STRUCTURAL_SUBPARTS: readonly ExamSubPart[] = [
   { category: "structural", subCategory: "文章の構造化", limit: 10 },
   { category: "structural", subCategory: "分類・グループ化", limit: 10 },
 ];
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 // subPartsで指定した小分類ごとにlimit×multiplier件ずつ並行取得する。同じ小分類（出題形式）の
 // 問題が連続して出題されるよう、取得結果はsubPartsの宣言順のまま連結し、配列全体を横断する
-// シャッフルは行わない（各小分類内の順序のみをシャッフルしてから平坦化＝連結する）。
+// シャッフルは行わない。
 // 例: SPI言語で「語句の用法」が5問選出された場合、他の形式が間に挟まらず5問連続で出題されてから
 // 次の形式へ移行する。
+// 【重要】各小分類内の並び順は、APIが返す順序をそのまま尊重すること（ここで独自にシャッフルし
+// 直してはいけない）。/api/questions は長文読解のような同一passage_group_id（1つの長文に対する
+// 複数設問）を常に連続させたうえでグループ単位のみをシャッフルして返す。この応答をクライアント側で
+// さらに一様シャッフルすると、passage_group_idの情報がクライアントのQuestion型に含まれていない
+// ため再グループ化できず、同じ長文の設問がバラバラに分散してしまう不具合が実際に発生した
+// （このコメントの直前まで、ここで再シャッフルしてしまっていた）。
 async function fetchSubPartsPool(
   subParts: readonly ExamSubPart[],
   multiplier: number,
@@ -104,7 +106,7 @@ async function fetchSubPartsPool(
       return fetch(`/api/questions?${params.toString()}`).then((r) => r.json());
     })
   );
-  return (results as { questions?: Question[] }[]).flatMap((r) => shuffleArray(r.questions ?? []));
+  return (results as { questions?: Question[] }[]).flatMap((r) => r.questions ?? []);
 }
 
 // 玉手箱・TG-WEB・GAB/C-GABは2026-09-01以降、形式・セクションごとに独立して受験できる方式に変更した
@@ -546,19 +548,18 @@ function TestPageInner() {
   );
 }
 
-// 基礎能力試験（言語・非言語）: 35分のタイムボックス制。前半17分は言語、後半18分は非言語から
-// プール内をランダムな出題順のまま連続して出題する。1問ごとの制限時間・即時の正誤表示は行わず、
-// 選択肢をクリックした瞬間に次の問題へ進む。時間切れで自動終了し、全問の解答一覧を/resultへ引き渡す。
+// 基礎能力試験（言語・非言語）: 言語39問＋非言語30問＝計69問の固定ロースターを、35分の
+// タイムボックス内で解く。ロースターは小分類（出題形式）ごとに連続するグループ順のまま
+// （fetchSubPartsPoolの仕様通り）、言語39問→非言語30問の順で並ぶ。1問ごとの制限時間・即時の
+// 正誤表示は行わず、選択肢をクリックした瞬間に次の問題へ進む。69問すべてに解答し終えた場合は
+// 残り時間に関わらずその時点で試験終了、35分経過時点で69問に届いていない場合はそこまでの
+// 解答のみを結果に反映する（未到達分は結果一覧に含めない）。
 function BasicExamFlow() {
   const router = useRouter();
-  const [pools, setPools] = useState<{ verbal: Question[]; non_verbal: Question[] } | null>(null);
+  const [questions, setQuestions] = useState<Question[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(BASIC_EXAM_TOTAL_SEC);
-  const [phase, setPhase] = useState<"verbal" | "non_verbal">("verbal");
-  const [verbalIndex, setVerbalIndex] = useState(0);
-  const [nonVerbalIndex, setNonVerbalIndex] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [answeredCount, setAnsweredCount] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [finishing, setFinishing] = useState(false);
 
   const resultsRef = useRef<ExamReviewEntry[]>([]);
@@ -566,19 +567,20 @@ function BasicExamFlow() {
 
   useEffect(() => {
     Promise.all([
-      fetchSubPartsPool(SPI_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, true),
-      fetchSubPartsPool(SPI_NON_VERBAL_SUBPARTS, BASIC_EXAM_POOL_MULTIPLIER, true),
+      fetchSubPartsPool(SPI_VERBAL_SUBPARTS, 1, true),
+      fetchSubPartsPool(SPI_NON_VERBAL_SUBPARTS, 1, true),
     ])
       .then(([verbalQuestions, nonVerbalQuestions]) => {
         if (!verbalQuestions.length || !nonVerbalQuestions.length) {
           setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
           return;
         }
-        setPools({ verbal: verbalQuestions, non_verbal: nonVerbalQuestions });
-        setCurrentQuestion(verbalQuestions[0]);
+        setQuestions([...verbalQuestions, ...nonVerbalQuestions]);
       })
       .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
   }, []);
+
+  const currentQuestion = questions?.[currentIndex] ?? null;
 
   // 現在の問題が表示された時点を計測開始とする（解答時間の計測用、試験中はUI非表示）。
   useEffect(() => {
@@ -592,17 +594,17 @@ function BasicExamFlow() {
 
   // 全体35分のカウントダウン。0になった時点で自動終了する。
   useEffect(() => {
-    if (!pools || finishing) return;
+    if (!questions || finishing) return;
     if (timeLeft <= 0) {
       void finalize();
       return;
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(id);
-  }, [pools, timeLeft, finishing, finalize]);
+  }, [questions, timeLeft, finishing, finalize]);
 
   function handleSelect(label: string) {
-    if (!pools || !currentQuestion || finishing || timeLeft <= 0) return;
+    if (!questions || !currentQuestion || finishing || timeLeft <= 0) return;
 
     const isCorrectAnswer = label === currentQuestion.answer;
     const timeTaken = Math.max(0, Math.round((Date.now() - questionStartedAtRef.current) / 1000));
@@ -620,21 +622,14 @@ function BasicExamFlow() {
       rawCategory: currentQuestion.rawCategory,
       answerTimeSeconds: timeTaken,
     });
-    setAnsweredCount((c) => c + 1);
 
-    const elapsed = BASIC_EXAM_TOTAL_SEC - timeLeft;
-    const nextPhase: "verbal" | "non_verbal" = elapsed < BASIC_EXAM_VERBAL_SEC ? "verbal" : "non_verbal";
-    setPhase(nextPhase);
-
-    if (nextPhase === "verbal") {
-      const nextIndex = verbalIndex + 1;
-      setVerbalIndex(nextIndex);
-      setCurrentQuestion(pools.verbal[nextIndex % pools.verbal.length]);
-    } else {
-      const nextIndex = nonVerbalIndex + 1;
-      setNonVerbalIndex(nextIndex);
-      setCurrentQuestion(pools.non_verbal[nextIndex % pools.non_verbal.length]);
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= questions.length) {
+      // 70問（固定ロースター全問）に到達したら、残り時間があっても即座に終了する。
+      void finalize();
+      return;
     }
+    setCurrentIndex(nextIndex);
   }
 
   if (loadError) {
@@ -653,7 +648,7 @@ function BasicExamFlow() {
     );
   }
 
-  if (!pools || !currentQuestion) {
+  if (!questions || !currentQuestion) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
         <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
@@ -661,7 +656,7 @@ function BasicExamFlow() {
     );
   }
 
-  const phaseLabel = phase === "verbal" ? "言語" : "非言語";
+  const phaseLabel = currentIndex < SPI_VERBAL_SUBPARTS.reduce((s, sp) => s + sp.limit, 0) ? "言語" : "非言語";
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
@@ -670,7 +665,7 @@ function BasicExamFlow() {
           <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
             基礎能力試験（{phaseLabel}）
           </span>
-          問題 {answeredCount + 1}
+          問題 {currentIndex + 1} / {questions.length}
         </span>
         <span
           className={`font-mono text-lg font-bold ${
