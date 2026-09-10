@@ -307,14 +307,16 @@ CREATE INDEX IF NOT EXISTS idx_sessions_subject ON sessions(subject_type, subjec
 CREATE TABLE IF NOT EXISTS company_borders (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   company_name TEXT NOT NULL,
+  company_name_kana TEXT NOT NULL DEFAULT '', -- ひらがな検索・五十音順ソート用のふりがな（全てひらがなで統一）
   industry TEXT NOT NULL,
   test_type TEXT NOT NULL, -- 例: 'SPI3' | '玉手箱' | 'TG-WEB' | 'GAB / C-GAB' | 'CAB' | 'SCOA'
   border_level TEXT NOT NULL, -- ボーダー難易度ランク。例: 'S' | 'A' | 'B' | 'C' | 'D'
-  selection_timing TEXT NOT NULL, -- 選考時期の目安。例: '3月〜6月（本選考）'
+  selection_timing TEXT NOT NULL, -- 選考時期の目安。例: '3月〜6月（本選考）'（現在フロントエンドでは非表示）
   description TEXT NOT NULL, -- 詳細解説（対策のポイント等）
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_company_borders_company_name ON company_borders(company_name);
+CREATE INDEX IF NOT EXISTS idx_company_borders_company_name_kana ON company_borders(company_name_kana);
 CREATE INDEX IF NOT EXISTS idx_company_borders_industry ON company_borders(industry);
 CREATE INDEX IF NOT EXISTS idx_company_borders_test_type ON company_borders(test_type);

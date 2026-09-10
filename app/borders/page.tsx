@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Building2, Calendar, X } from "lucide-react";
+import { Search, Building2, X } from "lucide-react";
 import { INDUSTRIES } from "@/src/data/formOptions";
 import { TEST_TYPES } from "@/src/data/testTypes";
 
 type CompanyBorder = {
   id: number;
   companyName: string;
+  companyNameKana: string;
   industry: string;
   testType: string;
   borderLevel: string;
@@ -31,6 +32,7 @@ export default function BordersPage() {
   const [borders, setBorders] = useState<CompanyBorder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -65,6 +67,13 @@ export default function BordersPage() {
       clearTimeout(timer);
     };
   }, [keyword, industry, selectedTestTypes]);
+
+  // 検索結果（漢字・ふりがな両方に部分一致済み）の企業名をそのままサジェスト候補として使う。
+  // 別途サジェスト専用のAPIは設けず、既に取得済みのデータを再利用する。
+  const suggestions = useMemo(() => {
+    const names = Array.from(new Set(borders.map((b) => b.companyName)));
+    return names.slice(0, 8);
+  }, [borders]);
 
   function toggleTestType(name: string) {
     setSelectedTestTypes((prev) =>
@@ -105,7 +114,9 @@ export default function BordersPage() {
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="企業名で検索（例: 三菱商事）"
+                onFocus={() => setSuggestionsOpen(true)}
+                onBlur={() => setSuggestionsOpen(false)}
+                placeholder="企業名で検索（ひらがなでもOK。例: 三菱商事 / みつびし）"
                 className="w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-9 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
               />
               {keyword && (
@@ -117,6 +128,30 @@ export default function BordersPage() {
                 >
                   <X className="h-4 w-4" />
                 </button>
+              )}
+
+              {/* サジェスト（オートコンプリート）候補 */}
+              {suggestionsOpen && keyword.trim() && suggestions.length > 0 && (
+                <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                  {suggestions.map((name) => (
+                    <li key={name}>
+                      <button
+                        type="button"
+                        // onBlurより先に発火させるためonMouseDownを使う（onClickだと入力欄のblurが
+                        // 先に走りサジェストが消えてしまい、クリックが成立しない）。
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setKeyword(name);
+                          setSuggestionsOpen(false);
+                        }}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
+                        {name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
 
@@ -198,10 +233,6 @@ export default function BordersPage() {
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
                     <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold text-gray-700">
                       {b.testType}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {b.selectionTiming}
                     </span>
                   </div>
 
