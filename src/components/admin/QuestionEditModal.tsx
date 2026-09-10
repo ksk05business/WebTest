@@ -47,7 +47,7 @@ export function QuestionEditModal({
   }
 
   function addOption() {
-    if (options.length >= 5) return;
+    if (options.length >= 8) return;
     setOptions((prev) => [...prev, ""]);
   }
 

@@ -49,10 +49,10 @@ export function validateQuestion(input: QuestionInput, label: string): Validated
   if (
     !Array.isArray(input.options) ||
     input.options.length < 2 ||
-    input.options.length > 5 ||
+    input.options.length > 8 ||
     !input.options.every((o) => typeof o === "string" && o.trim())
   ) {
-    return { error: `${label}: optionsは2〜5件の空でない文字列配列で指定してください` };
+    return { error: `${label}: optionsは2〜8件の空でない文字列配列で指定してください` };
   }
   if (
     typeof input.correctAnswer !== "number" ||
