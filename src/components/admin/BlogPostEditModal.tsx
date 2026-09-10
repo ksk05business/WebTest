@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { AdminBlogPostListItem } from "./BlogPostsTab";
 import { MdxLivePreview } from "./MdxLivePreview";
+import { TagTaxonomyPicker } from "./TagTaxonomyPicker";
 
 // 新規作成・編集どちらもこのモーダルを使う。post が null なら新規作成、値があれば編集。
 // 編集時はGET /api/admin/blog-posts/{slug} で本文とshaを取得してからこのモーダルを開く想定
@@ -28,7 +29,7 @@ export function BlogPostEditModal({
   const [title, setTitle] = useState(post?.title ?? "");
   const [description, setDescription] = useState(post?.description ?? "");
   const [date, setDate] = useState(post?.date ?? new Date().toISOString().slice(0, 10));
-  const [tagsText, setTagsText] = useState(post?.tags.join(", ") ?? "");
+  const [tags, setTags] = useState<string[]>(post?.tags ?? []);
   const [content, setContent] = useState(initialContent);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -47,11 +48,6 @@ export function BlogPostEditModal({
       setError("タイトル・説明文・公開日・本文は必須です");
       return;
     }
-
-    const tags = tagsText
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
 
     setSaving(true);
     try {
@@ -138,26 +134,21 @@ export function BlogPostEditModal({
             />
           </label>
 
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-semibold text-gray-700">公開日</span>
-              <input
-                type="date"
-                value={date.slice(0, 10)}
-                onChange={(e) => setDate(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-semibold text-gray-700">タグ（カンマ区切り）</span>
-              <input
-                type="text"
-                value={tagsText}
-                onChange={(e) => setTagsText(e.target.value)}
-                placeholder="SPI, 推論, 無料"
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              />
-            </label>
+          <label className="flex flex-col gap-1 text-sm sm:max-w-xs">
+            <span className="font-semibold text-gray-700">公開日</span>
+            <input
+              type="date"
+              value={date.slice(0, 10)}
+              onChange={(e) => setDate(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </label>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-semibold text-gray-700">
+              タグ（階層を辿って選択。複数追加可）
+            </span>
+            <TagTaxonomyPicker tags={tags} onChange={setTags} />
           </div>
 
           <div className="flex flex-col gap-1">
