@@ -15,7 +15,7 @@ interface CompanyBorderRow {
   has_structural: number;
 }
 
-const MAX_LIMIT = 100;
+const MAX_LIMIT = 300;
 
 // 企業ボーダー一覧を取得する。?q= は企業名の部分一致キーワード検索（漢字表記・ふりがな
 // （ひらがな）のどちらでも一致すればヒットする）、?industry= / ?testType= はそれぞれ複数指定
