@@ -236,9 +236,6 @@ export default function Home() {
             <br />
             模試 ✕ スカウト
           </h1>
-          <p className="rounded-full bg-white/15 px-4 py-1.5 text-sm font-bold text-white">
-            【デプロイテスト完了！】
-          </p>
           <p className="text-balance text-base leading-relaxed text-blue-50 sm:text-lg">
             SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA
             に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
@@ -412,9 +409,9 @@ export default function Home() {
                 仕組みで解決します。
               </h2>
               <p className="text-balance text-sm leading-relaxed text-gray-600 sm:text-base">
-                心理学者エビングハウスが提唱した「忘却曲線」の通り、人の記憶は復習しなければ急速に薄れていきます。Webテストナビは間違えた知識問題を自動でキューに登録し、
+                言語や英語などの「知識問題」は、心理学者エビングハウスが提唱した「忘却曲線」の通り、復習しなければ記憶が急速に薄れていきます。そのため間違えた問題を自動でキューに登録し、
                 <strong className="font-bold text-gray-900">1日・3日・7日・14日</strong>
-                の最適なタイミングで復習を促すことで、一夜漬けでは終わらない「本当に使える知識」への定着をサポートします。
+                の最適なタイミングで復習することで記憶への定着をサポートします。一方、計数（非言語）問題は単なる暗記よりも「解き方のパターンに慣れる」ことが重要です。Webテストナビは、分野ごとの特性に合わせた復習サイクルを提供し、着実なスコアアップをサポートします。
               </p>
               <div className="flex items-start gap-2 rounded-xl border border-purple-100 bg-purple-50/60 p-3 text-xs text-purple-800 sm:text-sm">
                 <TrendingUp className="mt-0.5 h-4 w-4 flex-shrink-0" />
