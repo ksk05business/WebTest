@@ -14,9 +14,12 @@ const TIME_PER_QUESTION = 60; // spi_english / spi_structural（1問ごとの制
 const BASIC_EXAM_TOTAL_SEC = 35 * 60;
 const BASIC_EXAM_VERBAL_SEC = 15 * 60;
 // 事前に取得しておく問題プールは、SPI_VERBAL_SUBPARTS/SPI_NON_VERBAL_SUBPARTSの単元別配分比率を
-// 保ったまま、この倍率でスケールアップして深さを持たせる（35分間で通常使い切らない余裕を持たせる
-// ため。不足した場合は末尾に達し次第、プール内で先頭から繰り返す）。
-const BASIC_EXAM_POOL_MULTIPLIER = 4;
+// 保ったまま、この倍率でスケールアップして深さを持たせる（不足した場合は末尾に達し次第、
+// プール内で先頭から繰り返す）。fetchSubPartsPoolが小分類ごとにグループ化して連結する方式に
+// なったため（同じ形式の問題が連続して出題される）、倍率を大きくしすぎると1つの小分類だけで
+// 時間を使い切ってしまい、後半の小分類（長文読解等）に時間内でたどり着けなくなる。そのため
+// 「快足の受験者が涸れないための最小限のバッファ」程度の低めの倍率に留めている。
+const BASIC_EXAM_POOL_MULTIPLIER = 2;
 
 type ExamSubPart = { category: string; subCategory: string; limit: number };
 
@@ -80,8 +83,11 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-// subPartsで指定した小分類ごとにlimit×multiplier件ずつ並行取得し、結合してシャッフルする
-// （単一のcategory一括取得だと小分類の出題比率を制御できないため、小分類ごとに個別取得する）。
+// subPartsで指定した小分類ごとにlimit×multiplier件ずつ並行取得する。同じ小分類（出題形式）の
+// 問題が連続して出題されるよう、取得結果はsubPartsの宣言順のまま連結し、配列全体を横断する
+// シャッフルは行わない（各小分類内の順序のみをシャッフルしてから平坦化＝連結する）。
+// 例: SPI言語で「語句の用法」が5問選出された場合、他の形式が間に挟まらず5問連続で出題されてから
+// 次の形式へ移行する。
 async function fetchSubPartsPool(
   subParts: readonly ExamSubPart[],
   multiplier: number,
@@ -98,8 +104,7 @@ async function fetchSubPartsPool(
       return fetch(`/api/questions?${params.toString()}`).then((r) => r.json());
     })
   );
-  const combined = (results as { questions?: Question[] }[]).flatMap((r) => r.questions ?? []);
-  return shuffleArray(combined);
+  return (results as { questions?: Question[] }[]).flatMap((r) => shuffleArray(r.questions ?? []));
 }
 
 // 玉手箱・TG-WEB・GAB/C-GABは2026-09-01以降、形式・セクションごとに独立して受験できる方式に変更した
