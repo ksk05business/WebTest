@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, ListChecks, LogOut, Mail, Users } from "lucide-react";
+import { Building2, Landmark, ListChecks, LogOut, Mail, Users } from "lucide-react";
 import { ContactInquiriesTab } from "@/src/components/admin/ContactInquiriesTab";
 import { CompanyManagementPanel } from "@/src/components/admin/CompanyManagementPanel";
 import { StudentsTab } from "@/src/components/admin/StudentsTab";
 import { QuestionAuditTab } from "@/src/components/admin/QuestionAuditTab";
+import { CompanyBordersTab } from "@/src/components/admin/CompanyBordersTab";
 
 const TOKEN_STORAGE_KEY = "adminApiToken";
 
@@ -16,6 +17,7 @@ const TABS = [
   { id: "questions", label: "問題データ管理", icon: ListChecks },
   { id: "contact", label: "お問い合わせ", icon: Mail },
   { id: "companies", label: "直接採用企業", icon: Building2 },
+  { id: "borders", label: "ボーダー企業管理", icon: Landmark },
   { id: "students", label: "学生", icon: Users },
 ] as const;
 
@@ -24,12 +26,14 @@ type TabId = (typeof TABS)[number]["id"];
 type BadgeCounts = {
   contactUnhandled: number;
   companiesPending: number;
+  bordersIncomplete: number;
   studentsRecent: number;
 };
 
 const BADGE_KEY_BY_TAB: Partial<Record<TabId, keyof BadgeCounts>> = {
   contact: "contactUnhandled",
   companies: "companiesPending",
+  borders: "bordersIncomplete",
   students: "studentsRecent",
 };
 
@@ -61,6 +65,7 @@ export default function AdminDashboardPage() {
         setBadgeCounts({
           contactUnhandled: data.contactUnhandled ?? 0,
           companiesPending: data.companiesPending ?? 0,
+          bordersIncomplete: data.bordersIncomplete ?? 0,
           studentsRecent: data.studentsRecent ?? 0,
         });
       })
@@ -148,6 +153,13 @@ export default function AdminDashboardPage() {
         )}
         {activeTab === "companies" && (
           <CompanyManagementPanel
+            adminToken={adminToken}
+            onAuthError={handleAuthError}
+            onDataChanged={handleDataChanged}
+          />
+        )}
+        {activeTab === "borders" && (
+          <CompanyBordersTab
             adminToken={adminToken}
             onAuthError={handleAuthError}
             onDataChanged={handleDataChanged}
