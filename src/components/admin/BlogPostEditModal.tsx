@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AdminBlogPostListItem } from "./BlogPostsTab";
+import { MdxLivePreview } from "./MdxLivePreview";
 
 // 新規作成・編集どちらもこのモーダルを使う。post が null なら新規作成、値があれば編集。
 // 編集時はGET /api/admin/blog-posts/{slug} で本文とshaを取得してからこのモーダルを開く想定
@@ -31,6 +32,8 @@ export function BlogPostEditModal({
   const [content, setContent] = useState(initialContent);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // 画面幅が狭い場合の「エディタ/プレビュー」タブ切り替え用（lg以上では常に2カラム表示のため使わない）。
+  const [mobileTab, setMobileTab] = useState<"editor" | "preview">("editor");
 
   const isEditing = post !== null;
 
@@ -88,7 +91,7 @@ export function BlogPostEditModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
       <div
-        className="flex w-full max-w-3xl flex-col overflow-y-auto rounded-lg bg-white p-6 shadow-xl"
+        className="flex w-full max-w-6xl flex-col overflow-y-auto rounded-lg bg-white p-6 shadow-xl"
         style={{ maxHeight: "92vh" }}
       >
         <h3 className="mb-1 text-lg font-bold text-gray-900">
@@ -157,15 +160,50 @@ export function BlogPostEditModal({
             </label>
           </div>
 
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-semibold text-gray-700">本文（MDX形式。フロントマターは含めない）</span>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={18}
-              className="rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs leading-relaxed focus:border-blue-500 focus:outline-none"
-            />
-          </label>
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-semibold text-gray-700">本文（MDX形式。フロントマターは含めない）</span>
+
+            {/* lg未満: エディタ/プレビューをタブ切り替え。lg以上: 常に左右2カラムで同時表示。 */}
+            <div className="flex gap-2 lg:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileTab("editor")}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  mobileTab === "editor" ? "bg-blue-600 text-white" : "border border-gray-300 text-gray-600"
+                }`}
+              >
+                エディタ
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileTab("preview")}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  mobileTab === "preview" ? "bg-blue-600 text-white" : "border border-gray-300 text-gray-600"
+                }`}
+              >
+                プレビュー
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={22}
+                className={`rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs leading-relaxed focus:border-blue-500 focus:outline-none ${
+                  mobileTab === "preview" ? "hidden lg:block" : ""
+                }`}
+              />
+              <div
+                className={`overflow-y-auto rounded-lg border border-gray-200 bg-white ${
+                  mobileTab === "editor" ? "hidden lg:block" : ""
+                }`}
+                style={{ maxHeight: "min(60vh, 520px)" }}
+              >
+                <MdxLivePreview source={content} />
+              </div>
+            </div>
+          </div>
 
           {error && <p className="text-sm font-medium text-red-600">{error}</p>}
 

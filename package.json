@@ -10,6 +10,7 @@
     "pages:dev": "next build && wrangler pages dev out"
   },
   "dependencies": {
+    "@mdx-js/mdx": "^3.1.1",
     "@next/third-parties": "^16.3.4",
     "@react-pdf/renderer": "^4.9.0",
     "gray-matter": "^4.0.3",

@@ -10,7 +10,12 @@ import { CarrollDiagram } from "@/src/components/CarrollDiagram";
 
 // MDX本文中から直接呼び出せるコンポーネント一覧。新しいカスタムコンポーネントを
 // MDX記事内で使いたい場合はここに追加すること。
-const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem, CarrollDiagram };
+// admin/MdxLivePreview.tsx（管理画面のリアルタイムプレビュー）でも全く同じ描画結果にするため、
+// このコンポーネント一覧とremark/rehypeプラグイン設定をここから共有エクスポートする
+// （2箇所で別々に保守すると設定がドリフトする恐れがあるため、必ずここを唯一の情報源とすること）。
+export const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem, CarrollDiagram };
+export const MDX_REMARK_PLUGINS = [remarkGfm, remarkMath];
+export const MDX_REHYPE_PLUGINS = [rehypeKatex];
 
 // SEOブログ記事（MDX）を描画する共通コンポーネント。Server Component（RSC）として動作し、
 // Next.jsの静的エクスポート（output: "export"）でもビルド時にレンダリングされる。
@@ -26,8 +31,8 @@ export function MdxWrapper({ source }: { source: string }) {
         components={MDX_COMPONENTS}
         options={{
           mdxOptions: {
-            remarkPlugins: [remarkGfm, remarkMath],
-            rehypePlugins: [rehypeKatex],
+            remarkPlugins: MDX_REMARK_PLUGINS,
+            rehypePlugins: MDX_REHYPE_PLUGINS,
           },
         }}
       />
