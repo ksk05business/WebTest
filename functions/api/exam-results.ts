@@ -202,6 +202,19 @@ function categoriesForFamily(testTypeFamily: string): { category: string; label:
   return groups.map((g) => ({ category: g.category, label: g.groupLabel }));
 }
 
+// テスト種別（TestType.id）→ そのテストの単元（questions.sub_category）一覧＋大分類・表示ラベル。
+// 「得意・苦手分野の詳細分析」（単元別内訳・レーダーチャート・苦手単元の復習導線）用に、
+// categoriesForFamily()の大分類単位よりさらに細かい粒度でsrc/data/practiceUnits.tsの単元定義を
+// フラット化する。
+function subCategoriesForFamily(
+  testTypeFamily: string
+): { category: string; subCategory: string; label: string }[] {
+  const groups = PRACTICE_UNIT_GROUPS_BY_TEST[testTypeFamily] ?? [];
+  return groups.flatMap((g) =>
+    g.units.map((u) => ({ category: g.category, subCategory: u.subCategory, label: u.label }))
+  );
+}
+
 function bucketBySubCategory(
   scores: CategoryScores,
   subToBroad: Record<string, string>
@@ -284,6 +297,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         "SELECT category_scores_json FROM exam_results WHERE category_scores_json IS NOT NULL ORDER BY taken_at DESC LIMIT 500"
       ).all<{ category_scores_json: string }>();
   const populationByBroad: Record<string, number[]> = {};
+  // 単元（sub_category）単位の母集団正答率。得意・苦手分野の詳細分析（単元別偏差値）用。
+  const populationBySubCategory: Record<string, number[]> = {};
   for (const row of allScoreRows.results ?? []) {
     try {
       const parsed: CategoryScores = JSON.parse(row.category_scores_json);
@@ -293,18 +308,29 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           (populationByBroad[broad] ??= []).push(v.correct / v.total);
         }
       }
+      for (const [sub, v] of Object.entries(parsed)) {
+        if (v.total > 0) {
+          (populationBySubCategory[sub] ??= []).push(v.correct / v.total);
+        }
+      }
     } catch {
       // 壊れたJSONはスキップ
     }
   }
 
-  // このユーザー自身の累計（直近20件分）を大分類ごとに集計する。
+  // このユーザー自身の累計（直近20件分）を大分類・単元それぞれの粒度で集計する。
   const userTotalsByBroad: Record<string, { correct: number; total: number }> = {};
+  const userTotalsBySubCategory: Record<string, { correct: number; total: number }> = {};
   for (const h of history) {
     if (!h.categoryScores) continue;
     const bucketed = bucketBySubCategory(h.categoryScores, subToBroad);
     for (const [broad, v] of Object.entries(bucketed)) {
       const entry = (userTotalsByBroad[broad] ??= { correct: 0, total: 0 });
+      entry.correct += v.correct;
+      entry.total += v.total;
+    }
+    for (const [sub, v] of Object.entries(h.categoryScores as CategoryScores)) {
+      const entry = (userTotalsBySubCategory[sub] ??= { correct: 0, total: 0 });
       entry.correct += v.correct;
       entry.total += v.total;
     }
@@ -330,6 +356,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     };
   });
 
+  // 得意・苦手分野の詳細分析（単元別内訳）。testType未指定時（全テスト横断）はSPIの単元一覧、
+  // 指定時はそのテスト自身の単元一覧を使う（broadCategoriesと同じ方針）。
+  const resolvedTestTypeFamily = testTypeFamily ?? "spi";
+  const subCategories = subCategoriesForFamily(resolvedTestTypeFamily);
+  const subCategoryBreakdown = subCategories.map(({ category: broad, subCategory, label }) => {
+    const totals = userTotalsBySubCategory[subCategory] ?? { correct: 0, total: 0 };
+    const rate = totals.total > 0 ? totals.correct / totals.total : null;
+    const deviation =
+      rate !== null ? calculateDeviationScore(rate, populationBySubCategory[subCategory] ?? []) : null;
+    return {
+      category: broad,
+      subCategory,
+      label,
+      correct: totals.correct,
+      total: totals.total,
+      accuracyRate: rate,
+      deviationScore: deviation,
+    };
+  });
+
   return Response.json({
     history,
     attemptCount: history.length,
@@ -337,5 +383,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     bestDeviationScore,
     bestAccuracyRate,
     categoryBreakdown,
+    subCategoryBreakdown,
+    testTypeFamily: resolvedTestTypeFamily,
   });
 };

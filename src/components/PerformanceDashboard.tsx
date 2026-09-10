@@ -7,6 +7,11 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -15,6 +20,16 @@ import {
 
 type CategoryBreakdownItem = {
   category: string;
+  label: string;
+  correct: number;
+  total: number;
+  accuracyRate: number | null;
+  deviationScore: number | null;
+};
+
+type SubCategoryBreakdownItem = {
+  category: string;
+  subCategory: string;
   label: string;
   correct: number;
   total: number;
@@ -37,6 +52,8 @@ type ExamData = {
   bestDeviationScore: number | null;
   bestAccuracyRate: number | null;
   categoryBreakdown: CategoryBreakdownItem[];
+  subCategoryBreakdown: SubCategoryBreakdownItem[];
+  testTypeFamily: string;
 };
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
@@ -177,6 +194,118 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                   </div>
                 )}
               </div>
+            );
+          })()}
+
+          {(() => {
+            const withData = examData.subCategoryBreakdown.filter((c) => c.total > 0);
+            if (withData.length === 0) return null;
+
+            // 大分類（category）ごとにグルーピングし、大分類の表示ラベルはcategoryBreakdownから引く。
+            const labelByBroad = new Map(examData.categoryBreakdown.map((c) => [c.category, c.label]));
+            const groups = new Map<string, SubCategoryBreakdownItem[]>();
+            for (const item of examData.subCategoryBreakdown) {
+              const list = groups.get(item.category) ?? [];
+              list.push(item);
+              groups.set(item.category, list);
+            }
+
+            // レーダーチャートは軸が多すぎると読みにくくなるため、データのある単元のうち
+            // 出題数が多い（＝信頼度が高い）上位12件までに絞る。
+            const radarData = [...withData]
+              .sort((a, b) => b.total - a.total)
+              .slice(0, 12)
+              .map((c) => ({ subject: c.label, 正答率: Math.round((c.accuracyRate ?? 0) * 100) }));
+
+            function practiceHref(item: SubCategoryBreakdownItem) {
+              const params = new URLSearchParams({
+                testType: examData!.testTypeFamily,
+                category: item.category,
+                subCategory: item.subCategory,
+              });
+              return `/practice?${params.toString()}`;
+            }
+
+            return (
+              <>
+                {radarData.length >= 3 && (
+                  <div className="rounded-lg border border-gray-200 bg-white p-4">
+                    <p className="mb-2 text-sm font-semibold text-gray-800">単元別・正答率レーダーチャート</p>
+                    <div style={{ width: "100%", height: 280 }}>
+                      <ResponsiveContainer>
+                        <RadarChart data={radarData} outerRadius="75%">
+                          <PolarGrid />
+                          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
+                          <PolarRadiusAxis domain={[0, 100]} tick={{ fontSize: 9 }} />
+                          <Radar
+                            name="正答率"
+                            dataKey="正答率"
+                            stroke="#2563eb"
+                            fill="#2563eb"
+                            fillOpacity={0.35}
+                          />
+                          <Tooltip />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded-lg border border-gray-200 bg-white p-4">
+                  <p className="mb-3 text-sm font-semibold text-gray-800">単元別・詳細分析</p>
+                  <div className="flex flex-col gap-4">
+                    {[...groups.entries()].map(([broad, items]) => (
+                      <div key={broad}>
+                        <p className="mb-2 text-xs font-bold text-gray-500">{labelByBroad.get(broad) ?? broad}</p>
+                        <div className="flex flex-col gap-2">
+                          {items.map((item) => {
+                            const hasData = item.total > 0;
+                            const isWeak = hasData && (item.accuracyRate ?? 1) < 0.65;
+                            return (
+                              <div
+                                key={item.subCategory}
+                                className={`flex flex-col gap-1.5 rounded-md border px-3 py-2 sm:flex-row sm:items-center sm:justify-between ${
+                                  isWeak ? "border-red-200 bg-red-50/50" : "border-gray-100 bg-gray-50/50"
+                                }`}
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-medium text-gray-800">{item.label}</span>
+                                    {isWeak && (
+                                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">
+                                        苦手単元
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="mt-0.5 text-xs text-gray-500">
+                                    {hasData
+                                      ? `正解率 ${Math.round((item.accuracyRate ?? 0) * 100)}%（${item.correct}/${item.total}問） ／偏差値 ${
+                                          item.deviationScore?.toFixed(1) ?? "-"
+                                        }`
+                                      : "データなし"}
+                                  </p>
+                                </div>
+                                {hasData && (
+                                  <a
+                                    href={practiceHref(item)}
+                                    className={`flex-shrink-0 rounded-full px-3 py-1.5 text-center text-xs font-semibold transition-colors ${
+                                      isWeak
+                                        ? "bg-red-600 text-white hover:bg-red-700"
+                                        : "border border-gray-300 text-gray-600 hover:bg-gray-100"
+                                    }`}
+                                  >
+                                    この単元を復習する
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
             );
           })()}
         </>
