@@ -227,19 +227,31 @@ export default function BordersPage() {
                         <p className="text-xs text-gray-500">{b.industry}</p>
                       </div>
                     </div>
-                    <span
-                      className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
-                        BORDER_LEVEL_STYLE[b.borderLevel] ?? "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      ボーダー {b.borderLevel}
-                    </span>
+                    {b.borderLevel ? (
+                      <span
+                        className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+                          BORDER_LEVEL_STYLE[b.borderLevel] ?? "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        ボーダー {b.borderLevel}
+                      </span>
+                    ) : (
+                      <span className="flex-shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-400">
+                        情報準備中
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
-                    <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold text-gray-700">
-                      {b.testType}
-                    </span>
+                    {b.testType ? (
+                      <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold text-gray-700">
+                        {b.testType}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-gray-50 px-2.5 py-1 font-semibold text-gray-400">
+                        検査種別: 情報準備中
+                      </span>
+                    )}
                     {b.hasEnglish && (
                       <span className="rounded-full bg-sky-50 px-2 py-1 font-semibold text-sky-700">
                         英語
