@@ -11,6 +11,8 @@ interface CompanyBorderRow {
   border_level: string;
   selection_timing: string;
   description: string;
+  has_english: number;
+  has_structural: number;
 }
 
 const MAX_LIMIT = 100;
@@ -49,7 +51,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
   const rows = await context.env.DB.prepare(
-    `SELECT id, company_name, company_name_kana, industry, test_type, border_level, selection_timing, description
+    `SELECT id, company_name, company_name_kana, industry, test_type, border_level, selection_timing, description, has_english, has_structural
      FROM company_borders
      ${where}
      ORDER BY company_name_kana ASC, company_name ASC
@@ -68,6 +70,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       borderLevel: r.border_level,
       selectionTiming: r.selection_timing,
       description: r.description,
+      hasEnglish: r.has_english === 1,
+      hasStructural: r.has_structural === 1,
     })),
   });
 };

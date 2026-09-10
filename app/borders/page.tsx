@@ -15,6 +15,8 @@ type CompanyBorder = {
   borderLevel: string;
   selectionTiming: string;
   description: string;
+  hasEnglish: boolean;
+  hasStructural: boolean;
 };
 
 const BORDER_LEVEL_STYLE: Record<string, string> = {
@@ -55,12 +57,16 @@ export default function BordersPage() {
         }
         setBorders(data.borders ?? []);
       } catch (e) {
-        if (e instanceof DOMException && e.name === "AbortError") return;
+        // 連続入力で直前のリクエストがキャンセルされた場合（AbortError）は、ユーザー操作による
+        // 正常な中断であり通信障害ではないため、エラー表示せず静かに無視する。
+        // fetchの実装によってはDOMExceptionのインスタンスでない場合もあるため、instanceofではなく
+        // name プロパティで判定する。
+        if (controller.signal.aborted || (e as { name?: string })?.name === "AbortError") return;
         setError("通信エラーが発生しました。時間をおいて再度お試しください。");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
-    }, 300);
+    }, 400);
 
     return () => {
       controller.abort();
@@ -116,7 +122,7 @@ export default function BordersPage() {
                 onChange={(e) => setKeyword(e.target.value)}
                 onFocus={() => setSuggestionsOpen(true)}
                 onBlur={() => setSuggestionsOpen(false)}
-                placeholder="企業名で検索（ひらがなでもOK。例: 三菱商事 / みつびし）"
+                placeholder="企業名で検索（例：三菱商事）"
                 className="w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-9 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
               />
               {keyword && (
@@ -230,10 +236,20 @@ export default function BordersPage() {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
                     <span className="rounded-full bg-gray-100 px-2.5 py-1 font-semibold text-gray-700">
                       {b.testType}
                     </span>
+                    {b.hasEnglish && (
+                      <span className="rounded-full bg-sky-50 px-2 py-1 font-semibold text-sky-700">
+                        英語
+                      </span>
+                    )}
+                    {b.hasStructural && (
+                      <span className="rounded-full bg-rose-50 px-2 py-1 font-semibold text-rose-700">
+                        構造的把握力
+                      </span>
+                    )}
                   </div>
 
                   <p className="text-sm leading-relaxed text-gray-600">{b.description}</p>

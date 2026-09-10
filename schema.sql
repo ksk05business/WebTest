@@ -313,6 +313,8 @@ CREATE TABLE IF NOT EXISTS company_borders (
   border_level TEXT NOT NULL, -- ボーダー難易度ランク。例: 'S' | 'A' | 'B' | 'C' | 'D'
   selection_timing TEXT NOT NULL, -- 選考時期の目安。例: '3月〜6月（本選考）'（現在フロントエンドでは非表示）
   description TEXT NOT NULL, -- 詳細解説（対策のポイント等）
+  has_english INTEGER NOT NULL DEFAULT 0, -- SPIの追加科目「英語」の有無（0/1）。SPI以外の検査種別では常に0。
+  has_structural INTEGER NOT NULL DEFAULT 0, -- SPIの追加科目「構造的把握力」の有無（0/1）。SPI以外の検査種別では常に0。
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
