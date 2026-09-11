@@ -1,4 +1,5 @@
 import { hashPassword } from "../_lib/password";
+import { SITE_NAME, SITE_URL } from "../../src/lib/site";
 
 interface Env {
   DB: D1Database;
@@ -47,7 +48,11 @@ async function sendOtpEmail(env: Env, email: string, otp: string): Promise<void>
         from: { address: FROM_ADDRESS, name: "Webテストナビ" },
         subject: "【Webテストナビ】パスワード再設定用のワンタイムパスワード",
         text: `パスワード再設定用のワンタイムパスワードは ${otp} です。\n有効期限は発行から${OTP_TTL_MINUTES}分間です。\n心当たりがない場合はこのメールを破棄してください。`,
-        html: `<p>パスワード再設定用のワンタイムパスワードは <strong>${otp}</strong> です。</p><p>有効期限は発行から${OTP_TTL_MINUTES}分間です。</p><p>心当たりがない場合はこのメールを破棄してください。</p>`,
+        html: `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 0 16px;">
+  <img src="${SITE_URL}/email-logo.png" width="48" height="48" alt="${SITE_NAME}" style="display:block;border-radius:10px;">
+  <div style="margin-top:8px;font-family:sans-serif;font-size:14px;font-weight:bold;color:#3730a3;">${SITE_NAME}</div>
+</td></tr></table>
+<p>パスワード再設定用のワンタイムパスワードは <strong>${otp}</strong> です。</p><p>有効期限は発行から${OTP_TTL_MINUTES}分間です。</p><p>心当たりがない場合はこのメールを破棄してください。</p>`,
       }),
     }
   );
