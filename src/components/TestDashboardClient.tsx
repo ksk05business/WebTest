@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Info } from "lucide-react";
 import { DashboardHeader } from "./DashboardHeader";
 import { ExamModeSelectModal } from "./ExamModeSelectModal";
+import { MockHistorySelectModal } from "./MockHistorySelectModal";
 import { PerformanceDashboard } from "./PerformanceDashboard";
 import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
@@ -19,6 +20,7 @@ export function TestDashboardClient({ testId }: { testId: string }) {
   const [authChecked, setAuthChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [examModalOpen, setExamModalOpen] = useState(false);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -146,13 +148,15 @@ export function TestDashboardClient({ testId }: { testId: string }) {
                 模試を受験する
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => router.push(`/practice?testType=${testId}&scope=wrong`)}
-              className="flex-1 rounded-full border-2 border-orange-300 bg-orange-50 px-6 py-3.5 text-center text-sm font-bold text-orange-700 hover:bg-orange-100"
-            >
-              復習をする
-            </button>
+            {testType.available && (
+              <button
+                type="button"
+                onClick={() => setHistoryModalOpen(true)}
+                className="flex-1 rounded-full border-2 border-orange-300 bg-orange-50 px-6 py-3.5 text-center text-sm font-bold text-orange-700 hover:bg-orange-100"
+              >
+                復習をする
+              </button>
+            )}
           </section>
         )}
 
@@ -167,6 +171,9 @@ export function TestDashboardClient({ testId }: { testId: string }) {
 
       {examModalOpen && (
         <ExamModeSelectModal testType={testType} onClose={() => setExamModalOpen(false)} />
+      )}
+      {historyModalOpen && (
+        <MockHistorySelectModal testType={testType} onClose={() => setHistoryModalOpen(false)} />
       )}
     </div>
   );
