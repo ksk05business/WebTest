@@ -232,13 +232,30 @@ function subCategoriesForFamily(
   );
 }
 
+// 単元（sub_category）名は同じテスト内でも複数の科目（category）にまたがって重複することがある
+// （例: 玉手箱の「論理的読解（GAB形式）」は言語・英語の両方に存在する）。そのため単元名だけでは
+// 科目を一意に決定できない。candidatesが複数ある場合、exam_results.test_type（例:
+// "tamatebako_verbal_gab"）がどの科目のtest_typeを接頭辞に持つかで解決する
+// （test_typeは科目を細分化したものであるため、必ずどちらか一方の科目名から始まる）。
+function resolveCategory(
+  subCategory: string,
+  testType: string,
+  candidatesBySubCategory: Map<string, string[]>
+): string {
+  const candidates = candidatesBySubCategory.get(subCategory);
+  if (!candidates || candidates.length === 0) return "non_verbal";
+  if (candidates.length === 1) return candidates[0];
+  return candidates.find((c) => testType.startsWith(c)) ?? candidates[0];
+}
+
 function bucketBySubCategory(
   scores: CategoryScores,
-  subToBroad: Record<string, string>
+  testType: string,
+  candidatesBySubCategory: Map<string, string[]>
 ): Record<string, { correct: number; total: number }> {
   const out: Record<string, { correct: number; total: number }> = {};
   for (const [sub, v] of Object.entries(scores)) {
-    const broad = subToBroad[sub] ?? "non_verbal";
+    const broad = resolveCategory(sub, testType, candidatesBySubCategory);
     if (!out[broad]) out[broad] = { correct: 0, total: 0 };
     out[broad].correct += v.correct;
     out[broad].total += v.total;
@@ -291,36 +308,46 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const bestAccuracyRate =
     history.length > 0 ? Math.max(...history.map((h) => h.accuracyRate)) : null;
 
-  // 問題の大分類（category: non_verbal/verbal/structural）と小分類（sub_category）の対応表を作り、
-  // category_scores_json（小分類キー）を大分類ごとに集計する。カテゴリ別の正解率・偏差値表示に使う。
-  const categoryRows = await context.env.DB.prepare(
-    "SELECT DISTINCT category, sub_category FROM questions"
-  ).all<{ category: string; sub_category: string }>();
-  const subToBroad: Record<string, string> = {};
-  for (const r of categoryRows.results ?? []) {
-    subToBroad[r.sub_category] = r.category;
+  // testType未指定時（全テスト横断）はSPIの4分類、指定時はそのテスト自身の大分類グループを使う
+  // （src/data/practiceUnits.tsのgroupLabelをそのまま表示ラベルとして使う）。
+  const resolvedTestTypeFamily = testTypeFamily ?? "spi";
+  const broadCategories = categoriesForFamily(resolvedTestTypeFamily);
+  const groupLabelByCategory = new Map(broadCategories.map((c) => [c.category, c.label]));
+
+  // 得意・苦手分野の詳細分析（単元別内訳）で使う単元一覧。src/data/practiceUnits.tsの静的定義から
+  // 導出するため、DBへの問い合わせは不要（以前はquestionsテーブルをDISTINCTで引いて
+  // 単元名→科目の対応表を作っていたが、テスト種別をまたいで同名単元が存在する場合に
+  // 対応表が上書きされて誤った科目に集計されるバグがあったため廃止した）。
+  const subCategories = subCategoriesForFamily(resolvedTestTypeFamily);
+  const candidatesBySubCategory = new Map<string, string[]>();
+  for (const u of subCategories) {
+    const list = candidatesBySubCategory.get(u.subCategory) ?? [];
+    list.push(u.category);
+    candidatesBySubCategory.set(u.subCategory, list);
   }
 
   // 母集団（全ユーザーの過去の受験ごとの大分類別正答率）を集める。直近500件までに抑える簡易実装。
   // testType指定時は同じテスト種別の受験のみを母集団とする。
   const allScoreRows = testTypesFilter
     ? await context.env.DB.prepare(
-        `SELECT category_scores_json FROM exam_results
+        `SELECT test_type, category_scores_json FROM exam_results
          WHERE category_scores_json IS NOT NULL AND test_type IN (${testTypesFilter.map(() => "?").join(",")})
          ORDER BY taken_at DESC LIMIT 500`
       )
         .bind(...testTypesFilter)
-        .all<{ category_scores_json: string }>()
+        .all<{ test_type: string; category_scores_json: string }>()
     : await context.env.DB.prepare(
-        "SELECT category_scores_json FROM exam_results WHERE category_scores_json IS NOT NULL ORDER BY taken_at DESC LIMIT 500"
-      ).all<{ category_scores_json: string }>();
+        "SELECT test_type, category_scores_json FROM exam_results WHERE category_scores_json IS NOT NULL ORDER BY taken_at DESC LIMIT 500"
+      ).all<{ test_type: string; category_scores_json: string }>();
   const populationByBroad: Record<string, number[]> = {};
-  // 単元（sub_category）単位の母集団正答率。得意・苦手分野の詳細分析（単元別偏差値）用。
+  // 単元（科目ID::単元名の複合キー）単位の母集団正答率。得意・苦手分野の詳細分析（単元別偏差値）用。
+  // 単元名だけをキーにすると、テスト種別をまたいで（あるいは玉手箱の言語/英語のように同じテスト内でも）
+  // 同名単元が存在する場合に別科目のデータが混ざってしまうため、科目IDを含めた複合キーで管理する。
   const populationBySubCategory: Record<string, number[]> = {};
   for (const row of allScoreRows.results ?? []) {
     try {
       const parsed: CategoryScores = JSON.parse(row.category_scores_json);
-      const bucketed = bucketBySubCategory(parsed, subToBroad);
+      const bucketed = bucketBySubCategory(parsed, row.test_type, candidatesBySubCategory);
       for (const [broad, v] of Object.entries(bucketed)) {
         if (v.total > 0) {
           (populationByBroad[broad] ??= []).push(v.correct / v.total);
@@ -328,7 +355,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       }
       for (const [sub, v] of Object.entries(parsed)) {
         if (v.total > 0) {
-          (populationBySubCategory[sub] ??= []).push(v.correct / v.total);
+          const broad = resolveCategory(sub, row.test_type, candidatesBySubCategory);
+          (populationBySubCategory[`${broad}::${sub}`] ??= []).push(v.correct / v.total);
         }
       }
     } catch {
@@ -341,24 +369,19 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const userTotalsBySubCategory: Record<string, { correct: number; total: number }> = {};
   for (const h of history) {
     if (!h.categoryScores) continue;
-    const bucketed = bucketBySubCategory(h.categoryScores, subToBroad);
+    const bucketed = bucketBySubCategory(h.categoryScores, h.testType, candidatesBySubCategory);
     for (const [broad, v] of Object.entries(bucketed)) {
       const entry = (userTotalsByBroad[broad] ??= { correct: 0, total: 0 });
       entry.correct += v.correct;
       entry.total += v.total;
     }
     for (const [sub, v] of Object.entries(h.categoryScores as CategoryScores)) {
-      const entry = (userTotalsBySubCategory[sub] ??= { correct: 0, total: 0 });
+      const broad = resolveCategory(sub, h.testType, candidatesBySubCategory);
+      const entry = (userTotalsBySubCategory[`${broad}::${sub}`] ??= { correct: 0, total: 0 });
       entry.correct += v.correct;
       entry.total += v.total;
     }
   }
-
-  // testType未指定時（全テスト横断）はSPIの4分類、指定時はそのテスト自身の大分類グループを使う
-  // （src/data/practiceUnits.tsのgroupLabelをそのまま表示ラベルとして使う）。
-  const broadCategories = testTypeFamily
-    ? categoriesForFamily(testTypeFamily)
-    : categoriesForFamily("spi");
 
   const categoryBreakdown = broadCategories.map(({ category: broad, label }) => {
     const totals = userTotalsByBroad[broad] ?? { correct: 0, total: 0 };
@@ -374,19 +397,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     };
   });
 
-  // 得意・苦手分野の詳細分析（単元別内訳）。testType未指定時（全テスト横断）はSPIの単元一覧、
-  // 指定時はそのテスト自身の単元一覧を使う（broadCategoriesと同じ方針）。
-  const resolvedTestTypeFamily = testTypeFamily ?? "spi";
-  const subCategories = subCategoriesForFamily(resolvedTestTypeFamily);
   const subCategoryBreakdown = subCategories.map(({ category: broad, subCategory, label }) => {
-    const totals = userTotalsBySubCategory[subCategory] ?? { correct: 0, total: 0 };
+    const key = `${broad}::${subCategory}`;
+    const totals = userTotalsBySubCategory[key] ?? { correct: 0, total: 0 };
     const rate = totals.total > 0 ? totals.correct / totals.total : null;
     const deviation =
-      rate !== null ? calculateDeviationScore(rate, populationBySubCategory[subCategory] ?? []) : null;
+      rate !== null ? calculateDeviationScore(rate, populationBySubCategory[key] ?? []) : null;
+    // 同じ単元名（subCategory）が別の科目にも存在する場合（例: 玉手箱の「論理的読解（GAB形式）」が
+    // 言語・英語の両方に存在）、レーダーチャート等で見分けられるよう科目名を括弧書きで補足する。
+    const isAmbiguous = (candidatesBySubCategory.get(subCategory)?.length ?? 0) > 1;
+    const displayLabel = isAmbiguous ? `${label}（${groupLabelByCategory.get(broad) ?? broad}）` : label;
     return {
       category: broad,
       subCategory,
-      label,
+      label: displayLabel,
       correct: totals.correct,
       total: totals.total,
       accuracyRate: rate,
