@@ -23,6 +23,7 @@ import { BusinessLink } from "@/src/components/BusinessLink";
 import { FadeInSection } from "@/src/components/FadeInSection";
 import { ForgettingCurveChart } from "@/src/components/ForgettingCurveChart";
 import { ShareButtons } from "@/src/components/ShareButtons";
+import { SmoothScroll } from "@/src/components/SmoothScroll";
 import { SupportChatWidget } from "@/src/components/SupportChatWidget";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/src/lib/site";
 
@@ -184,7 +185,8 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
-      <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
+      <SmoothScroll />
+      <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/80 backdrop-blur-sm will-change-transform">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <Link href="/" className="text-lg font-bold text-blue-700">
             Webテスト<span className="text-gray-900">ナビ</span>
@@ -213,11 +215,13 @@ export default function Home() {
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 px-6 py-20 text-center sm:py-28">
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
+          className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl will-change-transform"
+          style={{ transform: "translateY(calc(var(--scroll-y, 0) * 0.05px))" }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-32 -right-16 h-96 w-96 rounded-full bg-purple-400/20 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -right-16 h-96 w-96 rounded-full bg-purple-400/20 blur-3xl will-change-transform"
+          style={{ transform: "translateY(calc(var(--scroll-y, 0) * -0.04px))" }}
         />
         <div
           aria-hidden
@@ -277,7 +281,8 @@ export default function Home() {
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-red-600/20 blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 rounded-full bg-red-600/20 blur-3xl will-change-transform"
+          style={{ transform: "translateX(-50%) translateY(calc(var(--scroll-y, 0) * 0.06px))" }}
         />
 
         <FadeInSection className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-5">
@@ -526,11 +531,13 @@ export default function Home() {
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 px-6 py-20 text-center sm:py-24">
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-16 -bottom-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"
+          className="pointer-events-none absolute -left-16 -bottom-16 h-72 w-72 rounded-full bg-white/10 blur-3xl will-change-transform"
+          style={{ transform: "translateY(calc(var(--scroll-y, 0) * 0.05px))" }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl"
+          className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-purple-400/20 blur-3xl will-change-transform"
+          style={{ transform: "translateY(calc(var(--scroll-y, 0) * -0.05px))" }}
         />
         <FadeInSection className="relative z-10 mx-auto flex max-w-2xl flex-col items-center gap-6">
           <CheckCircle2 className="h-10 w-10 text-white" />

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
+@import "lenis/dist/lenis.css";
 @plugin "@tailwindcss/typography";
 
 /* KaTeXは視覚非表示のMathML（読み上げ用）レイヤーをclip-pathで隠すのみでDOMには残すため、

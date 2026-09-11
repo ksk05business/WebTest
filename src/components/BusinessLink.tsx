@@ -18,7 +18,14 @@ export function BusinessLink({
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (pathname === "/") {
       e.preventDefault();
-      document.getElementById("business")?.scrollIntoView({ behavior: "smooth" });
+      // SmoothScrollが慣性スクロールを有効化している間は、Lenis自身のscrollTo経由でないと
+      // 内部のスクロール状態と競合してカクつく。未マウント（reduced-motion環境等）の場合は
+      // ネイティブのscrollIntoViewにフォールバックする。
+      if (window.lenisInstance) {
+        window.lenisInstance.scrollTo("#business", { offset: -80 });
+      } else {
+        document.getElementById("business")?.scrollIntoView({ behavior: "smooth" });
+      }
     }
   }
 
