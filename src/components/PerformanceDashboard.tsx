@@ -37,6 +37,54 @@ const CATEGORY_TO_PART_ID: Record<string, Record<string, string>> = {
   spi: { non_verbal: "spi_basic", verbal: "spi_basic", structural: "spi_structural", english: "spi_english" },
 };
 
+// レーダーチャート専用の単元統合グループ（現状SPIのみ）。「単元別・詳細分析」リストはここでは
+// 統合せず全単元を個別表示するが、SPIは単元数が多く（22単元）レーダーチャートの軸として
+// 全部表示すると見づらいため、意味の近い単元をまとめて8軸程度に統合する。
+// subCategoriesはsrc/data/practiceUnits.tsのsubCategory（questions.sub_categoryの実値）と
+// 完全一致させること（表示用labelとは異なる場合がある点に注意）。
+const RADAR_GROUPS_BY_TEST: Record<
+  string,
+  { label: string; category: string; subCategories: string[] }[]
+> = {
+  spi: [
+    { label: "推論・論理", category: "non_verbal", subCategories: ["推論", "集合"] },
+    {
+      label: "文章題・計算",
+      category: "non_verbal",
+      subCategories: ["損益算", "割合・比", "仕事算", "分割払い", "濃度算"],
+    },
+    {
+      label: "図表・数理",
+      category: "non_verbal",
+      subCategories: ["資料の読み取り", "速さ・時間・距離", "場合の数・確率"],
+    },
+    {
+      label: "語彙・文法",
+      category: "verbal",
+      subCategories: ["二語の関係", "語彙", "語句の用法", "熟語の成り立ち"],
+    },
+    { label: "文章・読解", category: "verbal", subCategories: ["文の並べ替え", "長文読解"] },
+    {
+      label: "語彙・文法",
+      category: "english",
+      subCategories: ["語意（同意語・反意語）", "英英辞典", "空欄補充"],
+    },
+    { label: "読解", category: "english", subCategories: ["長文読解（英語）"] },
+    {
+      label: "構造・分類",
+      category: "structural",
+      subCategories: ["文章の構造化", "分類・グループ化"],
+    },
+  ],
+};
+
+const RADAR_SUBJECT_SHORT_LABEL: Record<string, string> = {
+  non_verbal: "非言語",
+  verbal: "言語",
+  english: "英語",
+  structural: "構造把握",
+};
+
 type CategoryBreakdownItem = {
   category: string;
   label: string;
@@ -341,12 +389,36 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
               groups.set(item.category, list);
             }
 
-            // レーダーチャートは軸が多すぎると読みにくくなるため、データのある単元のうち
-            // 出題数が多い（＝信頼度が高い）上位12件までに絞る。
-            const radarData = [...withData]
-              .sort((a, b) => b.total - a.total)
-              .slice(0, 12)
-              .map((c) => ({ subject: c.label, category: c.category, 正答率: Math.round((c.accuracyRate ?? 0) * 100) }));
+            // レーダーチャートは軸が多すぎると読みにくくなるため、統合グループ定義がある
+            // テスト種別（現状SPI）は意味の近い単元をまとめて8軸程度に統合する（グループの正答率は
+            // 属する単元の正答数・出題数を合算してから算出＝加重平均）。定義が無いテスト種別は
+            // 従来通り、データのある単元のうち出題数が多い（＝信頼度が高い）上位12件までに絞る。
+            const radarGroups = RADAR_GROUPS_BY_TEST[examData.testTypeFamily];
+            const radarData = radarGroups
+              ? radarGroups.flatMap((g) => {
+                  let correct = 0;
+                  let total = 0;
+                  for (const sub of g.subCategories) {
+                    const item = examData!.subCategoryBreakdown.find((c) => c.subCategory === sub);
+                    if (item) {
+                      correct += item.correct;
+                      total += item.total;
+                    }
+                  }
+                  if (total === 0) return [];
+                  const subjectShort = RADAR_SUBJECT_SHORT_LABEL[g.category] ?? g.category;
+                  return [
+                    {
+                      subject: `【${subjectShort}】${g.label}`,
+                      category: g.category,
+                      正答率: Math.round((correct / total) * 100),
+                    },
+                  ];
+                })
+              : [...withData]
+                  .sort((a, b) => b.total - a.total)
+                  .slice(0, 12)
+                  .map((c) => ({ subject: c.label, category: c.category, 正答率: Math.round((c.accuracyRate ?? 0) * 100) }));
 
             // 偏差値推移グラフと同じパート別カラーを、レーダーチャートの軸ラベル・データポイントにも適用する
             // （CATEGORY_TO_PART_IDに対応表がある場合のみ。無い場合は既存の単色表示のまま）。
