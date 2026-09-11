@@ -5,8 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { ExamReviewEntry, Question } from "@/src/data/questions";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 
-const TIME_PER_QUESTION = 60; // spi_english / spi_structural（1問ごとの制限時間）
-
 // 基礎能力試験（言語・非言語）は「言語39問＋非言語30問＝計69問の固定ロースター」を、35分間
 // （2100秒）のタイムボックス内で解く方式（言語は本来40問が目安だが、長文読解が3問1組の
 // passage_group_id単位でしか選出できないため39問に調整している。詳細はSPI_VERBAL_SUBPARTSの
@@ -28,11 +26,8 @@ type ExamSection = { label: string; timeLimitSec: number; subParts: readonly Exa
 type ExamPartConfig = {
   label: string;
   mockOnly: boolean;
-  // 単一時間制限で通しの問題リストから出題する場合（SPI英語・構造把握等）はこちら。
-  // 小分類ごとの出題数配分を指定する（src/data/examStockTargets.tsのperCycleと一致させること）。
-  subParts?: readonly ExamSubPart[];
-  // セクション（言語・非言語・英語等）ごとに独立した制限時間を設ける場合（TG-WEB）はこちら。
-  // 指定時はsubPartsより優先される。
+  // spi_basic（BasicExamFlowが個別に扱う固定ロースター方式）を除き、全パートがこちらを使う。
+  // 1セクションのみ（例: SPI英語・構造把握）の場合もsections配列の要素数を1にして表現する。
   sections?: readonly ExamSection[];
 };
 
@@ -78,6 +73,16 @@ const SPI_STRUCTURAL_SUBPARTS: readonly ExamSubPart[] = [
   { category: "structural", subCategory: "文章の構造化", limit: 10 },
   { category: "structural", subCategory: "分類・グループ化", limit: 10 },
 ];
+
+// 英語・構造把握は、以前は1問ごとに60秒の制限時間を設けていたが、SPI3本番の実際の形式
+// （セクション全体で持ち時間が決まっており、問題間で残り時間がリセットされない）に合わせて、
+// セクション全体で20分（1200秒）の通し時間制へ変更した（2026-09-11改修）。
+const SPI_ENGLISH_SECTION: ExamSection = { label: "英語", timeLimitSec: 20 * 60, subParts: SPI_ENGLISH_SUBPARTS };
+const SPI_STRUCTURAL_SECTION: ExamSection = {
+  label: "構造把握",
+  timeLimitSec: 20 * 60,
+  subParts: SPI_STRUCTURAL_SUBPARTS,
+};
 
 // subPartsで指定した小分類ごとにlimit×multiplier件ずつ並行取得する。同じ小分類（出題形式）の
 // 問題が連続して出題されるよう、取得結果はsubPartsの宣言順のまま連結し、配列全体を横断する
@@ -260,8 +265,8 @@ const EXAM_PARTS = {
   // （旧: 練習問題と同一のis_mock_only=0プールから出題。src/data/examStockTargets.tsの
   // sharesPoolWithPractice: trueは移行前の名残であり、この変更に合わせて撤去済み）。
   spi_basic: { label: "基礎能力試験（言語・非言語）", mockOnly: true },
-  spi_english: { subParts: SPI_ENGLISH_SUBPARTS, label: "英語", mockOnly: true },
-  spi_structural: { subParts: SPI_STRUCTURAL_SUBPARTS, label: "構造把握", mockOnly: true },
+  spi_english: { sections: [SPI_ENGLISH_SECTION], label: "英語", mockOnly: true },
+  spi_structural: { sections: [SPI_STRUCTURAL_SECTION], label: "構造把握", mockOnly: true },
   scoa: { sections: [SCOA_SECTION], label: "SCOA", mockOnly: true },
 
   tgweb_traditional_verbal: { sections: [TGWEB_TRADITIONAL_VERBAL_SECTION], label: "TG-WEB従来型・言語", mockOnly: true },
@@ -300,7 +305,7 @@ function formatMmSs(totalSeconds: number): string {
 }
 
 // 試験終了後にまとめて送信する結果を localStorage・D1（exam-results / practice/history）へ
-// 反映してから /result へ遷移する共通処理。BasicExamFlow・StandardExamFlow・SectionedExamFlowの
+// 反映してから /result へ遷移する共通処理。BasicExamFlow・SectionedExamFlowの
 // いずれも、試験中は一切正誤を表示せず、この関数を1回呼ぶことでのみ採点結果を確定させる。
 async function finalizeExam(
   router: ReturnType<typeof useRouter>,
@@ -535,17 +540,14 @@ function TestPageInner() {
   if (partId === "spi_basic") {
     return <BasicExamFlow />;
   }
-  if (part.sections) {
-    return <SectionedExamFlow partId={partId} sections={part.sections} mockOnly={part.mockOnly} />;
+  if (!part.sections) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+        <p className="text-sm font-medium text-red-600">設定エラーが発生しました。</p>
+      </main>
+    );
   }
-  return (
-    <StandardExamFlow
-      partId={partId}
-      subParts={part.subParts ?? []}
-      label={part.label}
-      mockOnly={part.mockOnly}
-    />
-  );
+  return <SectionedExamFlow partId={partId} sections={part.sections} mockOnly={part.mockOnly} />;
 }
 
 // 基礎能力試験（言語・非言語）: 言語39問＋非言語30問＝計69問の固定ロースターを、35分の
@@ -685,150 +687,7 @@ function BasicExamFlow() {
   );
 }
 
-// 英語・構造把握・SCOA: 1問ごとに60秒の制限時間があるが、即時の正誤表示は行わない。
-// 選択肢をクリックした瞬間（または時間切れ時点）に次の問題へ進み、全問終了後にまとめて採点する。
-function StandardExamFlow({
-  partId,
-  subParts,
-  label,
-  mockOnly,
-}: {
-  partId: ExamPartId;
-  subParts: readonly ExamSubPart[];
-  label: string;
-  mockOnly: boolean;
-}) {
-  const router = useRouter();
-  const [questions, setQuestions] = useState<Question[] | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
-  const [finishing, setFinishing] = useState(false);
-
-  const resultsRef = useRef<ExamReviewEntry[]>([]);
-  const question = questions?.[currentIndex];
-
-  useEffect(() => {
-    fetchSubPartsPool(subParts, 1, mockOnly)
-      .then((qs) => {
-        if (qs.length === 0) {
-          setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
-          return;
-        }
-        setQuestions(qs);
-      })
-      .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // reset timer whenever we move to a new question
-  useEffect(() => {
-    setTimeLeft(TIME_PER_QUESTION);
-  }, [currentIndex]);
-
-  const finalize = useCallback(async () => {
-    setFinishing(true);
-    await finalizeExam(router, partId, resultsRef.current);
-  }, [router, partId]);
-
-  function pushResult(q: Question, selectedLabel: string | null, answerTimeSeconds: number | null) {
-    resultsRef.current.push({
-      questionId: q.id,
-      questionCode: q.questionCode,
-      title: q.title,
-      text: q.text,
-      choices: q.choices,
-      correctLabel: q.answer,
-      selectedLabel,
-      correct: selectedLabel === q.answer,
-      explanation: q.explanation,
-      category: q.category,
-      rawCategory: q.rawCategory,
-      answerTimeSeconds,
-    });
-  }
-
-  function advance() {
-    if (!questions) return;
-    const isLast = currentIndex === questions.length - 1;
-    if (isLast) {
-      void finalize();
-      return;
-    }
-    setCurrentIndex((i) => i + 1);
-  }
-
-  // countdown
-  useEffect(() => {
-    if (!question || finishing) return;
-    if (timeLeft <= 0) {
-      pushResult(question, null, null);
-      advance();
-      return;
-    }
-    const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
-    return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft, finishing, question]);
-
-  function handleSelect(label: string) {
-    if (!question || finishing) return;
-    pushResult(question, label, TIME_PER_QUESTION - timeLeft);
-    advance();
-  }
-
-  if (loadError) {
-    return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm font-medium text-red-600">{loadError}</p>
-      </main>
-    );
-  }
-
-  if (finishing) {
-    return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm text-gray-500">試験結果を集計しています...</p>
-      </main>
-    );
-  }
-
-  if (!question || !questions) {
-    return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
-      </main>
-    );
-  }
-
-  return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
-      <div className="flex items-center justify-between text-sm text-gray-500">
-        <span className="flex items-center gap-2">
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-            {label}
-          </span>
-          第{currentIndex + 1}問 / 全{questions.length}問
-        </span>
-        <span
-          className={`font-mono text-lg font-bold ${
-            timeLeft <= 10 ? "text-red-600" : "text-gray-800"
-          }`}
-        >
-          残り {timeLeft} 秒
-        </span>
-      </div>
-
-      <QuestionCard question={question} onSelect={handleSelect} />
-
-      <p className="text-center text-xs text-gray-400">
-        回答するとすぐに次の問題に進みます。正誤・解説は試験終了後にまとめて確認できます。
-      </p>
-    </main>
-  );
-}
-
-// TG-WEB等: 言語・非言語・英語のセクションごとに独立した制限時間を持つ模試。
+// TG-WEB・SPI英語・SPI構造把握等: 言語・非言語・英語のセクションごとに独立した制限時間を持つ模試。
 // セクション内は選択肢をクリックした瞬間に次の問題へ進み（即時の正誤表示なし）、
 // セクションの全問に回答し終える、またはそのセクションの制限時間が0になると、
 // 残りの未回答分を自動的に「未回答」として記録したうえで次のセクションへ進む。
