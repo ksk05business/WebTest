@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { redirectToLogin } from "@/src/lib/authRedirect";
+import { MULTI_PART_EXAM_PARTS, type ExamPartInfo } from "@/src/data/testTypes";
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   PolarAngleAxis,
@@ -17,8 +19,23 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type ActiveDotProps,
+  type BaseTickContentProps,
+  type DotItemDotProps,
+  type TooltipContentProps,
 } from "recharts";
+
+// 科目（模試のパート、例: SPIの「基礎能力試験」「英語」「構造把握」）ごとに割り当てるテーマカラー。
+// 偏差値推移グラフの各ラインと、レーダーチャートの軸配色（colorForCategory）の両方で共通して使う。
+const SUBJECT_COLORS = ["#2563eb", "#16a34a", "#ea580c", "#9333ea", "#dc2626", "#0d9488", "#db2777", "#ca8a04"];
+
+// questions.category（大分類、レーダーチャートの単元がどれに属するか）→ 模試パート（test_type）の対応表。
+// SPIはcategoryとパートの対応が一意に定まる（例: non_verbal/verbalはどちらも「基礎能力試験」に統合されて
+// 出題される）ため、レーダーチャートの軸色を偏差値推移グラフのパート別カラーと連動させられる。
+// 他のテスト種別（玉手箱・TG-WEB等）はcategoryとパートの対応が一意ではない（1つのcategoryが複数パートに
+// またがる）ため対象外とし、レーダーチャートは単色のまま表示する。
+const CATEGORY_TO_PART_ID: Record<string, Record<string, string>> = {
+  spi: { non_verbal: "spi_basic", verbal: "spi_basic", structural: "spi_structural", english: "spi_english" },
+};
 
 type CategoryBreakdownItem = {
   category: string;
@@ -41,6 +58,7 @@ type SubCategoryBreakdownItem = {
 
 type ExamHistoryItem = {
   id: number;
+  testType: string;
   score: number;
   total: number;
   accuracyRate: number;
@@ -111,62 +129,116 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
           </div>
 
           {(() => {
-            // 偏差値は50 + 10*(rate-mean)/stddevで計算するため小数点以下が長くなりがち。
-            // Y軸ラベル・ツールチップで33.453424...のように見切れて表示されるバグを防ぐため、
-            // グラフに渡す時点で小数点第1位に丸める（DB保存値自体は変更しない）。
-            const chartData = [...examData.history]
-              .filter((h) => h.deviationScore !== null)
-              .reverse()
-              .map((h) => ({
-                id: h.id,
-                date: new Date(h.takenAt).toLocaleDateString("ja-JP", {
-                  month: "numeric",
-                  day: "numeric",
-                }),
-                deviation: Math.round((h.deviationScore as number) * 10) / 10,
-              }));
+            // パート（test_type）ごとに独立したラインを描画するため、まずテスト種別（testTypeFamily）
+            // が持つパート一覧を取得する（複数パート方式のテストのみ。SCOA等の単一パート方式は
+            // 便宜上「偏差値」という1本のラインとして扱う）。
+            const parts: readonly ExamPartInfo[] = MULTI_PART_EXAM_PARTS[examData.testTypeFamily] ?? [
+              { id: examData.testTypeFamily, label: "偏差値" },
+            ];
+            const partColor = new Map(parts.map((p, i) => [p.id, SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
+
+            // 月×パートごとに受験結果をグルーピングする。同月に複数回受験した場合は平均偏差値を
+            // ラインの値としてプロットし、個々の受験日・点数はentriesとして保持してツールチップで見せる
+            // （偏差値は50+10*(rate-mean)/stddevで計算するため小数点以下が長くなりがちなので、
+            // 平均値もここで小数点第1位に丸めておく。DB保存値自体は変更しない）。
+            const monthlyMap = new Map<
+              string,
+              Map<string, { sum: number; entries: { takenAt: string; score: number; total: number }[] }>
+            >();
+            for (const h of examData.history) {
+              if (h.deviationScore === null) continue;
+              const d = new Date(h.takenAt);
+              const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+              if (!monthlyMap.has(monthKey)) monthlyMap.set(monthKey, new Map());
+              const partsMap = monthlyMap.get(monthKey)!;
+              if (!partsMap.has(h.testType)) partsMap.set(h.testType, { sum: 0, entries: [] });
+              const bucket = partsMap.get(h.testType)!;
+              bucket.sum += h.deviationScore;
+              bucket.entries.push({ takenAt: h.takenAt, score: h.score, total: h.total });
+            }
+
+            const monthKeys = [...monthlyMap.keys()].sort();
+            const chartData = monthKeys.map((monthKey) => {
+              const row: Record<string, number | string> = {
+                monthKey,
+                monthLabel: `${Number(monthKey.split("-")[1])}月`,
+              };
+              const partsMap = monthlyMap.get(monthKey)!;
+              for (const part of parts) {
+                const bucket = partsMap.get(part.id);
+                if (bucket) {
+                  row[part.id] = Math.round((bucket.sum / bucket.entries.length) * 10) / 10;
+                }
+              }
+              return row;
+            });
             if (chartData.length === 0) return null;
+
+            function ChartTooltip({ active, payload, label }: TooltipContentProps) {
+              if (!active || !payload || payload.length === 0) return null;
+              const monthKey = (payload[0]?.payload as { monthKey?: string } | undefined)?.monthKey;
+              const partsMap = monthKey ? monthlyMap.get(monthKey) : undefined;
+              return (
+                <div className="rounded-lg border border-gray-200 bg-white p-3 text-xs shadow-lg">
+                  <p className="mb-1 font-semibold text-gray-700">{label}</p>
+                  {payload.map((entry) => {
+                    const partId = String(entry.dataKey);
+                    const partLabel = parts.find((p) => p.id === partId)?.label ?? partId;
+                    const bucket = partsMap?.get(partId);
+                    return (
+                      <div key={partId} className="mt-1.5 first:mt-0">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="inline-block h-2 w-2 rounded-full"
+                            style={{ backgroundColor: entry.color }}
+                          />
+                          <span className="font-medium text-gray-800">{partLabel}</span>
+                          <span className="text-gray-500">偏差値 {Number(entry.value).toFixed(1)}</span>
+                        </div>
+                        {bucket?.entries.map((e, i) => (
+                          <p key={i} className="ml-3.5 text-gray-400">
+                            {new Date(e.takenAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}
+                            ：{e.score}/{e.total}問
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
+
             return (
               <div className="rounded-lg border border-gray-200 bg-white p-4">
-                <p className="mb-2 text-sm font-semibold text-gray-800">偏差値推移</p>
-                <div style={{ width: "100%", height: 200 }}>
+                <p className="mb-2 text-sm font-semibold text-gray-800">偏差値推移（科目別）</p>
+                <div style={{ width: "100%", height: 240 }}>
                   <ResponsiveContainer>
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                      <XAxis dataKey="monthLabel" tick={{ fontSize: 12 }} />
                       <YAxis
                         domain={["dataMin - 5", "dataMax + 5"]}
                         tick={{ fontSize: 12 }}
                         tickFormatter={(v: number) => v.toFixed(1)}
                       />
-                      <Tooltip formatter={(value) => [Number(value).toFixed(1), "偏差値"]} />
-                      <Line
-                        type="monotone"
-                        dataKey="deviation"
-                        stroke="#2563eb"
-                        strokeWidth={2}
-                        dot={{ r: 3, cursor: "pointer" }}
-                        activeDot={(dotProps: ActiveDotProps) => {
-                          const { cx, cy, payload } = dotProps;
-                          const rowId = (payload as { id?: number } | undefined)?.id;
-                          return (
-                            <circle
-                              key={`active-dot-${rowId ?? "unknown"}`}
-                              cx={cx}
-                              cy={cy}
-                              r={5}
-                              fill="#2563eb"
-                              stroke="#2563eb"
-                              style={{ cursor: rowId ? "pointer" : "default" }}
-                              onClick={() => rowId && router.push(`/result/history?id=${rowId}`)}
-                            />
-                          );
-                        }}
-                      />
+                      <Tooltip content={ChartTooltip} />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
+                      {parts.map((part) => (
+                        <Line
+                          key={part.id}
+                          type="monotone"
+                          dataKey={part.id}
+                          name={part.label}
+                          stroke={partColor.get(part.id)}
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                          activeDot={{ r: 5 }}
+                          connectNulls
+                        />
+                      ))}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <p className="mt-1 text-right text-xs text-gray-400">グラフの点をクリックすると解答詳細を確認できます</p>
               </div>
             );
           })()}
@@ -274,7 +346,19 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
             const radarData = [...withData]
               .sort((a, b) => b.total - a.total)
               .slice(0, 12)
-              .map((c) => ({ subject: c.label, 正答率: Math.round((c.accuracyRate ?? 0) * 100) }));
+              .map((c) => ({ subject: c.label, category: c.category, 正答率: Math.round((c.accuracyRate ?? 0) * 100) }));
+
+            // 偏差値推移グラフと同じパート別カラーを、レーダーチャートの軸ラベル・データポイントにも適用する
+            // （CATEGORY_TO_PART_IDに対応表がある場合のみ。無い場合は既存の単色表示のまま）。
+            const radarParts: readonly ExamPartInfo[] = MULTI_PART_EXAM_PARTS[examData.testTypeFamily] ?? [
+              { id: examData.testTypeFamily, label: "偏差値" },
+            ];
+            const radarPartColor = new Map(radarParts.map((p, i) => [p.id, SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
+            const categoryToPart = CATEGORY_TO_PART_ID[examData.testTypeFamily];
+            function colorForCategory(category: string): string {
+              const partId = categoryToPart?.[category];
+              return (partId && radarPartColor.get(partId)) || "#2563eb";
+            }
 
             function practiceHref(item: SubCategoryBreakdownItem) {
               const params = new URLSearchParams({
@@ -290,11 +374,36 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                 {radarData.length >= 3 && (
                   <div className="rounded-lg border border-gray-200 bg-white p-4">
                     <p className="mb-2 text-sm font-semibold text-gray-800">単元別・正答率レーダーチャート</p>
+                    {categoryToPart && (
+                      <div className="mb-2 flex flex-wrap gap-2">
+                        {radarParts.map((part) => (
+                          <span key={part.id} className="flex items-center gap-1 text-[10px] text-gray-500">
+                            <span
+                              className="inline-block h-2 w-2 rounded-full"
+                              style={{ backgroundColor: radarPartColor.get(part.id) }}
+                            />
+                            {part.label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div style={{ width: "100%", height: 280 }}>
                       <ResponsiveContainer>
                         <RadarChart data={radarData} outerRadius="75%">
                           <PolarGrid />
-                          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
+                          <PolarAngleAxis
+                            dataKey="subject"
+                            tick={(props: BaseTickContentProps) => {
+                              const { x, y, textAnchor, payload } = props;
+                              const item = radarData.find((d) => d.subject === payload.value);
+                              const color = item ? colorForCategory(item.category) : "#374151";
+                              return (
+                                <text x={x} y={y} textAnchor={textAnchor} fontSize={10} fill={color}>
+                                  {payload.value}
+                                </text>
+                              );
+                            }}
+                          />
                           <PolarRadiusAxis domain={[0, 100]} tick={{ fontSize: 9 }} />
                           <Radar
                             name="正答率"
@@ -302,6 +411,12 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                             stroke="#2563eb"
                             fill="#2563eb"
                             fillOpacity={0.35}
+                            dot={(props: DotItemDotProps) => {
+                              const { cx, cy, payload: point, index } = props;
+                              const item = point as { category?: string } | undefined;
+                              const color = item?.category ? colorForCategory(item.category) : "#2563eb";
+                              return <circle key={`radar-dot-${index}`} cx={cx} cy={cy} r={3} fill={color} stroke={color} />;
+                            }}
                           />
                           <Tooltip />
                         </RadarChart>
