@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ExamReviewEntry } from "@/src/data/questions";
 import { ExamReviewList } from "@/src/components/ExamReviewList";
@@ -62,9 +61,13 @@ function ResultHistoryPageInner() {
     return (
       <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="text-gray-600">{error}</p>
-        <Link href="/dashboard" className="text-blue-600 underline">
-          ダッシュボードに戻る
-        </Link>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-blue-600 underline"
+        >
+          前のページに戻る
+        </button>
       </main>
     );
   }
@@ -94,17 +97,25 @@ function ResultHistoryPageInner() {
         <p className="text-sm text-gray-600">偏差値 {detail.deviationScore.toFixed(1)}</p>
       )}
 
-      <Link href="/dashboard" className="rounded-full px-4 py-3 text-sm text-gray-500 underline">
-        ダッシュボードに戻る
-      </Link>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="rounded-full px-4 py-3 text-sm text-gray-500 underline"
+      >
+        前のページに戻る
+      </button>
 
-      {detail.review.length > 0 && (
+      {detail.review.length > 0 ? (
         <section className="mt-4 w-full text-left">
           <h2 className="mb-4 text-center text-lg font-bold text-gray-900">
             解答一覧（全{detail.review.length}問）
           </h2>
           <ExamReviewList review={detail.review} />
         </section>
+      ) : (
+        <p className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+          この回の受験は問題ごとの詳細記録機能の追加前に受験されたため、解答一覧は表示できません。
+        </p>
       )}
     </main>
   );
