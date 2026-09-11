@@ -104,8 +104,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (list) list.push(row);
     else groups.set(key, [row]);
   }
-  for (const list of groups.values()) {
-    list.sort((a, b) => a.id - b.id);
+  for (const [key, list] of groups) {
+    // GAB英語（長文読解、1長文につき設問3問）は、常にid昇順（＝作成順）で出題した場合に
+    // 3問の正解パターンが固定順になってしまい、順番だけで正解が予測できてしまう問題があった。
+    // そのため他カテゴリの長文グループ（id昇順で文脈順を保つ）とは別に、グループ内の出題順を
+    // 毎回ランダム化する（練習・模試とも同じこのエンドポイントを使うため両方に自動的に適用される）。
+    if (list[0]?.category === "gab_english" && list.length > 1) {
+      groups.set(key, shuffle(list));
+    } else {
+      list.sort((a, b) => a.id - b.id);
+    }
   }
 
   const shuffledGroups = shuffle([...groups.values()]);
