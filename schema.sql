@@ -66,6 +66,27 @@ CREATE TABLE IF NOT EXISTS exam_results (
 CREATE INDEX IF NOT EXISTS idx_exam_results_user_id ON exam_results(user_id);
 
 -- ============================================================
+-- 模試の受験詳細（過去の受験結果の復習機能用）
+-- exam_resultsは受験1回分の集計スコアのみを保持するため、問題単位の詳細
+-- （出題順・自分の解答・正誤・解答時間）はこのテーブルに別途保持する。
+-- 問題文・選択肢・正解・解説そのものはquestionsテーブルを都度JOINして復元し、二重管理しない。
+-- 練習問題（isPractice=true）はexam_results自体を作らないため、このテーブルにも行を作らない。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS exam_result_answers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  exam_result_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  display_order INTEGER NOT NULL, -- 出題順（0始まり）。詳細画面での表示順に使う
+  selected_label TEXT, -- 選択した選択肢ラベル（'A'〜'E'等）。時間切れ等の未回答はNULL
+  correct INTEGER NOT NULL, -- 0 or 1
+  answer_time_seconds INTEGER,
+  FOREIGN KEY (exam_result_id) REFERENCES exam_results(id),
+  FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_exam_result_answers_exam_result_id ON exam_result_answers(exam_result_id);
+
+-- ============================================================
 -- スカウト機能: 企業プロフィール
 -- 職業安定法上、当社は「募集情報等提供事業（特定募集情報等提供事業）」として運営し、
 -- 個別の学生の推薦や面談調整といった職業紹介（マッチング）行為は一切行わない。

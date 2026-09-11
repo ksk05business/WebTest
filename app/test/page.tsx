@@ -330,21 +330,21 @@ async function finalizeExam(
     const rawUser = localStorage.getItem("spiUser");
     const email = rawUser ? (JSON.parse(rawUser) as { email?: string }).email : undefined;
     if (email && total > 0) {
-      const answers = results.map((r) => ({ questionId: r.questionId, correct: r.correct }));
+      const answers = results.map((r) => ({
+        questionId: r.questionId,
+        correct: r.correct,
+        selectedLabel: r.selectedLabel,
+        answerTimeSeconds: r.answerTimeSeconds,
+      }));
       await fetch("/api/exam-results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, testType: partId, score, total, categoryScores, answers }),
       });
-      const answersWithTime = results.map((r) => ({
-        questionId: r.questionId,
-        correct: r.correct,
-        answerTimeSeconds: r.answerTimeSeconds,
-      }));
       await fetch("/api/practice/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, testType: partId, answers: answersWithTime, isPractice: false }),
+        body: JSON.stringify({ email, testType: partId, answers, isPractice: false }),
       });
     }
   } catch {

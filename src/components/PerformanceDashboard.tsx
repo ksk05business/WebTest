@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 import {
@@ -16,6 +17,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  type ActiveDotProps,
 } from "recharts";
 
 type CategoryBreakdownItem = {
@@ -38,6 +40,7 @@ type SubCategoryBreakdownItem = {
 };
 
 type ExamHistoryItem = {
+  id: number;
   score: number;
   total: number;
   accuracyRate: number;
@@ -108,15 +111,19 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
           </div>
 
           {(() => {
+            // 偏差値は50 + 10*(rate-mean)/stddevで計算するため小数点以下が長くなりがち。
+            // Y軸ラベル・ツールチップで33.453424...のように見切れて表示されるバグを防ぐため、
+            // グラフに渡す時点で小数点第1位に丸める（DB保存値自体は変更しない）。
             const chartData = [...examData.history]
               .filter((h) => h.deviationScore !== null)
               .reverse()
               .map((h) => ({
+                id: h.id,
                 date: new Date(h.takenAt).toLocaleDateString("ja-JP", {
                   month: "numeric",
                   day: "numeric",
                 }),
-                deviation: h.deviationScore as number,
+                deviation: Math.round((h.deviationScore as number) * 10) / 10,
               }));
             if (chartData.length === 0) return null;
             return (
@@ -127,17 +134,69 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                      <YAxis domain={["dataMin - 5", "dataMax + 5"]} tick={{ fontSize: 12 }} />
-                      <Tooltip />
+                      <YAxis
+                        domain={["dataMin - 5", "dataMax + 5"]}
+                        tick={{ fontSize: 12 }}
+                        tickFormatter={(v: number) => v.toFixed(1)}
+                      />
+                      <Tooltip formatter={(value) => [Number(value).toFixed(1), "偏差値"]} />
                       <Line
                         type="monotone"
                         dataKey="deviation"
                         stroke="#2563eb"
                         strokeWidth={2}
-                        dot={{ r: 3 }}
+                        dot={{ r: 3, cursor: "pointer" }}
+                        activeDot={(dotProps: ActiveDotProps) => {
+                          const { cx, cy, payload } = dotProps;
+                          const rowId = (payload as { id?: number } | undefined)?.id;
+                          return (
+                            <circle
+                              key={`active-dot-${rowId ?? "unknown"}`}
+                              cx={cx}
+                              cy={cy}
+                              r={5}
+                              fill="#2563eb"
+                              stroke="#2563eb"
+                              style={{ cursor: rowId ? "pointer" : "default" }}
+                              onClick={() => rowId && router.push(`/result/history?id=${rowId}`)}
+                            />
+                          );
+                        }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
+                </div>
+                <p className="mt-1 text-right text-xs text-gray-400">グラフの点をクリックすると解答詳細を確認できます</p>
+              </div>
+            );
+          })()}
+
+          {(() => {
+            const withId = examData.history.filter((h) => h.id);
+            if (withId.length === 0) return null;
+            return (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="mb-3 text-sm font-semibold text-gray-800">受験履歴一覧</p>
+                <div className="flex flex-col divide-y divide-gray-100">
+                  {withId.map((h) => (
+                    <Link
+                      key={h.id}
+                      href={`/result/history?id=${h.id}`}
+                      className="flex items-center justify-between gap-3 py-2 text-sm hover:bg-gray-50"
+                    >
+                      <span className="text-gray-700">
+                        {new Date(h.takenAt).toLocaleDateString("ja-JP", {
+                          year: "numeric",
+                          month: "numeric",
+                          day: "numeric",
+                        })}
+                      </span>
+                      <span className="text-gray-500">
+                        {h.score}/{h.total}問
+                        {h.deviationScore !== null && `　偏差値 ${h.deviationScore.toFixed(1)}`}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             );

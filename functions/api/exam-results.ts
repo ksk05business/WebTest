@@ -11,7 +11,12 @@ interface Env {
 
 type CategoryScores = Record<string, { correct: number; total: number }>;
 
-type AnswerInput = { questionId: number; correct: boolean };
+type AnswerInput = {
+  questionId: number;
+  correct: boolean;
+  selectedLabel?: string | null;
+  answerTimeSeconds?: number | null;
+};
 
 type PostBody = {
   testType?: unknown;
@@ -154,7 +159,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const priorRates = (priorRows.results ?? []).map((r) => r.accuracy_rate);
   const deviationScore = calculateDeviationScore(accuracyRate, priorRates);
 
-  await context.env.DB.prepare(
+  const inserted = await context.env.DB.prepare(
     `INSERT INTO exam_results (user_id, test_type, score, total, accuracy_rate, deviation_score, category_scores_json)
      VALUES (?, ?, ?, ?, ?, ?, ?)`
   )
@@ -171,12 +176,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   if (answers) {
     await enqueueWrongAnswers(context.env.DB, userId, answers);
+
+    const examResultId = inserted.meta.last_row_id;
+    for (let i = 0; i < answers.length; i++) {
+      const a = answers[i];
+      await context.env.DB.prepare(
+        `INSERT INTO exam_result_answers (exam_result_id, question_id, display_order, selected_label, correct, answer_time_seconds)
+         VALUES (?, ?, ?, ?, ?, ?)`
+      )
+        .bind(examResultId, a.questionId, i, a.selectedLabel ?? null, a.correct ? 1 : 0, a.answerTimeSeconds ?? null)
+        .run();
+    }
   }
 
   return Response.json({ ok: true, deviationScore, accuracyRate });
 };
 
 type ExamResultRow = {
+  id: number;
   test_type: string;
   score: number;
   total: number;
@@ -242,20 +259,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const rows = testTypesFilter
     ? await context.env.DB.prepare(
-        `SELECT test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
+        `SELECT id, test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
          FROM exam_results WHERE user_id = ? AND test_type IN (${testTypesFilter.map(() => "?").join(",")})
          ORDER BY taken_at DESC LIMIT 20`
       )
         .bind(userId, ...testTypesFilter)
         .all<ExamResultRow>()
     : await context.env.DB.prepare(
-        `SELECT test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
+        `SELECT id, test_type, score, total, accuracy_rate, deviation_score, category_scores_json, taken_at
          FROM exam_results WHERE user_id = ? ORDER BY taken_at DESC LIMIT 20`
       )
         .bind(userId)
         .all<ExamResultRow>();
 
   const history = (rows.results ?? []).map((r) => ({
+    id: r.id,
     testType: r.test_type,
     score: r.score,
     total: r.total,
