@@ -492,15 +492,15 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                   }));
                 })();
 
-            // 各軸（行）にはその軸が属するパートのキーにだけ値を持たせ、他パートのキーは持たせない。
-            // これによりパートごとに独立した<Radar dataKey={partId}>を重ねて描画すると、
-            // パートごとに塗り分けられた別々の多角形として表示される。
+            // 全軸（8グループ）を1つのデータセットにまとめ、単一の<Radar dataKey="正答率">で
+            // 1つの多角形として描画する（パートごとに別々の<Radar>へ分割すると、他パートの軸で
+            // 値が欠けて多角形がいびつに分断されて見えるため、単一ポリゴンに戻した）。
+            // 科目ごとの色分けは、ポリゴン自体ではなく軸ラベルの文字色（PolarAngleAxisのtick）で行う。
             const radarData = radarPoints.map((p) => ({
               subject: p.subject,
               category: p.category,
-              [p.partId]: p.value,
+              正答率: p.value,
             }));
-            const radarPartIds = [...new Set(radarPoints.map((p) => p.partId))];
 
             function practiceHref(item: SubCategoryBreakdownItem) {
               const params = new URLSearchParams({
@@ -547,21 +547,14 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                             }}
                           />
                           <PolarRadiusAxis domain={[0, 100]} tick={{ fontSize: 9 }} />
-                          {radarPartIds.map((partId) => {
-                            const color = colorForPart(partId);
-                            const name = radarParts.find((p) => p.id === partId)?.label ?? "正答率";
-                            return (
-                              <Radar
-                                key={partId}
-                                name={name}
-                                dataKey={partId}
-                                stroke={color}
-                                fill={color}
-                                fillOpacity={0.35}
-                                dot={{ r: 3, fill: color, stroke: color }}
-                              />
-                            );
-                          })}
+                          <Radar
+                            name="正答率"
+                            dataKey="正答率"
+                            stroke={DEFAULT_RADAR_COLOR}
+                            fill={DEFAULT_RADAR_COLOR}
+                            fillOpacity={0.35}
+                            dot={{ r: 3, fill: DEFAULT_RADAR_COLOR, stroke: DEFAULT_RADAR_COLOR }}
+                          />
                           <Tooltip />
                         </RadarChart>
                       </ResponsiveContainer>
