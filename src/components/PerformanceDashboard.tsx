@@ -20,21 +20,29 @@ import {
   XAxis,
   YAxis,
   type BaseTickContentProps,
-  type DotItemDotProps,
   type TooltipContentProps,
 } from "recharts";
 
 // 科目（模試のパート、例: SPIの「基礎能力試験」「英語」「構造把握」）ごとに割り当てるテーマカラー。
-// 偏差値推移グラフの各ラインと、レーダーチャートの軸配色（colorForCategory）の両方で共通して使う。
+// 偏差値推移グラフの各ラインと、レーダーチャートの軸配色・ポリゴン塗り分け（colorForPart）の両方で共通して使う。
 const SUBJECT_COLORS = ["#2563eb", "#16a34a", "#ea580c", "#9333ea", "#dc2626", "#0d9488", "#db2777", "#ca8a04"];
 
 // questions.category（大分類、レーダーチャートの単元がどれに属するか）→ 模試パート（test_type）の対応表。
 // SPIはcategoryとパートの対応が一意に定まる（例: non_verbal/verbalはどちらも「基礎能力試験」に統合されて
 // 出題される）ため、レーダーチャートの軸色を偏差値推移グラフのパート別カラーと連動させられる。
-// 他のテスト種別（玉手箱・TG-WEB等）はcategoryとパートの対応が一意ではない（1つのcategoryが複数パートに
-// またがる）ため対象外とし、レーダーチャートは単色のまま表示する。
+// TG-WEBも従来型・新型の言語/非言語＋英語の5パートにそれぞれcategoryが1対1で対応するため同様に定義する
+// （tgweb_verbal_reading＝共通・言語の長文読解のみ、本番模試の独立パートが無いため対応表から除外し、
+// デフォルト色のまま表示する）。他のテスト種別（玉手箱・GAB/C-GAB等）は1つのcategoryが複数パートに
+// またがり一意に定まらないため対象外とし、レーダーチャートは単色のまま表示する。
 const CATEGORY_TO_PART_ID: Record<string, Record<string, string>> = {
   spi: { non_verbal: "spi_basic", verbal: "spi_basic", structural: "spi_structural", english: "spi_english" },
+  tgweb: {
+    tgweb_traditional_verbal: "tgweb_traditional_verbal",
+    tgweb_traditional_math: "tgweb_traditional_nonverbal",
+    tgweb_new_verbal: "tgweb_new_verbal",
+    tgweb_new_math: "tgweb_new_nonverbal",
+    tgweb_english: "tgweb_english",
+  },
 };
 
 // レーダーチャート専用の単元統合グループ（現状SPIのみ）。「単元別・詳細分析」リストはここでは
@@ -389,12 +397,29 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
               groups.set(item.category, list);
             }
 
+            // 偏差値推移グラフと同じパート別カラーを、レーダーチャートの軸ラベル・データポイント・
+            // ポリゴンの塗り分けにも適用する（CATEGORY_TO_PART_IDに対応表がある場合のみ。無い場合は
+            // 全軸を1つの"その他"パートとして扱い、従来通り単色の1ポリゴンで表示する）。
+            const radarParts: readonly ExamPartInfo[] = MULTI_PART_EXAM_PARTS[examData.testTypeFamily] ?? [
+              { id: examData.testTypeFamily, label: "偏差値" },
+            ];
+            const radarPartColor = new Map(radarParts.map((p, i) => [p.id, SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
+            const categoryToPart = CATEGORY_TO_PART_ID[examData.testTypeFamily];
+            const OTHER_PART_ID = "__other__";
+            const DEFAULT_RADAR_COLOR = "#2563eb";
+            function partIdForCategory(category: string): string {
+              return categoryToPart?.[category] ?? OTHER_PART_ID;
+            }
+            function colorForPart(partId: string): string {
+              return radarPartColor.get(partId) ?? DEFAULT_RADAR_COLOR;
+            }
+
             // レーダーチャートは軸が多すぎると読みにくくなるため、統合グループ定義がある
             // テスト種別（現状SPI）は意味の近い単元をまとめて8軸程度に統合する（グループの正答率は
             // 属する単元の正答数・出題数を合算してから算出＝加重平均）。定義が無いテスト種別は
             // 従来通り、データのある単元のうち出題数が多い（＝信頼度が高い）上位12件までに絞る。
             const radarGroups = RADAR_GROUPS_BY_TEST[examData.testTypeFamily];
-            const radarData = radarGroups
+            const radarPoints = radarGroups
               ? radarGroups.flatMap((g) => {
                   let correct = 0;
                   let total = 0;
@@ -411,26 +436,38 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                     {
                       subject: `【${subjectShort}】${g.label}`,
                       category: g.category,
-                      正答率: Math.round((correct / total) * 100),
+                      partId: partIdForCategory(g.category),
+                      value: Math.round((correct / total) * 100),
                     },
                   ];
                 })
-              : [...withData]
-                  .sort((a, b) => b.total - a.total)
-                  .slice(0, 12)
-                  .map((c) => ({ subject: c.label, category: c.category, 正答率: Math.round((c.accuracyRate ?? 0) * 100) }));
+              : (() => {
+                  // パート対応表がある場合、同じパートの単元が円周上で隣り合うようパート順に
+                  // グルーピングしてから並べる（複数のRadarを重ねて描画したとき、各パートの多角形が
+                  // 分断されず1つのまとまった領域として見えるようにするため）。
+                  const partOrder = new Map(radarParts.map((p, i) => [p.id, i]));
+                  const orderOf = (item: SubCategoryBreakdownItem) =>
+                    partOrder.get(partIdForCategory(item.category)) ?? radarParts.length;
+                  const sorted = categoryToPart
+                    ? [...withData].sort((a, b) => orderOf(a) - orderOf(b) || b.total - a.total)
+                    : [...withData].sort((a, b) => b.total - a.total);
+                  return sorted.slice(0, 12).map((c) => ({
+                    subject: c.label,
+                    category: c.category,
+                    partId: partIdForCategory(c.category),
+                    value: Math.round((c.accuracyRate ?? 0) * 100),
+                  }));
+                })();
 
-            // 偏差値推移グラフと同じパート別カラーを、レーダーチャートの軸ラベル・データポイントにも適用する
-            // （CATEGORY_TO_PART_IDに対応表がある場合のみ。無い場合は既存の単色表示のまま）。
-            const radarParts: readonly ExamPartInfo[] = MULTI_PART_EXAM_PARTS[examData.testTypeFamily] ?? [
-              { id: examData.testTypeFamily, label: "偏差値" },
-            ];
-            const radarPartColor = new Map(radarParts.map((p, i) => [p.id, SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
-            const categoryToPart = CATEGORY_TO_PART_ID[examData.testTypeFamily];
-            function colorForCategory(category: string): string {
-              const partId = categoryToPart?.[category];
-              return (partId && radarPartColor.get(partId)) || "#2563eb";
-            }
+            // 各軸（行）にはその軸が属するパートのキーにだけ値を持たせ、他パートのキーは持たせない。
+            // これによりパートごとに独立した<Radar dataKey={partId}>を重ねて描画すると、
+            // パートごとに塗り分けられた別々の多角形として表示される。
+            const radarData = radarPoints.map((p) => ({
+              subject: p.subject,
+              category: p.category,
+              [p.partId]: p.value,
+            }));
+            const radarPartIds = [...new Set(radarPoints.map((p) => p.partId))];
 
             function practiceHref(item: SubCategoryBreakdownItem) {
               const params = new URLSearchParams({
@@ -467,8 +504,8 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                             dataKey="subject"
                             tick={(props: BaseTickContentProps) => {
                               const { x, y, textAnchor, payload } = props;
-                              const item = radarData.find((d) => d.subject === payload.value);
-                              const color = item ? colorForCategory(item.category) : "#374151";
+                              const point = radarPoints.find((d) => d.subject === payload.value);
+                              const color = point ? colorForPart(point.partId) : "#374151";
                               return (
                                 <text x={x} y={y} textAnchor={textAnchor} fontSize={10} fill={color}>
                                   {payload.value}
@@ -477,19 +514,21 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                             }}
                           />
                           <PolarRadiusAxis domain={[0, 100]} tick={{ fontSize: 9 }} />
-                          <Radar
-                            name="正答率"
-                            dataKey="正答率"
-                            stroke="#2563eb"
-                            fill="#2563eb"
-                            fillOpacity={0.35}
-                            dot={(props: DotItemDotProps) => {
-                              const { cx, cy, payload: point, index } = props;
-                              const item = point as { category?: string } | undefined;
-                              const color = item?.category ? colorForCategory(item.category) : "#2563eb";
-                              return <circle key={`radar-dot-${index}`} cx={cx} cy={cy} r={3} fill={color} stroke={color} />;
-                            }}
-                          />
+                          {radarPartIds.map((partId) => {
+                            const color = colorForPart(partId);
+                            const name = radarParts.find((p) => p.id === partId)?.label ?? "正答率";
+                            return (
+                              <Radar
+                                key={partId}
+                                name={name}
+                                dataKey={partId}
+                                stroke={color}
+                                fill={color}
+                                fillOpacity={0.35}
+                                dot={{ r: 3, fill: color, stroke: color }}
+                              />
+                            );
+                          })}
                           <Tooltip />
                         </RadarChart>
                       </ResponsiveContainer>

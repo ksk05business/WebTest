@@ -52,6 +52,10 @@ function isAnswers(value: unknown): value is AnswerInput[] {
 // 偏差値 = 50 + 10 * (このスコア率 - 母集団平均) / 母集団標準偏差
 // 母集団は「この受験より前に記録された、同じtest_typeの全受験者の正答率」。
 // サンプルが少ない/ばらつきが無い場合は50を返す（過去の受験結果を遡って再計算はしない簡易実装）。
+// TG-WEB等、公開直後でまだ受験者数が少ないテスト種別は母集団の標準偏差が極端に小さくなりやすく、
+// 満点近いスコアを取ると偏差値85のような非現実的な値まで跳ね上がってしまう実例があった。
+// 母集団が十分に育つまでの安全弁として、最終的な出力値に上限（70）のキャップをかける。
+const MAX_DEVIATION_SCORE = 70;
 function calculateDeviationScore(rate: number, priorRates: number[]): number {
   if (priorRates.length < 2) return 50;
   const mean = priorRates.reduce((sum, r) => sum + r, 0) / priorRates.length;
@@ -59,7 +63,8 @@ function calculateDeviationScore(rate: number, priorRates: number[]): number {
     priorRates.reduce((sum, r) => sum + (r - mean) ** 2, 0) / priorRates.length;
   const stddev = Math.sqrt(variance);
   if (stddev === 0) return 50;
-  return 50 + (10 * (rate - mean)) / stddev;
+  const raw = 50 + (10 * (rate - mean)) / stddev;
+  return Math.min(raw, MAX_DEVIATION_SCORE);
 }
 
 // 練習問題・模試で間違えた問題を、忘却曲線に基づく復習キュー（user_question_reviews）へ
