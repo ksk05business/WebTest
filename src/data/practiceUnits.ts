@@ -216,8 +216,9 @@ const SCOA_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
     category: "scoa_common_sense",
     groupLabel: "常識",
     units: [
-      { id: "scoa_science", subCategory: "理科", label: "理科", memorization: true },
-      { id: "scoa_social", subCategory: "社会", label: "社会", memorization: true },
+      // 理科・社会は「言語」「英語」科目ではない（常識科目）ため、スキマ暗記復習の対象外とする。
+      { id: "scoa_science", subCategory: "理科", label: "理科" },
+      { id: "scoa_social", subCategory: "社会", label: "社会" },
     ],
   },
   {
@@ -276,6 +277,14 @@ export const DEFAULT_TEST_ID = "spi";
 export const CATEGORY_TO_TEST_ID: Record<string, string> = Object.fromEntries(
   Object.entries(PRACTICE_UNIT_GROUPS_BY_TEST).flatMap(([testId, groups]) =>
     groups.map((group) => [group.category, testId])
+  )
+);
+
+// category（大分類）→ groupLabel（科目名、例:「言語（能力）」）の逆引きマップ。
+// スキマ暗記復習のテスト種別×科目選択モーダルで、対象カテゴリの表示名を組み立てるために使う。
+export const CATEGORY_TO_GROUP_LABEL: Record<string, string> = Object.fromEntries(
+  Object.values(PRACTICE_UNIT_GROUPS_BY_TEST).flatMap((groups) =>
+    groups.map((group) => [group.category, group.groupLabel])
   )
 );
 

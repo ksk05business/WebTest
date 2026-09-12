@@ -111,7 +111,7 @@ function PracticePageInner() {
   function loadQuestions() {
     const fetchUrl =
       scope === "memorization"
-        ? "/api/practice/history?scope=memorization&limit=20"
+        ? `/api/practice/history?scope=memorization&limit=20${category ? `&category=${encodeURIComponent(category)}` : ""}`
         : scope === "wrong"
           ? `/api/practice/history?testType=${encodeURIComponent(testId)}&limit=20`
           : (() => {

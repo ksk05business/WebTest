@@ -80,8 +80,10 @@ type WrongRow = QuestionRow;
 //   - ?testType=<id>: そのテストの全分野（非言語・言語・英語等を問わない）を対象に独立してカウント・出題する
 //     （各テスト単元選択ページ上部の「復習ノート」用）。
 //   - ?scope=memorization（testType省略時）: テスト種別を問わず、src/data/practiceUnits.tsで
-//     memorization: true とマークされた単元（スマホで手軽に解ける暗記・知識系単元のみ、長文読解等は除く）
+//     memorization: true とマークされた単元（言語・英語の暗記・知識系単元のみ、長文読解等は除く）
 //     を横断して対象にする（ダッシュボードの「スキマ暗記復習」用）。
+//     ?category=<大分類>を追加すると、そのテスト×科目1つだけに絞り込む（テスト種別・科目選択モーダルで
+//     選んだ後の出題に使う）。category省略時（一覧取得用）は、対象カテゴリごとの内訳を`breakdown`で返す。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
   if (!userId) {
@@ -91,6 +93,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const params = new URL(context.request.url).searchParams;
   const testType = params.get("testType");
   const isMemorizationScope = !testType && params.get("scope") === "memorization";
+  const categoryFilter = params.get("category");
   const countOnly = params.get("countOnly") === "1";
   const limitRaw = params.get("limit");
   const limit = Math.min(
@@ -104,10 +107,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   // testType指定時: user_question_history.test_type で絞り込む（そのテストの全分野が対象）。
   // memorizationスコープ時: questionsをJOINし、暗記系単元の(category, subCategory)ペアで絞り込む
-  // （test_typeを問わず全テスト横断）。
-  const memorizationUnits = isMemorizationScope ? getMemorizationUnitKeys() : [];
+  // （test_typeを問わず全テスト横断、categoryFilter指定時はそのカテゴリ1つだけに絞る）。
+  const memorizationUnitsAll = isMemorizationScope ? getMemorizationUnitKeys() : [];
+  const memorizationUnits = categoryFilter
+    ? memorizationUnitsAll.filter((u) => u.category === categoryFilter)
+    : memorizationUnitsAll;
   if (isMemorizationScope && memorizationUnits.length === 0) {
-    return Response.json({ count: 0, questions: [] });
+    return Response.json({ count: 0, questions: [], breakdown: [] });
   }
   const memorizationCondition = memorizationUnits.map(() => "(q.category = ? AND q.sub_category = ?)").join(" OR ");
   const memorizationBinds = memorizationUnits.flatMap((u) => [u.category, u.subCategory]);
@@ -135,8 +141,25 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     .first<{ cnt: number }>();
   const count = countRow?.cnt ?? 0;
 
+  // categoryFilter未指定時（一覧取得用）のみ、対象カテゴリごとの内訳を返す
+  // （ダッシュボードのテスト種別・科目選択モーダルで使う）。
+  let breakdown: { category: string; count: number }[] = [];
+  if (isMemorizationScope && !categoryFilter && count > 0) {
+    const breakdownRows = await context.env.DB.prepare(
+      `WITH latest AS (${latestCte})
+       SELECT q.category AS category, COUNT(*) AS cnt
+       FROM latest l
+       JOIN questions q ON q.id = l.question_id
+       WHERE l.rn = 1 AND l.correct = 0 AND q.is_mock_only = 0
+       GROUP BY q.category`
+    )
+      .bind(...latestBinds)
+      .all<{ category: string; cnt: number }>();
+    breakdown = (breakdownRows.results ?? []).map((r) => ({ category: r.category, count: r.cnt }));
+  }
+
   if (countOnly || count === 0) {
-    return Response.json({ count, questions: [] });
+    return Response.json({ count, questions: [], breakdown });
   }
 
   const rows = await context.env.DB.prepare(
