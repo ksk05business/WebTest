@@ -1,0 +1,929 @@
+{
+  "questions": [
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "サイコロ問題",
+      "questionText": "以下の図1・図2は、同じサイコロ（互いに異なる6種類の記号が1つずつ描かれている）を異なる方向から見たものである。●の面と向かい合う面の記号は何か。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMTYyIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxNjIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIiB2aWV3Qm94PSIwIDAgMTIwIDEyMCI+PHBvbHlnb24gcG9pbnRzPSI2MCw1IDEwNSwzMCA2MCw1NSAxNSwzMCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMmI1ZjllIi8+PHBvbHlnb24gcG9pbnRzPSIxNSwzMCA2MCw1NSA2MCwxMDUgMTUsODAiIGZpbGw9IiNjM2Q5ZWYiIHN0cm9rZT0iIzJiNWY5ZSIvPjxwb2x5Z29uIHBvaW50cz0iNjAsNTUgMTA1LDMwIDEwNSw4MCA2MCwxMDUiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjU1IiB5PSIzNSIgZm9udC1zaXplPSIxNiI+4piFPC90ZXh0Pjx0ZXh0IHg9IjMwIiB5PSI3MyIgZm9udC1zaXplPSIxNiI+4pePPC90ZXh0Pjx0ZXh0IHg9Ijc4IiB5PSI3MyIgZm9udC1zaXplPSIxNiI+4pagPC90ZXh0Pjwvc3ZnPjxzdmcgeD0iMTYwIiB5PSIwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCIgdmlld0JveD0iMCAwIDEyMCAxMjAiPjxwb2x5Z29uIHBvaW50cz0iNjAsNSAxMDUsMzAgNjAsNTUgMTUsMzAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPjxwb2x5Z29uIHBvaW50cz0iMTUsMzAgNjAsNTUgNjAsMTA1IDE1LDgwIiBmaWxsPSIjYzNkOWVmIiBzdHJva2U9IiMyYjVmOWUiLz48cG9seWdvbiBwb2ludHM9IjYwLDU1IDEwNSwzMCAxMDUsODAgNjAsMTA1IiBmaWxsPSIjZWVmNGZiIiBzdHJva2U9IiMyYjVmOWUiLz48dGV4dCB4PSI1NSIgeT0iMzUiIGZvbnQtc2l6ZT0iMTYiPuKYhTwvdGV4dD48dGV4dCB4PSIzMCIgeT0iNzMiIGZvbnQtc2l6ZT0iMTYiPuKWsjwvdGV4dD48dGV4dCB4PSI3OCIgeT0iNzMiIGZvbnQtc2l6ZT0iMTYiPuKXizwvdGV4dD48L3N2Zz48dGV4dCB4PSI3MCIgeT0iMTU2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7lm7MxPC90ZXh0Pjx0ZXh0IHg9IjIzMCIgeT0iMTU2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7lm7MyPC90ZXh0Pjwvc3ZnPg==",
+      "options": [
+        "○",
+        "■",
+        "★",
+        "▲"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "図1・図2はどちらも上面が★なので、同じ軸（★を上にした状態）のまま、真上から見て回転させたものです。",
+        "図1では、上から見て正面（●）→右（■）の順に並んでいます。図2では、正面（▲）→右（○）の順に並んでいます。同じ軸で回転させただけなので、4つの側面の並び順（円環状のつながり）は変わりません。",
+        "これをつなげると、●→■→▲→○→（●に戻る）という円環の並びになります。円環の中で向かい合う（正面と背面、右と左の関係になる）のは、2つ隣どうしの組み合わせなので、●の向かいは▲、■の向かいは○となります。",
+        "よって、正解は4（▲）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "サイコロ問題",
+      "questionText": "以下の図1・図2は、同じサイコロ（面に1〜6の数字が1つずつ書かれているが、向かい合う面の数字の和が7になるとは限らない）を異なる方向から見たものである。「2」の面と向かい合う面の数字は何か。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMTYyIiB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxNjIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIiB2aWV3Qm94PSIwIDAgMTIwIDEyMCI+PHBvbHlnb24gcG9pbnRzPSI2MCw1IDEwNSwzMCA2MCw1NSAxNSwzMCIgZmlsbD0iI2Y3ZTNjNCIgc3Ryb2tlPSIjYzA3YTJiIi8+PHBvbHlnb24gcG9pbnRzPSIxNSwzMCA2MCw1NSA2MCwxMDUgMTUsODAiIGZpbGw9IiNmMGQ1YWIiIHN0cm9rZT0iI2MwN2EyYiIvPjxwb2x5Z29uIHBvaW50cz0iNjAsNTUgMTA1LDMwIDEwNSw4MCA2MCwxMDUiIGZpbGw9IiNmYmVlZDkiIHN0cm9rZT0iI2MwN2EyYiIvPjx0ZXh0IHg9IjU3IiB5PSIzNSIgZm9udC1zaXplPSIxNiI+MTwvdGV4dD48dGV4dCB4PSIzMyIgeT0iNzMiIGZvbnQtc2l6ZT0iMTYiPjI8L3RleHQ+PHRleHQgeD0iODEiIHk9IjczIiBmb250LXNpemU9IjE2Ij4zPC90ZXh0Pjwvc3ZnPjxzdmcgeD0iMTYwIiB5PSIwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCIgdmlld0JveD0iMCAwIDEyMCAxMjAiPjxwb2x5Z29uIHBvaW50cz0iNjAsNSAxMDUsMzAgNjAsNTUgMTUsMzAiIGZpbGw9IiNmN2UzYzQiIHN0cm9rZT0iI2MwN2EyYiIvPjxwb2x5Z29uIHBvaW50cz0iMTUsMzAgNjAsNTUgNjAsMTA1IDE1LDgwIiBmaWxsPSIjZjBkNWFiIiBzdHJva2U9IiNjMDdhMmIiLz48cG9seWdvbiBwb2ludHM9IjYwLDU1IDEwNSwzMCAxMDUsODAgNjAsMTA1IiBmaWxsPSIjZmJlZWQ5IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NyIgeT0iMzUiIGZvbnQtc2l6ZT0iMTYiPjE8L3RleHQ+PHRleHQgeD0iMzMiIHk9IjczIiBmb250LXNpemU9IjE2Ij40PC90ZXh0Pjx0ZXh0IHg9IjgxIiB5PSI3MyIgZm9udC1zaXplPSIxNiI+NTwvdGV4dD48L3N2Zz48dGV4dCB4PSI3MCIgeT0iMTU2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7lm7MxPC90ZXh0Pjx0ZXh0IHg9IjIzMCIgeT0iMTU2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7lm7MyPC90ZXh0Pjwvc3ZnPg==",
+      "options": [
+        "5",
+        "1",
+        "3",
+        "4"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "図1・図2はどちらも上面が1なので、同じ軸のまま回転させたものです。図1では正面(2)→右(3)、図2では正面(4)→右(5)の順に並んでいます。",
+        "これをつなげると、2→3→4→5→（2に戻る）という円環の並びになります。向かい合うのは2つ隣どうしなので、2の向かいは4、3の向かいは5となります。",
+        "よって、正解は4（4）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "サイコロ問題",
+      "questionText": "「元の図」のサイコロ（互いに異なる6種類の記号）を転がして別の向きから見たとき、あり得る図として正しいものを、選択肢1〜4のうちから選べ。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MjAgMzEzIiB3aWR0aD0iNTIwIiBoZWlnaHQ9IjMxMyI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjUyMCIgaGVpZ2h0PSIzMTMiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxMzAiIGhlaWdodD0iMTMwIiB2aWV3Qm94PSIwIDAgMTIwIDEyMCI+PHBvbHlnb24gcG9pbnRzPSI2MCw1IDEwNSwzMCA2MCw1NSAxNSwzMCIgZmlsbD0iI2UzZDdmMCIgc3Ryb2tlPSIjNmEyYjhhIi8+PHBvbHlnb24gcG9pbnRzPSIxNSwzMCA2MCw1NSA2MCwxMDUgMTUsODAiIGZpbGw9IiNkNmMzZWEiIHN0cm9rZT0iIzZhMmI4YSIvPjxwb2x5Z29uIHBvaW50cz0iNjAsNTUgMTA1LDMwIDEwNSw4MCA2MCwxMDUiIGZpbGw9IiNmMGVhZjciIHN0cm9rZT0iIzZhMmI4YSIvPjx0ZXh0IHg9IjU3IiB5PSIzNSIgZm9udC1zaXplPSIxNCI+4pmgPC90ZXh0Pjx0ZXh0IHg9IjMzIiB5PSI3MyIgZm9udC1zaXplPSIxNCI+4pmlPC90ZXh0Pjx0ZXh0IHg9IjgxIiB5PSI3MyIgZm9udC1zaXplPSIxNCI+4pmjPC90ZXh0Pjwvc3ZnPjx0ZXh0IHg9IjY1IiB5PSIxNDYiIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPuWFg+OBruWbszwvdGV4dD48c3ZnIHg9IjAiIHk9IjE3NiIgd2lkdGg9IjExNSIgaGVpZ2h0PSIxMTUiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cG9seWdvbiBwb2ludHM9IjYwLDUgMTA1LDMwIDYwLDU1IDE1LDMwIiBmaWxsPSIjZWVmNGZiIiBzdHJva2U9IiMyYjVmOWUiLz48cG9seWdvbiBwb2ludHM9IjE1LDMwIDYwLDU1IDYwLDEwNSAxNSw4MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMmI1ZjllIi8+PHBvbHlnb24gcG9pbnRzPSI2MCw1NSAxMDUsMzAgMTA1LDgwIDYwLDEwNSIgZmlsbD0iI2MzZDllZiIgc3Ryb2tlPSIjMmI1ZjllIi8+PHRleHQgeD0iNTciIHk9IjM1IiBmb250LXNpemU9IjE0Ij7imaU8L3RleHQ+PHRleHQgeD0iMzMiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaM8L3RleHQ+PHRleHQgeD0iODEiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaA8L3RleHQ+PC9zdmc+PHN2ZyB4PSIxMzUiIHk9IjE3NiIgd2lkdGg9IjExNSIgaGVpZ2h0PSIxMTUiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cG9seWdvbiBwb2ludHM9IjYwLDUgMTA1LDMwIDYwLDU1IDE1LDMwIiBmaWxsPSIjZWVmNGZiIiBzdHJva2U9IiMyYjVmOWUiLz48cG9seWdvbiBwb2ludHM9IjE1LDMwIDYwLDU1IDYwLDEwNSAxNSw4MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMmI1ZjllIi8+PHBvbHlnb24gcG9pbnRzPSI2MCw1NSAxMDUsMzAgMTA1LDgwIDYwLDEwNSIgZmlsbD0iI2MzZDllZiIgc3Ryb2tlPSIjMmI1ZjllIi8+PHRleHQgeD0iNTciIHk9IjM1IiBmb250LXNpemU9IjE0Ij7imaM8L3RleHQ+PHRleHQgeD0iMzMiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaU8L3RleHQ+PHRleHQgeD0iODEiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaA8L3RleHQ+PC9zdmc+PHN2ZyB4PSIyNzAiIHk9IjE3NiIgd2lkdGg9IjExNSIgaGVpZ2h0PSIxMTUiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cG9seWdvbiBwb2ludHM9IjYwLDUgMTA1LDMwIDYwLDU1IDE1LDMwIiBmaWxsPSIjZWVmNGZiIiBzdHJva2U9IiMyYjVmOWUiLz48cG9seWdvbiBwb2ludHM9IjE1LDMwIDYwLDU1IDYwLDEwNSAxNSw4MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMmI1ZjllIi8+PHBvbHlnb24gcG9pbnRzPSI2MCw1NSAxMDUsMzAgMTA1LDgwIDYwLDEwNSIgZmlsbD0iI2MzZDllZiIgc3Ryb2tlPSIjMmI1ZjllIi8+PHRleHQgeD0iNTciIHk9IjM1IiBmb250LXNpemU9IjE0Ij7imaA8L3RleHQ+PHRleHQgeD0iMzMiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaM8L3RleHQ+PHRleHQgeD0iODEiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaU8L3RleHQ+PC9zdmc+PHN2ZyB4PSI0MDUiIHk9IjE3NiIgd2lkdGg9IjExNSIgaGVpZ2h0PSIxMTUiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cG9seWdvbiBwb2ludHM9IjYwLDUgMTA1LDMwIDYwLDU1IDE1LDMwIiBmaWxsPSIjZWVmNGZiIiBzdHJva2U9IiMyYjVmOWUiLz48cG9seWdvbiBwb2ludHM9IjE1LDMwIDYwLDU1IDYwLDEwNSAxNSw4MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMmI1ZjllIi8+PHBvbHlnb24gcG9pbnRzPSI2MCw1NSAxMDUsMzAgMTA1LDgwIDYwLDEwNSIgZmlsbD0iI2MzZDllZiIgc3Ryb2tlPSIjMmI1ZjllIi8+PHRleHQgeD0iNTciIHk9IjM1IiBmb250LXNpemU9IjE0Ij7imaU8L3RleHQ+PHRleHQgeD0iMzMiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaA8L3RleHQ+PHRleHQgeD0iODEiIHk9IjczIiBmb250LXNpemU9IjE0Ij7imaM8L3RleHQ+PC9zdmc+PHRleHQgeD0iNTcuNSIgeT0iMzA3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj4xPC90ZXh0Pjx0ZXh0IHg9IjE5Mi41IiB5PSIzMDciIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjI8L3RleHQ+PHRleHQgeD0iMzI3LjUiIHk9IjMwNyIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+MzwvdGV4dD48dGV4dCB4PSI0NjIuNSIgeT0iMzA3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj40PC90ZXh0Pjwvc3ZnPg==",
+      "options": [
+        "3",
+        "1",
+        "4",
+        "2"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "元の図は「上♠・正面♥・右♣」です。サイコロを転がして向きを変えても、3つの面（♠♥♣）が集まる頂点まわりの「時計回りの並び順」は変わりません（鏡に映したような逆並びにはなりません）。",
+        "元の図を、♠♥♣が集まる頂点を軸にころんと転がすと、「上→正面」「正面→右」「右→上」のように位置がひとつずつ回転で入れ替わります。つまり「上♥・正面♣・右♠」のような並びは、正しく回転させて得られる図です。",
+        "選択肢1（上♥・正面♣・右♠）はこの回転と一致します。",
+        "選択肢2〜4は、いずれも3つのうち2つだけを入れ替えた並びになっており、これは実際にはサイコロを転がしても作れない「鏡映（裏返し）」の並びです。",
+        "よって、正解は2・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "サイコロ問題",
+      "questionText": "正六面体のサイコロがあり、各面には異なる記号A〜Fが1つずつ書かれている。今、上面がA、正面（北）がB、右面（東）がCの状態から、「東→東→北」の順に転がした。転がした後、上面になっている記号はどれか。\n（A〜Fの向かい合う面の組は、A—F、B—E、C—Dである。）",
+      "imageDataUri": null,
+      "options": [
+        "E",
+        "F",
+        "A",
+        "C"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "サイコロが東に転がると「上→東、東→下、下→西、西→上」の順に面が入れ替わります（南北の面は変わりません）。北に転がると「上→北、北→下、下→南、南→上」の順に入れ替わります（東西の面は変わりません）。",
+        "最初の状態：上A・下F・北B・南E・東C・西D。",
+        "【1回目：東に転がる】上＝西(D)、東＝上(A)、下＝東(C)、西＝下(F)。北・南は変わらず。",
+        "→ 上D・下C・北B・南E・東A・西F",
+        "【2回目：東に転がる】上＝西(F)、東＝上(D)、下＝東(A)、西＝下(C)。",
+        "→ 上F・下A・北B・南E・東D・西C",
+        "【3回目：北に転がる】上＝南(E)、北＝上(F)、下＝北(B)、南＝下(A)。",
+        "→ 上E・下B・北F・南A・東D・西C",
+        "最終的な上面はEです。",
+        "よって、正解は1（E）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "サイコロ問題",
+      "questionText": "以下の図1〜図3は、すべて同じサイコロを異なる方向から見たものである。図2の「？」に入る記号は何か。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MzAgMTUyIiB3aWR0aD0iNDMwIiBoZWlnaHQ9IjE1MiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjQzMCIgaGVpZ2h0PSIxNTIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxMzAiIGhlaWdodD0iMTMwIiB2aWV3Qm94PSIwIDAgMTIwIDEyMCI+PHBvbHlnb24gcG9pbnRzPSI2MCw1IDEwNSwzMCA2MCw1NSAxNSwzMCIgZmlsbD0iI2RjZWZlMCIgc3Ryb2tlPSIjMmI4YTVlIi8+PHBvbHlnb24gcG9pbnRzPSIxNSwzMCA2MCw1NSA2MCwxMDUgMTUsODAiIGZpbGw9IiNjOWU2ZDAiIHN0cm9rZT0iIzJiOGE1ZSIvPjxwb2x5Z29uIHBvaW50cz0iNjAsNTUgMTA1LDMwIDEwNSw4MCA2MCwxMDUiIGZpbGw9IiNlZWY3ZjAiIHN0cm9rZT0iIzJiOGE1ZSIvPjx0ZXh0IHg9IjU1IiB5PSIzNSIgZm9udC1zaXplPSIxNiI+4pmqPC90ZXh0Pjx0ZXh0IHg9IjMzIiB5PSI3MyIgZm9udC1zaXplPSIxNiI+4piGPC90ZXh0Pjx0ZXh0IHg9IjgwIiB5PSI3MyIgZm9udC1zaXplPSIxNiI+4pmjPC90ZXh0Pjwvc3ZnPjxzdmcgeD0iMTUwIiB5PSIwIiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjEzMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiPjxwb2x5Z29uIHBvaW50cz0iNjAsNSAxMDUsMzAgNjAsNTUgMTUsMzAiIGZpbGw9IiNkY2VmZTAiIHN0cm9rZT0iIzJiOGE1ZSIvPjxwb2x5Z29uIHBvaW50cz0iMTUsMzAgNjAsNTUgNjAsMTA1IDE1LDgwIiBmaWxsPSIjYzllNmQwIiBzdHJva2U9IiMyYjhhNWUiLz48cG9seWdvbiBwb2ludHM9IjYwLDU1IDEwNSwzMCAxMDUsODAgNjAsMTA1IiBmaWxsPSIjZWVmN2YwIiBzdHJva2U9IiMyYjhhNWUiLz48dGV4dCB4PSI1NyIgeT0iMzUiIGZvbnQtc2l6ZT0iMTYiPuKYhjwvdGV4dD48dGV4dCB4PSIzMyIgeT0iNzMiIGZvbnQtc2l6ZT0iMTYiPuKZozwvdGV4dD48dGV4dCB4PSI4MyIgeT0iNzMiIGZvbnQtc2l6ZT0iMTYiPu+8nzwvdGV4dD48L3N2Zz48c3ZnIHg9IjMwMCIgeT0iMCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIxMzAiIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cG9seWdvbiBwb2ludHM9IjYwLDUgMTA1LDMwIDYwLDU1IDE1LDMwIiBmaWxsPSIjZGNlZmUwIiBzdHJva2U9IiMyYjhhNWUiLz48cG9seWdvbiBwb2ludHM9IjE1LDMwIDYwLDU1IDYwLDEwNSAxNSw4MCIgZmlsbD0iI2M5ZTZkMCIgc3Ryb2tlPSIjMmI4YTVlIi8+PHBvbHlnb24gcG9pbnRzPSI2MCw1NSAxMDUsMzAgMTA1LDgwIDYwLDEwNSIgZmlsbD0iI2VlZjdmMCIgc3Ryb2tlPSIjMmI4YTVlIi8+PHRleHQgeD0iNTciIHk9IjM1IiBmb250LXNpemU9IjE2Ij7imaM8L3RleHQ+PHRleHQgeD0iMzMiIHk9IjczIiBmb250LXNpemU9IjE2Ij7imao8L3RleHQ+PHRleHQgeD0iODMiIHk9IjczIiBmb250LXNpemU9IjE2Ij7imIY8L3RleHQ+PC9zdmc+PHRleHQgeD0iNjUiIHk9IjE0NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+5ZuzMTwvdGV4dD48dGV4dCB4PSIyMTUiIHk9IjE0NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+5ZuzMjwvdGV4dD48dGV4dCB4PSIzNjUiIHk9IjE0NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+5ZuzMzwvdGV4dD48L3N2Zz4=",
+      "options": [
+        "♪",
+        "♣",
+        "別の記号",
+        "☆"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "図1（上♪・正面☆・右♣）→図2（上☆・正面♣・右？）→図3（上♣・正面♪・右☆）という並びに注目します。",
+        "図1から図2にかけて、「正面だった面が新しい上に」「右だった面が新しい正面に」「上だった面が新しい右に」という規則で入れ替わっていることがわかります（♪♥♣が集まる頂点を軸にころんと転がした形です）。",
+        "図1（上♪・正面☆・右♣）にこの規則を当てはめると、図2は上＝☆（元の正面）、正面＝♣（元の右）、右＝♪（元の上）となるはずです。実際、図2の上・正面は☆・♣で一致しているので、「？」＝♪です。",
+        "念のため図2から図3への変化でも確認すると、図2（上☆・正面♣・右♪と推定）から同じ規則を当てはめると、図3は上＝♣・正面＝♪・右＝☆となり、実際の図3と完全に一致します。",
+        "よって、正解は1（♪）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "正四面体の展開図",
+      "questionText": "以下の5つの図形のうち、正四面体の展開図として正しいものはどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MzAgMTYzIiB3aWR0aD0iODMwIiBoZWlnaHQ9IjE2MyI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjgzMCIgaGVpZ2h0PSIxNjMiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTE6IDMtdHJpYW5nbGUgc3RyaXAgb25seSwgd3JvbmcgY291bnQtLT4KPHBvbHlnb24gcG9pbnRzPSIyMCwxMTUgNTUsNjAgOTAsMTE1IiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPHBvbHlnb24gcG9pbnRzPSI1NSw2MCA5MCwxMTUgMTI1LDYwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPC9zdmc+PHN2ZyB4PSIxNzAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTI6IGNvcnJlY3Qgc3RhciBwYXR0ZXJuLS0+Cjxwb2x5Z29uIHBvaW50cz0iODAsMTAgNDUsNzUgMTE1LDc1IiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSIxMCwxNDAgNDUsNzUgODAsMTQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPHBvbHlnb24gcG9pbnRzPSIxNTAsMTQwIDExNSw3NSA4MCwxNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPgo8cG9seWdvbiBwb2ludHM9IjQ1LDc1IDExNSw3NSA4MCwxNDAiIGZpbGw9IiNlM2YwZGEiIHN0cm9rZT0iIzNmN2EyYiIvPgo8L3N2Zz48c3ZnIHg9IjM0MCIgeT0iMCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNDEiIHZpZXdCb3g9IjAgMCAxNjAgMTUwIj48IS0tMzogZGlzY29ubmVjdGVkIDIrMi0tPgo8cG9seWdvbiBwb2ludHM9IjE1LDE1IDUwLDE1IDMyLDUwIiBmaWxsPSIjZjNkYmU2IiBzdHJva2U9IiNhMTNhNmEiLz4KPHBvbHlnb24gcG9pbnRzPSI1MCwxNSA4NSwxNSA2Nyw1MCIgZmlsbD0iI2YzZGJlNiIgc3Ryb2tlPSIjYTEzYTZhIi8+Cjxwb2x5Z29uIHBvaW50cz0iMTUsOTAgNTAsOTAgMzIsMTI1IiBmaWxsPSIjZjNkYmU2IiBzdHJva2U9IiNhMTNhNmEiLz4KPHBvbHlnb24gcG9pbnRzPSI1MCw5MCA4NSw5MCA2NywxMjUiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8L3N2Zz48c3ZnIHg9IjUxMCIgeT0iMCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNDEiIHZpZXdCb3g9IjAgMCAxNjAgMTUwIj48IS0tNDogbm9uLWVxdWlsYXRlcmFsIHN0YXIgKGludmFsaWQsIGZhY2VzIG5vdCBjb25ncnVlbnQpLS0+Cjxwb2x5Z29uIHBvaW50cz0iODAsMTAgNDUsNzUgMTE1LDc1IiBmaWxsPSIjZTNmMGRhIiBzdHJva2U9IiMzZjdhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSI4MCwxMCA0NSw3NSAzMiwyNiIgZmlsbD0iI2UzZjBkYSIgc3Ryb2tlPSIjM2Y3YTJiIi8+Cjxwb2x5Z29uIHBvaW50cz0iODAsMTAgMTE1LDc1IDEyOCwyNiIgZmlsbD0iI2UzZjBkYSIgc3Ryb2tlPSIjM2Y3YTJiIi8+Cjxwb2x5Z29uIHBvaW50cz0iNDUsNzUgMTE1LDc1IDgwLDExMCIgZmlsbD0iI2UzZjBkYSIgc3Ryb2tlPSIjM2Y3YTJiIi8+Cjwvc3ZnPjxzdmcgeD0iNjgwIiB5PSIwIiB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE0MSIgdmlld0JveD0iMCAwIDE2MCAxNTAiPjwhLS01OiBzaW5nbGUgdW5kaXZpZGVkIHRyaWFuZ2xlLS0+Cjxwb2x5Z29uIHBvaW50cz0iODAsMTUgMjAsMTMwIDE0MCwxMzAiIGZpbGw9IiNlZWUiIHN0cm9rZT0iIzY2NiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPjx0ZXh0IHg9Ijc1IiB5PSIxNTciIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjE8L3RleHQ+PHRleHQgeD0iMjQ1IiB5PSIxNTciIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjI8L3RleHQ+PHRleHQgeD0iNDE1IiB5PSIxNTciIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjM8L3RleHQ+PHRleHQgeD0iNTg1IiB5PSIxNTciIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjQ8L3RleHQ+PHRleHQgeD0iNzU1IiB5PSIxNTciIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjU8L3RleHQ+PC9zdmc+",
+      "options": [
+        "4",
+        "3",
+        "5",
+        "2",
+        "1"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "1は三角形が2枚しかなく、枚数が不足しているため誤りです。",
+        "3は2枚ずつの2つのグループに分かれてしまい、1枚の展開図としてつながっていないため誤りです。",
+        "4は中央の三角形の3辺それぞれに三角形が1枚ずつ張り出した配置に見えますが、張り出した3枚の三角形が中央の三角形と合同な正三角形になっていない（辺の長さが異なる）ため、正四面体の4つの面（すべて合同な正三角形でなければならない）の条件を満たさず、組み立てることができません。",
+        "2は、大きな正三角形を3辺の中点で結んで4つの小さな正三角形に分けた、正四面体の代表的な展開図（中央の三角形の3辺それぞれに三角形が1枚ずつ張り出した形）です。正しく組み立てると正四面体が完成します。",
+        "よって、正解は4・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "正四面体の展開図",
+      "questionText": "以下の5つの図形のうち、正四面体の展開図として正しいものはどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4OTAgMTYzIiB3aWR0aD0iODkwIiBoZWlnaHQ9IjE2MyI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9Ijg5MCIgaGVpZ2h0PSIxNjMiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxODAiIGhlaWdodD0iMTM1IiB2aWV3Qm94PSIwIDAgMjAwIDE1MCI+PCEtLTE6IGNvcnJlY3Qgc3RyYWlnaHQgc3RyaXAgb2YgNCAoY29tcGxldGVkKS0tPgo8cG9seWdvbiBwb2ludHM9IjIwLDExNSA1NSw2MCA5MCwxMTUiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPgo8cG9seWdvbiBwb2ludHM9IjU1LDYwIDkwLDExNSAxMjUsNjAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPgo8cG9seWdvbiBwb2ludHM9IjkwLDExNSAxMjUsNjAgMTYwLDExNSIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMmI1ZjllIi8+Cjxwb2x5Z29uIHBvaW50cz0iMTI1LDYwIDE2MCwxMTUgMTk1LDYwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPC9zdmc+PHN2ZyB4PSIyMDAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTI6IDMgb25seS0tPgo8cG9seWdvbiBwb2ludHM9IjIwLDExNSA1NSw2MCA5MCwxMTUiIGZpbGw9IiNmN2UzYzQiIHN0cm9rZT0iI2MwN2EyYiIvPgo8cG9seWdvbiBwb2ludHM9IjU1LDYwIDkwLDExNSAxMjUsNjAiIGZpbGw9IiNmN2UzYzQiIHN0cm9rZT0iI2MwN2EyYiIvPgo8L3N2Zz48c3ZnIHg9IjM3MCIgeT0iMCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNDEiIHZpZXdCb3g9IjAgMCAxNjAgMTUwIj48IS0tMzogZGlzY29ubmVjdGVkLS0+Cjxwb2x5Z29uIHBvaW50cz0iMTUsMTUgNTAsMTUgMzIsNTAiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8cG9seWdvbiBwb2ludHM9IjUwLDE1IDg1LDE1IDY3LDUwIiBmaWxsPSIjZjNkYmU2IiBzdHJva2U9IiNhMTNhNmEiLz4KPHBvbHlnb24gcG9pbnRzPSIxNSw5MCA1MCw5MCAzMiwxMjUiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8cG9seWdvbiBwb2ludHM9IjUwLDkwIDg1LDkwIDY3LDEyNSIgZmlsbD0iI2YzZGJlNiIgc3Ryb2tlPSIjYTEzYTZhIi8+Cjwvc3ZnPjxzdmcgeD0iNTQwIiB5PSIwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEzNSIgdmlld0JveD0iMCAwIDIwMCAxNTAiPjwhLS00OiBub24tZXF1aWxhdGVyYWwgc3RhciAoaW52YWxpZCwgZmFjZXMgbm90IGNvbmdydWVudCktLT4KPHBvbHlnb24gcG9pbnRzPSI4MCwxMCA0NSw3NSAxMTUsNzUiIGZpbGw9IiNlM2YwZGEiIHN0cm9rZT0iIzNmN2EyYiIvPgo8cG9seWdvbiBwb2ludHM9IjgwLDEwIDQ1LDc1IDMyLDI2IiBmaWxsPSIjZTNmMGRhIiBzdHJva2U9IiMzZjdhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSI4MCwxMCAxMTUsNzUgMTI4LDI2IiBmaWxsPSIjZTNmMGRhIiBzdHJva2U9IiMzZjdhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSI0NSw3NSAxMTUsNzUgODAsMTEwIiBmaWxsPSIjZTNmMGRhIiBzdHJva2U9IiMzZjdhMmIiLz4KPC9zdmc+PHN2ZyB4PSI3NDAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTU6IDMgdHJpYW5nbGVzICsgMSBzcXVhcmUsIHdyb25nIHNoYXBlIG1peC0tPgo8cG9seWdvbiBwb2ludHM9IjIwLDExNSA1NSw2MCA5MCwxMTUiIGZpbGw9IiNmZGYzZTAiIHN0cm9rZT0iIzhhNmEyYiIvPgo8cG9seWdvbiBwb2ludHM9IjU1LDYwIDkwLDExNSAxMjUsNjAiIGZpbGw9IiNmZGYzZTAiIHN0cm9rZT0iIzhhNmEyYiIvPgo8cmVjdCB4PSIyMCIgeT0iMTE1IiB3aWR0aD0iMzUiIGhlaWdodD0iMzAiIGZpbGw9IiNmZGYzZTAiIHN0cm9rZT0iIzhhNmEyYiIvPgo8L3N2Zz48dGV4dCB4PSI5MCIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj4xPC90ZXh0Pjx0ZXh0IHg9IjI3NSIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj4yPC90ZXh0Pjx0ZXh0IHg9IjQ0NSIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj4zPC90ZXh0Pjx0ZXh0IHg9IjYzMCIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj40PC90ZXh0Pjx0ZXh0IHg9IjgxNSIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj41PC90ZXh0Pjwvc3ZnPg==",
+      "options": [
+        "1",
+        "3",
+        "5",
+        "2",
+        "4"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "2は三角形が2枚しかなく不足しているため誤りです。",
+        "3は2つのグループに分かれてつながっていないため誤りです。",
+        "4は中央の三角形の3辺それぞれに三角形が1枚ずつ張り出した配置に見えますが、張り出した3枚の三角形が中央の三角形と合同な正三角形になっていない（辺の長さが異なる）ため、正四面体の4つの面（すべて合同な正三角形でなければならない）の条件を満たさず、組み立てることができません。",
+        "5は三角形2枚に四角形1枚を組み合わせた図で、正四面体の面はすべて三角形でなければならないため誤りです。",
+        "1は、合同な正三角形3枚をジグザグに帯状につなげ、両端を含めて合計4枚とした形で、正四面体の展開図としてよく知られた正しい形です（帯を折り込んでいくと、正四面体が組み上がります）。",
+        "よって、正解は1・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "正四面体の展開図",
+      "questionText": "以下の5つの図形のうち、正四面体の展開図として正しいものはどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4ODAgMTkyIiB3aWR0aD0iODgwIiBoZWlnaHQ9IjE5MiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9Ijg4MCIgaGVpZ2h0PSIxOTIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTE6IGNvcnJlY3Qgc3RhciwgYnJhbmNoIGF0IGRpZmZlcmVudCBwb3NpdGlvbi0tPgo8cG9seWdvbiBwb2ludHM9IjgwLDEwIDQ1LDc1IDExNSw3NSIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMmI1ZjllIi8+Cjxwb2x5Z29uIHBvaW50cz0iMTAsMTQwIDQ1LDc1IDgwLDE0MCIgZmlsbD0iI2Y3ZTNjNCIgc3Ryb2tlPSIjYzA3YTJiIi8+Cjxwb2x5Z29uIHBvaW50cz0iMTUwLDE0MCAxMTUsNzUgODAsMTQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSI0NSw3NSAxMTUsNzUgODAsMTQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz4KPC9zdmc+PHN2ZyB4PSIxNzAiIHk9IjAiIHdpZHRoPSIxNzAiIGhlaWdodD0iMTcwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PCEtLTI6IGZhbiBhcm91bmQgYSBwb2ludCwgaW52YWxpZCAodmVydGV4LW9ubHkgdG91Y2hpbmcpLS0+Cjxwb2x5Z29uIHBvaW50cz0iMTAwLDEwMCA4MCw0MCAxMTAsNDAiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8cG9seWdvbiBwb2ludHM9IjEwMCwxMDAgMTYwLDgwIDE2MCwxMTAiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8cG9seWdvbiBwb2ludHM9IjEwMCwxMDAgODAsMTYwIDExMCwxNjAiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8cG9seWdvbiBwb2ludHM9IjEwMCwxMDAgNDAsODAgNDAsMTEwIiBmaWxsPSIjZjNkYmU2IiBzdHJva2U9IiNhMTNhNmEiLz4KPC9zdmc+PHN2ZyB4PSIzNjAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTM6IDMgb25seS0tPgo8cG9seWdvbiBwb2ludHM9IjIwLDExNSA1NSw2MCA5MCwxMTUiIGZpbGw9IiNlM2YwZGEiIHN0cm9rZT0iIzNmN2EyYiIvPgo8cG9seWdvbiBwb2ludHM9IjU1LDYwIDkwLDExNSAxMjUsNjAiIGZpbGw9IiNlM2YwZGEiIHN0cm9rZT0iIzNmN2EyYiIvPgo8L3N2Zz48c3ZnIHg9IjUzMCIgeT0iMCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNDEiIHZpZXdCb3g9IjAgMCAxNjAgMTUwIj48IS0tNDogZGlzY29ubmVjdGVkLS0+Cjxwb2x5Z29uIHBvaW50cz0iMTUsMTUgNTAsMTUgMzIsNTAiIGZpbGw9IiNmZGYzZTAiIHN0cm9rZT0iIzhhNmEyYiIvPgo8cG9seWdvbiBwb2ludHM9IjUwLDE1IDg1LDE1IDY3LDUwIiBmaWxsPSIjZmRmM2UwIiBzdHJva2U9IiM4YTZhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSIxNSw5MCA1MCw5MCAzMiwxMjUiIGZpbGw9IiNmZGYzZTAiIHN0cm9rZT0iIzhhNmEyYiIvPgo8cG9seWdvbiBwb2ludHM9IjUwLDkwIDg1LDkwIDY3LDEyNSIgZmlsbD0iI2ZkZjNlMCIgc3Ryb2tlPSIjOGE2YTJiIi8+Cjwvc3ZnPjxzdmcgeD0iNzAwIiB5PSIwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEzNSIgdmlld0JveD0iMCAwIDIwMCAxNTAiPjwhLS01OiBub24tZXF1aWxhdGVyYWwgc3RhciAoaW52YWxpZCwgZmFjZXMgbm90IGNvbmdydWVudCktLT4KPHBvbHlnb24gcG9pbnRzPSI4MCwxMCA0NSw3NSAxMTUsNzUiIGZpbGw9IiNlZWUiIHN0cm9rZT0iIzY2NiIvPgo8cG9seWdvbiBwb2ludHM9IjgwLDEwIDQ1LDc1IDMyLDI2IiBmaWxsPSIjZWVlIiBzdHJva2U9IiM2NjYiLz4KPHBvbHlnb24gcG9pbnRzPSI4MCwxMCAxMTUsNzUgMTI4LDI2IiBmaWxsPSIjZWVlIiBzdHJva2U9IiM2NjYiLz4KPHBvbHlnb24gcG9pbnRzPSI0NSw3NSAxMTUsNzUgODAsMTEwIiBmaWxsPSIjZWVlIiBzdHJva2U9IiM2NjYiLz4KPC9zdmc+PHRleHQgeD0iNzUiIHk9IjE4NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+MTwvdGV4dD48dGV4dCB4PSIyNTUiIHk9IjE4NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+MjwvdGV4dD48dGV4dCB4PSI0MzUiIHk9IjE4NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+MzwvdGV4dD48dGV4dCB4PSI2MDUiIHk9IjE4NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+NDwvdGV4dD48dGV4dCB4PSI3OTAiIHk9IjE4NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+NTwvdGV4dD48L3N2Zz4=",
+      "options": [
+        "3",
+        "1",
+        "4",
+        "5",
+        "2"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "2は4枚の三角形が中央の1点だけで接しており、辺を共有していないため、面同士がつながった1枚の展開図とはいえず誤りです。",
+        "3は三角形が2枚しかなく不足しているため誤りです。",
+        "4は2つのグループに分かれてつながっていないため誤りです。",
+        "5は中央の三角形の3辺それぞれに三角形が1枚ずつ張り出した配置に見えますが、張り出した3枚の三角形が中央の三角形と合同な正三角形になっていない（辺の長さが異なる）ため、正四面体の4つの面（すべて合同な正三角形でなければならない）の条件を満たさず、組み立てることができません。",
+        "1は、中央の三角形の3辺それぞれに三角形が1枚ずつ張り出した「中央＋3枚」の形で、正しく組み立てると正四面体になります。",
+        "よって、正解は2・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "正四面体の展開図",
+      "questionText": "以下の5つの図形のうち、正四面体の展開図として成り立たない（組み立てられない）ものはどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4OTAgMTYzIiB3aWR0aD0iODkwIiBoZWlnaHQ9IjE2MyI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9Ijg5MCIgaGVpZ2h0PSIxNjMiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTE6IHN0YXIsIHZhbGlkLS0+Cjxwb2x5Z29uIHBvaW50cz0iODAsMTAgNDUsNzUgMTE1LDc1IiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSIxMCwxNDAgNDUsNzUgODAsMTQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPHBvbHlnb24gcG9pbnRzPSIxNTAsMTQwIDExNSw3NSA4MCwxNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPgo8cG9seWdvbiBwb2ludHM9IjQ1LDc1IDExNSw3NSA4MCwxNDAiIGZpbGw9IiNlM2YwZGEiIHN0cm9rZT0iIzNmN2EyYiIvPgo8L3N2Zz48c3ZnIHg9IjE3MCIgeT0iMCIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxMzUiIHZpZXdCb3g9IjAgMCAyMDAgMTUwIj48IS0tMjogYmVudCBwYXRoIChicmFuY2ggYXQgZW5kKSwgdmFsaWQtLT4KPHBvbHlnb24gcG9pbnRzPSIyMCwxMTUgNTUsNjAgOTAsMTE1IiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPHBvbHlnb24gcG9pbnRzPSI1NSw2MCA5MCwxMTUgMTI1LDYwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPHBvbHlnb24gcG9pbnRzPSI5MCwxMTUgMTI1LDYwIDE2MCwxMTUiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPgo8cG9seWdvbiBwb2ludHM9IjIwLDExNSA5MCwxMTUgNTUsMTcwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz4KPC9zdmc+PHN2ZyB4PSIzNzAiIHk9IjAiIHdpZHRoPSIxODAiIGhlaWdodD0iMTM1IiB2aWV3Qm94PSIwIDAgMjAwIDE1MCI+PCEtLTM6IHN0cmFpZ2h0IHN0cmlwIG9mIDQsIHZhbGlkLS0+Cjxwb2x5Z29uIHBvaW50cz0iMjAsMTE1IDU1LDYwIDkwLDExNSIgZmlsbD0iI2UzZjBkYSIgc3Ryb2tlPSIjM2Y3YTJiIi8+Cjxwb2x5Z29uIHBvaW50cz0iNTUsNjAgOTAsMTE1IDEyNSw2MCIgZmlsbD0iI2UzZjBkYSIgc3Ryb2tlPSIjM2Y3YTJiIi8+Cjxwb2x5Z29uIHBvaW50cz0iOTAsMTE1IDEyNSw2MCAxNjAsMTE1IiBmaWxsPSIjZTNmMGRhIiBzdHJva2U9IiMzZjdhMmIiLz4KPC9zdmc+PHN2ZyB4PSI1NzAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTQxIiB2aWV3Qm94PSIwIDAgMTYwIDE1MCI+PCEtLTQ6IGRpc2Nvbm5lY3RlZCAyKzIsIElOVkFMSUQgYW5zd2VyLS0+Cjxwb2x5Z29uIHBvaW50cz0iMTUsMTUgNTAsMTUgMzIsNTAiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8cG9seWdvbiBwb2ludHM9IjUwLDE1IDg1LDE1IDY3LDUwIiBmaWxsPSIjZjNkYmU2IiBzdHJva2U9IiNhMTNhNmEiLz4KPHBvbHlnb24gcG9pbnRzPSIxNSw5MCA1MCw5MCAzMiwxMjUiIGZpbGw9IiNmM2RiZTYiIHN0cm9rZT0iI2ExM2E2YSIvPgo8cG9seWdvbiBwb2ludHM9IjUwLDkwIDg1LDkwIDY3LDEyNSIgZmlsbD0iI2YzZGJlNiIgc3Ryb2tlPSIjYTEzYTZhIi8+Cjwvc3ZnPjxzdmcgeD0iNzQwIiB5PSIwIiB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE0MSIgdmlld0JveD0iMCAwIDE2MCAxNTAiPjwhLS01OiBzdGFyIHZhcmlhbnQsIHZhbGlkLS0+Cjxwb2x5Z29uIHBvaW50cz0iODAsMTAgNDUsNzUgMTE1LDc1IiBmaWxsPSIjZWVmNGZiIiBzdHJva2U9IiMyYjVmOWUiLz4KPHBvbHlnb24gcG9pbnRzPSIxMCwxNDAgNDUsNzUgODAsMTQwIiBmaWxsPSIjZmRmM2UwIiBzdHJva2U9IiM4YTZhMmIiLz4KPHBvbHlnb24gcG9pbnRzPSIxNTAsMTQwIDExNSw3NSA4MCwxNDAiIGZpbGw9IiNmZGYzZTAiIHN0cm9rZT0iIzhhNmEyYiIvPgo8cG9seWdvbiBwb2ludHM9IjQ1LDc1IDExNSw3NSA4MCwxNDAiIGZpbGw9IiNmZGYzZTAiIHN0cm9rZT0iIzhhNmEyYiIvPgo8L3N2Zz48dGV4dCB4PSI3NSIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj4xPC90ZXh0Pjx0ZXh0IHg9IjI2MCIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj4yPC90ZXh0Pjx0ZXh0IHg9IjQ2MCIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj4zPC90ZXh0Pjx0ZXh0IHg9IjY0NSIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj40PC90ZXh0Pjx0ZXh0IHg9IjgxNSIgeT0iMTU3IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj41PC90ZXh0Pjwvc3ZnPg==",
+      "options": [
+        "4",
+        "2",
+        "3",
+        "5",
+        "1"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "1（中央の三角形の3辺に1枚ずつ張り出した形）、3（3枚をまっすぐ帯状につないだ形）、5（1とは別配置の中央＋3枚の形）は、いずれも正四面体の代表的な展開図であり、正しく組み立てられます。",
+        "2は、3枚の帯の端の三角形にさらに1枚を追加した形で、一見複雑に見えますが、つながり方（どの面とどの面が辺を共有しているか）を見ると「1枚が2枚目の端につながり、2枚目が3枚目に、3枚目が4枚目に」という一直線のつながり（1本道）になっており、これも正しく組み立てられます。",
+        "4は、2枚ずつの2つのグループに分かれてしまい、1枚の展開図としてつながっていないため、組み立てることができません。",
+        "よって、正解は1・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の分割数",
+      "questionText": "円の内部に3本の直線（弦）を引く。どの2本も円の内部の異なる1点で交わり、3本が1点に集中することはないとき、円は最大何個の領域に分けられるか。",
+      "imageDataUri": null,
+      "options": [
+        "9個",
+        "7個",
+        "8個",
+        "6個"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "弦を1本引くごとに増える領域の数は「その弦が、それまでに引いた弦と何回交わるか＋1」で求められます。",
+        "1本目：まだ何とも交わらないので、+1（円が2個の領域になる）。",
+        "2本目：1本目と1回交わるので、+2（合計4個）。",
+        "3本目：1本目・2本目とそれぞれ1回ずつ、合計2回交わるので、+3（合計7個）。",
+        "よって、最大で7個の領域に分けられます。",
+        "よって、正解は2（7個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の分割数",
+      "questionText": "円の内部に4本の直線（弦）を引く。どの2本も円の内部の異なる1点で交わり、3本以上が1点に集中することはないとき、円は最大何個の領域に分けられるか。",
+      "imageDataUri": null,
+      "options": [
+        "9個",
+        "11個",
+        "12個",
+        "10個"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "問題10と同じ考え方で求めます。",
+        "1本目：+1（2個）。2本目：+2（4個）。3本目：+3（7個）。4本目：それまでの3本すべてと交わるので+4（11個）。",
+        "よって、最大で11個の領域に分けられます。",
+        "よって、正解は2（11個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の分割数",
+      "questionText": "正方形に2本の対角線を引いたあと、さらに上辺の中点と下辺の中点を結ぶ線分を1本引いた。このとき、正方形は何個の領域に分けられるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMTQwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8bGluZSB4MT0iMTAiIHkxPSIxMCIgeDI9IjkwIiB5Mj0iOTAiIHN0cm9rZT0iIzJiNWY5ZSIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxsaW5lIHgxPSI5MCIgeTE9IjEwIiB4Mj0iMTAiIHkyPSI5MCIgc3Ryb2tlPSIjMmI1ZjllIiBzdHJva2Utd2lkdGg9IjIiLz4KPGxpbmUgeDE9IjUwIiB5MT0iMTAiIHgyPSI1MCIgeTI9IjkwIiBzdHJva2U9IiNjMDM5MmIiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz48L3N2Zz4=",
+      "options": [
+        "7個",
+        "5個",
+        "8個",
+        "6個"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "2本の対角線を引くと、正方形は中心で交わる4つの三角形（上・下・左・右）に分かれます。",
+        "上下の辺の中点を結ぶ線分は、ちょうど正方形の中心（対角線の交点）を通ります。この線分は、上の三角形をまっすぐ2つに分け、下の三角形もまっすぐ2つに分けますが、左右の三角形には触れません。",
+        "よって、上（2個）＋下（2個）＋左（1個）＋右（1個）＝6個の領域に分けられます。",
+        "よって、正解は4（6個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の分割数",
+      "questionText": "正三角形の各頂点から、向かい合う辺の中点に向けて線分（中線）を1本ずつ、合計3本引いた。このとき、正三角形は何個の領域に分けられるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMTQwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+Cjxwb2x5Z29uIHBvaW50cz0iNTAsMTAgMTAsOTAgOTAsOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxsaW5lIHgxPSI1MCIgeTE9IjEwIiB4Mj0iNTAiIHkyPSI5MCIgc3Ryb2tlPSIjMmI1ZjllIiBzdHJva2Utd2lkdGg9IjIiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOTAiIHgyPSI3MCIgeTI9IjMwIiBzdHJva2U9IiMyYjVmOWUiIHN0cm9rZS13aWR0aD0iMiIvPgo8bGluZSB4MT0iOTAiIHkxPSI5MCIgeDI9IjMwIiB5Mj0iMzAiIHN0cm9rZT0iIzJiNWY5ZSIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPjwvc3ZnPg==",
+      "options": [
+        "3個",
+        "4個",
+        "6個",
+        "7個"
+      ],
+      "correctAnswer": 2,
+      "explanation": [
+        "三角形の3本の中線は、必ず1点（重心）で交わることが知られています。3本が1点に集中しているため、円の弦のように「1本ごとに交点の数だけ領域が増える」計算はそのまま使えません。",
+        "実際に図をかいて確認すると、3本の中線によって正三角形は、重心を頂点とする6つの小さな三角形に分けられます（これはよく知られた事実です）。",
+        "よって、正解は3（6個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の系列・法則性",
+      "questionText": "下の図形は、一定の規則にしたがって変化している。空欄「？」に当てはまる図形はどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MjAgMTEyIiB3aWR0aD0iNDIwIiBoZWlnaHQ9IjExMiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjQyMCIgaGVpZ2h0PSIxMTIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgdmlld0JveD0iMCAwIDgwIDgwIj48cG9seWdvbiBwb2ludHM9IjQwLDEwIDcwLDY1IDEwLDY1IiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjVmOWUiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjQwIiBjeT0iMTAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48Y2lyY2xlIGN4PSI3MCIgY3k9IjY1IiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PGNpcmNsZSBjeD0iMTAiIGN5PSI2NSIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjwvc3ZnPjxzdmcgeD0iMTEwIiB5PSIwIiB3aWR0aD0iOTAiIGhlaWdodD0iOTAiIHZpZXdCb3g9IjAgMCA4MCA4MCI+PHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJiNWY5ZSIgc3Ryb2tlLXdpZHRoPSIyIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjxjaXJjbGUgY3g9IjY4IiBjeT0iMTIiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48Y2lyY2xlIGN4PSI2OCIgY3k9IjY4IiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSI2OCIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjwvc3ZnPjxzdmcgeD0iMjIwIiB5PSIwIiB3aWR0aD0iOTAiIGhlaWdodD0iOTAiIHZpZXdCb3g9IjAgMCA4MCA4MCI+PHBvbHlnb24gcG9pbnRzPSI0MCw4IDY4LDI4IDU4LDYyIDIyLDYyIDEyLDI4IiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjVmOWUiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjQwIiBjeT0iOCIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjxjaXJjbGUgY3g9IjY4IiBjeT0iMjgiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48Y2lyY2xlIGN4PSI1OCIgY3k9IjYyIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PGNpcmNsZSBjeD0iMjIiIGN5PSI2MiIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMjgiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48L3N2Zz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzMzAsMCkiPjxyZWN0IHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOTk5IiBzdHJva2UtZGFzaGFycmF5PSI0LDMiLz48dGV4dCB4PSI0NSIgeT0iNTUiIGZvbnQtc2l6ZT0iMjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiPu+8nzwvdGV4dD48L2c+PHRleHQgeD0iNDUiIHk9IjEwNiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+4pGg77yI54K5M+WAi++8iTwvdGV4dD48dGV4dCB4PSIxNTUiIHk9IjEwNiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+4pGh77yI54K5NOWAi++8iTwvdGV4dD48dGV4dCB4PSIyNjUiIHk9IjEwNiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+4pGi77yI54K5NeWAi++8iTwvdGV4dD48L3N2Zz4=",
+      "options": [
+        "正七角形（頂点に点が7個）",
+        "正六角形（頂点に点が6個）",
+        "正六角形（頂点に点が5個）",
+        "正五角形（頂点に点が6個）"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "①正三角形（頂点3・点3個）→②正方形（頂点4・点4個）→③正五角形（頂点5・点5個）と、多角形の辺（頂点）の数が1つずつ増え、頂点の数とちょうど同じ数だけ点が打たれています。",
+        "この規則にしたがうと、次は正六角形（頂点6）に、頂点の数と同じ6個の点が打たれた図形になります。",
+        "よって、正解は2・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の系列・法則性",
+      "questionText": "図形の中にある点の数が、2個、5個、10個、17個と一定の規則にしたがって増えていく。5番目の図形の点の数はいくつか。",
+      "imageDataUri": null,
+      "options": [
+        "26個",
+        "28個",
+        "24個",
+        "25個"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "隣り合う数の差を見ると、5－2＝3、10－5＝5、17－10＝7 と、差が3、5、7…と2ずつ増えていることがわかります。",
+        "次の差（4番目から5番目への差）は、7の次なので9になります。よって、5番目の点の数は17＋9＝26個です。",
+        "（別解：1番目から順に1²+1＝2、2²+1＝5、3²+1＝10、4²+1＝17 という規則になっているので、5番目は5²+1＝26個です。）",
+        "よって、正解は1（26個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の系列・法則性",
+      "questionText": "下の図のように、矢印の向きが一定の規則にしたがって変化している。「？」に入る矢印の向きはどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MzAgOTIiIHdpZHRoPSI0MzAiIGhlaWdodD0iOTIiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSI0MzAiIGhlaWdodD0iOTIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSI3MCIgaGVpZ2h0PSI3MCIgdmlld0JveD0iMCAwIDYwIDYwIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjY2NjIi8+PGxpbmUgeDE9IjMwIiB5MT0iMzAiIHgyPSIzMCIgeTI9IjgiIHN0cm9rZT0iIzJiNWY5ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBvbHlnb24gcG9pbnRzPSIzMCw0IDI2LDEyIDM0LDEyIiBmaWxsPSIjMmI1ZjllIi8+PC9zdmc+PHN2ZyB4PSI5MCIgeT0iMCIgd2lkdGg9IjcwIiBoZWlnaHQ9IjcwIiB2aWV3Qm94PSIwIDAgNjAgNjAiPjxjaXJjbGUgY3g9IjMwIiBjeT0iMzAiIHI9IjI1IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiLz48bGluZSB4MT0iMzAiIHkxPSIzMCIgeDI9IjQ3IiB5Mj0iMTMiIHN0cm9rZT0iIzJiNWY5ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBvbHlnb24gcG9pbnRzPSI1MCwxMCA0MCwxMiA0OCwyMCIgZmlsbD0iIzJiNWY5ZSIvPjwvc3ZnPjxzdmcgeD0iMTgwIiB5PSIwIiB3aWR0aD0iNzAiIGhlaWdodD0iNzAiIHZpZXdCb3g9IjAgMCA2MCA2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2NjYyIvPjxsaW5lIHgxPSIzMCIgeTE9IjMwIiB4Mj0iNTIiIHkyPSIzMCIgc3Ryb2tlPSIjMmI1ZjllIiBzdHJva2Utd2lkdGg9IjMiLz48cG9seWdvbiBwb2ludHM9IjU2LDMwIDQ4LDI2IDQ4LDM0IiBmaWxsPSIjMmI1ZjllIi8+PC9zdmc+PHN2ZyB4PSIyNzAiIHk9IjAiIHdpZHRoPSI3MCIgaGVpZ2h0PSI3MCIgdmlld0JveD0iMCAwIDYwIDYwIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjY2NjIi8+PGxpbmUgeDE9IjMwIiB5MT0iMzAiIHgyPSI0NyIgeTI9IjQ3IiBzdHJva2U9IiMyYjVmOWUiIHN0cm9rZS13aWR0aD0iMyIvPjxwb2x5Z29uIHBvaW50cz0iNTAsNTAgNDgsNDAgNDAsNDgiIGZpbGw9IiMyYjVmOWUiLz48L3N2Zz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjAsMCkiPjxyZWN0IHdpZHRoPSI3MCIgaGVpZ2h0PSI3MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOTk5IiBzdHJva2UtZGFzaGFycmF5PSI0LDMiLz48dGV4dCB4PSIzNSIgeT0iNDUiIGZvbnQtc2l6ZT0iMjgiIHRleHQtYW5jaG9yPSJtaWRkbGUiPu+8nzwvdGV4dD48L2c+PHRleHQgeD0iMzUiIHk9Ijg2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7ikaDljJc8L3RleHQ+PHRleHQgeD0iMTI1IiB5PSI4NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+4pGh5YyX5p2xPC90ZXh0Pjx0ZXh0IHg9IjIxNSIgeT0iODYiIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPuKRouadsTwvdGV4dD48dGV4dCB4PSIzMDUiIHk9Ijg2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7ikaPljZfmnbE8L3RleHQ+PC9zdmc+",
+      "options": [
+        "南西",
+        "北西",
+        "南",
+        "西"
+      ],
+      "correctAnswer": 2,
+      "explanation": [
+        "矢印の向きは、北→北東→東→南東と、時計回りに45°ずつ回転しています。",
+        "この規則にしたがうと、次は南東からさらに45°時計回りに回転した「南」になります。",
+        "よって、正解は3（南）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の系列・法則性",
+      "questionText": "次の5つの図形は、内部にある点の数がそれぞれ異なる。①4個、②9個、③16個、④25個、⑤30個であるとき、1つだけ他と異なる規則に従っているものはどれか。",
+      "imageDataUri": null,
+      "options": [
+        "①",
+        "③",
+        "⑤",
+        "②",
+        "④"
+      ],
+      "correctAnswer": 2,
+      "explanation": [
+        "①4＝2×2、②9＝3×3、③16＝4×4、④25＝5×5 と、①〜④はすべてある整数を2回かけた数（平方数）になっています。",
+        "一方、⑤の30は、5×6＝30であり、同じ数を2回かけても作れないため、平方数ではありません（5×5＝25、6×6＝36であり、30はその間の数です）。",
+        "よって、他と異なる規則に従っているのは⑤です。",
+        "正解は3・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "対称性・重ね合わせ",
+      "questionText": "正六角形には、線対称となる対称軸（折り曲げるとぴったり重なる直線）が何本あるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMTQwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+Cjxwb2x5Z29uIHBvaW50cz0iNTAsMTAgODUsMzAgODUsNzAgNTAsOTAgMTUsNzAgMTUsMzAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPjwvc3ZnPg==",
+      "options": [
+        "3本",
+        "12本",
+        "4本",
+        "6本"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "正六角形の対称軸には、向かい合う2つの頂点を通る軸が3本と、向かい合う2つの辺の中点を通る軸が3本の、合わせて6本があります。",
+        "よって、正解は4（6本）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "対称性・重ね合わせ",
+      "questionText": "正五角形には、線対称となる対称軸が何本あるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgMTQwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+Cjxwb2x5Z29uIHBvaW50cz0iNTAsOCA5MCwzOCA3NCw4OCAyNiw4OCAxMCwzOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+PC9zdmc+",
+      "options": [
+        "5本",
+        "4本",
+        "10本",
+        "1本"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "正五角形は頂点の数が奇数（5個）なので、正六角形のように「頂点どうし」「辺どうし」を結ぶ軸には分かれません。それぞれの対称軸は、1つの頂点と、その向かい側の辺の中点を通ります。頂点は5つあるので、対称軸も5本です。",
+        "よって、正解は1（5本）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "対称性・重ね合わせ",
+      "questionText": "下のシートA・シートBは、透明な板の一部のマスに色を塗ったものである。この2枚を、マスの位置を合わせてそのまま重ねたとき（どちらか一方でも色が塗られていれば、重ねた図でもそのマスは色付きになる）、正しくできあがる図はどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MDAgMjg4IiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjI4OCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjUwMCIgaGVpZ2h0PSIyODgiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxMTAiIGhlaWdodD0iMTEwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMmI1ZjllIi8+PHJlY3QgeD0iNDAiIHk9IjEwIiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIGZpbGw9IiMyYjVmOWUiLz48cmVjdCB4PSIxMCIgeT0iNDAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzJiNWY5ZSIvPgo8cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIi8+CjxsaW5lIHgxPSI0MCIgeTE9IjEwIiB4Mj0iNDAiIHkyPSIxMDAiIHN0cm9rZT0iIzMzMyIvPjxsaW5lIHgxPSI3MCIgeTE9IjEwIiB4Mj0iNzAiIHkyPSIxMDAiIHN0cm9rZT0iIzMzMyIvPgo8bGluZSB4MT0iMTAiIHkxPSI0MCIgeDI9IjEwMCIgeTI9IjQwIiBzdHJva2U9IiMzMzMiLz48bGluZSB4MT0iMTAiIHkxPSI3MCIgeDI9IjEwMCIgeTI9IjcwIiBzdHJva2U9IiMzMzMiLz4KPC9zdmc+PHN2ZyB4PSIxMzAiIHk9IjAiIHdpZHRoPSIxMTAiIGhlaWdodD0iMTEwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CjxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjYzA3YTJiIi8+PHJlY3QgeD0iNzAiIHk9IjQwIiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIGZpbGw9IiNjMDdhMmIiLz48cmVjdCB4PSI0MCIgeT0iNzAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iI2MwN2EyYiIvPjxyZWN0IHg9IjcwIiB5PSI3MCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjYzA3YTJiIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiLz4KPGxpbmUgeDE9IjQwIiB5MT0iMTAiIHgyPSI0MCIgeTI9IjEwMCIgc3Ryb2tlPSIjMzMzIi8+PGxpbmUgeDE9IjcwIiB5MT0iMTAiIHgyPSI3MCIgeTI9IjEwMCIgc3Ryb2tlPSIjMzMzIi8+CjxsaW5lIHgxPSIxMCIgeTE9IjQwIiB4Mj0iMTAwIiB5Mj0iNDAiIHN0cm9rZT0iIzMzMyIvPjxsaW5lIHgxPSIxMCIgeTE9IjcwIiB4Mj0iMTAwIiB5Mj0iNzAiIHN0cm9rZT0iIzMzMyIvPgo8L3N2Zz48dGV4dCB4PSI1NSIgeT0iMTI2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7jgrfjg7zjg4hBPC90ZXh0Pjx0ZXh0IHg9IjE4NSIgeT0iMTI2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7jgrfjg7zjg4hCPC90ZXh0PjxzdmcgeD0iMCIgeT0iMTU2IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjExMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiPgo8cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzNmN2EyYiIvPjxyZWN0IHg9IjQwIiB5PSIxMCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2Y3YTJiIi8+PHJlY3QgeD0iMTAiIHk9IjQwIiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIGZpbGw9IiMzZjdhMmIiLz48cmVjdCB4PSI3MCIgeT0iNDAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzNmN2EyYiIvPjxyZWN0IHg9IjQwIiB5PSI3MCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2Y3YTJiIi8+PHJlY3QgeD0iNzAiIHk9IjcwIiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIGZpbGw9IiMzZjdhMmIiLz4KPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOTAiIGhlaWdodD0iOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIvPgo8bGluZSB4MT0iNDAiIHkxPSIxMCIgeDI9IjQwIiB5Mj0iMTAwIiBzdHJva2U9IiMzMzMiLz48bGluZSB4MT0iNzAiIHkxPSIxMCIgeDI9IjcwIiB5Mj0iMTAwIiBzdHJva2U9IiMzMzMiLz4KPGxpbmUgeDE9IjEwIiB5MT0iNDAiIHgyPSIxMDAiIHkyPSI0MCIgc3Ryb2tlPSIjMzMzIi8+PGxpbmUgeDE9IjEwIiB5MT0iNzAiIHgyPSIxMDAiIHkyPSI3MCIgc3Ryb2tlPSIjMzMzIi8+Cjwvc3ZnPjxzdmcgeD0iMTMwIiB5PSIxNTYiIHdpZHRoPSIxMTAiIGhlaWdodD0iMTEwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CjxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2Y3YTJiIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiLz4KPGxpbmUgeDE9IjQwIiB5MT0iMTAiIHgyPSI0MCIgeTI9IjEwMCIgc3Ryb2tlPSIjMzMzIi8+PGxpbmUgeDE9IjcwIiB5MT0iMTAiIHgyPSI3MCIgeTI9IjEwMCIgc3Ryb2tlPSIjMzMzIi8+CjxsaW5lIHgxPSIxMCIgeTE9IjQwIiB4Mj0iMTAwIiB5Mj0iNDAiIHN0cm9rZT0iIzMzMyIvPjxsaW5lIHgxPSIxMCIgeTE9IjcwIiB4Mj0iMTAwIiB5Mj0iNzAiIHN0cm9rZT0iIzMzMyIvPgo8L3N2Zz48c3ZnIHg9IjI2MCIgeT0iMTU2IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjExMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiPgo8cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzNmN2EyYiIvPjxyZWN0IHg9IjQwIiB5PSIxMCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2Y3YTJiIi8+PHJlY3QgeD0iMTAiIHk9IjQwIiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIGZpbGw9IiMzZjdhMmIiLz48cmVjdCB4PSI3MCIgeT0iNDAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzNmN2EyYiIvPjxyZWN0IHg9IjQwIiB5PSI3MCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2Y3YTJiIi8+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjkwIiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiLz4KPGxpbmUgeDE9IjQwIiB5MT0iMTAiIHgyPSI0MCIgeTI9IjEwMCIgc3Ryb2tlPSIjMzMzIi8+PGxpbmUgeDE9IjcwIiB5MT0iMTAiIHgyPSI3MCIgeTI9IjEwMCIgc3Ryb2tlPSIjMzMzIi8+CjxsaW5lIHgxPSIxMCIgeTE9IjQwIiB4Mj0iMTAwIiB5Mj0iNDAiIHN0cm9rZT0iIzMzMyIvPjxsaW5lIHgxPSIxMCIgeTE9IjcwIiB4Mj0iMTAwIiB5Mj0iNzAiIHN0cm9rZT0iIzMzMyIvPgo8L3N2Zz48c3ZnIHg9IjM5MCIgeT0iMTU2IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjExMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiPgo8cmVjdCB4PSI3MCIgeT0iMTAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzNmN2EyYiIvPjxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2Y3YTJiIi8+PHJlY3QgeD0iMTAiIHk9IjcwIiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIGZpbGw9IiMzZjdhMmIiLz4KPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOTAiIGhlaWdodD0iOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIvPgo8bGluZSB4MT0iNDAiIHkxPSIxMCIgeDI9IjQwIiB5Mj0iMTAwIiBzdHJva2U9IiMzMzMiLz48bGluZSB4MT0iNzAiIHkxPSIxMCIgeDI9IjcwIiB5Mj0iMTAwIiBzdHJva2U9IiMzMzMiLz4KPGxpbmUgeDE9IjEwIiB5MT0iNDAiIHgyPSIxMDAiIHkyPSI0MCIgc3Ryb2tlPSIjMzMzIi8+PGxpbmUgeDE9IjEwIiB5MT0iNzAiIHgyPSIxMDAiIHkyPSI3MCIgc3Ryb2tlPSIjMzMzIi8+Cjwvc3ZnPjx0ZXh0IHg9IjU1IiB5PSIyODIiIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjE8L3RleHQ+PHRleHQgeD0iMTg1IiB5PSIyODIiIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjI8L3RleHQ+PHRleHQgeD0iMzE1IiB5PSIyODIiIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjM8L3RleHQ+PHRleHQgeD0iNDQ1IiB5PSIyODIiIGZvbnQtc2l6ZT0iMTMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPjQ8L3RleHQ+PC9zdmc+",
+      "options": [
+        "3",
+        "4",
+        "2",
+        "1"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "シートAで色が塗られているマスは、左上・上中央・左中央の3マスです。シートBで色が塗られているマスは、左中央・右中央・下中央・右下の4マスです。",
+        "2枚とも塗られているマス（左中央）は重複して数えず、どちらか一方でも塗られていれば色付きとします。すべて合わせると、左上・上中央・左中央・右中央・下中央・右下の6マスが色付きになります。",
+        "選択肢2は「シートAとシートB両方に塗られているマス（左中央）」だけを塗ったもの（重なり＝共通部分）で、誤りです。",
+        "選択肢3は、右下のマスの色を塗り忘れており、5マスしかないため誤りです。",
+        "選択肢4は、シートA・Bのどちらにも塗られていないマスを含む、誤った組み合わせです。",
+        "選択肢1が、正しく6マスすべてを塗った組み合わせです。",
+        "よって、正解は4・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "立方体の切断面",
+      "questionText": "立方体の1つの頂点に集まる3本の辺について、それぞれの中点を通る平面で、その頂点付近を切り落とした。切り口の図形はどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTQwIDE0MCI+Cjxwb2x5Z29uIHBvaW50cz0iMzAsMTAwIDEwMCwxMjAgOTAsNTAgMjAsMzAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk5OSIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjMsMyIvPgo8bGluZSB4MT0iMzAiIHkxPSIxMDAiIHgyPSI2MCIgeTI9IjE0MCIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+CjxsaW5lIHgxPSIxMDAiIHkxPSIxMjAiIHgyPSI2MCIgeTI9IjE0MCIgc3Ryb2tlPSIjOTk5IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+Cjxwb2x5Z29uIHBvaW50cz0iMjAsMzAgOTAsNTAgNjAsMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjxwb2x5Z29uIHBvaW50cz0iMjAsMzAgNjAsMTAgMzAsMTAwIiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8cG9seWdvbiBwb2ludHM9IjkwLDUwIDYwLDEwIDEwMCwxMjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjxwb2x5Z29uIHBvaW50cz0iNDUsMTAgNjAsMjkgMzMsNTQiIGZpbGw9IiNmN2UzYzQiIHN0cm9rZT0iI2MwMzkyYiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPjwvc3ZnPg==",
+      "options": [
+        "正方形",
+        "正三角形",
+        "直角三角形",
+        "ひし形"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "立方体の1つの頂点には、長さの等しい3本の辺が集まっています。この3本の辺それぞれの中点を結ぶと、3つの辺（切り口の辺）の長さはすべて等しくなります（もとの辺の長さを2とすると、中点どうしを結ぶ線分の長さはいずれも直角二等辺三角形の斜辺にあたり、すべて√2で等しくなります）。",
+        "3辺の長さがすべて等しい三角形は正三角形です。",
+        "よって、正解は2（正三角形）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "立方体の切断面",
+      "questionText": "立方体を、互いに平行な2本の辺（面を共有しない、向かい合う位置にある辺どうし）を含む平面で切断すると、切り口の図形はどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTQwIDE0MCI+Cjxwb2x5Z29uIHBvaW50cz0iMjAsMzAgOTAsMTAgOTAsODAgMjAsMTAwIiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxsaW5lIHgxPSIyMCIgeTE9IjMwIiB4Mj0iMjAiIHkyPSIxMDAiIHN0cm9rZT0iIzk5OSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtZGFzaGFycmF5PSIzLDMiLz4KPGxpbmUgeDE9IjkwIiB5MT0iMTAiIHgyPSI5MCIgeTI9IjgwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxsaW5lIHgxPSIyMCIgeTE9IjEwMCIgeDI9IjkwIiB5Mj0iODAiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPGxpbmUgeDE9IjIwIiB5MT0iMzAiIHgyPSI5MCIgeTI9IjEwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxsaW5lIHgxPSIyMCIgeTE9IjEwMCIgeDI9IjU1IiB5Mj0iMTMwIiBzdHJva2U9IiM5OTkiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMywzIi8+CjxsaW5lIHgxPSI5MCIgeTE9IjgwIiB4Mj0iMTI1IiB5Mj0iMTEwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxsaW5lIHgxPSI1NSIgeTE9IjEzMCIgeDI9IjEyNSIgeTI9IjExMCIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEuNSIvPgo8bGluZSB4MT0iMjAiIHkxPSIzMCIgeDI9IjU1IiB5Mj0iNjAiIHN0cm9rZT0iIzk5OSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtZGFzaGFycmF5PSIzLDMiLz4KPGxpbmUgeDE9IjkwIiB5MT0iMTAiIHgyPSIxMjUiIHkyPSI0MCIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEuNSIvPgo8bGluZSB4MT0iNTUiIHkxPSI2MCIgeDI9IjEyNSIgeTI9IjQwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxsaW5lIHgxPSI1NSIgeTE9IjYwIiB4Mj0iNTUiIHkyPSIxMzAiIHN0cm9rZT0iIzk5OSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtZGFzaGFycmF5PSIzLDMiLz4KPGxpbmUgeDE9IjEyNSIgeTE9IjQwIiB4Mj0iMTI1IiB5Mj0iMTEwIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMS41Ii8+Cjxwb2x5Z29uIHBvaW50cz0iOTAsMTAgOTAsODAgMTI1LDExMCAxMjUsNDAiIGZpbGw9IiNmN2UzYzQiIGZpbGwtb3BhY2l0eT0iMC42IiBzdHJva2U9IiNjMDM5MmIiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz48L3N2Zz4=",
+      "options": [
+        "台形",
+        "平行四辺形（長方形ではない）",
+        "正方形",
+        "長方形"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "面を共有しない向かい合う2辺は、互いに平行で、長さも立方体の1辺と等しくなっています。この2辺を含む平面で切ると、切り口の4辺のうち2辺はこの元の辺（長さは立方体の1辺）、残り2辺はその2辺を結ぶ線分（長さは面の対角線、1辺×√2）になります。",
+        "向かい合う辺どうしが平行なので、この切り口は平行四辺形になりますが、さらに、切り口の辺は立方体の辺・面の対角線のいずれも互いに垂直に交わるため、4つの角はすべて直角になります。角が直角の平行四辺形は長方形です。",
+        "よって、正解は4（長方形）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "立方体の切断面",
+      "questionText": "立方体を、頂点を共有しない6本の辺の中点をすべて通るような平面（対角線の中心に垂直な平面）で切断すると、切り口の図形はどれか。",
+      "imageDataUri": null,
+      "options": [
+        "正六角形",
+        "不等辺六角形",
+        "正八角形",
+        "正方形"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "立方体には、対角線上にある2つの頂点を結ぶ「立体対角線」があります。この対角線の中点を通り、対角線に垂直な平面で切断すると、その切り口は立方体の12本の辺のうち6本の中点を通り、正六角形になることが知られています。",
+        "これは、立方体を対角線方向から見たときに、輪郭が正六角形に見えることからもイメージできます。",
+        "よって、正解は1（正六角形）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "立方体の切断面",
+      "questionText": "次のうち、1つの平面で立方体を切断したときの切り口として、決して現れない図形はどれか。",
+      "imageDataUri": null,
+      "options": [
+        "正六角形",
+        "正五角形",
+        "正方形",
+        "正三角形",
+        "正七角形"
+      ],
+      "correctAnswer": 4,
+      "explanation": [
+        "1つの平面で立方体を切断したときにできる切り口の辺の数は、その平面が立方体のいくつの面と交わるかで決まります。立方体の面は6つしかないため、切り口の辺の数は最大でも6本（六角形）までしかありえません。",
+        "問題1〜3で見たように、正三角形（3辺）、長方形やひし形（4辺）、正六角形（6辺）は実際に現れますし、5辺（五角形）の切り口も現れます。しかし、7辺（七角形）の切り口は、面の数が6つしかない立方体では絶対に作ることができません。",
+        "よって、正解は5（正七角形）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "展開図の点の対応",
+      "questionText": "この展開図を組み立てたとき、点「き」と重なる点はどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNjAgMjAwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjIwMCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMTcwIDEzMCI+CjxyZWN0IHg9IjAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjE1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMTwvdGV4dD4KPHJlY3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjU1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMjwvdGV4dD4KPHJlY3QgeD0iODAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9Ijk1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMzwvdGV4dD4KPHJlY3QgeD0iMTIwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz48dGV4dCB4PSIxMzUiIHk9IjY1IiBmb250LXNpemU9IjE0Ij7pnaI0PC90ZXh0Pgo8cmVjdCB4PSI0MCIgeT0iMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMjUiIGZvbnQtc2l6ZT0iMTQiPumdojU8L3RleHQ+CjxyZWN0IHg9IjQwIiB5PSI4MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMTA1IiBmb250LXNpemU9IjE0Ij7pnaI2PC90ZXh0Pgo8Y2lyY2xlIGN4PSIwIiBjeT0iNDAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSItMTAiIHk9IjM1IiBmb250LXNpemU9IjEzIj7jgYI8L3RleHQ+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTYzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GEPC90ZXh0Pgo8Y2lyY2xlIGN4PSI0MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBhjwvdGV4dD4KPGNpcmNsZSBjeD0iMCIgY3k9IjgwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iLTEwIiB5PSI5NSIgZm9udC1zaXplPSIxMyI+44GIPC90ZXh0Pgo8Y2lyY2xlIGN4PSIxNjAiIGN5PSI4MCIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjx0ZXh0IHg9IjE2MyIgeT0iOTUiIGZvbnQtc2l6ZT0iMTMiPuOBijwvdGV4dD4KPGNpcmNsZSBjeD0iNDAiIGN5PSIxMjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iMTMyIiBmb250LXNpemU9IjEzIj7jgYs8L3RleHQ+CjxjaXJjbGUgY3g9IjEyMCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTIzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GNPC90ZXh0Pgo8Y2lyY2xlIGN4PSI4MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSI4MyIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBjzwvdGV4dD4KPGNpcmNsZSBjeD0iMTIwIiBjeT0iODAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIxMjMiIHk9Ijk1IiBmb250LXNpemU9IjEzIj7jgZE8L3RleHQ+CjxjaXJjbGUgY3g9IjgwIiBjeT0iMTIwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iODMiIHk9IjEzMiIgZm9udC1zaXplPSIxMyI+44GTPC90ZXh0Pgo8L3N2Zz48L3N2Zz4=",
+      "options": [
+        "け",
+        "く",
+        "え",
+        "こ"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "面2を正面としたとき、面3は右側面、面5は上面になります。面3と面5がそれぞれ持つ「き」「く」の点は、どちらも面2の右上の頂点（正面右上頂点）に集まる、立方体の同じ頂点（右上奥の頂点）に対応します。",
+        "よって、正解は2（く）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "展開図の点の対応",
+      "questionText": "この展開図を組み立てたとき、点「け」と重なる点はどれか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNjAgMjAwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjIwMCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMTcwIDEzMCI+CjxyZWN0IHg9IjAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjE1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMTwvdGV4dD4KPHJlY3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjU1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMjwvdGV4dD4KPHJlY3QgeD0iODAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9Ijk1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMzwvdGV4dD4KPHJlY3QgeD0iMTIwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz48dGV4dCB4PSIxMzUiIHk9IjY1IiBmb250LXNpemU9IjE0Ij7pnaI0PC90ZXh0Pgo8cmVjdCB4PSI0MCIgeT0iMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMjUiIGZvbnQtc2l6ZT0iMTQiPumdojU8L3RleHQ+CjxyZWN0IHg9IjQwIiB5PSI4MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMTA1IiBmb250LXNpemU9IjE0Ij7pnaI2PC90ZXh0Pgo8Y2lyY2xlIGN4PSIwIiBjeT0iNDAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSItMTAiIHk9IjM1IiBmb250LXNpemU9IjEzIj7jgYI8L3RleHQ+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTYzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GEPC90ZXh0Pgo8Y2lyY2xlIGN4PSI0MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBhjwvdGV4dD4KPGNpcmNsZSBjeD0iMCIgY3k9IjgwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iLTEwIiB5PSI5NSIgZm9udC1zaXplPSIxMyI+44GIPC90ZXh0Pgo8Y2lyY2xlIGN4PSIxNjAiIGN5PSI4MCIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjx0ZXh0IHg9IjE2MyIgeT0iOTUiIGZvbnQtc2l6ZT0iMTMiPuOBijwvdGV4dD4KPGNpcmNsZSBjeD0iNDAiIGN5PSIxMjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iMTMyIiBmb250LXNpemU9IjEzIj7jgYs8L3RleHQ+CjxjaXJjbGUgY3g9IjEyMCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTIzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GNPC90ZXh0Pgo8Y2lyY2xlIGN4PSI4MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSI4MyIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBjzwvdGV4dD4KPGNpcmNsZSBjeD0iMTIwIiBjeT0iODAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIxMjMiIHk9Ijk1IiBmb250LXNpemU9IjEzIj7jgZE8L3RleHQ+CjxjaXJjbGUgY3g9IjgwIiBjeT0iMTIwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iODMiIHk9IjEzMiIgZm9udC1zaXplPSIxMyI+44GTPC90ZXh0Pgo8L3N2Zz48L3N2Zz4=",
+      "options": [
+        "こ",
+        "う",
+        "く",
+        "き"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "面3（右側面）の「け」と、面6（底面）の「こ」は、どちらも正面右下の頂点に集まる、立方体の同じ頂点（右下奥の頂点）に対応します。",
+        "よって、正解は1（こ）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "展開図の点の対応",
+      "questionText": "この展開図を組み立てたとき、点「あ」と（あ自身を含めて）重なる点は全部で何個あるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNjAgMjAwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjIwMCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMTcwIDEzMCI+CjxyZWN0IHg9IjAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjE1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMTwvdGV4dD4KPHJlY3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjU1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMjwvdGV4dD4KPHJlY3QgeD0iODAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9Ijk1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMzwvdGV4dD4KPHJlY3QgeD0iMTIwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz48dGV4dCB4PSIxMzUiIHk9IjY1IiBmb250LXNpemU9IjE0Ij7pnaI0PC90ZXh0Pgo8cmVjdCB4PSI0MCIgeT0iMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMjUiIGZvbnQtc2l6ZT0iMTQiPumdojU8L3RleHQ+CjxyZWN0IHg9IjQwIiB5PSI4MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMTA1IiBmb250LXNpemU9IjE0Ij7pnaI2PC90ZXh0Pgo8Y2lyY2xlIGN4PSIwIiBjeT0iNDAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSItMTAiIHk9IjM1IiBmb250LXNpemU9IjEzIj7jgYI8L3RleHQ+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTYzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GEPC90ZXh0Pgo8Y2lyY2xlIGN4PSI0MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBhjwvdGV4dD4KPGNpcmNsZSBjeD0iMCIgY3k9IjgwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iLTEwIiB5PSI5NSIgZm9udC1zaXplPSIxMyI+44GIPC90ZXh0Pgo8Y2lyY2xlIGN4PSIxNjAiIGN5PSI4MCIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjx0ZXh0IHg9IjE2MyIgeT0iOTUiIGZvbnQtc2l6ZT0iMTMiPuOBijwvdGV4dD4KPGNpcmNsZSBjeD0iNDAiIGN5PSIxMjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iMTMyIiBmb250LXNpemU9IjEzIj7jgYs8L3RleHQ+CjxjaXJjbGUgY3g9IjEyMCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTIzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GNPC90ZXh0Pgo8Y2lyY2xlIGN4PSI4MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSI4MyIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBjzwvdGV4dD4KPGNpcmNsZSBjeD0iMTIwIiBjeT0iODAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIxMjMiIHk9Ijk1IiBmb250LXNpemU9IjEzIj7jgZE8L3RleHQ+CjxjaXJjbGUgY3g9IjgwIiBjeT0iMTIwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iODMiIHk9IjEzMiIgZm9udC1zaXplPSIxMyI+44GTPC90ZXh0Pgo8L3N2Zz48L3N2Zz4=",
+      "options": [
+        "2個",
+        "3個",
+        "1個",
+        "4個"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "「あ」（面1の左上）、「い」（面4の右上、帯の反対側の端）、「う」（面5の左上）の3点は、いずれも立方体の同じ頂点（左上奥の頂点）に集まります。これは、その頂点に面1（左側面）・面4（背面）・面5（上面）の3つの面が集まるためです。",
+        "よって、あ・い・うの3個です。",
+        "正解は2（3個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "展開図の点の対応",
+      "questionText": "この展開図を組み立てたとき、点「え」と組み立てたときに重なる点を、お・か・き・くの中からすべて選ぶとどれになるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNjAgMjAwIiB3aWR0aD0iMjYwIiBoZWlnaHQ9IjIwMCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMTcwIDEzMCI+CjxyZWN0IHg9IjAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjE1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMTwvdGV4dD4KPHJlY3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9IjU1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMjwvdGV4dD4KPHJlY3QgeD0iODAiIHk9IjQwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlZWY0ZmIiIHN0cm9rZT0iIzJiNWY5ZSIvPjx0ZXh0IHg9Ijk1IiB5PSI2NSIgZm9udC1zaXplPSIxNCI+6Z2iMzwvdGV4dD4KPHJlY3QgeD0iMTIwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz48dGV4dCB4PSIxMzUiIHk9IjY1IiBmb250LXNpemU9IjE0Ij7pnaI0PC90ZXh0Pgo8cmVjdCB4PSI0MCIgeT0iMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMjUiIGZvbnQtc2l6ZT0iMTQiPumdojU8L3RleHQ+CjxyZWN0IHg9IjQwIiB5PSI4MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiNjMDdhMmIiLz48dGV4dCB4PSI1NSIgeT0iMTA1IiBmb250LXNpemU9IjE0Ij7pnaI2PC90ZXh0Pgo8Y2lyY2xlIGN4PSIwIiBjeT0iNDAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSItMTAiIHk9IjM1IiBmb250LXNpemU9IjEzIj7jgYI8L3RleHQ+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTYzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GEPC90ZXh0Pgo8Y2lyY2xlIGN4PSI0MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBhjwvdGV4dD4KPGNpcmNsZSBjeD0iMCIgY3k9IjgwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iLTEwIiB5PSI5NSIgZm9udC1zaXplPSIxMyI+44GIPC90ZXh0Pgo8Y2lyY2xlIGN4PSIxNjAiIGN5PSI4MCIgcj0iMyIgZmlsbD0iI2MwMzkyYiIvPjx0ZXh0IHg9IjE2MyIgeT0iOTUiIGZvbnQtc2l6ZT0iMTMiPuOBijwvdGV4dD4KPGNpcmNsZSBjeD0iNDAiIGN5PSIxMjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIzMCIgeT0iMTMyIiBmb250LXNpemU9IjEzIj7jgYs8L3RleHQ+CjxjaXJjbGUgY3g9IjEyMCIgY3k9IjQwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iMTIzIiB5PSIzNSIgZm9udC1zaXplPSIxMyI+44GNPC90ZXh0Pgo8Y2lyY2xlIGN4PSI4MCIgY3k9IjAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSI4MyIgeT0iLTUiIGZvbnQtc2l6ZT0iMTMiPuOBjzwvdGV4dD4KPGNpcmNsZSBjeD0iMTIwIiBjeT0iODAiIHI9IjMiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSIxMjMiIHk9Ijk1IiBmb250LXNpemU9IjEzIj7jgZE8L3RleHQ+CjxjaXJjbGUgY3g9IjgwIiBjeT0iMTIwIiByPSIzIiBmaWxsPSIjYzAzOTJiIi8+PHRleHQgeD0iODMiIHk9IjEzMiIgZm9udC1zaXplPSIxMyI+44GTPC90ZXh0Pgo8L3N2Zz48L3N2Zz4=",
+      "options": [
+        "お・か",
+        "か・く",
+        "お・き",
+        "き・く"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "「え」（面1の左下）、「お」（面4の右下、帯の反対側の端）、「か」（面6の左下）の3点は、いずれも立方体の同じ頂点（左下奥の頂点）に集まります（面1・面4・面6の3つの面が集まる頂点です）。",
+        "よって、正解は1（お・か）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "投影図から立体を特定",
+      "questionText": "ある立体を、正面から見ると「長方形」、真上から見ると「円」、真横から見ると「長方形」に見えた。この立体は何か。",
+      "imageDataUri": null,
+      "options": [
+        "円錐",
+        "円柱",
+        "三角柱",
+        "球"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "真上から見て円に見えるのは、断面が円形の立体です。正面・真横のどちらから見ても長方形に見えるのは、その円形の断面が上から下まで同じ大きさで真っ直ぐ伸びている（先細りしていない）立体です。これに当てはまるのは円柱です。",
+        "（円錐であれば、正面・真横からは三角形に見えます。）",
+        "よって、正解は2（円柱）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "投影図から立体を特定",
+      "questionText": "ある立体を、正面から見ると「三角形」、真上から見ると「円」、真横から見ると「三角形」に見えた。この立体は何か。",
+      "imageDataUri": null,
+      "options": [
+        "四角錐",
+        "円錐",
+        "円柱",
+        "半球"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "真上から見て円に見えるので、断面が円形の立体です。正面・真横から見て三角形に見えるのは、上に向かって先細りになっている（頂点に向かって細くなる）立体です。これに当てはまるのは円錐です。",
+        "よって、正解は2（円錐）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "投影図から立体を特定",
+      "questionText": "ある立体を、正面から見ると「三角形」、真上から見ると「長方形」、真横から見ると「長方形」に見えた。この立体は何か。",
+      "imageDataUri": null,
+      "options": [
+        "四角柱",
+        "円柱",
+        "三角柱",
+        "三角錐"
+      ],
+      "correctAnswer": 2,
+      "explanation": [
+        "正面から見て三角形に見えるのは、三角形の断面を持つ立体です。真上・真横から見て長方形に見えるということは、その三角形の断面が奥行き方向にずっと同じ形で伸びている（角錐のように先細りしていない）ことを意味します。これに当てはまるのは、三角形を底面とする角柱、すなわち三角柱です（横向きに倒して、三角形の面が正面を向くように置いた状態）。",
+        "よって、正解は3（三角柱）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "積み木の個数",
+      "questionText": "下の図は、積み木を真上から見たときの、各マスに積まれている積み木の段数を表している。積み木の総数はいくつか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNjAgMTYwIiB3aWR0aD0iMTYwIiBoZWlnaHQ9IjE2MCI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMTYwIiB2aWV3Qm94PSIwIDAgMTMwIDEzMCI+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIyNiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPjI8L3RleHQ+CjxyZWN0IHg9IjUwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSI2NiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPjE8L3RleHQ+CjxyZWN0IHg9IjkwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIxMDYiIHk9IjM1IiBmb250LXNpemU9IjE4Ij4zPC90ZXh0Pgo8cmVjdCB4PSIxMCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMjYiIHk9Ijc1IiBmb250LXNpemU9IjE4Ij4xPC90ZXh0Pgo8cmVjdCB4PSI1MCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iNjYiIHk9Ijc1IiBmb250LXNpemU9IjE4Ij40PC90ZXh0Pgo8cmVjdCB4PSI5MCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMTA2IiB5PSI3NSIgZm9udC1zaXplPSIxOCI+MjwvdGV4dD4KPHJlY3QgeD0iMTAiIHk9IjkwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzMzMyIvPjx0ZXh0IHg9IjI2IiB5PSIxMTUiIGZvbnQtc2l6ZT0iMTgiPjM8L3RleHQ+CjxyZWN0IHg9IjUwIiB5PSI5MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSI2NiIgeT0iMTE1IiBmb250LXNpemU9IjE4Ij4yPC90ZXh0Pgo8cmVjdCB4PSI5MCIgeT0iOTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMTA2IiB5PSIxMTUiIGZvbnQtc2l6ZT0iMTgiPjE8L3RleHQ+Cjwvc3ZnPjwvc3ZnPg==",
+      "options": [
+        "21個",
+        "19個",
+        "20個",
+        "18個"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "各マスの段数をすべて足し合わせます。",
+        "1行目：2＋1＋3＝6",
+        "2行目：1＋4＋2＝7",
+        "3行目：3＋2＋1＝6",
+        "合計：6＋7＋6＝19個",
+        "よって、正解は2（19個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "積み木の個数",
+      "questionText": "下の「真上から見た図」は、積み木がある位置（×印）とない位置（空欄）を表している。「正面から見た図」は、それぞれの列（左から1〜3列目）で最も高く積まれている段数を表している。この条件を満たすように積み木を積むとき、必要な積み木の数として考えられる最小の個数はいくつか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTcyIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE3MiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjMyMCIgaGVpZ2h0PSIxNzIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTMwIDEzMCI+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIyNiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPsOXPC90ZXh0Pgo8cmVjdCB4PSI1MCIgeT0iMTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iNjYiIHk9IjM1IiBmb250LXNpemU9IjE4Ij7DlzwvdGV4dD4KPHJlY3QgeD0iOTAiIHk9IjEwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzMzMyIvPgo8cmVjdCB4PSIxMCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMjYiIHk9Ijc1IiBmb250LXNpemU9IjE4Ij7DlzwvdGV4dD4KPHJlY3QgeD0iNTAiIHk9IjUwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzMzMyIvPgo8cmVjdCB4PSI5MCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMTA2IiB5PSI3NSIgZm9udC1zaXplPSIxOCI+w5c8L3RleHQ+CjxyZWN0IHg9IjEwIiB5PSI5MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiMzMzMiLz4KPHJlY3QgeD0iNTAiIHk9IjkwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzMzMyIvPjx0ZXh0IHg9IjY2IiB5PSIxMTUiIGZvbnQtc2l6ZT0iMTgiPsOXPC90ZXh0Pgo8cmVjdCB4PSI5MCIgeT0iOTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMTA2IiB5PSIxMTUiIGZvbnQtc2l6ZT0iMTgiPsOXPC90ZXh0Pgo8L3N2Zz48c3ZnIHg9IjE3MCIgeT0iMCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSI2OSIgdmlld0JveD0iMCAwIDEzMCA2MCI+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIyNiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPjM8L3RleHQ+CjxyZWN0IHg9IjUwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSI2NiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPjI8L3RleHQ+CjxyZWN0IHg9IjkwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIxMDYiIHk9IjM1IiBmb250LXNpemU9IjE4Ij4yPC90ZXh0Pgo8L3N2Zz48dGV4dCB4PSI3NSIgeT0iMTY2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7nnJ/kuIrjgYvjgonopovjgZ/lm7PvvIjDl++8neepjeOBv+acqOOBguOCiu+8iTwvdGV4dD48dGV4dCB4PSIyNDUiIHk9IjE2NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+5q2j6Z2i44GL44KJ6KaL44Gf5Zuz77yI5ZCE5YiX44Gu5pyA5aSn44Gu5q615pWw77yJPC90ZXh0Pjwvc3ZnPg==",
+      "options": [
+        "10個",
+        "11個",
+        "12個",
+        "9個"
+      ],
+      "correctAnswer": 0,
+      "explanation": [
+        "列ごとに、積み木がある位置（×）の個数と、その列の最大段数を確認します。",
+        "1列目：×は1行目・2行目の2か所、最大段数は3。最小個数にするには、どちらか1か所を3段、残り1か所を最低の1段にすればよいので、3＋1＝4個。",
+        "2列目：×は1行目・3行目の2か所、最大段数は2。同様に、2＋1＝3個。",
+        "3列目：×は2行目・3行目の2か所、最大段数は2。同様に、2＋1＝3個。",
+        "合計の最小個数：4＋3＋3＝10個",
+        "よって、正解は1（10個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "積み木の個数",
+      "questionText": "問題13と同じ「真上から見た図」「正面から見た図」の条件を満たすように積み木を積むとき、必要な積み木の数として考えられる最大の個数はいくつか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTcyIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE3MiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjMyMCIgaGVpZ2h0PSIxNzIiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTMwIDEzMCI+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIyNiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPsOXPC90ZXh0Pgo8cmVjdCB4PSI1MCIgeT0iMTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iNjYiIHk9IjM1IiBmb250LXNpemU9IjE4Ij7DlzwvdGV4dD4KPHJlY3QgeD0iOTAiIHk9IjEwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzMzMyIvPgo8cmVjdCB4PSIxMCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMjYiIHk9Ijc1IiBmb250LXNpemU9IjE4Ij7DlzwvdGV4dD4KPHJlY3QgeD0iNTAiIHk9IjUwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzMzMyIvPgo8cmVjdCB4PSI5MCIgeT0iNTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMTA2IiB5PSI3NSIgZm9udC1zaXplPSIxOCI+w5c8L3RleHQ+CjxyZWN0IHg9IjEwIiB5PSI5MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZmZmIiBzdHJva2U9IiMzMzMiLz4KPHJlY3QgeD0iNTAiIHk9IjkwIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNkYmU5ZjciIHN0cm9rZT0iIzMzMyIvPjx0ZXh0IHg9IjY2IiB5PSIxMTUiIGZvbnQtc2l6ZT0iMTgiPsOXPC90ZXh0Pgo8cmVjdCB4PSI5MCIgeT0iOTAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgZmlsbD0iI2RiZTlmNyIgc3Ryb2tlPSIjMzMzIi8+PHRleHQgeD0iMTA2IiB5PSIxMTUiIGZvbnQtc2l6ZT0iMTgiPsOXPC90ZXh0Pgo8L3N2Zz48c3ZnIHg9IjE3MCIgeT0iMCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSI2OSIgdmlld0JveD0iMCAwIDEzMCA2MCI+CjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIyNiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPjM8L3RleHQ+CjxyZWN0IHg9IjUwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSI2NiIgeT0iMzUiIGZvbnQtc2l6ZT0iMTgiPjI8L3RleHQ+CjxyZWN0IHg9IjkwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjdlM2M0IiBzdHJva2U9IiMzMzMiLz48dGV4dCB4PSIxMDYiIHk9IjM1IiBmb250LXNpemU9IjE4Ij4yPC90ZXh0Pgo8L3N2Zz48dGV4dCB4PSI3NSIgeT0iMTY2IiBmb250LXNpemU9IjEzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMzMzIj7nnJ/kuIrjgYvjgonopovjgZ/lm7PvvIjDl++8neepjeOBv+acqOOBguOCiu+8iTwvdGV4dD48dGV4dCB4PSIyNDUiIHk9IjE2NiIgZm9udC1zaXplPSIxMyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyI+5q2j6Z2i44GL44KJ6KaL44Gf5Zuz77yI5ZCE5YiX44Gu5pyA5aSn44Gu5q615pWw77yJPC90ZXh0Pjwvc3ZnPg==",
+      "options": [
+        "15個",
+        "12個",
+        "13個",
+        "14個"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "最大の個数にするには、積み木がある（×の）マスはすべて、その列の最大段数と同じ高さまで積めばよいことになります（正面から見た図は「その列の中の最大値」を表しているだけなので、他のマスがその最大値と同じ高さでも、正面から見える段数は変わりません）。",
+        "1列目：×が2か所、それぞれ最大段数3を積むと、3＋3＝6個。",
+        "2列目：×が2か所、それぞれ最大段数2を積むと、2＋2＝4個。",
+        "3列目：×が2か所、それぞれ最大段数2を積むと、2＋2＝4個。",
+        "合計の最大個数：6＋4＋4＝14個",
+        "よって、正解は4（14個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の回転体",
+      "questionText": "半円を、その直径を軸として1回転させると、どのような立体ができるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgODQiIHdpZHRoPSIxNDAiIGhlaWdodD0iODQiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iODQiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iODQiIHZpZXdCb3g9IjAgMCAxMDAgNjAiPgo8cGF0aCBkPSJNIDIwIDUwIEEgMzAgMzAgMCAwIDEgODAgNTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJiNWY5ZSIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxsaW5lIHgxPSIyMCIgeTE9IjUwIiB4Mj0iODAiIHkyPSI1MCIgc3Ryb2tlPSIjYzAzOTJiIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjQsMyIvPgo8L3N2Zz48L3N2Zz4=",
+      "options": [
+        "円柱",
+        "半球",
+        "球",
+        "円錐"
+      ],
+      "correctAnswer": 2,
+      "explanation": [
+        "半円の弧の上のすべての点は、直径の中点（円の中心）から等しい距離（半径）にあります。この半円を直径を軸に1回転させると、弧上のすべての点が、中心から半径の長さだけ離れた位置を通ることになり、球面ができあがります。",
+        "よって、正解は3（球）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "図形の回転体",
+      "questionText": "下のような直角台形（上底が下底より短く、片方の脚が底辺に垂直）を、その垂直な脚を軸として1回転させると、どのような立体ができるか。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDAgOTgiIHdpZHRoPSIxNDAiIGhlaWdodD0iOTgiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iOTgiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxNDAiIGhlaWdodD0iOTgiIHZpZXdCb3g9IjAgMCAxMDAgNzAiPgo8cG9seWdvbiBwb2ludHM9IjIwLDEwIDYwLDEwIDgwLDYwIDIwLDYwIiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjVmOWUiIHN0cm9rZS13aWR0aD0iMiIvPgo8bGluZSB4MT0iMjAiIHkxPSIxMCIgeDI9IjIwIiB5Mj0iNjAiIHN0cm9rZT0iI2MwMzkyYiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtZGFzaGFycmF5PSI0LDMiLz4KPC9zdmc+PC9zdmc+",
+      "options": [
+        "球",
+        "円錐台",
+        "円柱",
+        "円錐"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "回転の軸となる脚の上端（短い上底の端）は、軸から近い距離（上底の長さ）を半径とする円を描き、下端（長い下底の端）は、軸から遠い距離（下底の長さ）を半径とする円を描きます。斜めの辺は、この2つの円をつなぐ側面（末広がりの曲面）を描きます。",
+        "これは、円錐の先端を切り取ったような形、すなわち円錐台になります。",
+        "よって、正解は2（円錐台）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "高難度の塗り分け・敷き詰め",
+      "questionText": "6つの領域A〜Fが、A-B、B-C、C-D、D-E、E-F、F-Aの順に環状に隣り合っている（つまりAとFも隣り合っている）。この6領域を7色を使って塗り分ける場合、何通りの塗り方があるか（隣り合う領域は異なる色。使わない色があってもよい）。",
+      "imageDataUri": null,
+      "options": [
+        "46,650通り",
+        "46,656通り",
+        "46,662通り",
+        "46,668通り"
+      ],
+      "correctAnswer": 2,
+      "explanation": [
+        "領域が輪のように環状につながっている場合（n個の領域が環状に隣接、色数k）の塗り分け方の総数は、公式 (k－1)ⁿ＋(－1)ⁿ(k－1) で求められます。",
+        "n＝6（偶数）、k＝7を代入すると、",
+        "(7－1)⁶＋(－1)⁶×(7－1)＝6⁶＋6＝46,656＋6＝46,662通り",
+        "（nが偶数のときは＋(k－1)、奇数のときは－(k－1)となる点に注意が必要です。単に6⁶だけを計算すると、末尾の＋6を忘れた46,656になってしまいます。）",
+        "よって、正解は3（46,662通り）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "高難度の塗り分け・敷き詰め",
+      "questionText": "3辺の長さが3、4、5の直角三角形2枚を、斜辺どうしを合わせて組み合わせると、3×4の長方形ができる。この長方形を敷き詰めて、できるだけ小さい正方形を作るには、直角三角形は最低何枚必要か。",
+      "imageDataUri": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMzAgMTAxIiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjEwMSI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEzMCIgaGVpZ2h0PSIxMDEiIGZpbGw9IiNmZmZmZmYiLz48c3ZnIHg9IjAiIHk9IjAiIHdpZHRoPSIxMzAiIGhlaWdodD0iMTAxIiB2aWV3Qm94PSIwIDAgOTAgNzAiPgo8cG9seWdvbiBwb2ludHM9IjEwLDYwIDcwLDYwIDEwLDEwIiBmaWxsPSIjZGJlOWY3IiBzdHJva2U9IiMyYjVmOWUiLz4KPHBvbHlnb24gcG9pbnRzPSI3MCw2MCAxMCwxMCA3MCwxMCIgZmlsbD0iI2Y3ZTNjNCIgc3Ryb2tlPSIjYzA3YTJiIi8+Cjwvc3ZnPjwvc3ZnPg==",
+      "options": [
+        "16枚",
+        "12枚",
+        "20枚",
+        "24枚"
+      ],
+      "correctAnswer": 3,
+      "explanation": [
+        "3と4の最小公倍数は12なので、1辺の長さが12の正方形を目標にします。",
+        "3×4の長方形を、縦方向に12÷3＝4枚、横方向に12÷4＝3枚並べると、1辺12の正方形ができます。必要な長方形の枚数は4×3＝12枚です。",
+        "1枚の長方形は直角三角形2枚からできているので、必要な直角三角形の枚数は12×2＝24枚です。",
+        "よって、正解は4（24枚）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "高難度の塗り分け・敷き詰め",
+      "questionText": "5つの領域A〜Eがある。A・B・Cの3つは互いにすべて隣接している（三角形状）。C・D・Eの3つも互いにすべて隣接している（別の三角形状で、Cを共有している）。ただし、A・BはD・Eのいずれとも隣接していない。この5領域を6色を使って塗り分ける場合、何通りの塗り方があるか（隣り合う領域は異なる色。使わない色があってもよい）。",
+      "imageDataUri": null,
+      "options": [
+        "3,600通り",
+        "2,400通り",
+        "1,800通り",
+        "2,880通り"
+      ],
+      "correctAnswer": 1,
+      "explanation": [
+        "まず、A・B・Cの三角形部分を塗ります。3領域が互いにすべて隣接しているので、Aは6通り、Bは残り5通り、Cは残り4通りとなり、6×5×4＝120通りです。",
+        "次に、Dを塗ります。DはCとだけ隣接している（A・Bとは隣接していない）ので、Cと異なればよく5通りです。",
+        "最後に、Eを塗ります。EはC・Dの両方と隣接しているので、その2色と異なる必要があり、6－2＝4通りです。",
+        "これらをかけ合わせると、120×5×4＝2,400通りです。",
+        "よって、正解は2（2,400通り）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    },
+    {
+      "category": "tgweb_traditional_math",
+      "subCategory": "図形問題",
+      "title": "高難度の塗り分け・敷き詰め",
+      "questionText": "3辺の長さが2、3、7の直方体がたくさんある。これを積み重ねて、3辺の長さがすべて等しい最小の立方体を作りたい。この直方体は最低何個必要か。",
+      "imageDataUri": null,
+      "options": [
+        "882個",
+        "2,058個",
+        "1,764個",
+        "1,176個"
+      ],
+      "correctAnswer": 2,
+      "explanation": [
+        "2、3、7の最小公倍数は42なので、1辺の長さが42の立方体を目標にします。",
+        "直方体を、縦方向に42÷2＝21個、横方向に42÷3＝14個、高さ方向に42÷7＝6個並べると、1辺42の立方体ができます。",
+        "必要な直方体の個数は、21×14×6＝1,764個です。",
+        "よって、正解は3（1,764個）・・・（答）となります。"
+      ],
+      "difficulty": 3,
+      "status": "published",
+      "originalityNote": "オリジナルで書き下ろした図形問題（既存記事等からの引用なし）。"
+    }
+  ]
+}
