@@ -35,7 +35,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
        SUM(CASE WHEN s.status = 'wrong' THEN 1 ELSE 0 END) AS wrong
      FROM questions q
      LEFT JOIN user_question_statuses s ON s.question_id = q.id AND s.user_id = ?
-     WHERE q.status = 'published' AND q.category = ? AND q.sub_category = ?`
+     WHERE q.status = 'published' AND q.is_mock_only = 0 AND q.category = ? AND q.sub_category = ?`
   )
     .bind(userId, category, subCategory)
     .first<SummaryRow>();
