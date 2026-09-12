@@ -50,19 +50,34 @@ function isAnswers(value: unknown): value is AnswerInput[] {
 }
 
 // 偏差値 = 50 + 10 * (このスコア率 - 母集団平均) / 母集団標準偏差
-// 母集団は「この受験より前に記録された、同じtest_typeの全受験者の正答率」。
-// サンプルが少ない/ばらつきが無い場合は50を返す（過去の受験結果を遡って再計算はしない簡易実装）。
-// TG-WEB等、公開直後でまだ受験者数が少ないテスト種別は母集団の標準偏差が極端に小さくなりやすく、
-// 満点近いスコアを取ると偏差値85のような非現実的な値まで跳ね上がってしまう実例があった。
-// 母集団が十分に育つまでの安全弁として、最終的な出力値に上限（70）のキャップをかける。
+// 母集団は「この受験より前に記録された、同じtest_typeの全受験者の正答率」に、常に
+// 「得点率70%・標準偏差15%相当」の仮想ダミー母集団（重みDUMMY_POPULATION_WEIGHT件分）を
+// 合成したもの（擬似ベイズ推定によるスムージング）。公開直後で実データがまだ少ないテスト種別は
+// これにより「7割正解＝偏差値50」に自然に収束し、満点近いスコアで偏差値85のような非現実的な値に
+// 跳ね上がる問題（実例あり）を防ぐ。実データの件数（n1）が増えるほどダミー母集団（固定n0件）の
+// 相対的な影響は薄まり、自動的に実際の受験者集団の平均・ばらつきへシフトしていく。
+// ダミー母集団の標準偏差を0.15としたのは、得点率100%（rate-mean=0.3）がちょうど
+// 偏差値70（=50+10*0.3/0.15）に一致し、後述の上限キャップと自然に噛み合うため。
+// 実データを合成した後の母集団でも標準偏差が極端に小さくなるケースへの安全弁として、
+// 最終的な出力値に上限（70）のキャップは引き続きかける。
+const DUMMY_POPULATION_MEAN = 0.7;
+const DUMMY_POPULATION_STDDEV = 0.15;
+const DUMMY_POPULATION_WEIGHT = 20;
 const MAX_DEVIATION_SCORE = 70;
+
 function calculateDeviationScore(rate: number, priorRates: number[]): number {
-  if (priorRates.length < 2) return 50;
-  const mean = priorRates.reduce((sum, r) => sum + r, 0) / priorRates.length;
-  const variance =
-    priorRates.reduce((sum, r) => sum + (r - mean) ** 2, 0) / priorRates.length;
-  const stddev = Math.sqrt(variance);
+  const n0 = DUMMY_POPULATION_WEIGHT;
+  const n1 = priorRates.length;
+  const mean1 = n1 > 0 ? priorRates.reduce((sum, r) => sum + r, 0) / n1 : 0;
+  const var1 = n1 > 0 ? priorRates.reduce((sum, r) => sum + (r - mean1) ** 2, 0) / n1 : 0;
+
+  const totalN = n0 + n1;
+  const mean = (n0 * DUMMY_POPULATION_MEAN + n1 * mean1) / totalN;
+  const dummyVarTerm = n0 * (DUMMY_POPULATION_STDDEV ** 2 + (DUMMY_POPULATION_MEAN - mean) ** 2);
+  const realVarTerm = n1 > 0 ? n1 * (var1 + (mean1 - mean) ** 2) : 0;
+  const stddev = Math.sqrt((dummyVarTerm + realVarTerm) / totalN);
   if (stddev === 0) return 50;
+
   const raw = 50 + (10 * (rate - mean)) / stddev;
   return Math.min(raw, MAX_DEVIATION_SCORE);
 }
