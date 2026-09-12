@@ -19,10 +19,34 @@ export type BlogPost = BlogFrontmatter & {
   content: string;
 };
 
-export function getAllBlogSlugs(): string[] {
+function getAllSlugsFromDisk(): string[] {
   return readdirSync(BLOG_DIR)
     .filter((f) => f.endsWith(".mdx"))
     .map((f) => f.replace(/\.mdx$/, ""));
+}
+
+// フロントマターのdateが未来（ビルド時点の現在日時より後）の記事は「予約公開」扱いとし、
+// 公開日時を迎えるまで一覧・詳細ページとも一切出力しない（静的サイト出力のため、実際に
+// サイトへ反映されるのはこの判定を行うビルド・デプロイのタイミングになる）。
+function isPublished(date: string): boolean {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return true;
+  return d.getTime() <= Date.now();
+}
+
+// generateStaticParams等で使う。予約公開中（未来日付）の記事のスラッグは除外し、
+// 該当ページ自体が静的サイトに生成されないようにする。
+export function getAllBlogSlugs(): string[] {
+  return getAllSlugsFromDisk().filter((slug) => {
+    const filePath = path.join(BLOG_DIR, `${slug}.mdx`);
+    try {
+      const raw = readFileSync(filePath, "utf-8");
+      const { data } = matter(raw);
+      return isPublished(data.date);
+    } catch {
+      return false;
+    }
+  });
 }
 
 export function getBlogPost(slug: string): BlogPost | null {
@@ -30,6 +54,7 @@ export function getBlogPost(slug: string): BlogPost | null {
   try {
     const raw = readFileSync(filePath, "utf-8");
     const { data, content } = matter(raw);
+    if (!isPublished(data.date)) return null;
     return {
       slug,
       title: data.title,
