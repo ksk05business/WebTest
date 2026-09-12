@@ -343,3 +343,17 @@ CREATE INDEX IF NOT EXISTS idx_company_borders_company_name ON company_borders(c
 CREATE INDEX IF NOT EXISTS idx_company_borders_company_name_kana ON company_borders(company_name_kana);
 CREATE INDEX IF NOT EXISTS idx_company_borders_industry ON company_borders(industry);
 CREATE INDEX IF NOT EXISTS idx_company_borders_test_type ON company_borders(test_type);
+
+-- 学生が`/borders`でお気に入り登録した企業ボーダーの紐付け。学生本人のみが自分の登録を
+-- 参照・追加・解除でき、他の学生・企業からは見えない。
+CREATE TABLE IF NOT EXISTS user_favorite_companies (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  company_border_id INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, company_border_id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (company_border_id) REFERENCES company_borders(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_favorite_companies_user ON user_favorite_companies(user_id);

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { Search, Building2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Building2, X, Heart } from "lucide-react";
+import { DashboardHeader } from "@/src/components/DashboardHeader";
+import { redirectToLogin } from "@/src/lib/authRedirect";
 import { INDUSTRIES } from "@/src/data/formOptions";
 import { TEST_TYPES } from "@/src/data/testTypes";
 
@@ -28,6 +30,8 @@ const BORDER_LEVEL_STYLE: Record<string, string> = {
 };
 
 export default function BordersPage() {
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [industry, setIndustry] = useState("");
   const [selectedTestTypes, setSelectedTestTypes] = useState<string[]>([]);
@@ -35,6 +39,70 @@ export default function BordersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("spiUser")) {
+      redirectToLogin(router);
+      return;
+    }
+    setAuthChecked(true);
+
+    fetch("/api/favorite-companies")
+      .then((res) => res.json())
+      .then((data: { companyBorderIds?: number[]; error?: string }) => {
+        if (data.error) {
+          if (data.error === "ログインが必要です") redirectToLogin(router);
+          return;
+        }
+        setFavoriteIds(new Set(data.companyBorderIds ?? []));
+      })
+      .catch(() => {
+        // お気に入り一覧の取得に失敗してもページ自体は表示する
+      });
+  }, [router]);
+
+  function toggleFavorite(companyBorderId: number) {
+    const alreadyFavorited = favoriteIds.has(companyBorderId);
+    setFavoriteIds((prev) => {
+      const next = new Set(prev);
+      if (alreadyFavorited) next.delete(companyBorderId);
+      else next.add(companyBorderId);
+      return next;
+    });
+
+    fetch("/api/favorite-companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ companyBorderId }),
+    })
+      .then((res) => res.json())
+      .then((data: { favorited?: boolean; error?: string }) => {
+        if (data.error === "ログインが必要です") {
+          redirectToLogin(router);
+          return;
+        }
+        // サーバー側の実際の結果で確定させる（楽観的更新とズレた場合はここで補正する）。
+        if (typeof data.favorited === "boolean") {
+          setFavoriteIds((prev) => {
+            const next = new Set(prev);
+            if (data.favorited) next.add(companyBorderId);
+            else next.delete(companyBorderId);
+            return next;
+          });
+        }
+      })
+      .catch(() => {
+        // 通信失敗時は楽観的更新を元に戻す
+        setFavoriteIds((prev) => {
+          const next = new Set(prev);
+          if (alreadyFavorited) next.add(companyBorderId);
+          else next.delete(companyBorderId);
+          return next;
+        });
+      });
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -87,21 +155,15 @@ export default function BordersPage() {
     );
   }
 
+  const displayedBorders = favoritesOnly ? borders.filter((b) => favoriteIds.has(b.id)) : borders;
+
+  if (!authChecked) {
+    return null;
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
-      <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <Link href="/" className="text-lg font-bold text-blue-700">
-            Webテスト<span className="text-gray-900">ナビ</span>
-          </Link>
-          <Link
-            href="/register"
-            className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
-          >
-            無料登録
-          </Link>
-        </div>
-      </header>
+      <DashboardHeader />
 
       <main className="flex-1 px-6 py-12 sm:py-16">
         <div className="mx-auto max-w-5xl">
@@ -201,6 +263,16 @@ export default function BordersPage() {
                 </div>
               </div>
             </div>
+
+            <label className="flex w-fit cursor-pointer items-center gap-2 text-sm font-medium text-gray-700">
+              <input
+                type="checkbox"
+                checked={favoritesOnly}
+                onChange={(e) => setFavoritesOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+              />
+              お気に入りのみ表示
+            </label>
           </div>
 
           {/* 検索結果 */}
@@ -208,13 +280,17 @@ export default function BordersPage() {
 
           {loading ? (
             <p className="py-10 text-center text-sm text-gray-400">検索中...</p>
-          ) : borders.length === 0 ? (
+          ) : displayedBorders.length === 0 ? (
             <p className="py-10 text-center text-sm text-gray-400">
-              条件に一致する企業が見つかりませんでした。
+              {favoritesOnly
+                ? "お気に入り登録した企業がありません。"
+                : "条件に一致する企業が見つかりませんでした。"}
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {borders.map((b) => (
+              {displayedBorders.map((b) => {
+                const isFavorite = favoriteIds.has(b.id);
+                return (
                 <div
                   key={b.id}
                   className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
@@ -227,19 +303,30 @@ export default function BordersPage() {
                         <p className="text-xs text-gray-500">{b.industry}</p>
                       </div>
                     </div>
-                    {b.borderLevel ? (
-                      <span
-                        className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
-                          BORDER_LEVEL_STYLE[b.borderLevel] ?? "bg-gray-100 text-gray-600"
-                        }`}
+                    <div className="flex flex-shrink-0 items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleFavorite(b.id)}
+                        aria-label={isFavorite ? "お気に入りから削除" : "お気に入りに追加"}
+                        aria-pressed={isFavorite}
+                        className="flex h-7 w-7 items-center justify-center rounded-full text-gray-300 hover:bg-rose-50 hover:text-rose-500"
                       >
-                        ボーダー {b.borderLevel}
-                      </span>
-                    ) : (
-                      <span className="flex-shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-400">
-                        情報準備中
-                      </span>
-                    )}
+                        <Heart className={`h-4 w-4 ${isFavorite ? "fill-rose-500 text-rose-500" : ""}`} />
+                      </button>
+                      {b.borderLevel ? (
+                        <span
+                          className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${
+                            BORDER_LEVEL_STYLE[b.borderLevel] ?? "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          ボーダー {b.borderLevel}
+                        </span>
+                      ) : (
+                        <span className="flex-shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-400">
+                          情報準備中
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
@@ -266,7 +353,8 @@ export default function BordersPage() {
 
                   <p className="text-sm leading-relaxed text-gray-600">{b.description}</p>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
