@@ -6,7 +6,27 @@ import { MULTI_PART_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 
-type PartEligibility = { eligible: boolean; nextResetAt: string };
+type PartEligibility = { eligible: boolean; lastTakenAt: string | null; nextResetAt: string };
+
+// 受験回数制限に関する注意文言（アイコン＋警告色で強調）。スタートボタンの直前に必ず表示する。
+function ExamLimitNotice() {
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2.5 text-xs text-red-800">
+      <span aria-hidden className="text-base leading-none">
+        ⚠️
+      </span>
+      <p>
+        <span className="font-bold">【重要】</span>
+        本番想定の模試は、各テスト種別につき「2ヶ月に1回」のみ受験可能です。途中で中断・放棄した場合も1回分としてカウントされますのでご注意ください。
+      </p>
+    </div>
+  );
+}
+
+// SQLiteのdatetime('now')（"YYYY-MM-DD HH:MM:SS"、UTC）から日付部分（YYYY-MM-DD）だけを取り出す。
+function toIsoDatePart(sqliteUtc: string): string {
+  return sqliteUtc.slice(0, 10);
+}
 
 export function ExamModeSelectModal({
   testType,
@@ -23,9 +43,7 @@ export function ExamModeSelectModal({
   const isMultiPart = Boolean(multiParts);
 
   // テスト種別ごとに2ヶ月に1回（奇数月1日に一斉リセット）のみ受験可能。
-  const [eligibility, setEligibility] = useState<{ eligible: boolean; nextResetAt: string } | null>(
-    null
-  );
+  const [eligibility, setEligibility] = useState<PartEligibility | null>(null);
   // 複数パート方式のテスト種別は、パートごとに受験可否を個別に持つ。
   const [multiPartEligibility, setMultiPartEligibility] = useState<Record<string, PartEligibility>>(
     {}
@@ -41,9 +59,13 @@ export function ExamModeSelectModal({
     if (!testType.available || isMultiPart) return;
     fetch(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
       .then((res) => res.json())
-      .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
+      .then((data: { eligible?: boolean; lastTakenAt?: string | null; nextResetAt?: string; error?: string }) => {
         if (data.error) return;
-        setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
+        setEligibility({
+          eligible: Boolean(data.eligible),
+          lastTakenAt: data.lastTakenAt ?? null,
+          nextResetAt: data.nextResetAt ?? "",
+        });
       })
       .catch(() => {});
     fetch(`/api/exam-session?testType=${encodeURIComponent(testType.id)}`)
@@ -60,11 +82,15 @@ export function ExamModeSelectModal({
     multiParts.forEach((part) => {
       fetch(`/api/exam-eligibility?testType=${part.id}`)
         .then((res) => res.json())
-        .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
+        .then((data: { eligible?: boolean; lastTakenAt?: string | null; nextResetAt?: string; error?: string }) => {
           if (data.error) return;
           setMultiPartEligibility((prev) => ({
             ...prev,
-            [part.id]: { eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" },
+            [part.id]: {
+              eligible: Boolean(data.eligible),
+              lastTakenAt: data.lastTakenAt ?? null,
+              nextResetAt: data.nextResetAt ?? "",
+            },
           }));
         })
         .catch(() => {});
@@ -110,6 +136,7 @@ export function ExamModeSelectModal({
                 </p>
               ) : multiParts ? (
                 <div className="mt-1 flex flex-col gap-2">
+                  <ExamLimitNotice />
                   {multiParts.map((part) => {
                     const partEligibility = multiPartEligibility[part.id];
                     return (
@@ -122,7 +149,13 @@ export function ExamModeSelectModal({
                           <div className="rounded-lg bg-amber-50 px-3 py-2 text-center text-xs font-semibold text-amber-800">
                             このテストは2ヶ月に1回のみ受験可能です
                             <br />
-                            次回一斉リセット: {formatJapaneseDate(partEligibility.nextResetAt)}
+                            {partEligibility.lastTakenAt && (
+                              <>
+                                前回の受験日: {formatJapaneseDate(toIsoDatePart(partEligibility.lastTakenAt))}
+                                <br />
+                              </>
+                            )}
+                            次回受験可能日: {formatJapaneseDate(partEligibility.nextResetAt)}以降
                           </div>
                         ) : (
                           <button
@@ -139,20 +172,32 @@ export function ExamModeSelectModal({
                   })}
                 </div>
               ) : eligibility && !eligibility.eligible ? (
-                <div className="mt-1 rounded-lg bg-amber-50 px-3 py-2.5 text-center text-xs font-semibold text-amber-800">
-                  このテストは2ヶ月に1回のみ受験可能です
-                  <br />
-                  次回一斉リセット: {formatJapaneseDate(eligibility.nextResetAt)}
-                </div>
+                <>
+                  <ExamLimitNotice />
+                  <div className="mt-1 rounded-lg bg-amber-50 px-3 py-2.5 text-center text-xs font-semibold text-amber-800">
+                    このテストは2ヶ月に1回のみ受験可能です
+                    <br />
+                    {eligibility.lastTakenAt && (
+                      <>
+                        前回の受験日: {formatJapaneseDate(toIsoDatePart(eligibility.lastTakenAt))}
+                        <br />
+                      </>
+                    )}
+                    次回受験可能日: {formatJapaneseDate(eligibility.nextResetAt)}以降
+                  </div>
+                </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => router.push(testType.href)}
-                  disabled={!eligibility}
-                  className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {hasResumeSession ? "前回の続きから再開" : "模擬試験をスタート"}
-                </button>
+                <>
+                  <ExamLimitNotice />
+                  <button
+                    type="button"
+                    onClick={() => router.push(testType.href)}
+                    disabled={!eligibility}
+                    className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {hasResumeSession ? "前回の続きから再開" : "模擬試験をスタート"}
+                  </button>
+                </>
               )}
             </div>
           </div>

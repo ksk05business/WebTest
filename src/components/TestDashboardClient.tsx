@@ -129,34 +129,47 @@ export function TestDashboardClient({ testId }: { testId: string }) {
 
         {/* アクションボタン */}
         {(hasPracticeContent || testType.available) && (
-          <section className="flex flex-col gap-3 sm:flex-row">
-            {hasPracticeContent && (
-              <button
-                type="button"
-                onClick={() => router.push(`/practice?testType=${testId}`)}
-                className="flex-1 rounded-full border-2 border-blue-300 bg-white px-6 py-3.5 text-center text-sm font-bold text-blue-700 hover:bg-blue-50"
-              >
-                練習問題をする
-              </button>
-            )}
+          <section className="flex flex-col gap-3">
             {testType.available && (
-              <button
-                type="button"
-                onClick={() => setExamModalOpen(true)}
-                className="flex-1 rounded-full bg-blue-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow hover:bg-blue-700"
-              >
-                模試を受験する
-              </button>
+              <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-xs text-red-800">
+                <span aria-hidden className="text-base leading-none">
+                  ⚠️
+                </span>
+                <p>
+                  <span className="font-bold">【重要】</span>
+                  本番想定の模試は、各テスト種別につき「2ヶ月に1回」のみ受験可能です。途中で中断・放棄した場合も1回分としてカウントされますのでご注意ください。
+                </p>
+              </div>
             )}
-            {testType.available && (
-              <button
-                type="button"
-                onClick={() => setHistoryModalOpen(true)}
-                className="flex-1 rounded-full border-2 border-orange-300 bg-orange-50 px-6 py-3.5 text-center text-sm font-bold text-orange-700 hover:bg-orange-100"
-              >
-                復習をする
-              </button>
-            )}
+            <div className="flex flex-col gap-3 sm:flex-row">
+              {hasPracticeContent && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/practice?testType=${testId}`)}
+                  className="flex-1 rounded-full border-2 border-blue-300 bg-white px-6 py-3.5 text-center text-sm font-bold text-blue-700 hover:bg-blue-50"
+                >
+                  練習問題をする
+                </button>
+              )}
+              {testType.available && (
+                <button
+                  type="button"
+                  onClick={() => setExamModalOpen(true)}
+                  className="flex-1 rounded-full bg-blue-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow hover:bg-blue-700"
+                >
+                  模試を受験する
+                </button>
+              )}
+              {testType.available && (
+                <button
+                  type="button"
+                  onClick={() => setHistoryModalOpen(true)}
+                  className="flex-1 rounded-full border-2 border-orange-300 bg-orange-50 px-6 py-3.5 text-center text-sm font-bold text-orange-700 hover:bg-orange-100"
+                >
+                  復習をする
+                </button>
+              )}
+            </div>
           </section>
         )}
 
