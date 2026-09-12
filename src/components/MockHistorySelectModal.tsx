@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { redirectToLogin } from "@/src/lib/authRedirect";
-import type { TestType } from "@/src/data/testTypes";
+import { MULTI_PART_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
 
 type HistoryItem = {
   id: number;
+  testType: string;
   score: number;
   total: number;
   deviationScore: number | null;
@@ -27,6 +28,15 @@ export function MockHistorySelectModal({
 }) {
   const router = useRouter();
   const [history, setHistory] = useState<HistoryItem[] | null>(null);
+
+  // 複数パート方式のテスト（TG-WEB等）は、exam_results.test_typeがパートごとのid
+  // （例: "tgweb_traditional_verbal"）になっている。src/data/testTypes.tsのMULTI_PART_EXAM_PARTSから
+  // 「従来型・言語（12問/12分）」のような表示ラベルを取り、末尾の（問題数/制限時間）部分を除いた
+  // 科目名だけをバッジ表示する。単一パート方式のテスト（SCOA等）はtest_typeがtestType.id自身になり
+  // 該当エントリが無いため、バッジは表示しない（モーダルのタイトルに既にテスト名があるため冗長）。
+  const partLabelByTestType = new Map(
+    (MULTI_PART_EXAM_PARTS[testType.id] ?? []).map((p) => [p.id, p.label.replace(/（[^）]*）$/, "")])
+  );
 
   useEffect(() => {
     fetch(`/api/exam-results?testType=${encodeURIComponent(testType.id)}`)
@@ -75,12 +85,17 @@ export function MockHistorySelectModal({
                   onClick={() => router.push(`/result/history?id=${h.id}`)}
                   className="flex items-center justify-between gap-3 py-3 text-left text-sm hover:bg-gray-50"
                 >
-                  <span className="text-gray-700">
+                  <span className="flex items-center gap-2 text-gray-700">
                     {new Date(h.takenAt).toLocaleDateString("ja-JP", {
                       year: "numeric",
                       month: "numeric",
                       day: "numeric",
                     })}
+                    {partLabelByTestType.has(h.testType) && (
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                        {partLabelByTestType.get(h.testType)}
+                      </span>
+                    )}
                   </span>
                   <span className="text-gray-500">
                     {h.score}/{h.total}問

@@ -15,7 +15,7 @@ const CATEGORY_DEFAULT_SECONDS: Record<string, number> = {
   tamatebako_verbal: 90,
   tamatebako_english: 90,
   // TG-WEB
-  tgweb_traditional_verbal: 20,
+  tgweb_traditional_verbal: 60,
   tgweb_verbal_reading: 90,
   tgweb_traditional_math: 60,
   tgweb_new_verbal: 15,
