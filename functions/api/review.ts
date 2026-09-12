@@ -59,7 +59,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       reviewStage: r.review_stage,
       status: r.status,
       nextReviewAt: r.next_review_at,
-      question: toClientQuestion(r),
+      question: toClientQuestion(r, { shuffle: true }),
     })),
   });
 };

@@ -126,6 +126,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
 
   return Response.json({
-    questions: selected.map(toClientQuestion),
+    questions: selected.map((r) => toClientQuestion(r, { shuffle: true })),
   });
 };

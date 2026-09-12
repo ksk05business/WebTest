@@ -160,6 +160,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   return Response.json({
     count,
-    questions: (rows.results ?? []).map(toClientQuestion),
+    questions: (rows.results ?? []).map((r) => toClientQuestion(r, { shuffle: true })),
   });
 };

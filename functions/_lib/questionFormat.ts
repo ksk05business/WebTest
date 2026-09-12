@@ -51,7 +51,22 @@ function buildQuestionCode(category: string, seq: number | undefined): string | 
   return `#${mapping.test}-${mapping.unit}-${String(seq).padStart(3, "0")}`;
 }
 
-export function toClientQuestion(row: QuestionRow) {
+// 選択肢の並び順をシャッフルし、正解インデックスを追従させる（Fisher-Yates）。
+// DB上のoptions/correct_answerは元の並びのまま変更せず、クライアントへ返す直前の表示用配列だけを
+// シャッフルする。出題のたびに呼ばれるため、正解ラベルが特定の記号（A/B等）に偏る問題を解消する。
+function shuffleOptions(options: string[], correctIndex: number): { options: string[]; correctIndex: number } {
+  const order = options.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return {
+    options: order.map((i) => options[i]),
+    correctIndex: order.indexOf(correctIndex),
+  };
+}
+
+export function toClientQuestion(row: QuestionRow, opts?: { shuffle?: boolean }) {
   let options: string[] = [];
   try {
     options = JSON.parse(row.options);
@@ -73,6 +88,13 @@ export function toClientQuestion(row: QuestionRow) {
     }
   }
 
+  let correctIndex = row.correct_answer;
+  if (opts?.shuffle && options.length > 1) {
+    const shuffled = shuffleOptions(options, correctIndex);
+    options = shuffled.options;
+    correctIndex = shuffled.correctIndex;
+  }
+
   return {
     id: row.id,
     category: row.sub_category,
@@ -83,7 +105,7 @@ export function toClientQuestion(row: QuestionRow) {
     tables,
     imageDataUri: row.image_data_uri ?? undefined,
     choices: options.map((text, i) => ({ label: CHOICE_LABELS[i] ?? String(i), text })),
-    answer: CHOICE_LABELS[row.correct_answer] ?? String(row.correct_answer),
+    answer: CHOICE_LABELS[correctIndex] ?? String(correctIndex),
     explanation,
   };
 }
