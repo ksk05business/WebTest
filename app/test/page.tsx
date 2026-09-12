@@ -304,6 +304,77 @@ function formatMmSs(totalSeconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+// 中断・再開機能（exam_sessionsテーブル）で保存・復元するスナップショットの形。
+// BasicExamFlow（単一セクション扱い）・SectionedExamFlow（複数セクション）のどちらも、
+// questionsは常に「セクションごとの配列の配列」として統一的に保存する。
+type ResumeSession = {
+  testType: string;
+  sectionIndex: number;
+  questionIndex: number;
+  timeLeftSeconds: number;
+  questions: Question[][];
+  answers: ExamReviewEntry[];
+};
+
+// ログイン中のユーザーについて、指定test_typeの中断データが存在すればそれを返す（無ければnull）。
+// 通信エラー時もnullを返し、呼び出し側は「新規に受験を開始する」フォールバックとして扱えるようにする。
+async function fetchResumeSession(testType: string): Promise<ResumeSession | null> {
+  try {
+    const res = await fetch(`/api/exam-session?testType=${encodeURIComponent(testType)}`);
+    const data: { session?: ResumeSession | null } = await res.json();
+    return data.session ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// 模試の受験中、中断ボタン以外でのページ離脱（ブラウザの戻る/進む・スワイプバック・リロード・
+// タブを閉じる）を防ぐ。activeがtrueの間だけ監視し、中断・終了などの意図した遷移の直前には
+// 呼び出し側でactiveをfalseにしてから画面遷移すること（router.pushはbeforeunload/popstateの
+// どちらも発火させないため、これらの意図した遷移自体がブロックされることはない）。
+function useBlockUnintendedLeave(active: boolean) {
+  useEffect(() => {
+    if (!active) return;
+
+    // 戻る/進む・スワイプバック対策: 履歴に1件積んでおき、popstateが発生するたびに
+    // 同じ状態を積み直すことで、実質的にページ遷移をキャンセルする
+    // （popstate自体をpreventDefaultする手段はブラウザに存在しないため、この方式で代替する）。
+    window.history.pushState(null, "", window.location.href);
+    function handlePopState() {
+      window.history.pushState(null, "", window.location.href);
+      window.alert("模試の途中です。ページを離れる場合は「中断して戻る」ボタンを使用してください。");
+    }
+    window.addEventListener("popstate", handlePopState);
+
+    // リロード・タブを閉じる・URL直接入力等の対策。確認ダイアログの文言は
+    // 主要ブラウザの仕様によりカスタマイズできず、ブラウザ標準の文言で表示される。
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [active]);
+}
+
+// 「中断して戻る」ボタン。両フロー（BasicExamFlow / SectionedExamFlow）で共通の見た目にする。
+function PauseButton({ onPause, disabled }: { onPause: () => void; disabled: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onPause}
+      disabled={disabled}
+      className="w-fit rounded-full border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-500 hover:border-gray-400 hover:text-gray-700 disabled:opacity-50"
+    >
+      中断して戻る
+    </button>
+  );
+}
+
 // 試験終了後にまとめて送信する結果を localStorage・D1（exam-results / practice/history）へ
 // 反映してから /result へ遷移する共通処理。BasicExamFlow・SectionedExamFlowの
 // いずれも、試験中は一切正誤を表示せず、この関数を1回呼ぶことでのみ採点結果を確定させる。
@@ -355,6 +426,10 @@ async function finalizeExam(
   } catch {
     // D1保存に失敗してもlocalStorageには結果があるため、結果表示自体は継続する
   }
+
+  // 完走したので中断データが残っていれば削除する（残したままだと次回開始時に誤って
+  // 「前回の続きから再開」の対象として扱われてしまう）。
+  fetch(`/api/exam-session?testType=${encodeURIComponent(partId)}`, { method: "DELETE" }).catch(() => {});
 
   router.push("/result");
 }
@@ -563,23 +638,34 @@ function BasicExamFlow() {
   const [timeLeft, setTimeLeft] = useState(BASIC_EXAM_TOTAL_SEC);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [finishing, setFinishing] = useState(false);
+  const [pausing, setPausing] = useState(false);
 
   const resultsRef = useRef<ExamReviewEntry[]>([]);
   const questionStartedAtRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    Promise.all([
-      fetchSubPartsPool(SPI_VERBAL_SUBPARTS, 1, true),
-      fetchSubPartsPool(SPI_NON_VERBAL_SUBPARTS, 1, true),
-    ])
-      .then(([verbalQuestions, nonVerbalQuestions]) => {
-        if (!verbalQuestions.length || !nonVerbalQuestions.length) {
-          setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
-          return;
-        }
-        setQuestions([...verbalQuestions, ...nonVerbalQuestions]);
-      })
-      .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+    fetchResumeSession("spi_basic").then((session) => {
+      if (session) {
+        // 中断データがあればそのまま復元して再開する（新規取得はしない）。
+        resultsRef.current = session.answers;
+        setQuestions(session.questions.flat());
+        setCurrentIndex(session.questionIndex);
+        setTimeLeft(session.timeLeftSeconds);
+        return;
+      }
+      Promise.all([
+        fetchSubPartsPool(SPI_VERBAL_SUBPARTS, 1, true),
+        fetchSubPartsPool(SPI_NON_VERBAL_SUBPARTS, 1, true),
+      ])
+        .then(([verbalQuestions, nonVerbalQuestions]) => {
+          if (!verbalQuestions.length || !nonVerbalQuestions.length) {
+            setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
+            return;
+          }
+          setQuestions([...verbalQuestions, ...nonVerbalQuestions]);
+        })
+        .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+    });
   }, []);
 
   const currentQuestion = questions?.[currentIndex] ?? null;
@@ -594,19 +680,45 @@ function BasicExamFlow() {
     await finalizeExam(router, "spi_basic", resultsRef.current);
   }, [router]);
 
+  // 中断ボタン: 現在の状態（残り時間・現在の問題インデックス・出題済みの問題・解答済み結果）を
+  // まるごと保存してからダッシュボードへ戻る。
+  async function handlePause() {
+    if (!questions) return;
+    setPausing(true);
+    try {
+      await fetch("/api/exam-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          testType: "spi_basic",
+          sectionIndex: 0,
+          questionIndex: currentIndex,
+          timeLeftSeconds: timeLeft,
+          questions: [questions],
+          answers: resultsRef.current,
+        }),
+      });
+    } catch {
+      // 保存に失敗しても中断操作自体は継続する（次回開始時は最初からのやり直しになる）
+    }
+    router.push("/dashboard");
+  }
+
+  useBlockUnintendedLeave(Boolean(questions) && !finishing && !pausing);
+
   // 全体35分のカウントダウン。0になった時点で自動終了する。
   useEffect(() => {
-    if (!questions || finishing) return;
+    if (!questions || finishing || pausing) return;
     if (timeLeft <= 0) {
       void finalize();
       return;
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(id);
-  }, [questions, timeLeft, finishing, finalize]);
+  }, [questions, timeLeft, finishing, pausing, finalize]);
 
   function handleSelect(label: string) {
-    if (!questions || !currentQuestion || finishing || timeLeft <= 0) return;
+    if (!questions || !currentQuestion || finishing || pausing || timeLeft <= 0) return;
 
     const isCorrectAnswer = label === currentQuestion.answer;
     const timeTaken = Math.max(0, Math.round((Date.now() - questionStartedAtRef.current) / 1000));
@@ -650,6 +762,14 @@ function BasicExamFlow() {
     );
   }
 
+  if (pausing) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+        <p className="text-sm text-gray-500">中断内容を保存しています...</p>
+      </main>
+    );
+  }
+
   if (!questions || !currentQuestion) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
@@ -677,6 +797,8 @@ function BasicExamFlow() {
           残り {formatMmSs(timeLeft)}
         </span>
       </div>
+
+      <PauseButton onPause={() => void handlePause()} disabled={pausing} />
 
       <QuestionCard question={currentQuestion} onSelect={handleSelect} />
 
@@ -708,6 +830,7 @@ function SectionedExamFlow({
   const [questionIndex, setQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [finishing, setFinishing] = useState(false);
+  const [pausing, setPausing] = useState(false);
 
   const resultsRef = useRef<ExamReviewEntry[]>([]);
   const questionStartedAtRef = useRef<number>(Date.now());
@@ -719,32 +842,43 @@ function SectionedExamFlow({
   }, [sectionIndex, questionIndex]);
 
   useEffect(() => {
-    Promise.all(
-      sections.map((section) =>
-        Promise.all(
-          section.subParts.map((sp) => {
-            const params = new URLSearchParams({
-              category: sp.category,
-              subCategory: sp.subCategory,
-              limit: String(sp.limit),
-            });
-            if (mockOnly) params.set("mockOnly", "1");
-            return fetch(`/api/questions?${params.toString()}`).then((r) => r.json());
-          })
-        ).then((results: { questions?: Question[]; error?: string }[]) =>
-          results.flatMap((r) => r.questions ?? [])
+    fetchResumeSession(partId).then((session) => {
+      if (session) {
+        // 中断データがあればそのまま復元して再開する（新規取得はしない）。
+        resultsRef.current = session.answers;
+        setSectionQuestions(session.questions);
+        setSectionIndex(session.sectionIndex);
+        setQuestionIndex(session.questionIndex);
+        setTimeLeft(session.timeLeftSeconds);
+        return;
+      }
+      Promise.all(
+        sections.map((section) =>
+          Promise.all(
+            section.subParts.map((sp) => {
+              const params = new URLSearchParams({
+                category: sp.category,
+                subCategory: sp.subCategory,
+                limit: String(sp.limit),
+              });
+              if (mockOnly) params.set("mockOnly", "1");
+              return fetch(`/api/questions?${params.toString()}`).then((r) => r.json());
+            })
+          ).then((results: { questions?: Question[]; error?: string }[]) =>
+            results.flatMap((r) => r.questions ?? [])
+          )
         )
       )
-    )
-      .then((perSection: Question[][]) => {
-        if (perSection.some((qs) => qs.length === 0)) {
-          setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
-          return;
-        }
-        setSectionQuestions(perSection);
-        setTimeLeft(sections[0].timeLimitSec);
-      })
-      .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+        .then((perSection: Question[][]) => {
+          if (perSection.some((qs) => qs.length === 0)) {
+            setLoadError("出題できる問題がありません。時間をおいて再度お試しください。");
+            return;
+          }
+          setSectionQuestions(perSection);
+          setTimeLeft(sections[0].timeLimitSec);
+        })
+        .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -752,6 +886,32 @@ function SectionedExamFlow({
     setFinishing(true);
     await finalizeExam(router, partId, resultsRef.current);
   }, [router, partId]);
+
+  // 中断ボタン: 現在の状態（セクション・問題インデックス・残り時間・出題済みの問題・
+  // 解答済み結果）をまるごと保存してからダッシュボードへ戻る。
+  async function handlePause() {
+    if (!sectionQuestions) return;
+    setPausing(true);
+    try {
+      await fetch("/api/exam-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          testType: partId,
+          sectionIndex,
+          questionIndex,
+          timeLeftSeconds: timeLeft,
+          questions: sectionQuestions,
+          answers: resultsRef.current,
+        }),
+      });
+    } catch {
+      // 保存に失敗しても中断操作自体は継続する（次回開始時は最初からのやり直しになる）
+    }
+    router.push("/dashboard");
+  }
+
+  useBlockUnintendedLeave(Boolean(sectionQuestions) && !finishing && !pausing);
 
   function pushResult(q: Question, selectedLabel: string | null, answerTimeSeconds: number | null) {
     resultsRef.current.push({
@@ -797,17 +957,17 @@ function SectionedExamFlow({
   // セクションごとの残り時間カウントダウン。0になったらそのセクションの残り問題を未回答として
   // 記録し、次のセクションへ自動遷移する（最終セクションなら採点へ）。
   useEffect(() => {
-    if (!sectionQuestions || finishing) return;
+    if (!sectionQuestions || finishing || pausing) return;
     if (timeLeft <= 0) {
       advanceSection(true);
       return;
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(id);
-  }, [sectionQuestions, timeLeft, finishing, advanceSection]);
+  }, [sectionQuestions, timeLeft, finishing, pausing, advanceSection]);
 
   function handleSelect(label: string) {
-    if (!sectionQuestions || finishing) return;
+    if (!sectionQuestions || finishing || pausing) return;
     const currentQuestions = sectionQuestions[sectionIndex];
     const q = currentQuestions[questionIndex];
     const timeTaken = Math.max(0, Math.round((Date.now() - questionStartedAtRef.current) / 1000));
@@ -833,6 +993,14 @@ function SectionedExamFlow({
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
         <p className="text-sm text-gray-500">試験結果を集計しています...</p>
+      </main>
+    );
+  }
+
+  if (pausing) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+        <p className="text-sm text-gray-500">中断内容を保存しています...</p>
       </main>
     );
   }
@@ -866,6 +1034,8 @@ function SectionedExamFlow({
           残り {formatMmSs(timeLeft)}
         </span>
       </div>
+
+      <PauseButton onPause={() => void handlePause()} disabled={pausing} />
 
       <QuestionCard question={question} onSelect={handleSelect} />
 

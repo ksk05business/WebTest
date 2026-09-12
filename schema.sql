@@ -357,3 +357,31 @@ CREATE TABLE IF NOT EXISTS user_favorite_companies (
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_favorite_companies_user ON user_favorite_companies(user_id);
+
+-- ============================================================
+-- 模試（本番モード、app/test/page.tsxのBasicExamFlow/SectionedExamFlow）の中断・再開機能用。
+-- 「中断して戻る」を押した時点のスナップショットを丸ごと保存し、同じtest_typeを再度開いた際に
+-- 完全に同じ状態（出題された問題・順番・選択肢の並び・残り時間・解答済みの内容）から再開できるようにする。
+-- BasicExamFlow（単一セクション扱い）・SectionedExamFlow（複数セクション）のどちらも
+-- questions_jsonは常に「セクションごとの配列の配列」（Question[][]）として統一的に保存し、
+-- APIはフロー種別を意識しない単なる状態スナップショットの保管庫として振る舞う。
+-- 1ユーザー・1test_typeにつき常に最新の中断状態1件のみを保持する（再度中断したら上書き）。
+-- 正常に完走した場合はfinalizeExamの完了時にこの行を削除し、次回開始時に誤って
+-- 「再開」扱いにならないようにする。
+-- ============================================================
+CREATE TABLE IF NOT EXISTS exam_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  test_type TEXT NOT NULL, -- ExamPartId（例: "spi_basic", "tgweb_traditional_verbal"）
+  section_index INTEGER NOT NULL DEFAULT 0,
+  question_index INTEGER NOT NULL DEFAULT 0,
+  time_left_seconds INTEGER NOT NULL,
+  questions_json TEXT NOT NULL, -- Question[][]（出題済みの問題をシャッフル後の並びのまま丸ごと保存）
+  answers_json TEXT NOT NULL DEFAULT '[]', -- ExamReviewEntry[]（中断時点までの解答済み結果）
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, test_type),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_exam_sessions_user ON exam_sessions(user_id);

@@ -31,6 +31,12 @@ export function ExamModeSelectModal({
     {}
   );
 
+  // 中断データ（exam_sessions）が残っているパート/テスト種別は、スタートボタンの文言を
+  // 「前回の続きから再開」に変える。再開ロジック自体はapp/test/page.tsx側が自動判定するため、
+  // ここではボタンの遷移先を変える必要はなく表示だけを切り替える。
+  const [hasResumeSession, setHasResumeSession] = useState(false);
+  const [multiPartResumeSession, setMultiPartResumeSession] = useState<Record<string, boolean>>({});
+
   useEffect(() => {
     if (!testType.available || isMultiPart) return;
     fetch(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
@@ -38,6 +44,13 @@ export function ExamModeSelectModal({
       .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
         if (data.error) return;
         setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
+      })
+      .catch(() => {});
+    fetch(`/api/exam-session?testType=${encodeURIComponent(testType.id)}`)
+      .then((res) => res.json())
+      .then((data: { session?: unknown; error?: string }) => {
+        if (data.error) return;
+        setHasResumeSession(Boolean(data.session));
       })
       .catch(() => {});
   }, [testType.available, testType.id, isMultiPart]);
@@ -53,6 +66,13 @@ export function ExamModeSelectModal({
             ...prev,
             [part.id]: { eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" },
           }));
+        })
+        .catch(() => {});
+      fetch(`/api/exam-session?testType=${part.id}`)
+        .then((res) => res.json())
+        .then((data: { session?: unknown; error?: string }) => {
+          if (data.error) return;
+          setMultiPartResumeSession((prev) => ({ ...prev, [part.id]: Boolean(data.session) }));
         })
         .catch(() => {});
     });
@@ -111,7 +131,7 @@ export function ExamModeSelectModal({
                             disabled={!partEligibility}
                             className="rounded-full bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                           >
-                            スタート
+                            {multiPartResumeSession[part.id] ? "前回の続きから再開" : "スタート"}
                           </button>
                         )}
                       </div>
@@ -131,7 +151,7 @@ export function ExamModeSelectModal({
                   disabled={!eligibility}
                   className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  模擬試験をスタート
+                  {hasResumeSession ? "前回の続きから再開" : "模擬試験をスタート"}
                 </button>
               )}
             </div>
