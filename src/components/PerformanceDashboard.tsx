@@ -32,8 +32,10 @@ const SUBJECT_COLORS = ["#2563eb", "#16a34a", "#ea580c", "#9333ea", "#dc2626", "
 // 出題される）ため、レーダーチャートの軸色を偏差値推移グラフのパート別カラーと連動させられる。
 // TG-WEBも従来型・新型の言語/非言語＋英語の5パートにそれぞれcategoryが1対1で対応するため同様に定義する
 // （tgweb_verbal_reading＝共通・言語の長文読解のみ、本番模試の独立パートが無いため対応表から除外し、
-// デフォルト色のまま表示する）。他のテスト種別（玉手箱・GAB/C-GAB等）は1つのcategoryが複数パートに
-// またがり一意に定まらないため対象外とし、レーダーチャートは単色のまま表示する。
+// デフォルト色のまま表示する）。GAB/C-GABも言語・計数・英語の3パートにそれぞれcategoryが1対1で
+// 対応するため同様に定義する。玉手箱は1つのcategory（例: tamatebako_math）が複数パートにまたがり
+// category単位では一意に定まらないため、こちらではなくSUBCATEGORY_TO_PART_ID（sub_category単位）で
+// 対応させる。
 const CATEGORY_TO_PART_ID: Record<string, Record<string, string>> = {
   spi: { non_verbal: "spi_basic", verbal: "spi_basic", structural: "spi_structural", english: "spi_english" },
   tgweb: {
@@ -42,6 +44,29 @@ const CATEGORY_TO_PART_ID: Record<string, Record<string, string>> = {
     tgweb_new_verbal: "tgweb_new_verbal",
     tgweb_new_math: "tgweb_new_nonverbal",
     tgweb_english: "tgweb_english",
+  },
+  gab_cgab: {
+    gab_verbal: "gab_verbal_exam",
+    gab_quantitative: "gab_quantitative_exam",
+    gab_english: "gab_english_exam",
+  },
+};
+
+// "category::sub_category" 単位のパート対応表。玉手箱は同じcategory内でも単元（sub_category）ごとに
+// 異なる本番模試パートに分かれており（例: tamatebako_math配下の「四則逆算」「図表の読み取り」
+// 「表の空欄推測」はそれぞれ別パート）、CATEGORY_TO_PART_IDのcategory単位の対応表では表現できない。
+// さらに「論理的読解（GAB形式）」のようにsub_category名だけでは言語/英語の科目を一意に決められない
+// 単元もあるため、必ずcategoryと組み合わせたキーで引く。
+const SUBCATEGORY_TO_PART_ID: Record<string, Record<string, string>> = {
+  tamatebako: {
+    "tamatebako_math::四則逆算": "tamatebako_math_arithmetic",
+    "tamatebako_math::図表の読み取り": "tamatebako_math_graph",
+    "tamatebako_math::表の空欄推測": "tamatebako_math_table",
+    "tamatebako_verbal::論理的読解（GAB形式）": "tamatebako_verbal_gab",
+    "tamatebako_verbal::趣旨判定（IMAGES形式）": "tamatebako_verbal_images",
+    "tamatebako_verbal::趣旨把握": "tamatebako_verbal_summary",
+    "tamatebako_english::論理的読解（GAB形式）": "tamatebako_english_gab",
+    "tamatebako_english::長文読解（IMAGES形式）": "tamatebako_english_images",
   },
 };
 
@@ -398,16 +423,24 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
             }
 
             // 偏差値推移グラフと同じパート別カラーを、レーダーチャートの軸ラベル・データポイント・
-            // ポリゴンの塗り分けにも適用する（CATEGORY_TO_PART_IDに対応表がある場合のみ。無い場合は
-            // 全軸を1つの"その他"パートとして扱い、従来通り単色の1ポリゴンで表示する）。
+            // ポリゴンの塗り分けにも適用する（CATEGORY_TO_PART_ID/SUBCATEGORY_TO_PART_IDに対応表が
+            // ある場合のみ。無い場合は全軸を1つの"その他"パートとして扱い、従来通り単色の1ポリゴンで表示する）。
             const radarParts: readonly ExamPartInfo[] = MULTI_PART_EXAM_PARTS[examData.testTypeFamily] ?? [
               { id: examData.testTypeFamily, label: "偏差値" },
             ];
             const radarPartColor = new Map(radarParts.map((p, i) => [p.id, SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
             const categoryToPart = CATEGORY_TO_PART_ID[examData.testTypeFamily];
+            const subcategoryToPart = SUBCATEGORY_TO_PART_ID[examData.testTypeFamily];
+            const hasPartMapping = Boolean(categoryToPart) || Boolean(subcategoryToPart);
             const OTHER_PART_ID = "__other__";
             const DEFAULT_RADAR_COLOR = "#2563eb";
-            function partIdForCategory(category: string): string {
+            // sub_category単位の対応表（玉手箱等、同じcategory内でも単元ごとにパートが異なるテスト用）を
+            // 優先し、無ければcategory単位の対応表（SPI/TG-WEB/GAB等）にフォールバックする。
+            function partIdForItem(category: string, subCategory?: string): string {
+              if (subCategory) {
+                const subPart = subcategoryToPart?.[`${category}::${subCategory}`];
+                if (subPart) return subPart;
+              }
               return categoryToPart?.[category] ?? OTHER_PART_ID;
             }
             function colorForPart(partId: string): string {
@@ -436,7 +469,7 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                     {
                       subject: `【${subjectShort}】${g.label}`,
                       category: g.category,
-                      partId: partIdForCategory(g.category),
+                      partId: partIdForItem(g.category),
                       value: Math.round((correct / total) * 100),
                     },
                   ];
@@ -447,14 +480,14 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                   // 分断されず1つのまとまった領域として見えるようにするため）。
                   const partOrder = new Map(radarParts.map((p, i) => [p.id, i]));
                   const orderOf = (item: SubCategoryBreakdownItem) =>
-                    partOrder.get(partIdForCategory(item.category)) ?? radarParts.length;
-                  const sorted = categoryToPart
+                    partOrder.get(partIdForItem(item.category, item.subCategory)) ?? radarParts.length;
+                  const sorted = hasPartMapping
                     ? [...withData].sort((a, b) => orderOf(a) - orderOf(b) || b.total - a.total)
                     : [...withData].sort((a, b) => b.total - a.total);
                   return sorted.slice(0, 12).map((c) => ({
                     subject: c.label,
                     category: c.category,
-                    partId: partIdForCategory(c.category),
+                    partId: partIdForItem(c.category, c.subCategory),
                     value: Math.round((c.accuracyRate ?? 0) * 100),
                   }));
                 })();
@@ -483,7 +516,7 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                 {radarData.length >= 3 && (
                   <div className="rounded-lg border border-gray-200 bg-white p-4">
                     <p className="mb-2 text-sm font-semibold text-gray-800">単元別・正答率レーダーチャート</p>
-                    {categoryToPart && (
+                    {hasPartMapping && (
                       <div className="mb-2 flex flex-wrap gap-2">
                         {radarParts.map((part) => (
                           <span key={part.id} className="flex items-center gap-1 text-[10px] text-gray-500">
