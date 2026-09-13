@@ -7,6 +7,7 @@ import { ChevronRight, Flame } from "lucide-react";
 import { DEFAULT_TEST_ID, PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_TYPES } from "@/src/data/testTypes";
 import { UnitStatusSummaryModal } from "@/src/components/UnitStatusSummaryModal";
+import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 
 type UnitCount = { category: string; subCategory: string; count: number };
 
@@ -29,7 +30,7 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
   const testName = TEST_TYPES.find((t) => t.id === testId)?.name ?? "SPI3";
 
   useEffect(() => {
-    fetch("/api/question-units")
+    fetchWithRetry("/api/question-units")
       .then((res) => res.json())
       .then((data: { units?: UnitCount[] }) => {
         setUnitCounts(data.units ?? []);
@@ -42,7 +43,7 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
 
   useEffect(() => {
     setDueReviewLoading(true);
-    fetch(`/api/practice/history?testType=${encodeURIComponent(testId)}&countOnly=1`)
+    fetchWithRetry(`/api/practice/history?testType=${encodeURIComponent(testId)}&countOnly=1`)
       .then((res) => res.json())
       .then((data: { count?: number }) => setDueReviewCount(data.count ?? 0))
       .catch(() => {

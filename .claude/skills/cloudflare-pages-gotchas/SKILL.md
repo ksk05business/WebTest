@@ -1,6 +1,6 @@
 ---
 name: cloudflare-pages-gotchas
-description: Cloudflare Pages Functions・D1のこのプロジェクト特有のハマりどころを扱うときに読む。D1スキーマドリフト（ALTER TABLE運用）、本番デプロイ、メール送信（Cloudflare Email Sending）設定、wrangler.jsoncの取り扱いを含む。schema.sqlを変更する・本番D1にマイグレーションを適用する・メール機能に触るときは必読。
+description: Cloudflare Pages Functions・D1のこのプロジェクト特有のハマりどころを扱うときに読む。D1スキーマドリフト（ALTER TABLE運用）、本番デプロイ、メール送信（Cloudflare Email Sending）設定、wrangler.jsoncの取り扱い、D1のN+1回避（batch）、エッジキャッシュ（Cache API）、フロントのfetchリトライ規約を含む。schema.sqlを変更する・本番D1にマイグレーションを適用する・メール機能に触るときは必読。
 ---
 
 # Cloudflare Pages / D1 特有の注意点
@@ -35,3 +35,32 @@ description: Cloudflare Pages Functions・D1のこのプロジェクト特有の
 - 動作確認時にOTPの値を見たい場合は`forgot-password.ts`に一時的に`console.log`を仕込み、`wrangler pages dev`のログで確認してからコミット前に必ず削除すること。
 
 **AIチャットボット（Cloudflare Workers AI）は過去に導入→撤回済み**（`"ai": {"binding": "AI"}`は削除済み）。現在の`SupportChatWidget.tsx`は外部通信を一切行わないハードコードFAQボットのみ。再導入する場合はAPIクレジット消費・レート制限の設計を再検討すること。
+
+## D1のN+1回避（batch）
+
+D1はPostgresのようなコネクションプールを持つDBではなく（Prisma/Drizzle/PgBouncer等の概念はそもそも当てはまらない）、1回のawaitが1往復のHTTPライクなラウンドトリップになる。1回答=1行のような「配列をfor文でawait直列INSERT/UPSERT」するコードは、件数が多い（模試1パート最大130問、練習の「未回答のみ」等は最大300問）ほどレイテンシが積み上がり、通信エラー・タイムアウトの原因になる（2026-09-13に実際にこれが原因の不安定化を修正した実例: `functions/api/practice/history.ts`のuser_question_history一括INSERT、`functions/api/exam-results.ts`のenqueueWrongAnswers・exam_result_answers一括INSERT）。
+
+**同じユーザーの複数行を書き込む場合は、必ず`db.batch([stmt1, stmt2, ...])`を使う**（`db.prepare(sql)`で1つのPreparedStatementを作り、`.bind(...)`した配列を`db.batch()`に渡す。1リクエストにまとめて送信され、トランザクションとして実行される）。新しく「配列をループしてDBに書き込む」コードを書く前に、既存のbatch実装を参考にすること。
+
+## エッジキャッシュ（Cache API）
+
+ユーザーに依存しない全員共通のGETレスポンス（例: `functions/api/question-units.ts`の単元別収録問題数）は、Cloudflareの`caches.default`（Cache API）でキャッシュしD1への問い合わせを削減する。パターン:
+
+```ts
+const cache = caches.default;
+const cacheKey = new Request(context.request.url, context.request);
+const cached = await cache.match(cacheKey);
+if (cached) return cached;
+// ...DBクエリ...
+const response = Response.json(data, { headers: { "Cache-Control": "public, max-age=300" } });
+context.waitUntil(cache.put(cacheKey, response.clone()));
+return response;
+```
+
+認証ユーザー固有のデータ（`getAuthenticatedSubjectId`を呼ぶ全エンドポイント）には使わない（他人のデータが返る事故になる）。管理者が問題を追加した直後は最大`max-age`秒だけ単元一覧の件数表示が古いままになり得るが、意図的なトレードオフ（`question-bank`スキル参照）。
+
+## フロントのfetchリトライ規約
+
+`src/lib/fetchWithRetry.ts`は、一時的な通信エラー（ネットワーク断・D1側の5xx/429）を指数バックオフで自動再試行する`fetch`の薄いラッパー（デフォルト計3回試行、4xxは再試行しない）。**ボタンの活性化・出題開始など「取得できないとUIが詰む」GETフェッチには素の`fetch`ではなくこれを使う**。以前は`.catch(() => {})`で握りつぶすだけの実装が複数箇所にあり、一時的な通信エラー1回でstateが`null`のまま固まり「ボタンが押せない・何度もリロードしないと直らない」不具合の主因になっていた（`ExamModeSelectModal.tsx`・`app/test/page.tsx`・`UnitStatusSummaryModal.tsx`等で2026-09-13に修正）。
+
+再試行を使い果たしてもなお失敗した場合に備え、`eligibilityFailed`のような専用stateを持たせ、赤文字エラー＋「再試行」ボタン（同じ読み込み関数を再度呼ぶだけ）を出すこと。再試行中はボタンをdisabled化し、`lucide-react`の`Loader2`（`animate-spin`、既存は`QuotationDownloadButton.tsx`が先例）でローディング中であることを示す。POST（`/api/exam-results`・`/api/practice/history`のPOST等、非冪等な書き込み）には自動リトライを使わない（レスポンス消失後の再試行で二重登録になり得るため、失敗時は素の`fetch`のままユーザーに任せる）。

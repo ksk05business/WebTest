@@ -104,18 +104,19 @@ async function enqueueWrongAnswers(db: D1Database, userId: number, answers: Answ
     .all<{ id: number }>();
 
   const modifier = daysFromNowModifier(INITIAL_REVIEW_INTERVAL_DAYS);
-  for (const q of wrongQuestions.results ?? []) {
-    await db
-      .prepare(
-        `INSERT INTO user_question_reviews (user_id, question_id, review_stage, status, last_result, next_review_at)
-         VALUES (?, ?, 0, 'active', 'incorrect', datetime('now', ?))
-         ON CONFLICT(user_id, question_id) DO UPDATE SET
-           review_stage = 0, status = 'active', last_result = 'incorrect',
-           next_review_at = datetime('now', ?), updated_at = datetime('now')`
-      )
-      .bind(userId, q.id, modifier, modifier)
-      .run();
-  }
+  const rows = wrongQuestions.results ?? [];
+  if (rows.length === 0) return;
+
+  // 間違えた問題数だけ直列にUPSERTすると、間違いが多い受験ほどD1へのラウンドトリップが
+  // 積み重なる。batch()で1リクエストにまとめて送信する。
+  const upsertStatement = db.prepare(
+    `INSERT INTO user_question_reviews (user_id, question_id, review_stage, status, last_result, next_review_at)
+     VALUES (?, ?, 0, 'active', 'incorrect', datetime('now', ?))
+     ON CONFLICT(user_id, question_id) DO UPDATE SET
+       review_stage = 0, status = 'active', last_result = 'incorrect',
+       next_review_at = datetime('now', ?), updated_at = datetime('now')`
+  );
+  await db.batch(rows.map((q) => upsertStatement.bind(userId, q.id, modifier, modifier)));
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -198,15 +199,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     await enqueueWrongAnswers(context.env.DB, userId, answers);
 
     const examResultId = inserted.meta.last_row_id;
-    for (let i = 0; i < answers.length; i++) {
-      const a = answers[i];
-      await context.env.DB.prepare(
-        `INSERT INTO exam_result_answers (exam_result_id, question_id, display_order, selected_label, correct, answer_time_seconds)
-         VALUES (?, ?, ?, ?, ?, ?)`
+    // 模試1パート分（最大130問程度）を1問ずつ直列INSERTすると通信エラー・タイムアウトの
+    // 原因になり得るため、batch()で1リクエストにまとめて送信する。
+    const answerInsertStatement = context.env.DB.prepare(
+      `INSERT INTO exam_result_answers (exam_result_id, question_id, display_order, selected_label, correct, answer_time_seconds)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    );
+    await context.env.DB.batch(
+      answers.map((a, i) =>
+        answerInsertStatement.bind(
+          examResultId,
+          a.questionId,
+          i,
+          a.selectedLabel ?? null,
+          a.correct ? 1 : 0,
+          a.answerTimeSeconds ?? null
+        )
       )
-        .bind(examResultId, a.questionId, i, a.selectedLabel ?? null, a.correct ? 1 : 0, a.answerTimeSeconds ?? null)
-        .run();
-    }
+    );
   }
 
   return Response.json({ ok: true, deviationScore, accuracyRate });

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { MULTI_PART_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
+import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 
 type PartEligibility = { eligible: boolean; lastTakenAt: string | null; nextResetAt: string };
 
@@ -48,6 +50,13 @@ export function ExamModeSelectModal({
   const [multiPartEligibility, setMultiPartEligibility] = useState<Record<string, PartEligibility>>(
     {}
   );
+  // 一時的な通信エラーはfetchWithRetryが自動リトライするため、ここがtrueになるのは
+  // 再試行を使い果たしてもなお失敗した場合のみ。スタートボタンを永久に非活性のまま
+  // 放置せず、原因と再試行手段をユーザーに示す。
+  const [eligibilityFailed, setEligibilityFailed] = useState(false);
+  const [multiPartEligibilityFailed, setMultiPartEligibilityFailed] = useState<
+    Record<string, boolean>
+  >({});
 
   // 中断データ（exam_sessions）が残っているパート/テスト種別は、スタートボタンの文言を
   // 「前回の続きから再開」に変える。再開ロジック自体はapp/test/page.tsx側が自動判定するため、
@@ -55,53 +64,77 @@ export function ExamModeSelectModal({
   const [hasResumeSession, setHasResumeSession] = useState(false);
   const [multiPartResumeSession, setMultiPartResumeSession] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    if (!testType.available || isMultiPart) return;
-    fetch(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
+  const loadSingleEligibility = useCallback(() => {
+    setEligibility(null);
+    setEligibilityFailed(false);
+    fetchWithRetry(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
       .then((res) => res.json())
       .then((data: { eligible?: boolean; lastTakenAt?: string | null; nextResetAt?: string; error?: string }) => {
-        if (data.error) return;
+        if (data.error) {
+          setEligibilityFailed(true);
+          return;
+        }
         setEligibility({
           eligible: Boolean(data.eligible),
           lastTakenAt: data.lastTakenAt ?? null,
           nextResetAt: data.nextResetAt ?? "",
         });
       })
-      .catch(() => {});
-    fetch(`/api/exam-session?testType=${encodeURIComponent(testType.id)}`)
+      .catch(() => setEligibilityFailed(true));
+    fetchWithRetry(`/api/exam-session?testType=${encodeURIComponent(testType.id)}`)
       .then((res) => res.json())
       .then((data: { session?: unknown; error?: string }) => {
         if (data.error) return;
         setHasResumeSession(Boolean(data.session));
       })
       .catch(() => {});
-  }, [testType.available, testType.id, isMultiPart]);
+  }, [testType.id]);
 
   useEffect(() => {
-    if (!testType.available || !multiParts) return;
-    multiParts.forEach((part) => {
-      fetch(`/api/exam-eligibility?testType=${part.id}`)
+    if (!testType.available || isMultiPart) return;
+    loadSingleEligibility();
+  }, [testType.available, isMultiPart, loadSingleEligibility]);
+
+  const loadPartEligibility = useCallback(
+    (partId: string) => {
+      setMultiPartEligibility((prev) => {
+        const next = { ...prev };
+        delete next[partId];
+        return next;
+      });
+      setMultiPartEligibilityFailed((prev) => ({ ...prev, [partId]: false }));
+      fetchWithRetry(`/api/exam-eligibility?testType=${partId}`)
         .then((res) => res.json())
         .then((data: { eligible?: boolean; lastTakenAt?: string | null; nextResetAt?: string; error?: string }) => {
-          if (data.error) return;
+          if (data.error) {
+            setMultiPartEligibilityFailed((prev) => ({ ...prev, [partId]: true }));
+            return;
+          }
           setMultiPartEligibility((prev) => ({
             ...prev,
-            [part.id]: {
+            [partId]: {
               eligible: Boolean(data.eligible),
               lastTakenAt: data.lastTakenAt ?? null,
               nextResetAt: data.nextResetAt ?? "",
             },
           }));
         })
-        .catch(() => {});
-      fetch(`/api/exam-session?testType=${part.id}`)
+        .catch(() => setMultiPartEligibilityFailed((prev) => ({ ...prev, [partId]: true })));
+      fetchWithRetry(`/api/exam-session?testType=${partId}`)
         .then((res) => res.json())
         .then((data: { session?: unknown; error?: string }) => {
           if (data.error) return;
-          setMultiPartResumeSession((prev) => ({ ...prev, [part.id]: Boolean(data.session) }));
+          setMultiPartResumeSession((prev) => ({ ...prev, [partId]: Boolean(data.session) }));
         })
         .catch(() => {});
-    });
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!testType.available || !multiParts) return;
+    multiParts.forEach((part) => loadPartEligibility(part.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testType.available, multiParts]);
 
   return (
@@ -157,20 +190,54 @@ export function ExamModeSelectModal({
                             )}
                             次回受験可能日: {formatJapaneseDate(partEligibility.nextResetAt)}以降
                           </div>
+                        ) : multiPartEligibilityFailed[part.id] ? (
+                          <div className="flex flex-col gap-1.5 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-semibold text-red-700">
+                            受験可否の確認に失敗しました。通信環境をご確認のうえ再試行してください。
+                            <button
+                              type="button"
+                              onClick={() => loadPartEligibility(part.id)}
+                              className="rounded-full border border-red-300 py-1.5 font-semibold hover:bg-red-100"
+                            >
+                              再試行
+                            </button>
+                          </div>
                         ) : (
                           <button
                             type="button"
                             onClick={() => router.push(`/test?part=${part.id}`)}
                             disabled={!partEligibility}
-                            className="rounded-full bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                            className="flex items-center justify-center gap-1.5 rounded-full bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                           >
-                            {multiPartResumeSession[part.id] ? "前回の続きから再開" : "スタート"}
+                            {!partEligibility ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                確認中...
+                              </>
+                            ) : multiPartResumeSession[part.id] ? (
+                              "前回の続きから再開"
+                            ) : (
+                              "スタート"
+                            )}
                           </button>
                         )}
                       </div>
                     );
                   })}
                 </div>
+              ) : eligibilityFailed ? (
+                <>
+                  <ExamLimitNotice />
+                  <div className="mt-1 flex flex-col gap-1.5 rounded-lg bg-red-50 px-3 py-2.5 text-center text-xs font-semibold text-red-700">
+                    受験可否の確認に失敗しました。通信環境をご確認のうえ再試行してください。
+                    <button
+                      type="button"
+                      onClick={loadSingleEligibility}
+                      className="rounded-full border border-red-300 py-1.5 font-semibold hover:bg-red-100"
+                    >
+                      再試行
+                    </button>
+                  </div>
+                </>
               ) : eligibility && !eligibility.eligible ? (
                 <>
                   <ExamLimitNotice />
@@ -193,9 +260,18 @@ export function ExamModeSelectModal({
                     type="button"
                     onClick={() => router.push(testType.href)}
                     disabled={!eligibility}
-                    className="mt-1 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                    className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                   >
-                    {hasResumeSession ? "前回の続きから再開" : "模擬試験をスタート"}
+                    {!eligibility ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        受験可否を確認中...
+                      </>
+                    ) : hasResumeSession ? (
+                      "前回の続きから再開"
+                    ) : (
+                      "模擬試験をスタート"
+                    )}
                   </button>
                 </>
               )}

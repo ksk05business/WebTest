@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { redirectToLogin } from "@/src/lib/authRedirect";
+import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 import { MemorizationTestSelectModal, type MemorizationBreakdownItem } from "@/src/components/MemorizationTestSelectModal";
 
 // 全テスト種別（SPI3・玉手箱・TG-WEB・SCOA等）を横断した「直近の解答が不正解のまま」の
@@ -17,7 +18,7 @@ export function MemorizationReviewBanner({ email }: { email: string }) {
 
   useEffect(() => {
     if (!email) return;
-    fetch("/api/practice/history?scope=memorization&countOnly=1")
+    fetchWithRetry("/api/practice/history?scope=memorization&countOnly=1")
       .then((res) => res.json())
       .then((data: { count?: number; breakdown?: MemorizationBreakdownItem[]; error?: string }) => {
         if (data.error === "ログインが必要です") {

@@ -3,12 +3,13 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { ArrowLeft, Loader2, RotateCcw } from "lucide-react";
 import type { Question } from "@/src/data/questions";
 import { PracticeUnitSelector } from "@/src/components/PracticeUnitSelector";
 import { CATEGORY_TO_TEST_ID, DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
 import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 import { redirectToLogin } from "@/src/lib/authRedirect";
+import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -124,7 +125,7 @@ function PracticePageInner() {
               if (statusFilter) params.set("statusFilter", statusFilter);
               return `/api/questions?${params.toString()}`;
             })();
-    fetch(fetchUrl)
+    fetchWithRetry(fetchUrl)
       .then((res) => {
         if (res.status === 401) {
           redirectToLogin(router);
@@ -323,6 +324,16 @@ function PracticePageInner() {
         <BackToUnitsLink testId={testId} scope={scope} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <p className="text-sm font-medium text-red-600">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoadError(null);
+              loadQuestions();
+            }}
+            className="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            再試行
+          </button>
         </div>
       </main>
     );
@@ -365,7 +376,10 @@ function PracticePageInner() {
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-6 py-10">
         <BackToUnitsLink testId={testId} scope={scope} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
+          <p className="flex items-center gap-2 text-sm text-gray-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            問題を読み込んでいます...
+          </p>
         </div>
       </main>
     );

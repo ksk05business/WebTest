@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { redirectToLogin } from "@/src/lib/authRedirect";
+import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 
 type Summary = { total: number; known: number; uncertain: number; wrong: number; unanswered: number };
 
@@ -26,9 +28,12 @@ export function UnitStatusSummaryModal({
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // 一時的な通信エラーはfetchWithRetryが自動で再試行するため、loadErrorになるのは
+  // 再試行を使い果たしてもなお失敗した場合のみ。「再試行」ボタンからも呼べるようにしておく。
+  const loadSummary = useCallback(() => {
+    setLoadError(null);
     const params = new URLSearchParams({ category, subCategory });
-    fetch(`/api/question-status-summary?${params.toString()}`)
+    fetchWithRetry(`/api/question-status-summary?${params.toString()}`)
       .then((res) => {
         if (res.status === 401) {
           redirectToLogin(router);
@@ -52,6 +57,10 @@ export function UnitStatusSummaryModal({
       .catch(() => setLoadError((prev) => prev ?? "取得に失敗しました。時間をおいて再度お試しください。"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, subCategory]);
+
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary]);
 
   function startPractice(statusFilter?: "wrong_uncertain" | "unanswered") {
     const params = new URLSearchParams({ category, subCategory, testType: testId });
@@ -83,9 +92,25 @@ export function UnitStatusSummaryModal({
           </button>
         </div>
 
-        {loadError && <p className="mt-4 text-sm font-medium text-red-600">{loadError}</p>}
+        {loadError && (
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <p className="text-sm font-medium text-red-600">{loadError}</p>
+            <button
+              type="button"
+              onClick={loadSummary}
+              className="rounded-full border border-gray-300 px-4 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              再試行
+            </button>
+          </div>
+        )}
 
-        {!summary && !loadError && <p className="mt-4 text-sm text-gray-500">読み込み中...</p>}
+        {!summary && !loadError && (
+          <p className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            読み込み中...
+          </p>
+        )}
 
         {summary && (
           <>

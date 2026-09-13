@@ -51,12 +51,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
   }
 
-  for (const a of answers) {
-    await context.env.DB.prepare(
-      `INSERT INTO user_question_history (user_id, question_id, test_type, correct, is_practice, answer_time_seconds)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    )
-      .bind(
+  // 1回答ずつawaitして直列にINSERTすると、回答数が多い（模試の1パートで最大130問程度）ほど
+  // D1へのラウンドトリップが積み重なりレイテンシ・タイムアウトの原因になる。batch()で
+  // 1リクエストにまとめて送信する（D1のbatchはトランザクションとしてまとめて実行される）。
+  const insertStatement = context.env.DB.prepare(
+    `INSERT INTO user_question_history (user_id, question_id, test_type, correct, is_practice, answer_time_seconds)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  );
+  await context.env.DB.batch(
+    answers.map((a) =>
+      insertStatement.bind(
         userId,
         a.questionId,
         testType,
@@ -64,8 +68,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         isPractice ? 1 : 0,
         typeof a.answerTimeSeconds === "number" ? a.answerTimeSeconds : null
       )
-      .run();
-  }
+    )
+  );
 
   return Response.json({ ok: true, count: answers.length });
 };

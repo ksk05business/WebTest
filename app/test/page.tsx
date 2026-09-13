@@ -2,8 +2,10 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import type { ExamReviewEntry, Question } from "@/src/data/questions";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
+import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 
 // 基礎能力試験（言語・非言語）は「言語39問＋非言語30問＝計69問の固定ロースター」を、35分間
 // （2100秒）のタイムボックス内で解く方式（言語は本来40問が目安だが、長文読解が3問1組の
@@ -108,7 +110,7 @@ async function fetchSubPartsPool(
         limit: String(sp.limit * multiplier),
       });
       if (mockOnly) params.set("mockOnly", "1");
-      return fetch(`/api/questions?${params.toString()}`).then((r) => r.json());
+      return fetchWithRetry(`/api/questions?${params.toString()}`).then((r) => r.json());
     })
   );
   return (results as { questions?: Question[] }[]).flatMap((r) => r.questions ?? []);
@@ -320,7 +322,7 @@ type ResumeSession = {
 // 通信エラー時もnullを返し、呼び出し側は「新規に受験を開始する」フォールバックとして扱えるようにする。
 async function fetchResumeSession(testType: string): Promise<ResumeSession | null> {
   try {
-    const res = await fetch(`/api/exam-session?testType=${encodeURIComponent(testType)}`);
+    const res = await fetchWithRetry(`/api/exam-session?testType=${encodeURIComponent(testType)}`);
     const data: { session?: ResumeSession | null } = await res.json();
     return data.session ?? null;
   } catch {
@@ -552,11 +554,13 @@ function TestPageInner() {
   }, [router]);
 
   // テスト種別（パート）ごとに2ヶ月に1回（奇数月1日に一斉リセット）のみ受験可能。
-  useEffect(() => {
-    if (!authChecked) return;
+  // 一時的な通信エラーはfetchWithRetryが自動で再試行するため、ここでエラー画面になるのは
+  // 再試行を使い果たしてもなお失敗した場合のみ。loadEligibilityは「再試行」ボタンからも
+  // 呼べるようにし、ページ全体のリロードなしで復帰できるようにする。
+  const loadEligibility = useCallback(() => {
     setEligibility(null);
     setEligibilityError(null);
-    fetch(`/api/exam-eligibility?testType=${partId}`)
+    fetchWithRetry(`/api/exam-eligibility?testType=${partId}`)
       .then((res) => res.json())
       .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
         if (data.error) {
@@ -570,7 +574,12 @@ function TestPageInner() {
         setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
       })
       .catch(() => setEligibilityError("通信エラーが発生しました。時間をおいて再度お試しください。"));
-  }, [authChecked, router, partId]);
+  }, [router, partId]);
+
+  useEffect(() => {
+    if (!authChecked) return;
+    loadEligibility();
+  }, [authChecked, loadEligibility]);
 
   if (!authChecked) {
     return null;
@@ -578,8 +587,15 @@ function TestPageInner() {
 
   if (eligibilityError) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10 text-center">
         <p className="text-sm font-medium text-red-600">{eligibilityError}</p>
+        <button
+          type="button"
+          onClick={loadEligibility}
+          className="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          再試行
+        </button>
       </main>
     );
   }
@@ -587,7 +603,10 @@ function TestPageInner() {
   if (!eligibility) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm text-gray-500">受験可否を確認しています...</p>
+        <p className="flex items-center gap-2 text-sm text-gray-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          受験可否を確認しています...
+        </p>
       </main>
     );
   }
@@ -643,7 +662,11 @@ function BasicExamFlow() {
   const resultsRef = useRef<ExamReviewEntry[]>([]);
   const questionStartedAtRef = useRef<number>(Date.now());
 
-  useEffect(() => {
+  // fetchSubPartsPool内のfetchWithRetryが一時的な通信エラーは自動で再試行するため、
+  // ここに来るのは再試行を使い果たしてもなお失敗した場合のみ。「再試行」ボタンから
+  // ページ全体のリロードなしで再取得できるよう、関数として切り出しておく。
+  const loadQuestions = useCallback(() => {
+    setLoadError(null);
     fetchResumeSession("spi_basic").then((session) => {
       if (session) {
         // 中断データがあればそのまま復元して再開する（新規取得はしない）。
@@ -666,6 +689,11 @@ function BasicExamFlow() {
         })
         .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
     });
+  }, []);
+
+  useEffect(() => {
+    loadQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentQuestion = questions?.[currentIndex] ?? null;
@@ -748,8 +776,15 @@ function BasicExamFlow() {
 
   if (loadError) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10 text-center">
         <p className="text-sm font-medium text-red-600">{loadError}</p>
+        <button
+          type="button"
+          onClick={loadQuestions}
+          className="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          再試行
+        </button>
       </main>
     );
   }
@@ -773,7 +808,10 @@ function BasicExamFlow() {
   if (!questions || !currentQuestion) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
+        <p className="flex items-center gap-2 text-sm text-gray-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          問題を読み込んでいます...
+        </p>
       </main>
     );
   }
@@ -841,7 +879,11 @@ function SectionedExamFlow({
     questionStartedAtRef.current = Date.now();
   }, [sectionIndex, questionIndex]);
 
-  useEffect(() => {
+  // fetchWithRetryが一時的な通信エラーは自動で再試行するため、ここに来るのは再試行を
+  // 使い果たしてもなお失敗した場合のみ。「再試行」ボタンからページ全体のリロードなしで
+  // 再取得できるよう、関数として切り出しておく。
+  const loadQuestions = useCallback(() => {
+    setLoadError(null);
     fetchResumeSession(partId).then((session) => {
       if (session) {
         // 中断データがあればそのまま復元して再開する（新規取得はしない）。
@@ -862,7 +904,7 @@ function SectionedExamFlow({
                 limit: String(sp.limit),
               });
               if (mockOnly) params.set("mockOnly", "1");
-              return fetch(`/api/questions?${params.toString()}`).then((r) => r.json());
+              return fetchWithRetry(`/api/questions?${params.toString()}`).then((r) => r.json());
             })
           ).then((results: { questions?: Question[]; error?: string }[]) =>
             results.flatMap((r) => r.questions ?? [])
@@ -879,6 +921,11 @@ function SectionedExamFlow({
         })
         .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partId, mockOnly]);
+
+  useEffect(() => {
+    loadQuestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -983,8 +1030,15 @@ function SectionedExamFlow({
 
   if (loadError) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10 text-center">
         <p className="text-sm font-medium text-red-600">{loadError}</p>
+        <button
+          type="button"
+          onClick={loadQuestions}
+          className="rounded-full border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          再試行
+        </button>
       </main>
     );
   }
@@ -1008,7 +1062,10 @@ function SectionedExamFlow({
   if (!sectionQuestions) {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 px-6 py-10">
-        <p className="text-sm text-gray-500">問題を読み込んでいます...</p>
+        <p className="flex items-center gap-2 text-sm text-gray-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          問題を読み込んでいます...
+        </p>
       </main>
     );
   }

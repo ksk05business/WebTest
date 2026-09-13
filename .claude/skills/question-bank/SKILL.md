@@ -51,6 +51,8 @@ R2等の外部オブジェクトストレージは未導入のため、グラフ
 
 `GET /api/questions`はデフォルトで`is_mock_only=0`（練習問題プール）のみを対象にする。`?mockOnly=1`を指定すると模試専用問題のみが対象になる。本番模試（`/test`）専用に問題プールを分離したい場合に使う（現状SCOAのみこの分離運用、他テストは全問`is_mock_only=0`）。
 
+`GET /api/question-units`（単元選択画面の収録問題数バッジ）は2026-09-13よりCloudflareのCache APIで5分間キャッシュしている（`cloudflare-pages-gotchas`スキル参照）。新しい問題を`published`にした直後、本番でバッジの件数が最大5分ほど反映されないことがあるが仕様通り（動作確認時は`?`付きの別クエリではキャッシュキーが変わらないので、キャッシュを避けたい場合は`wrangler pages deployment tail`等で実際のDB件数を直接確認すること）。
+
 ## src/data/questions.ts が型定義しか持たない理由
 
 2026-08-21に`src/data/questions.ts`にハードコードしていたSPI問題を`questions`テーブル（D1）へ完全移行した。移行後、配列本体は削除し`Question`/`TableBlock`の**型定義のみ**を残している（`/test`が今もこの型をクライアント側の形状として使うため）。移行に使った`scripts/generate-seed-questions.mts`は二度と実行できない一度きりの移行アーティファクトで、`tsconfig.json`の`exclude`によりNext.jsのビルド時型チェック対象から外されている。**この型ファイルにデータの配列が無いのは意図的であり、バグではない。**
