@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import type { ExamReviewEntry, Question } from "@/src/data/questions";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
+import { ProfileRequiredModal } from "@/src/components/ProfileRequiredModal";
 
 // 基礎能力試験（言語・非言語）は「言語39問＋非言語30問＝計69問の固定ロースター」を、35分間
 // （2100秒）のタイムボックス内で解く方式（言語は本来40問が目安だが、長文読解が3問1組の
@@ -540,9 +541,11 @@ function TestPageInner() {
   const part: ExamPartConfig = EXAM_PARTS[partId];
 
   const [authChecked, setAuthChecked] = useState(false);
-  const [eligibility, setEligibility] = useState<{ eligible: boolean; nextResetAt: string } | null>(
-    null
-  );
+  const [eligibility, setEligibility] = useState<{
+    eligible: boolean;
+    nextResetAt: string;
+    profileCompleted: boolean;
+  } | null>(null);
   const [eligibilityError, setEligibilityError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -562,7 +565,7 @@ function TestPageInner() {
     setEligibilityError(null);
     fetchWithRetry(`/api/exam-eligibility?testType=${partId}`)
       .then((res) => res.json())
-      .then((data: { eligible?: boolean; nextResetAt?: string; error?: string }) => {
+      .then((data: { eligible?: boolean; nextResetAt?: string; profileCompleted?: boolean; error?: string }) => {
         if (data.error) {
           if (data.error === "ログインが必要です") {
             router.replace("/login");
@@ -571,7 +574,11 @@ function TestPageInner() {
           setEligibilityError(data.error);
           return;
         }
-        setEligibility({ eligible: Boolean(data.eligible), nextResetAt: data.nextResetAt ?? "" });
+        setEligibility({
+          eligible: Boolean(data.eligible),
+          nextResetAt: data.nextResetAt ?? "",
+          profileCompleted: data.profileCompleted ?? true,
+        });
       })
       .catch(() => setEligibilityError("通信エラーが発生しました。時間をおいて再度お試しください。"));
   }, [router, partId]);
@@ -607,6 +614,14 @@ function TestPageInner() {
           <Loader2 className="h-4 w-4 animate-spin" />
           受験可否を確認しています...
         </p>
+      </main>
+    );
+  }
+
+  if (!eligibility.profileCompleted) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-10">
+        <ProfileRequiredModal onClose={() => router.push("/dashboard")} />
       </main>
     );
   }

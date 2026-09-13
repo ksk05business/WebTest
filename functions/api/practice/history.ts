@@ -1,6 +1,7 @@
 import { toClientQuestion, type QuestionRow } from "../../_lib/questionFormat";
 import { getAuthenticatedSubjectId } from "../../_lib/session";
 import { getMemorizationUnitKeys } from "../../../src/data/practiceUnits";
+import { isProfileIncomplete, PROFILE_INCOMPLETE_ERROR } from "../../_lib/profileGate";
 
 interface Env {
   DB: D1Database;
@@ -107,6 +108,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   if (!testType && !isMemorizationScope) {
     return Response.json({ error: "testTypeまたはscope=memorizationを指定してください" }, { status: 400 });
+  }
+
+  // countOnly（ダッシュボード・単元選択画面のバッジ件数表示）はプロフィール未入力でも通常通り
+  // 閲覧できるようにし、実際に問題を取得して解答を開始する経路のみブロックする。
+  if (!countOnly && (await isProfileIncomplete(context.env.DB, userId))) {
+    return Response.json({ error: PROFILE_INCOMPLETE_ERROR }, { status: 403 });
   }
 
   // testType指定時: user_question_history.test_type で絞り込む（そのテストの全分野が対象）。

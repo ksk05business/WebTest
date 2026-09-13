@@ -10,6 +10,7 @@ import { CATEGORY_TO_TEST_ID, DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
 import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
+import { ProfileRequiredModal } from "@/src/components/ProfileRequiredModal";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -88,6 +89,7 @@ function PracticePageInner() {
     }[]
   >([]);
   const [answerTimeSeconds, setAnswerTimeSeconds] = useState<number | null>(null);
+  const [profileRequiredModalOpen, setProfileRequiredModalOpen] = useState(false);
   const questionStartedAtRef = useRef<number>(Date.now());
 
   const question = questions?.[currentIndex];
@@ -131,6 +133,10 @@ function PracticePageInner() {
           redirectToLogin(router);
           throw new Error("unauthorized");
         }
+        if (res.status === 403) {
+          setProfileRequiredModalOpen(true);
+          throw new Error("profile_incomplete");
+        }
         return res.json();
       })
       .then((data: { questions?: Question[]; error?: string }) => {
@@ -146,7 +152,12 @@ function PracticePageInner() {
         }
         setQuestions(data.questions);
       })
-      .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
+      .catch((err) => {
+        if (err instanceof Error && (err.message === "unauthorized" || err.message === "profile_incomplete")) {
+          return;
+        }
+        setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。");
+      });
   }
 
   useEffect(() => {
@@ -316,6 +327,14 @@ function PracticePageInner() {
 
   if (!category && !scope) {
     return <PracticeUnitSelector testId={testId} />;
+  }
+
+  if (profileRequiredModalOpen) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-10">
+        <ProfileRequiredModal onClose={() => router.push("/dashboard")} />
+      </main>
+    );
   }
 
   if (loadError) {

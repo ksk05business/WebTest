@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { MULTI_PART_EXAM_PARTS, type TestType } from "@/src/data/testTypes";
@@ -8,7 +9,12 @@ import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 
-type PartEligibility = { eligible: boolean; lastTakenAt: string | null; nextResetAt: string };
+type PartEligibility = {
+  eligible: boolean;
+  lastTakenAt: string | null;
+  nextResetAt: string;
+  profileCompleted: boolean;
+};
 
 // 受験回数制限に関する注意文言（アイコン＋警告色で強調）。スタートボタンの直前に必ず表示する。
 function ExamLimitNotice() {
@@ -69,17 +75,26 @@ export function ExamModeSelectModal({
     setEligibilityFailed(false);
     fetchWithRetry(`/api/exam-eligibility?testType=${encodeURIComponent(testType.id)}`)
       .then((res) => res.json())
-      .then((data: { eligible?: boolean; lastTakenAt?: string | null; nextResetAt?: string; error?: string }) => {
-        if (data.error) {
-          setEligibilityFailed(true);
-          return;
+      .then(
+        (data: {
+          eligible?: boolean;
+          lastTakenAt?: string | null;
+          nextResetAt?: string;
+          profileCompleted?: boolean;
+          error?: string;
+        }) => {
+          if (data.error) {
+            setEligibilityFailed(true);
+            return;
+          }
+          setEligibility({
+            eligible: Boolean(data.eligible),
+            lastTakenAt: data.lastTakenAt ?? null,
+            nextResetAt: data.nextResetAt ?? "",
+            profileCompleted: data.profileCompleted ?? true,
+          });
         }
-        setEligibility({
-          eligible: Boolean(data.eligible),
-          lastTakenAt: data.lastTakenAt ?? null,
-          nextResetAt: data.nextResetAt ?? "",
-        });
-      })
+      )
       .catch(() => setEligibilityFailed(true));
     fetchWithRetry(`/api/exam-session?testType=${encodeURIComponent(testType.id)}`)
       .then((res) => res.json())
@@ -105,20 +120,29 @@ export function ExamModeSelectModal({
       setMultiPartEligibilityFailed((prev) => ({ ...prev, [partId]: false }));
       fetchWithRetry(`/api/exam-eligibility?testType=${partId}`)
         .then((res) => res.json())
-        .then((data: { eligible?: boolean; lastTakenAt?: string | null; nextResetAt?: string; error?: string }) => {
-          if (data.error) {
-            setMultiPartEligibilityFailed((prev) => ({ ...prev, [partId]: true }));
-            return;
+        .then(
+          (data: {
+            eligible?: boolean;
+            lastTakenAt?: string | null;
+            nextResetAt?: string;
+            profileCompleted?: boolean;
+            error?: string;
+          }) => {
+            if (data.error) {
+              setMultiPartEligibilityFailed((prev) => ({ ...prev, [partId]: true }));
+              return;
+            }
+            setMultiPartEligibility((prev) => ({
+              ...prev,
+              [partId]: {
+                eligible: Boolean(data.eligible),
+                lastTakenAt: data.lastTakenAt ?? null,
+                nextResetAt: data.nextResetAt ?? "",
+                profileCompleted: data.profileCompleted ?? true,
+              },
+            }));
           }
-          setMultiPartEligibility((prev) => ({
-            ...prev,
-            [partId]: {
-              eligible: Boolean(data.eligible),
-              lastTakenAt: data.lastTakenAt ?? null,
-              nextResetAt: data.nextResetAt ?? "",
-            },
-          }));
-        })
+        )
         .catch(() => setMultiPartEligibilityFailed((prev) => ({ ...prev, [partId]: true })));
       fetchWithRetry(`/api/exam-session?testType=${partId}`)
         .then((res) => res.json())
@@ -178,7 +202,17 @@ export function ExamModeSelectModal({
                         className="flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-3"
                       >
                         <p className="text-sm font-semibold text-gray-800">{part.label}</p>
-                        {partEligibility && !partEligibility.eligible ? (
+                        {partEligibility && !partEligibility.profileCompleted ? (
+                          <div className="flex flex-col gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-center text-xs font-semibold text-amber-800">
+                            プロフィール情報の登録が必要です
+                            <Link
+                              href="/mypage"
+                              className="rounded-full bg-amber-600 py-1.5 font-semibold text-white hover:bg-amber-700"
+                            >
+                              プロフィールを入力する
+                            </Link>
+                          </div>
+                        ) : partEligibility && !partEligibility.eligible ? (
                           <div className="rounded-lg bg-amber-50 px-3 py-2 text-center text-xs font-semibold text-amber-800">
                             このテストは2ヶ月に1回のみ受験可能です
                             <br />
@@ -238,6 +272,16 @@ export function ExamModeSelectModal({
                     </button>
                   </div>
                 </>
+              ) : eligibility && !eligibility.profileCompleted ? (
+                <div className="mt-1 flex flex-col gap-1.5 rounded-lg bg-amber-50 px-3 py-2.5 text-center text-xs font-semibold text-amber-800">
+                  プロフィール情報の登録が必要です
+                  <Link
+                    href="/mypage"
+                    className="rounded-full bg-amber-600 py-1.5 font-semibold text-white hover:bg-amber-700"
+                  >
+                    プロフィールを入力する
+                  </Link>
+                </div>
               ) : eligibility && !eligibility.eligible ? (
                 <>
                   <ExamLimitNotice />

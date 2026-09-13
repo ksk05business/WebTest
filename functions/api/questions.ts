@@ -1,5 +1,6 @@
 import { toClientQuestion, type QuestionRow } from "../_lib/questionFormat";
 import { getAuthenticatedSubjectId } from "../_lib/session";
+import { isProfileIncomplete, PROFILE_INCOMPLETE_ERROR } from "../_lib/profileGate";
 
 interface Env {
   DB: D1Database;
@@ -56,6 +57,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (!userId) {
       return Response.json({ error: "ログインが必要です" }, { status: 401 });
     }
+  } else {
+    // ログイン中であればプロフィール未入力チェックのためにIDを取得する（未ログインの
+    // 場合の挙動は変えない。ログイン必須化自体は各画面側の既存のリダイレクト処理に委ねる）。
+    userId = await getAuthenticatedSubjectId(context.env.DB, context.request, "user");
+  }
+
+  if (userId !== null && (await isProfileIncomplete(context.env.DB, userId))) {
+    return Response.json({ error: PROFILE_INCOMPLETE_ERROR }, { status: 403 });
   }
 
   const conditions = ["status = 'published'", "is_mock_only = ?"];

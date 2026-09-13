@@ -8,9 +8,11 @@ import { DashboardHeader } from "./DashboardHeader";
 import { ExamModeSelectModal } from "./ExamModeSelectModal";
 import { MockHistorySelectModal } from "./MockHistorySelectModal";
 import { PerformanceDashboard } from "./PerformanceDashboard";
+import { ProfileRequiredModal } from "./ProfileRequiredModal";
 import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_EXPLAINERS } from "@/src/data/testExplainers";
+import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 
 // 試験別専用ページ（/dashboard/[testId]）の実体。テストの説明・アクションボタン（練習問題／模試）・
 // そのテストに絞った成績分析（PerformanceDashboard）をまとめて表示する。メインダッシュボードから
@@ -21,6 +23,10 @@ export function TestDashboardClient({ testId }: { testId: string }) {
   const [userEmail, setUserEmail] = useState("");
   const [examModalOpen, setExamModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  // nullは未取得（読み込み中）を表す。読み込み中にボタンが押された場合はブロックしない
+  // （バックエンド側のチェックが最終防御線のため、フェイルオープンで問題ない）。
+  const [isProfileCompleted, setIsProfileCompleted] = useState<boolean | null>(null);
+  const [profileRequiredModalOpen, setProfileRequiredModalOpen] = useState(false);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -32,6 +38,27 @@ export function TestDashboardClient({ testId }: { testId: string }) {
     if (user.email) setUserEmail(user.email);
     setAuthChecked(true);
   }, [router]);
+
+  useEffect(() => {
+    if (!authChecked) return;
+    fetchWithRetry("/api/me")
+      .then((res) => res.json())
+      .then((data: { is_profile_completed?: boolean }) => {
+        setIsProfileCompleted(data.is_profile_completed ?? true);
+      })
+      .catch(() => {
+        // 取得に失敗した場合はブロックしない（バックエンド側のチェックが最終防御線）
+        setIsProfileCompleted(true);
+      });
+  }, [authChecked]);
+
+  function guardOrRun(action: () => void) {
+    if (isProfileCompleted === false) {
+      setProfileRequiredModalOpen(true);
+      return;
+    }
+    action();
+  }
 
   const testType: TestType | undefined = TEST_TYPES.find((t) => t.id === testId);
   const explainer = TEST_EXPLAINERS[testId];
@@ -145,7 +172,7 @@ export function TestDashboardClient({ testId }: { testId: string }) {
               {hasPracticeContent && (
                 <button
                   type="button"
-                  onClick={() => router.push(`/practice?testType=${testId}`)}
+                  onClick={() => guardOrRun(() => router.push(`/practice?testType=${testId}`))}
                   className="flex-1 rounded-full border-2 border-blue-300 bg-white px-6 py-3.5 text-center text-sm font-bold text-blue-700 hover:bg-blue-50"
                 >
                   練習問題をする
@@ -154,7 +181,7 @@ export function TestDashboardClient({ testId }: { testId: string }) {
               {testType.available && (
                 <button
                   type="button"
-                  onClick={() => setExamModalOpen(true)}
+                  onClick={() => guardOrRun(() => setExamModalOpen(true))}
                   className="flex-1 rounded-full bg-blue-600 px-6 py-3.5 text-center text-sm font-bold text-white shadow hover:bg-blue-700"
                 >
                   模試を受験する
@@ -187,6 +214,9 @@ export function TestDashboardClient({ testId }: { testId: string }) {
       )}
       {historyModalOpen && (
         <MockHistorySelectModal testType={testType} onClose={() => setHistoryModalOpen(false)} />
+      )}
+      {profileRequiredModalOpen && (
+        <ProfileRequiredModal onClose={() => setProfileRequiredModalOpen(false)} />
       )}
     </div>
   );
