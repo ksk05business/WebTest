@@ -1,18 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Mail } from "lucide-react";
 import { AuthLayout } from "@/src/components/AuthLayout";
 import { IconInput } from "@/src/components/IconInput";
+import { GoogleLoginButton } from "@/src/components/GoogleLoginButton";
+
+// functions/api/auth/google-callback.ts が失敗時に付与する ?error= の文言。
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  no_account: "このGoogleアカウントに対応する登録済みアカウントが見つかりませんでした。先に会員登録を行ってください。",
+  oauth_denied: "Googleログインがキャンセルされました。",
+  oauth_state: "Googleログインの検証に失敗しました。もう一度お試しください。",
+  oauth_unverified: "メールアドレスが確認されていないGoogleアカウントではログインできません。",
+  oauth_config: "現在Googleログインをご利用いただけません。",
+  oauth_failed: "Googleログインに失敗しました。もう一度お試しください。",
+};
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
+  );
+}
+
+function LoginPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const oauthError = searchParams.get("error");
+    if (oauthError) {
+      setError(OAUTH_ERROR_MESSAGES[oauthError] ?? "ログインに失敗しました。");
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,6 +115,14 @@ export default function LoginPage() {
           {submitting ? "ログイン中..." : "ログイン"}
         </button>
       </form>
+
+      <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
+        <div className="h-px flex-1 bg-gray-200" />
+        または
+        <div className="h-px flex-1 bg-gray-200" />
+      </div>
+
+      <GoogleLoginButton />
 
       <p className="mt-6 text-center text-sm text-gray-600">
         アカウントをお持ちでない方は{" "}
