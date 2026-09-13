@@ -1,6 +1,5 @@
 import { generateInitialPassword, hashPassword } from "../../_lib/password";
-import { getUniversityCategory } from "../../../src/data/universityCategories";
-import { parseDesiredOccupations } from "../../_lib/desiredOccupations";
+import { buildPlaceholderProfile } from "../../_lib/placeholderProfile";
 import { createSession, sessionCookieHeader } from "../../_lib/session";
 import {
   CLEAR_PENDING_SIGNUP_COOKIE,
@@ -63,23 +62,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     );
   }
 
-  const lastName = pending.familyName || "未設定";
-  const firstName = pending.givenName || "未設定";
-  const lastNameRomaji = pending.familyName || "Google";
-  const firstNameRomaji = pending.givenName || "User";
-  const facultyType = "未設定（Google連携）";
-  const university = "未設定（Google連携）";
-  const universityCategory = getUniversityCategory(university);
-  const industryFirst = "その他";
-  const industrySecond = "その他";
-  const industryThird = "その他";
-  const desiredOccupationsJson = parseDesiredOccupations(["こだわりなし・総合職（オープンコース）等"]);
-  if (!desiredOccupationsJson) {
-    return Response.json({ error: "登録に失敗しました" }, { status: 500 });
-  }
-  const now = new Date();
-  const graduationYear = now.getFullYear() + 1;
-  const graduationMonth = 3;
+  const p = buildPlaceholderProfile({
+    lastName: pending.familyName,
+    firstName: pending.givenName,
+    lastNameRomaji: pending.familyName,
+    firstNameRomaji: pending.givenName,
+  });
 
   const { hash, salt } = await hashPassword(generateInitialPassword());
 
@@ -93,22 +81,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
      RETURNING id`
   )
     .bind(
-      lastName,
-      firstName,
-      lastNameRomaji,
-      firstNameRomaji,
+      p.lastName,
+      p.firstName,
+      p.lastNameRomaji,
+      p.firstNameRomaji,
       pending.email,
       hash,
       salt,
-      facultyType,
-      university,
-      universityCategory,
-      industryFirst,
-      industrySecond,
-      industryThird,
-      desiredOccupationsJson,
-      graduationYear,
-      graduationMonth,
+      p.facultyType,
+      p.university,
+      p.universityCategory,
+      p.industryFirst,
+      p.industrySecond,
+      p.industryThird,
+      p.desiredOccupationsJson,
+      p.graduationYear,
+      p.graduationMonth,
       isScoutConsent ? 1 : 0,
       null
     )
@@ -132,5 +120,5 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   headers.append("Set-Cookie", sessionCookieHeader("user", token));
   headers.append("Set-Cookie", CLEAR_PENDING_SIGNUP_COOKIE);
 
-  return new Response(JSON.stringify({ ok: true, name: `${lastName} ${firstName}` }), { headers });
+  return new Response(JSON.stringify({ ok: true, name: `${p.lastName} ${p.firstName}` }), { headers });
 };

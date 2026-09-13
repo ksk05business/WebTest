@@ -1,35 +1,24 @@
 import { hashPassword } from "../_lib/password";
-import { getUniversityCategory } from "../../src/data/universityCategories";
-import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
-import { parseDesiredOccupations } from "../_lib/desiredOccupations";
+import { buildPlaceholderProfile } from "../_lib/placeholderProfile";
 import { createSession, sessionCookieHeader } from "../_lib/session";
-import { isValidMbtiCode } from "../../src/data/mbti";
 
 interface Env {
   DB: D1Database;
 }
 
 type RegisterBody = {
-  lastName?: unknown;
-  firstName?: unknown;
-  lastNameRomaji?: unknown;
-  firstNameRomaji?: unknown;
   email?: unknown;
   password?: unknown;
-  facultyType?: unknown;
-  university?: unknown;
-  manualUniversityCategory?: unknown;
-  industryFirst?: unknown;
-  industrySecond?: unknown;
-  industryThird?: unknown;
-  desiredOccupations?: unknown;
-  graduationYear?: unknown;
-  graduationMonth?: unknown;
   agreedTerms?: unknown;
   scoutConsent?: unknown;
-  mbti?: unknown;
 };
 
+// 会員登録はメールアドレス・パスワードのみで完結させる（2026-09-13の改修で、氏名・大学・
+// 志望業界等の詳細プロフィール入力を登録フローから分離した）。大学・志望業界等の必須列は
+// buildPlaceholderProfile()の仮値で埋め、is_profile_completed = 0 で作成する。本人が
+// 後から/mypage（PUT /api/me）で実際の値を保存すると is_profile_completed が 1 に更新される
+// （functions/api/me.ts参照）。この仮登録の枠組みはGoogleログインでの新規作成
+// （functions/api/auth/google-signup.ts）と共通。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   let body: RegisterBody;
   try {
@@ -38,52 +27,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "不正なリクエストです" }, { status: 400 });
   }
 
-  const {
-    lastName,
-    firstName,
-    lastNameRomaji,
-    firstNameRomaji,
-    email,
-    password,
-    facultyType,
-    university,
-    manualUniversityCategory,
-    industryFirst,
-    industrySecond,
-    industryThird,
-    desiredOccupations,
-    graduationYear,
-    graduationMonth,
-    agreedTerms,
-    scoutConsent,
-    mbti,
-  } = body;
+  const { email, password, agreedTerms, scoutConsent } = body;
 
   if (
-    typeof lastName !== "string" ||
-    !lastName.trim() ||
-    typeof firstName !== "string" ||
-    !firstName.trim() ||
-    typeof lastNameRomaji !== "string" ||
-    !lastNameRomaji.trim() ||
-    typeof firstNameRomaji !== "string" ||
-    !firstNameRomaji.trim() ||
     typeof email !== "string" ||
     !email.trim() ||
     typeof password !== "string" ||
-    password.length < 8 ||
-    typeof facultyType !== "string" ||
-    !facultyType ||
-    typeof university !== "string" ||
-    !university ||
-    typeof industryFirst !== "string" ||
-    !industryFirst ||
-    typeof industrySecond !== "string" ||
-    !industrySecond ||
-    typeof industryThird !== "string" ||
-    !industryThird ||
-    typeof graduationYear !== "number" ||
-    typeof graduationMonth !== "number"
+    password.length < 8
   ) {
     return Response.json({ error: "入力内容を確認してください" }, { status: 400 });
   }
@@ -93,31 +43,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
   const isScoutConsent = scoutConsent === true;
 
-  // MBTIは任意項目。未選択（""/undefined/null）はNULL保存、指定時は既知の16タイプのみ許可する。
-  if (mbti !== undefined && mbti !== null && mbti !== "" && (typeof mbti !== "string" || !isValidMbtiCode(mbti))) {
-    return Response.json({ error: "MBTIの値が不正です" }, { status: 400 });
-  }
-  const mbtiValue = typeof mbti === "string" && mbti !== "" ? mbti : null;
-
-  const desiredOccupationsJson = parseDesiredOccupations(desiredOccupations);
-  if (!desiredOccupationsJson) {
-    return Response.json(
-      { error: "希望職種は1〜3つ選択してください" },
-      { status: 400 }
-    );
-  }
-
-  if (
-    industryFirst === industrySecond ||
-    industryFirst === industryThird ||
-    industrySecond === industryThird
-  ) {
-    return Response.json(
-      { error: "第一〜第三志望の業界はそれぞれ異なるものを選択してください" },
-      { status: 400 }
-    );
-  }
-
   const existing = await context.env.DB.prepare("SELECT id FROM users WHERE email = ?")
     .bind(email)
     .first();
@@ -126,39 +51,36 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const { hash, salt } = await hashPassword(password);
-  const universityCategory =
-    typeof manualUniversityCategory === "string" &&
-    (MANUAL_ENTRY_UNIVERSITIES as string[]).includes(manualUniversityCategory)
-      ? manualUniversityCategory
-      : getUniversityCategory(university);
+  const p = buildPlaceholderProfile();
 
   const inserted = await context.env.DB.prepare(
     `INSERT INTO users
       (last_name, first_name, last_name_romaji, first_name_romaji, email, password_hash, password_salt,
        faculty_type, university, university_category, industry_first, industry_second, industry_third,
-       desired_occupations, graduation_year, graduation_month, terms_agreed_at, scout_consent, mbti)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
+       desired_occupations, graduation_year, graduation_month, terms_agreed_at, scout_consent, mbti,
+       is_profile_completed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, 0)
      RETURNING id`
   )
     .bind(
-      lastName,
-      firstName,
-      lastNameRomaji,
-      firstNameRomaji,
+      p.lastName,
+      p.firstName,
+      p.lastNameRomaji,
+      p.firstNameRomaji,
       email,
       hash,
       salt,
-      facultyType,
-      university,
-      universityCategory,
-      industryFirst,
-      industrySecond,
-      industryThird,
-      desiredOccupationsJson,
-      graduationYear,
-      graduationMonth,
+      p.facultyType,
+      p.university,
+      p.universityCategory,
+      p.industryFirst,
+      p.industrySecond,
+      p.industryThird,
+      p.desiredOccupationsJson,
+      p.graduationYear,
+      p.graduationMonth,
       isScoutConsent ? 1 : 0,
-      mbtiValue
+      null
     )
     .first<{ id: number }>();
 
@@ -179,7 +101,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   const token = await createSession(context.env.DB, "user", inserted.id);
 
-  return new Response(JSON.stringify({ ok: true, name: `${lastName} ${firstName}` }), {
+  return new Response(JSON.stringify({ ok: true, name: `${p.lastName} ${p.firstName}` }), {
     headers: {
       "Content-Type": "application/json",
       "Set-Cookie": sessionCookieHeader("user", token),
