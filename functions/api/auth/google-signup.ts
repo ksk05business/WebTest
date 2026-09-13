@@ -87,8 +87,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     `INSERT INTO users
       (last_name, first_name, last_name_romaji, first_name_romaji, email, password_hash, password_salt,
        faculty_type, university, university_category, industry_first, industry_second, industry_third,
-       desired_occupations, graduation_year, graduation_month, terms_agreed_at, scout_consent, mbti)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?)
+       desired_occupations, graduation_year, graduation_month, terms_agreed_at, scout_consent, mbti,
+       is_profile_completed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, 0)
      RETURNING id`
   )
     .bind(

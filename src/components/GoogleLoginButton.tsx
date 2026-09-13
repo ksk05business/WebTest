@@ -2,7 +2,7 @@
 // 通常のページ遷移（<a href>）でfunctions/api/auth/google.ts（Googleの認可画面へリダイレクトする
 // Pages Function）へ渡す。ログイン成功後はfunctions/api/auth/google-callback.ts経由で
 // /auth/callback（app/auth/callback/page.tsx）へ戻り、そこでspiUserをlocalStorageに保存する。
-export function GoogleLoginButton() {
+export function GoogleLoginButton({ label = "Googleでログイン" }: { label?: string }) {
   return (
     <a
       href="/api/auth/google"
@@ -32,7 +32,7 @@ export function GoogleLoginButton() {
           C44,22.659,43.862,21.35,43.611,20.083z"
         />
       </svg>
-      Googleでログイン
+      {label}
     </a>
   );
 }

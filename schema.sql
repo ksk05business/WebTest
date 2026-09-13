@@ -29,6 +29,11 @@ CREATE TABLE IF NOT EXISTS users (
   -- 通称和名（例: "指揮官"）や4グループ（分析家・外交官・管理者・探検家）へのマッピングは
   -- src/data/mbti.ts で管理し、DBにはコード文字列のみを保存する。
   mbti TEXT,
+  -- 氏名・大学・志望業界等の必須プロフィール項目が入力済みかどうか。通常の会員登録（/register）は
+  -- 全項目必須のため常に1。Googleログインで未登録メールアドレスから新規作成したアカウント
+  -- （functions/api/auth/google-signup.ts）はプレースホルダー値で仮登録するため0で作成し、
+  -- /mypageでの本来のプロフィール保存（PUT /api/me）成功時に1へ更新する。
+  is_profile_completed INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

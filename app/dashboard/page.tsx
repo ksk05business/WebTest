@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { MemorizationReviewBanner } from "@/src/components/MemorizationReviewBanner";
+import { ProfileCompletionBanner } from "@/src/components/ProfileCompletionBanner";
 import { RecommendedCompanies } from "@/src/components/RecommendedCompanies";
 import { NoticeBoard } from "@/src/components/NoticeBoard";
 import { ShareButtons } from "@/src/components/ShareButtons";
@@ -65,6 +66,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            {userEmail && <ProfileCompletionBanner email={userEmail} />}
             {userEmail && <MemorizationReviewBanner email={userEmail} />}
 
             <RecommendedCompanies />

@@ -19,6 +19,7 @@ import { AuthLayout } from "@/src/components/AuthLayout";
 import { IconInput } from "@/src/components/IconInput";
 import { MbtiSelect } from "@/src/components/MbtiSelect";
 import { TermsAgreementModal } from "@/src/components/TermsAgreementModal";
+import { GoogleLoginButton } from "@/src/components/GoogleLoginButton";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
@@ -419,6 +420,14 @@ export default function RegisterPage() {
           {submitting ? "登録中..." : "登録する"}
         </button>
       </form>
+
+      <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
+        <div className="h-px flex-1 bg-gray-200" />
+        または
+        <div className="h-px flex-1 bg-gray-200" />
+      </div>
+
+      <GoogleLoginButton label="Googleで登録" />
 
       <p className="mt-3 text-center text-sm text-gray-600">
         すでにアカウントをお持ちの方は{" "}

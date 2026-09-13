@@ -25,6 +25,7 @@ type UserProfileRow = {
   graduation_month: number;
   scout_consent: number;
   mbti: string | null;
+  is_profile_completed: number;
 };
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
@@ -36,7 +37,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const user = await context.env.DB.prepare(
     `SELECT last_name, first_name, last_name_romaji, first_name_romaji, email,
             faculty_type, university, university_category, industry_first, industry_second, industry_third,
-            desired_occupations, graduation_year, graduation_month, scout_consent, mbti
+            desired_occupations, graduation_year, graduation_month, scout_consent, mbti, is_profile_completed
      FROM users WHERE id = ?`
   )
     .bind(userId)
@@ -53,7 +54,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     desiredOccupations = [];
   }
 
-  return Response.json({ ...user, desired_occupations: desiredOccupations });
+  return Response.json({
+    ...user,
+    desired_occupations: desiredOccupations,
+    is_profile_completed: user.is_profile_completed === 1,
+  });
 };
 
 type UpdateBody = {
@@ -161,11 +166,15 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       ? manualUniversityCategory
       : getUniversityCategory(university);
 
+  // 必須プロフィール項目（このPUTが要求する全項目）が入力された時点で完了扱いにする。
+  // Googleログインの仮登録（functions/api/auth/google-signup.ts）はis_profile_completed=0で
+  // 作成されるが、このAPIは通常の会員登録と同じ必須項目をすべて検証済みのため、
+  // 呼び出しに成功すれば常に1へ更新してよい。
   const result = await context.env.DB.prepare(
     `UPDATE users SET
       last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
       faculty_type = ?, university = ?, university_category = ?, industry_first = ?, industry_second = ?, industry_third = ?,
-      desired_occupations = ?, graduation_year = ?, graduation_month = ?, mbti = ?
+      desired_occupations = ?, graduation_year = ?, graduation_month = ?, mbti = ?, is_profile_completed = 1
      WHERE id = ?`
   )
     .bind(
