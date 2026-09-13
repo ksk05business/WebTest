@@ -52,7 +52,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      )
      SELECT
        a.selected_label, a.answer_time_seconds, a.correct,
-       q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.options, q.correct_answer, q.explanation, rk.seq
+       q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.image_data_uri, q.options, q.correct_answer, q.explanation, rk.seq
      FROM exam_result_answers a
      JOIN questions q ON q.id = a.question_id
      JOIN ranked rk ON rk.id = q.id
@@ -67,6 +67,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       questionCode: q.questionCode,
       title: q.title,
       text: q.text,
+      tables: q.tables,
+      imageDataUri: q.imageDataUri,
       choices: q.choices,
       correctLabel: q.answer,
       selectedLabel: r.selected_label,

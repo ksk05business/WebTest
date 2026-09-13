@@ -32,6 +32,57 @@ export function ExamReviewList({ review }: { review: ExamReviewEntry[] }) {
           {entry.title && <p className="mb-1 text-sm font-semibold text-blue-700">{entry.title}</p>}
           <p className="whitespace-pre-wrap text-sm font-medium text-gray-900">{entry.text}</p>
 
+          {entry.imageDataUri && (
+            <div className="mt-2 overflow-x-auto">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={entry.imageDataUri}
+                alt="設問のグラフ"
+                className="mx-auto max-w-full rounded-lg border border-gray-200"
+              />
+            </div>
+          )}
+
+          {entry.tables && (
+            <div className="mt-2 flex flex-col gap-4">
+              {entry.tables.map((table, ti) => (
+                <div key={ti} className="overflow-x-auto">
+                  {table.title && (
+                    <p className="mb-1 text-sm font-semibold text-gray-700">{table.title}</p>
+                  )}
+                  <table className="w-full min-w-max border-collapse text-sm">
+                    <thead>
+                      <tr>
+                        {table.headers.map((header, hi) => (
+                          <th
+                            key={hi}
+                            className="border border-gray-300 bg-gray-100 px-3 py-1.5 text-center font-semibold text-gray-800"
+                          >
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {table.rows.map((row, ri) => (
+                        <tr key={ri}>
+                          {row.map((cell, ci) => (
+                            <td
+                              key={ci}
+                              className="border border-gray-300 px-3 py-1.5 text-center text-gray-700"
+                            >
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="mt-3 flex flex-col gap-1.5">
             {entry.choices.map((choice) => {
               const isCorrectChoice = choice.label === entry.correctLabel;

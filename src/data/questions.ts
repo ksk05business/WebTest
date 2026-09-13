@@ -29,6 +29,8 @@ export type ExamReviewEntry = {
   questionCode?: string;
   title?: string;
   text: string;
+  tables?: TableBlock[];
+  imageDataUri?: string;
   choices: { label: string; text: string }[];
   correctLabel: string;
   selectedLabel: string | null;

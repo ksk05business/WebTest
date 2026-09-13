@@ -43,7 +43,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      )
      SELECT
         r.id AS review_id, r.review_stage, r.status, r.next_review_at,
-        q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.options, q.correct_answer, q.explanation, rk.seq
+        q.id, q.category, q.sub_category, q.title, q.question_text, q.tables_json, q.image_data_uri, q.options, q.correct_answer, q.explanation, rk.seq
      FROM user_question_reviews r
      JOIN questions q ON q.id = r.question_id
      JOIN ranked rk ON rk.id = q.id
