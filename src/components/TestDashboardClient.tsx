@@ -166,7 +166,7 @@ export function TestDashboardClient({ testId }: { testId: string }) {
                   onClick={() => setHistoryModalOpen(true)}
                   className="flex-1 rounded-full border-2 border-orange-300 bg-orange-50 px-6 py-3.5 text-center text-sm font-bold text-orange-700 hover:bg-orange-100"
                 >
-                  復習をする
+                  模試を復習する
                 </button>
               )}
             </div>

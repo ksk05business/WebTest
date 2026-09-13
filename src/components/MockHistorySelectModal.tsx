@@ -14,7 +14,7 @@ type HistoryItem = {
   takenAt: string;
 };
 
-// 「復習をする」ボタンから開く、対象テストの過去の模試受験履歴選択モーダル。
+// 「模試を復習する」ボタンから開く、対象テストの過去の模試受験履歴選択モーダル。
 // GET /api/exam-results?testType= は試験別専用ページ（PerformanceDashboard）と同じエンドポイントで、
 // 指定テスト種別（testType.id）の受験履歴のみに絞り込まれたhistoryを返す。
 // 一覧から1件選ぶと、その回の詳細（出題・自分の解答・正解・解説）を表示する既存の

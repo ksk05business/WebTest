@@ -122,16 +122,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const memorizationCondition = memorizationUnits.map(() => "(q.category = ? AND q.sub_category = ?)").join(" OR ");
   const memorizationBinds = memorizationUnits.flatMap((u) => [u.category, u.subCategory]);
 
+  // is_practice = 1のみを対象にする（模試＝本番モードの解答履歴が練習問題の復習対象に
+  // 混入しないようにするため。app/test/page.tsxはisPractice: falseでこの同じテーブルに記録する）。
   const latestCte = isMemorizationScope
     ? `SELECT h.question_id, h.correct,
               ROW_NUMBER() OVER (PARTITION BY h.question_id ORDER BY h.answered_at DESC, h.id DESC) AS rn
        FROM user_question_history h
        JOIN questions q ON q.id = h.question_id
-       WHERE h.user_id = ? AND (${memorizationCondition})`
+       WHERE h.user_id = ? AND h.is_practice = 1 AND (${memorizationCondition})`
     : `SELECT question_id, correct,
               ROW_NUMBER() OVER (PARTITION BY question_id ORDER BY answered_at DESC, id DESC) AS rn
        FROM user_question_history
-       WHERE user_id = ? AND test_type = ?`;
+       WHERE user_id = ? AND test_type = ? AND is_practice = 1`;
   const latestBinds = isMemorizationScope ? [userId, ...memorizationBinds] : [userId, testType];
 
   const countRow = await context.env.DB.prepare(
