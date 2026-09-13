@@ -51,6 +51,12 @@ function buildQuestionCode(category: string, seq: number | undefined): string | 
   return `#${mapping.test}-${mapping.unit}-${String(seq).padStart(3, "0")}`;
 }
 
+// 選択肢が「正しい／間違っている／判断できない」のような固定された意味順序を持ち、
+// シャッフルすると選択肢の意味が壊れてしまうカテゴリ。GAB言語理解（論理的読解）は
+// A=明らかに正しい／B=明らかに間違っている／C=判断できない、の3択が常にこの順で
+// 表示される前提の設問文になっているため、他カテゴリと違ってシャッフル対象から除外する。
+const FIXED_OPTION_ORDER_CATEGORIES = new Set(["gab_verbal"]);
+
 // 選択肢の並び順をシャッフルし、正解インデックスを追従させる（Fisher-Yates）。
 // DB上のoptions/correct_answerは元の並びのまま変更せず、クライアントへ返す直前の表示用配列だけを
 // シャッフルする。出題のたびに呼ばれるため、正解ラベルが特定の記号（A/B等）に偏る問題を解消する。
@@ -89,7 +95,7 @@ export function toClientQuestion(row: QuestionRow, opts?: { shuffle?: boolean })
   }
 
   let correctIndex = row.correct_answer;
-  if (opts?.shuffle && options.length > 1) {
+  if (opts?.shuffle && options.length > 1 && !FIXED_OPTION_ORDER_CATEGORIES.has(row.category)) {
     const shuffled = shuffleOptions(options, correctIndex);
     options = shuffled.options;
     correctIndex = shuffled.correctIndex;

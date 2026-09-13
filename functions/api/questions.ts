@@ -104,12 +104,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (list) list.push(row);
     else groups.set(key, [row]);
   }
+  // GAB英語（長文読解、1長文につき設問3問）・GAB言語理解（論理的読解、1長文につき設問4問）は、
+  // 常にid昇順（＝作成順）で出題した場合に正解パターンが固定順になってしまい、順番だけで
+  // 正解が予測できてしまう問題があった。そのため他カテゴリの長文グループ（id昇順で文脈順を保つ）
+  // とは別に、グループ内の出題順を毎回ランダム化する（練習・模試とも同じこのエンドポイントを
+  // 使うため両方に自動的に適用される）。設問ごとのid・correct_answerはtoClientQuestion側で
+  // 個別に紐付けたまま並び替えるだけなので、順序が変わっても採点は各設問のidに基づき正しく行われる。
+  const SHUFFLED_PASSAGE_CATEGORIES = new Set(["gab_english", "gab_verbal"]);
   for (const [key, list] of groups) {
-    // GAB英語（長文読解、1長文につき設問3問）は、常にid昇順（＝作成順）で出題した場合に
-    // 3問の正解パターンが固定順になってしまい、順番だけで正解が予測できてしまう問題があった。
-    // そのため他カテゴリの長文グループ（id昇順で文脈順を保つ）とは別に、グループ内の出題順を
-    // 毎回ランダム化する（練習・模試とも同じこのエンドポイントを使うため両方に自動的に適用される）。
-    if (list[0]?.category === "gab_english" && list.length > 1) {
+    if (list[0] && SHUFFLED_PASSAGE_CATEGORIES.has(list[0].category) && list.length > 1) {
       groups.set(key, shuffle(list));
     } else {
       list.sort((a, b) => a.id - b.id);
