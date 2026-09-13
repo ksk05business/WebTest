@@ -1,10 +1,14 @@
 import { createSession, sessionCookieHeader } from "../../_lib/session";
+import { encodePendingSignup, getCookie, pendingSignupCookieHeader } from "../../_lib/googlePendingSignup";
 
 // Googleからの認可コールバック。functions/api/auth/google.ts が発行したstateを照合し、
 // authorization codeをアクセストークンに交換してユーザー情報（email）を取得する。
-// このアプリの新規登録は大学・志望業界等の必須プロフィール項目を伴うため、Googleの情報だけでは
-// 新規アカウントを作成できない。そのため対象はメールアドレスが一致する既存ユーザーのログインのみとし、
-// 未登録のメールアドレスの場合は/loginへエラー付きで戻す（会員登録は従来通りメール+パスワードで行う）。
+// メールアドレスが一致する既存ユーザーがいればそのままログインさせる。
+// 未登録の場合、このアプリの新規登録は大学・志望業界等の必須プロフィール項目・利用規約への
+// 明示的な同意を伴うため、Googleの情報だけでは新規アカウントを作成できない。そのため
+// email/name等を短命なHttpOnly Cookie（google_pending_signup）に一時保存したうえで
+// /auth/google-signup（利用規約への同意画面）へ渡し、同意後にfunctions/api/auth/google-signup.ts が
+// 実際のアカウント作成を行う。
 interface Env {
   DB: D1Database;
   GOOGLE_CLIENT_ID?: string;
@@ -13,13 +17,6 @@ interface Env {
 
 const STATE_COOKIE_NAME = "google_oauth_state";
 const CLEAR_STATE_COOKIE = `${STATE_COOKIE_NAME}=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`;
-
-function getCookie(request: Request, name: string): string | null {
-  const header = request.headers.get("Cookie");
-  if (!header) return null;
-  const match = header.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[1]) : null;
-}
 
 function redirectToLogin(origin: string, error: string, extraCookie: string): Response {
   return new Response(null, {
@@ -84,7 +81,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return redirectToLogin(origin, "oauth_failed", CLEAR_STATE_COOKIE);
   }
 
-  const profile = await userInfoRes.json<{ email?: string; email_verified?: boolean }>();
+  const profile = await userInfoRes.json<{
+    email?: string;
+    email_verified?: boolean;
+    given_name?: string;
+    family_name?: string;
+  }>();
   if (!profile.email || !profile.email_verified) {
     return redirectToLogin(origin, "oauth_unverified", CLEAR_STATE_COOKIE);
   }
@@ -94,7 +96,15 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     .first<{ id: number }>();
 
   if (!user) {
-    return redirectToLogin(origin, "no_account", CLEAR_STATE_COOKIE);
+    const pendingValue = encodePendingSignup({
+      email: profile.email,
+      givenName: profile.given_name ?? "",
+      familyName: profile.family_name ?? "",
+    });
+    const headers = new Headers({ Location: `${origin}/auth/google-signup` });
+    headers.append("Set-Cookie", pendingSignupCookieHeader(pendingValue));
+    headers.append("Set-Cookie", CLEAR_STATE_COOKIE);
+    return new Response(null, { status: 302, headers });
   }
 
   const token = await createSession(context.env.DB, "user", user.id);
