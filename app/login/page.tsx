@@ -7,8 +7,11 @@ import { Lock, Mail } from "lucide-react";
 import { AuthLayout } from "@/src/components/AuthLayout";
 import { IconInput } from "@/src/components/IconInput";
 import { GoogleLoginButton } from "@/src/components/GoogleLoginButton";
+import { LineLoginButton } from "@/src/components/LineLoginButton";
 
-// functions/api/auth/google-callback.ts が失敗時に付与する ?error= の文言。
+// functions/api/auth/google-callback.ts・line-callback.ts が失敗時に付与する ?error= の文言。
+// LINE側はGoogleと同じ意味のエラーでも"line_"接頭辞を付けたコードを使う
+// （同じコード名だと両方とも「Googleログイン」表記のメッセージになってしまうため）。
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   no_account: "このGoogleアカウントに対応する登録済みアカウントが見つかりませんでした。先に会員登録を行ってください。",
   oauth_denied: "Googleログインがキャンセルされました。",
@@ -16,6 +19,10 @@ const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   oauth_unverified: "メールアドレスが確認されていないGoogleアカウントではログインできません。",
   oauth_config: "現在Googleログインをご利用いただけません。",
   oauth_failed: "Googleログインに失敗しました。もう一度お試しください。",
+  line_oauth_denied: "LINEログインがキャンセルされました。",
+  line_oauth_state: "LINEログインの検証に失敗しました。もう一度お試しください。",
+  line_oauth_config: "現在LINEログインをご利用いただけません。",
+  line_oauth_failed: "LINEログインに失敗しました。もう一度お試しください。",
 };
 
 export default function LoginPage() {
@@ -122,7 +129,10 @@ function LoginPageInner() {
         <div className="h-px flex-1 bg-gray-200" />
       </div>
 
-      <GoogleLoginButton />
+      <div className="flex flex-col gap-3">
+        <GoogleLoginButton />
+        <LineLoginButton />
+      </div>
 
       <p className="mt-6 text-center text-sm text-gray-600">
         アカウントをお持ちでない方は{" "}

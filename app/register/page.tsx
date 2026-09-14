@@ -8,6 +8,7 @@ import { AuthLayout } from "@/src/components/AuthLayout";
 import { IconInput } from "@/src/components/IconInput";
 import { TermsAgreementModal } from "@/src/components/TermsAgreementModal";
 import { GoogleLoginButton } from "@/src/components/GoogleLoginButton";
+import { LineLoginButton } from "@/src/components/LineLoginButton";
 
 // 会員登録はメールアドレス・パスワードのみで完結させる（2026-09-13の改修で、氏名・大学・
 // 志望業界等の詳細プロフィール入力を登録フローから分離した）。登録直後のアカウントは
@@ -195,7 +196,10 @@ export default function RegisterPage() {
         <div className="h-px flex-1 bg-gray-200" />
       </div>
 
-      <GoogleLoginButton label="Googleで登録" />
+      <div className="flex flex-col gap-3">
+        <GoogleLoginButton label="Googleで登録" />
+        <LineLoginButton label="LINEで登録" />
+      </div>
 
       <p className="mt-6 text-center text-sm text-gray-600">
         すでにアカウントをお持ちの方は{" "}
