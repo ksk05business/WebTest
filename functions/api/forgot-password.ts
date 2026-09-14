@@ -1,5 +1,6 @@
 import { hashPassword } from "../_lib/password";
 import { SITE_NAME, SITE_URL } from "../../src/lib/site";
+import { checkRateLimit, getClientIp } from "../_lib/rateLimit";
 
 interface Env {
   DB: D1Database;
@@ -7,7 +8,12 @@ interface Env {
   // Pages Functionsは send_email バインディングに対応していないため、REST API経由で送信する。
   EMAIL_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
+  RATE_LIMIT_KV?: KVNamespace;
 }
+
+// 同一IPからの/api/forgot-password連打による、Cloudflare Email Sending API課金の悪用を防ぐ。
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
 
 const OTP_TTL_MINUTES = 10;
 const FROM_ADDRESS = "noreply@shukatsu-webtest.com";
@@ -64,6 +70,20 @@ async function sendOtpEmail(env: Env, email: string, otp: string): Promise<void>
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const clientIp = getClientIp(context.request);
+  const rateLimit = await checkRateLimit(
+    context.env.RATE_LIMIT_KV,
+    `forgot-password:${clientIp}`,
+    RATE_LIMIT_MAX,
+    RATE_LIMIT_WINDOW_SECONDS
+  );
+  if (!rateLimit.allowed) {
+    return Response.json(
+      { error: "リクエストが多すぎます。しばらく時間をおいて再度お試しください。" },
+      { status: 429 }
+    );
+  }
+
   let body: ForgotPasswordBody;
   try {
     body = await context.request.json();

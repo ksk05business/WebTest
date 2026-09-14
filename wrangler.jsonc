@@ -9,5 +9,13 @@
       "database_name": "webtest-db",
       "database_id": "f5ecd161-b535-4c0a-8606-39c0d79b3346"
     }
+  ],
+  // 従量課金が発生しうる外部API（Cloudflare Email Sending、functions/api/forgot-password.ts）への
+  // 悪用（大量リクエストによる高額請求）を防ぐレートリミット用。functions/_lib/rateLimit.ts参照。
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT_KV",
+      "id": "aa250b70698c4788b0014c2b641ba1dd"
+    }
   ]
 }
