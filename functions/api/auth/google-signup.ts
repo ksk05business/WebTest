@@ -1,5 +1,5 @@
 import { generateInitialPassword, hashPassword } from "../../_lib/password";
-import { buildPlaceholderProfile } from "../../_lib/placeholderProfile";
+import { buildSocialPlaceholderProfile } from "../../_lib/placeholderProfile";
 import { createSession, sessionCookieHeader } from "../../_lib/session";
 import {
   CLEAR_PENDING_SIGNUP_COOKIE,
@@ -62,12 +62,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     );
   }
 
-  const p = buildPlaceholderProfile({
-    lastName: pending.familyName,
-    firstName: pending.givenName,
-    lastNameRomaji: pending.familyName,
-    firstNameRomaji: pending.givenName,
-  });
+  // Googleのプロフィール情報（氏名）は保存しない。本人がマイページで入力する。
+  const p = buildSocialPlaceholderProfile();
 
   const { hash, salt } = await hashPassword(generateInitialPassword());
 

@@ -43,3 +43,17 @@ export function buildPlaceholderProfile(input?: {
     graduationMonth: 3,
   };
 }
+
+// Google/LINEログイン経由の新規登録専用。OAuthプロバイダーから取得できた実名を
+// 本人の確認なしにプロフィールへ保存しないため、氏名関連フィールドは空文字にする
+// （last_name/first_name等はNOT NULL制約のため、「未入力」を表現できる最小値として
+// 空文字を使う。マイページ側はこの空文字を初期値としてそのまま表示し、本人の入力を必須とする）。
+export function buildSocialPlaceholderProfile() {
+  return {
+    ...buildPlaceholderProfile(),
+    lastName: "",
+    firstName: "",
+    lastNameRomaji: "",
+    firstNameRomaji: "",
+  };
+}

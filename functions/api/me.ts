@@ -3,10 +3,13 @@ import { MANUAL_ENTRY_UNIVERSITIES } from "../../src/data/universities";
 import { parseDesiredOccupations } from "../_lib/desiredOccupations";
 import { getAuthenticatedSubjectId } from "../_lib/session";
 import { isValidMbtiCode } from "../../src/data/mbti";
+import { isPlaceholderLineEmail } from "../_lib/linePlaceholderEmail";
 
 interface Env {
   DB: D1Database;
 }
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type UserProfileRow = {
   last_name: string;
@@ -58,10 +61,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     ...user,
     desired_occupations: desiredOccupations,
     is_profile_completed: user.is_profile_completed === 1,
+    // LINEログインでメールアドレスが未登録（ダミーアドレス保存）のユーザーのみ、
+    // マイページ側でメールアドレス入力欄を編集可能・必須として表示するためのフラグ。
+    email_editable: isPlaceholderLineEmail(user.email),
   });
 };
 
 type UpdateBody = {
+  email?: unknown;
   lastName?: unknown;
   firstName?: unknown;
   lastNameRomaji?: unknown;
@@ -94,6 +101,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   }
 
   const {
+    email,
     lastName,
     firstName,
     lastNameRomaji,
@@ -109,6 +117,30 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     graduationMonth,
     mbti,
   } = body;
+
+  const currentUser = await context.env.DB.prepare("SELECT email FROM users WHERE id = ?")
+    .bind(userId)
+    .first<{ email: string }>();
+  if (!currentUser) {
+    return Response.json({ error: "ユーザーが見つかりません" }, { status: 404 });
+  }
+
+  // LINEログインでメールアドレスが未登録（ダミーアドレス保存）のユーザーのみ、
+  // このタイミングで本人入力のメールアドレスを必須にして実際のemailへ更新する。
+  // それ以外のユーザーのメールアドレスは変更不可（既存仕様のまま）。
+  let newEmail = currentUser.email;
+  if (isPlaceholderLineEmail(currentUser.email)) {
+    if (typeof email !== "string" || !EMAIL_PATTERN.test(email.trim())) {
+      return Response.json({ error: "有効なメールアドレスを入力してください" }, { status: 400 });
+    }
+    newEmail = email.trim();
+    const existing = await context.env.DB.prepare("SELECT id FROM users WHERE email = ? AND id != ?")
+      .bind(newEmail, userId)
+      .first();
+    if (existing) {
+      return Response.json({ error: "このメールアドレスは既に登録されています" }, { status: 409 });
+    }
+  }
 
   if (
     typeof lastName !== "string" ||
@@ -172,12 +204,13 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   // 呼び出しに成功すれば常に1へ更新してよい。
   const result = await context.env.DB.prepare(
     `UPDATE users SET
-      last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
+      email = ?, last_name = ?, first_name = ?, last_name_romaji = ?, first_name_romaji = ?,
       faculty_type = ?, university = ?, university_category = ?, industry_first = ?, industry_second = ?, industry_third = ?,
       desired_occupations = ?, graduation_year = ?, graduation_month = ?, mbti = ?, is_profile_completed = 1
      WHERE id = ?`
   )
     .bind(
+      newEmail,
       lastName,
       firstName,
       lastNameRomaji,

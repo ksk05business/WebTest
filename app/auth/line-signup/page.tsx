@@ -3,23 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Lock, Mail } from "lucide-react";
+import { Lock } from "lucide-react";
 import { AuthLayout } from "@/src/components/AuthLayout";
-import { IconInput } from "@/src/components/IconInput";
 import { TermsAgreementModal } from "@/src/components/TermsAgreementModal";
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// functions/api/auth/line-callback.ts が「未登録（またはメールアドレス取得不可）」と
-// 判定した場合に遷移してくる画面。/auth/google-signupと同じ枠組みだが、LINEはメール
-// アドレスが取得できない場合があるため（チャネル側の許可申請が必要）、その場合は
-// メールアドレス入力欄を表示するフォールバックUIを追加している（要件4）。
+// functions/api/auth/line-callback.ts が「未登録」と判定した場合に遷移してくる画面。
+// /auth/google-signupと同じ枠組みだが、LINEはメールアドレスを取得できた場合でも
+// あえて保存しない（functions/api/auth/line-signup.ts参照）ため、ここでは入力を求めず、
+// 登録後にプロフィール設定画面（マイページ）で入力してもらう案内のみ表示する。
 export default function LineSignupPage() {
   const router = useRouter();
   const [pendingLoaded, setPendingLoaded] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [emailInput, setEmailInput] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [termsModalOpen, setTermsModalOpen] = useState(false);
@@ -27,17 +22,15 @@ export default function LineSignupPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const agreedAll = agreedToTerms && agreedToPrivacy;
-  const needsEmailInput = pendingLoaded && !pendingEmail;
 
   useEffect(() => {
     fetch("/api/auth/line-pending")
       .then((res) => res.json())
-      .then((data: { error?: string; email?: string | null }) => {
+      .then((data: { error?: string }) => {
         if (data.error) {
           setLoadError("LINEログインの情報が見つかりませんでした。もう一度お試しください。");
           return;
         }
-        setPendingEmail(data.email ?? null);
         setPendingLoaded(true);
       })
       .catch(() => setLoadError("通信エラーが発生しました。時間をおいて再度お試しください。"));
@@ -45,10 +38,6 @@ export default function LineSignupPage() {
 
   async function handleCreateAccount() {
     setError(null);
-    if (needsEmailInput && !EMAIL_PATTERN.test(emailInput.trim())) {
-      setError("有効なメールアドレスを入力してください");
-      return;
-    }
     if (!agreedAll) {
       setError("利用規約・プライバシーポリシーへの同意が必要です");
       return;
@@ -61,7 +50,6 @@ export default function LineSignupPage() {
         body: JSON.stringify({
           agreedTerms: agreedAll,
           scoutConsent: agreedToPrivacy,
-          ...(needsEmailInput ? { email: emailInput.trim() } : {}),
         }),
       });
       let data: { error?: string; name?: string } = {};
@@ -106,29 +94,8 @@ export default function LineSignupPage() {
   return (
     <AuthLayout title="会員登録" subtitle="LINEアカウントで新規会員登録を行います">
       <div className="flex flex-col gap-4">
-        {pendingEmail ? (
-          <p className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800">
-            <span className="font-semibold">{pendingEmail}</span> でアカウントを作成します。
-          </p>
-        ) : (
-          <>
-            <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-              LINEアカウントからメールアドレスを取得できませんでした。会員登録に使用するメールアドレスを入力してください。
-            </p>
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-gray-700">
-              メールアドレス
-              <IconInput
-                icon={Mail}
-                type="email"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="you@example.com"
-              />
-            </label>
-          </>
-        )}
-        <p className="text-xs text-gray-500">
-          大学・志望業界などのプロフィールは登録後に「プロフィール設定」画面からいつでも入力・変更できます。
+        <p className="rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-800">
+          LINEアカウントで新規登録します。お名前・メールアドレスなどのプロフィールは登録後に「プロフィール設定」画面からいつでも入力・変更できます。
         </p>
 
         <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-gray-50 p-3">
@@ -181,7 +148,7 @@ export default function LineSignupPage() {
         <button
           type="button"
           onClick={handleCreateAccount}
-          disabled={submitting || !agreedAll || (needsEmailInput && !emailInput.trim())}
+          disabled={submitting || !agreedAll}
           className="mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 disabled:shadow-none"
         >
           {submitting ? "登録中..." : "アカウントを作成する"}

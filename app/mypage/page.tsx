@@ -23,12 +23,15 @@ import { redirectToLogin } from "@/src/lib/authRedirect";
 
 const ROMAJI_PATTERN = /^[A-Za-z\- ]+$/;
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 type Profile = {
   last_name: string;
   first_name: string;
   last_name_romaji: string;
   first_name_romaji: string;
   email: string;
+  email_editable: boolean;
   faculty_type: string;
   university: string;
   university_category: string | null;
@@ -46,6 +49,7 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [email, setEmail] = useState("");
+  const [emailEditable, setEmailEditable] = useState(false);
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastNameRomaji, setLastNameRomaji] = useState("");
@@ -73,7 +77,8 @@ export default function MyPage() {
   const [savingPassword, setSavingPassword] = useState(false);
 
   function applyProfile(data: Profile) {
-    setEmail(data.email);
+    setEmail(data.email_editable ? "" : data.email);
+    setEmailEditable(data.email_editable);
     setLastName(data.last_name);
     setFirstName(data.first_name);
     setLastNameRomaji(data.last_name_romaji);
@@ -138,6 +143,7 @@ export default function MyPage() {
     setSuccess(false);
 
     if (
+      (emailEditable && !email.trim()) ||
       !lastName.trim() ||
       !firstName.trim() ||
       !lastNameRomaji.trim() ||
@@ -150,6 +156,10 @@ export default function MyPage() {
       desiredOccupations.length === 0
     ) {
       setError("すべての項目を入力してください");
+      return;
+    }
+    if (emailEditable && !EMAIL_PATTERN.test(email.trim())) {
+      setError("有効なメールアドレスを入力してください");
       return;
     }
     if (desiredOccupations.length > MAX_DESIRED_OCCUPATIONS) {
@@ -207,12 +217,14 @@ export default function MyPage() {
         return;
       }
       localStorage.setItem("spiUser", JSON.stringify({ name: data.name, email }));
+      setEmailEditable(false);
       setSavedProfile({
         last_name: lastName,
         first_name: firstName,
         last_name_romaji: lastNameRomaji,
         first_name_romaji: firstNameRomaji,
         email,
+        email_editable: false,
         faculty_type: facultyType,
         university,
         university_category: manualUniversityCategory,
@@ -310,7 +322,9 @@ export default function MyPage() {
             <dl className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 text-sm">
               <div>
                 <dt className="text-xs text-gray-500">メールアドレス</dt>
-                <dd className="text-gray-900">{email}</dd>
+                <dd className="text-gray-900">
+                  {email || <span className="text-gray-400">未登録（要入力）</span>}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">氏名</dt>
@@ -374,15 +388,27 @@ export default function MyPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
               メールアドレス
-              <input
-                type="email"
-                value={email}
-                disabled
-                className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-gray-500"
-              />
-              <span className="text-xs text-gray-400">
-                メールアドレスの変更は現在サポートしていません
-              </span>
+              {emailEditable ? (
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="min-h-12 rounded-lg border border-gray-300 px-3 py-2 text-gray-900"
+                />
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    value={email}
+                    disabled
+                    className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-gray-500"
+                  />
+                  <span className="text-xs text-gray-400">
+                    メールアドレスの変更は現在サポートしていません
+                  </span>
+                </>
+              )}
             </label>
 
             <div className="flex flex-col gap-2 sm:flex-row">
