@@ -13,7 +13,7 @@ export const TEST_TYPES: TestType[] = [
   { id: "tamatebako", name: "玉手箱", href: "/test", available: true },
   { id: "tgweb", name: "TG-WEB", href: "/test", available: true },
   { id: "gab_cgab", name: "GAB / C-GAB", href: "/test", available: true },
-  { id: "cab", name: "CAB", href: "/test", available: false },
+  { id: "cab", name: "Web-CAB", href: "/test", available: false },
   // SCOAの本番模試は、言語・数理・論理・常識・英語の全分野を横断する単一の統合模試として提供する
   // （app/test/page.tsxのEXAM_PARTS.scoa参照、全120問・60分）。出題対象は練習問題プールとは別に
   // 確保した本番模試専用の問題プール（questions.is_mock_only=1）のみで、各分野からランダム抽出済み。
