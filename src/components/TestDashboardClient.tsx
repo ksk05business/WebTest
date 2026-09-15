@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Info } from "lucide-react";
+import { ChevronDown, ChevronLeft, Info } from "lucide-react";
 import { DashboardHeader } from "./DashboardHeader";
 import { ExamModeSelectModal } from "./ExamModeSelectModal";
 import { MockHistorySelectModal } from "./MockHistorySelectModal";
@@ -90,14 +90,17 @@ export function TestDashboardClient({ testId }: { testId: string }) {
           )}
         </div>
 
-        {/* テストの説明エリア */}
+        {/* テストの説明エリア（折りたたみ式） */}
         {explainer && (
-          <section className="rounded-xl border border-gray-200 bg-white p-5">
-            <div className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-gray-800">
-              <Info className="h-4 w-4 text-blue-600" />
-              {explainer.heading}
-            </div>
-            <div className="flex flex-col gap-4 text-sm text-gray-600">
+          <details open className="group rounded-xl border border-gray-200 bg-white">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 text-sm font-semibold text-gray-800 marker:content-none [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-1.5">
+                <Info className="h-4 w-4 flex-shrink-0 text-blue-600" />
+                {explainer.heading}
+              </span>
+              <ChevronDown className="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="flex flex-col gap-4 px-5 pb-5 text-sm text-gray-600">
               {explainer.sections.map((section) => (
                 <div key={section.title}>
                   <p className="font-semibold text-gray-700">{section.title}</p>
@@ -151,7 +154,7 @@ export function TestDashboardClient({ testId }: { testId: string }) {
                 </div>
               ))}
             </div>
-          </section>
+          </details>
         )}
 
         {/* アクションボタン */}
