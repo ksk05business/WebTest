@@ -83,7 +83,7 @@ export function TestDashboardClient({ testId }: { testId: string }) {
 
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{testType.name}</h1>
-          {!testType.available && !hasPracticeContent && (
+          {!testType.available && !hasPracticeContent && !explainer && (
             <p className="mt-2 text-sm text-amber-700">
               現在問題コンテンツを順次準備中です。公開まで今しばらくお待ちください。
             </p>
