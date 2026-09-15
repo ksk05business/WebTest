@@ -259,14 +259,30 @@ const GAB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   },
 ];
 
+// CABは「暗算」「法則性」「命令表」「暗号」の4科目構成（Web-CABの概要説明・testExplainers.tsの
+// 解説と対応）。2026-09-15時点で実データがあるのは「法則性」のみ。他の3科目は単元一覧に
+// 先行して掲載し、未投入の間はPracticeUnitSelector.tsxの「収録0問→準備中バッジ+トースト」表示に任せる。
+const CAB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
+  {
+    category: "cab_ability",
+    groupLabel: "能力検査",
+    units: [
+      { id: "cab_calculation", subCategory: "暗算", label: "暗算" },
+      { id: "cab_pattern", subCategory: "法則性", label: "法則性" },
+      { id: "cab_instruction", subCategory: "命令表", label: "命令表" },
+      { id: "cab_cipher", subCategory: "暗号", label: "暗号" },
+    ],
+  },
+];
+
 // テスト種別id（src/data/testTypes.tsのTestType.id）ごとの単元グループ。
-// 未定義のテスト種別（CAB）は分野・単元一覧自体をまだ用意していない。
 export const PRACTICE_UNIT_GROUPS_BY_TEST: Record<string, PracticeUnitGroup[]> = {
   spi: SPI_PRACTICE_UNIT_GROUPS,
   tamatebako: TAMATEBAKO_PRACTICE_UNIT_GROUPS,
   tgweb: TGWEB_PRACTICE_UNIT_GROUPS,
   scoa: SCOA_PRACTICE_UNIT_GROUPS,
   gab_cgab: GAB_PRACTICE_UNIT_GROUPS,
+  cab: CAB_PRACTICE_UNIT_GROUPS,
 };
 
 export const DEFAULT_TEST_ID = "spi";

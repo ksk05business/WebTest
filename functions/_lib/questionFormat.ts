@@ -43,6 +43,7 @@ const CATEGORY_CODE: Record<string, { test: string; unit: string }> = {
   gab_verbal: { test: "GAB", unit: "L" },
   gab_quantitative: { test: "GAB", unit: "Q" },
   gab_english: { test: "GAB", unit: "E" },
+  cab_ability: { test: "CAB", unit: "A" },
 };
 
 function buildQuestionCode(category: string, seq: number | undefined): string | undefined {

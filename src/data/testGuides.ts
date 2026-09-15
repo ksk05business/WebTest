@@ -290,12 +290,12 @@ export const TEST_GUIDES: TestGuide[] = [
       {
         question: "Webテストナビ でCABは練習できますか？",
         answer:
-          "CAB専用の練習問題は現在準備中です。公開までは対応済みのSPI3・玉手箱で基礎的な処理速度・論理的思考力を鍛えておくことをおすすめします。",
+          "「法則性」の練習問題を公開済みです。暗算・命令表・暗号は準備中のため、公開までは対応済みのSPI3・玉手箱で基礎的な処理速度・論理的思考力を鍛えておくことをおすすめします。",
       },
     ],
-    practiceAvailable: false,
-    practiceHref: "/register",
-    practiceNote: "CABの練習問題は準備中です。公開までは対応済みのSPI3・玉手箱で対策を進めましょう。",
+    practiceAvailable: true,
+    practiceHref: "/practice?testType=cab",
+    practiceNote: "「法則性」の練習問題を無料で公開中です。他の科目は準備中のため、公開までは対応済みのSPI3・玉手箱で対策を進めましょう。",
   },
   {
     slug: "scoa",

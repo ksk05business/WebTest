@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ChevronDown, ChevronLeft, Info } from "lucide-react";
 import { DashboardHeader } from "./DashboardHeader";
 import { ExamModeSelectModal } from "./ExamModeSelectModal";
 import { MockHistorySelectModal } from "./MockHistorySelectModal";
@@ -13,11 +13,6 @@ import { TEST_TYPES, type TestType } from "@/src/data/testTypes";
 import { PRACTICE_UNIT_GROUPS_BY_TEST } from "@/src/data/practiceUnits";
 import { TEST_EXPLAINERS } from "@/src/data/testExplainers";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
-
-// Web-CAB専用: 問題データがまだ無いため、科目名だけを並べた「型」のプレースホルダー。
-// クリックしても練習ページへは遷移せず、準備中トーストを出すのみ（/practiceのPracticeUnitSelector.tsx
-// で使っている「単元ボタン+準備中バッジ」の見た目を流用している）。
-const CAB_PLACEHOLDER_SUBJECTS = ["暗算", "法則性", "命令表", "暗号"];
 
 // 試験別専用ページ（/dashboard/[testId]）の実体。テストの説明・アクションボタン（練習問題／模試）・
 // そのテストに絞った成績分析（PerformanceDashboard）をまとめて表示する。メインダッシュボードから
@@ -32,13 +27,6 @@ export function TestDashboardClient({ testId }: { testId: string }) {
   // （バックエンド側のチェックが最終防御線のため、フェイルオープンで問題ない）。
   const [isProfileCompleted, setIsProfileCompleted] = useState<boolean | null>(null);
   const [profileRequiredModalOpen, setProfileRequiredModalOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!toast) return;
-    const id = setTimeout(() => setToast(null), 2500);
-    return () => clearTimeout(id);
-  }, [toast]);
 
   useEffect(() => {
     const raw = localStorage.getItem("spiUser");
@@ -169,33 +157,6 @@ export function TestDashboardClient({ testId }: { testId: string }) {
           </details>
         )}
 
-        {/* 科目一覧（Web-CABは問題データ未投入のため、選択UIの型のみ先行実装） */}
-        {testId === "cab" && (
-          <section className="flex flex-col gap-2">
-            <p className="text-sm font-semibold text-gray-700">科目を選ぶ</p>
-            <div className="flex flex-col gap-2">
-              {CAB_PLACEHOLDER_SUBJECTS.map((subject) => (
-                <button
-                  key={subject}
-                  type="button"
-                  onClick={() => setToast(`「${subject}」の問題は準備中です`)}
-                  className="flex min-h-12 items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white p-3 text-left opacity-50 transition-colors"
-                >
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800">
-                    {subject}
-                  </span>
-                  <span className="flex flex-shrink-0 items-center gap-2">
-                    <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-400">
-                      準備中
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* アクションボタン */}
         {(hasPracticeContent || testType.available) && (
           <section className="flex flex-col gap-3">
@@ -259,12 +220,6 @@ export function TestDashboardClient({ testId }: { testId: string }) {
       )}
       {profileRequiredModalOpen && (
         <ProfileRequiredModal onClose={() => setProfileRequiredModalOpen(false)} />
-      )}
-
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-gray-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg">
-          {toast}
-        </div>
       )}
     </div>
   );
