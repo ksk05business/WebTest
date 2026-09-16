@@ -114,12 +114,13 @@ function PracticePageInner() {
   function loadQuestions() {
     const fetchUrl =
       scope === "memorization"
-        ? `/api/practice/history?scope=memorization&limit=20${category ? `&category=${encodeURIComponent(category)}` : ""}`
+        ? `/api/practice/history?scope=memorization${category ? `&category=${encodeURIComponent(category)}` : ""}`
         : scope === "wrong"
-          ? `/api/practice/history?testType=${encodeURIComponent(testId)}&limit=20`
+          ? `/api/practice/history?testType=${encodeURIComponent(testId)}`
           : (() => {
-              // statusFilter（未回答のみ/×＋△のみ復習）指定時は該当する全問題を出題するため、上限を大きく取る。
-              const params = new URLSearchParams({ limit: statusFilter ? "300" : "20" });
+              // 対象問題を全件出題するため、API側が許容する上限（MAX_LIMIT/STATUS_FILTER_MAX_LIMIT）
+              // いっぱいまで要求する。実際の上限は/api/questions側で決まる。
+              const params = new URLSearchParams({ limit: "300" });
               if (category) {
                 params.set("category", category);
                 if (subCategory) params.set("subCategory", subCategory);

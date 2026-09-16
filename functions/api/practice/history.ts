@@ -100,11 +100,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const isMemorizationScope = !testType && params.get("scope") === "memorization";
   const categoryFilter = params.get("category");
   const countOnly = params.get("countOnly") === "1";
-  const limitRaw = params.get("limit");
-  const limit = Math.min(
-    Math.max(limitRaw !== null && !Number.isNaN(Number(limitRaw)) ? Number(limitRaw) : 20, 1),
-    50
-  );
 
   if (!testType && !isMemorizationScope) {
     return Response.json({ error: "testTypeまたはscope=memorizationを指定してください" }, { status: 400 });
@@ -188,10 +183,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      JOIN questions q ON q.id = w.question_id
      JOIN ranked r ON r.id = q.id
      WHERE q.status = 'published' AND q.is_mock_only = 0
-     ORDER BY RANDOM()
-     LIMIT ?`
+     ORDER BY RANDOM()`
   )
-    .bind(...latestBinds, limit)
+    .bind(...latestBinds)
     .all<WrongRow>();
 
   return Response.json({
