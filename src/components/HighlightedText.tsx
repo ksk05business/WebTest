@@ -68,13 +68,26 @@ function renderInlineMarks(text: string) {
 
 // 助詞など、targetsに渡された語句がtext中に出現する箇所をすべて太字ハイライトする
 // （同じ語句が複数回現れる場合はすべて対象。マッチが無ければtextをそのまま返す）。
+//
+// text側に【対象語句】という括弧付きの形が実際に存在する場合（＝問題文自体。ターゲットは
+// 問題文の【】から抽出しているので必ず存在する）は、その括弧付きの箇所だけを対象にする。
+// 括弧無しの地の文全体を素朴に総当たりすると、「文法的に同じ用法の…」のような定型の
+// 設問文自体に含まれる同じ助詞（「に」「の」「を」等、対象語句と偶然同じ文字）まで誤って
+// ハイライトしてしまう実害があったため（例: target="に"の問題で設問文中の「文法的に」の
+// 「に」まで【に】と表示されてしまう不具合）。
+// 括弧付きの形がtext中に無い場合（＝選択肢側。選択肢は【】を含まない地の文）は、
+// 従来どおり語句がそのまま出現する箇所をすべて対象にする。
 function renderGlobalMatches(text: string, matchSet: Set<string>) {
   if (matchSet.size === 0) {
     return <>{text}</>;
   }
 
   const escaped = [...matchSet].map(escapeRegExp);
-  const pattern = new RegExp(`(【(?:${escaped.join("|")})】|${escaped.join("|")})`, "g");
+  const bracketAlternation = escaped.map((e) => `【${e}】`).join("|");
+  const hasBracketForm = new RegExp(bracketAlternation).test(text);
+  const pattern = hasBracketForm
+    ? new RegExp(`(${bracketAlternation})`, "g")
+    : new RegExp(`(${escaped.join("|")})`, "g");
   const parts = text.split(pattern).filter((part) => part !== undefined && part !== "");
 
   if (parts.length <= 1) {
