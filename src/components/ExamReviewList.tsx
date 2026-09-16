@@ -1,12 +1,15 @@
 import type { ExamReviewEntry } from "@/src/data/questions";
 import { getTargetTimeSeconds } from "@/src/data/targetTimes";
+import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
 
 // 試験終了直後の結果画面（/result）と、過去の受験結果の詳細画面（/result/history）の
 // 両方で使う「解答一覧」の共通レンダリング。問題文・選択肢（正誤色分け）・解説・解答時間を表示する。
 export function ExamReviewList({ review }: { review: ExamReviewEntry[] }) {
   return (
     <div className="flex flex-col gap-4">
-      {review.map((entry, i) => (
+      {review.map((entry, i) => {
+        const highlightTargets = extractBracketTargets(entry.text);
+        return (
         <div
           key={i}
           className={`rounded-lg border p-4 ${
@@ -30,7 +33,9 @@ export function ExamReviewList({ review }: { review: ExamReviewEntry[] }) {
           </div>
 
           {entry.title && <p className="mb-1 text-sm font-semibold text-blue-700">{entry.title}</p>}
-          <p className="whitespace-pre-wrap text-sm font-medium text-gray-900">{entry.text}</p>
+          <p className="whitespace-pre-wrap text-sm font-medium text-gray-900">
+            <HighlightedText text={entry.text} targets={highlightTargets} />
+          </p>
 
           {entry.imageDataUri && (
             <div className="mt-2 overflow-x-auto">
@@ -93,7 +98,7 @@ export function ExamReviewList({ review }: { review: ExamReviewEntry[] }) {
               return (
                 <div key={choice.label} className={`rounded-md border px-3 py-1.5 text-sm ${style}`}>
                   <span className="mr-2 font-bold">{choice.label}.</span>
-                  {choice.text}
+                  <HighlightedText text={choice.text} targets={highlightTargets} />
                   {isSelectedChoice && !isCorrectChoice && (
                     <span className="ml-2 text-xs font-semibold">（あなたの解答）</span>
                   )}
@@ -132,7 +137,8 @@ export function ExamReviewList({ review }: { review: ExamReviewEntry[] }) {
               })()}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 import { ProfileRequiredModal } from "@/src/components/ProfileRequiredModal";
+import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -406,6 +407,7 @@ function PracticePageInner() {
   }
 
   const isCorrect = selected === question.answer;
+  const highlightTargets = extractBracketTargets(question.text);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-10">
@@ -469,7 +471,9 @@ function PracticePageInner() {
         <p className="text-sm font-semibold text-blue-700">{question.title}</p>
       )}
 
-      <p className="whitespace-pre-wrap text-lg font-medium text-gray-900">{question.text}</p>
+      <p className="whitespace-pre-wrap text-lg font-medium text-gray-900">
+        <HighlightedText text={question.text} targets={highlightTargets} />
+      </p>
 
       {question.imageDataUri && (
         <div className="overflow-x-auto">
@@ -542,7 +546,7 @@ function PracticePageInner() {
               className={`flex min-h-12 items-center rounded-lg border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed ${style}`}
             >
               <span className="mr-2 font-bold">{choice.label}.</span>
-              {choice.text}
+              <HighlightedText text={choice.text} targets={highlightTargets} />
             </button>
           );
         })}

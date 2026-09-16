@@ -7,6 +7,7 @@ import type { ExamReviewEntry, Question } from "@/src/data/questions";
 import { formatJapaneseDate } from "@/src/lib/formatDate";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 import { ProfileRequiredModal } from "@/src/components/ProfileRequiredModal";
+import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
 
 // 基礎能力試験（言語・非言語）は「言語39問＋非言語30問＝計69問の固定ロースター」を、35分間
 // （2100秒）のタイムボックス内で解く方式（言語は本来40問が目安だが、長文読解が3問1組の
@@ -447,6 +448,7 @@ function QuestionCard({
   question: Question;
   onSelect: (label: string) => void;
 }) {
+  const highlightTargets = extractBracketTargets(question.text);
   return (
     <>
       {question.questionCode && (
@@ -457,7 +459,9 @@ function QuestionCard({
 
       {question.title && <p className="text-sm font-semibold text-blue-700">{question.title}</p>}
 
-      <p className="whitespace-pre-wrap text-lg font-medium text-gray-900">{question.text}</p>
+      <p className="whitespace-pre-wrap text-lg font-medium text-gray-900">
+        <HighlightedText text={question.text} targets={highlightTargets} />
+      </p>
 
       {question.imageDataUri && (
         <div className="overflow-x-auto">
@@ -518,7 +522,7 @@ function QuestionCard({
             className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-left transition-colors hover:bg-gray-50"
           >
             <span className="mr-2 font-bold">{choice.label}.</span>
-            {choice.text}
+            <HighlightedText text={choice.text} targets={highlightTargets} />
           </button>
         ))}
       </div>
