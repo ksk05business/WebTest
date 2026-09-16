@@ -20,6 +20,18 @@ function escapeRegExp(value: string): string {
 const HIGHLIGHT_CLASS =
   "font-bold text-indigo-700 underline decoration-indigo-300 decoration-2 underline-offset-2";
 
+// マッチした語句を強調表示する。問題文側は元のテキストにすでに【】が付いているためそのまま
+// 太字化し、選択肢側（【】を含まない地の文からのマッチ）には表示上【】を補って囲むことで、
+// 問題文と選択肢のどちらを見ても「同じ記法で対象語句が示されている」状態にする。
+function renderHighlightedSpan(display: string, key: number) {
+  const alreadyBracketed = display.startsWith("【") && display.endsWith("】");
+  return (
+    <strong key={key} className={HIGHLIGHT_CLASS}>
+      {alreadyBracketed ? display : `【${display}】`}
+    </strong>
+  );
+}
+
 // 【対象語句】のすぐ後ろに続く「（正解の漢字）」のような丸括弧注記は、答えそのものが
 // 画面に露出してしまう（ネタバレになる）ため、表示前に完全に取り除く。
 // 全角（）・半角()の両方に対応し、間に空白が挟まっていても許容する。
@@ -45,11 +57,7 @@ function renderInlineMarks(text: string) {
     if (match.index > lastIndex) {
       nodes.push(<Fragment key={key++}>{text.slice(lastIndex, match.index)}</Fragment>);
     }
-    nodes.push(
-      <strong key={key++} className={HIGHLIGHT_CLASS}>
-        {match[1]}
-      </strong>
-    );
+    nodes.push(renderHighlightedSpan(match[1], key++));
     lastIndex = match.index + match[0].length;
   }
   if (lastIndex < text.length) {
@@ -78,13 +86,7 @@ function renderGlobalMatches(text: string, matchSet: Set<string>) {
       {parts.map((part, i) => {
         const inner = part.startsWith("【") && part.endsWith("】") ? part.slice(1, -1) : part;
         const isMatch = matchSet.has(inner);
-        return isMatch ? (
-          <strong key={i} className={HIGHLIGHT_CLASS}>
-            {part}
-          </strong>
-        ) : (
-          <Fragment key={i}>{part}</Fragment>
-        );
+        return isMatch ? renderHighlightedSpan(part, i) : <Fragment key={i}>{part}</Fragment>;
       })}
     </>
   );
