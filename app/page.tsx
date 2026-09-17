@@ -208,6 +208,51 @@ const JSON_LD = {
   ],
 };
 
+// Google/LINE登録訴求の吹き出し（RegisterCtaBubble・HeaderRegisterBubble）で共通利用するミニロゴ。
+// GoogleLoginButton.tsx/LineLoginButton.tsxと同じSVGパスデータを使い、実際のログインボタンの
+// ロゴと完全に一致させる。
+function GoogleMiniIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={`${className} flex-shrink-0`} viewBox="0 0 48 48" aria-hidden="true">
+      <path
+        fill="#FFC107"
+        d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
+        c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24
+        c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
+      />
+      <path
+        fill="#FF3D00"
+        d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039
+        l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+      />
+      <path
+        fill="#4CAF50"
+        d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36
+        c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+      />
+      <path
+        fill="#1976D2"
+        d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571
+        c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24
+        C44,22.659,43.862,21.35,43.611,20.083z"
+      />
+    </svg>
+  );
+}
+
+function LineMiniIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <span
+      className={`${className} flex flex-shrink-0 items-center justify-center rounded-full`}
+      style={{ backgroundColor: "#06C755" }}
+    >
+      <svg className="h-[62%] w-[62%]" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 5.61 2 10.062c0 3.99 3.548 7.33 8.345 7.962.325.07.767.215.879.494.101.253.066.65.033.906l-.142.858c-.043.253-.2.99.868.54 1.067-.45 5.76-3.393 7.858-5.81C21.29 13.37 22 11.79 22 10.062 22 5.61 17.523 2 12 2Zm-3.5 9.8H7.1a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.4a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31Zm3.72 0h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31ZM14.9 11.8a.31.31 0 0 1-.31.31h-.001a.307.307 0 0 1-.248-.125l-1.767-2.386v2.2a.31.31 0 0 1-.31.31h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001c.098 0 .19.048.248.125l1.767 2.386v-2.2a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31Zm3.09-3.166h-1.63v.71h1.63a.31.31 0 1 1 0 .62h-1.63v.71h1.63a.31.31 0 1 1 0 .619h-1.94a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.94a.31.31 0 1 1 0 .619Z" />
+      </svg>
+    </span>
+  );
+}
+
 // メインの無料登録ボタンの直上に添える、心理的ハードルを下げるための吹き出し。
 // 登録ボタンをrelativeでラップした親要素の中で使う（このコンポーネント自身がabsolute配置）。
 // アニメーションはapp/globals.cssのanimate-float-gentle（画面右下シェアボタンの吹き出しと共通）を再利用する。
@@ -218,41 +263,31 @@ function RegisterCtaBubble() {
       className="animate-float-gentle pointer-events-none absolute -top-14 left-1/2 z-20 w-max -translate-x-1/2"
     >
       <div className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-gray-800 shadow-xl ring-1 ring-gray-200">
-        <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 48 48" aria-hidden="true">
-          <path
-            fill="#FFC107"
-            d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
-            c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24
-            c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
-          />
-          <path
-            fill="#FF3D00"
-            d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039
-            l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
-          />
-          <path
-            fill="#4CAF50"
-            d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36
-            c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-          />
-          <path
-            fill="#1976D2"
-            d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571
-            c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24
-            C44,22.659,43.862,21.35,43.611,20.083z"
-          />
-        </svg>
-        <span
-          className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: "#06C755" }}
-        >
-          <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-            <path d="M12 2C6.477 2 2 5.61 2 10.062c0 3.99 3.548 7.33 8.345 7.962.325.07.767.215.879.494.101.253.066.65.033.906l-.142.858c-.043.253-.2.99.868.54 1.067-.45 5.76-3.393 7.858-5.81C21.29 13.37 22 11.79 22 10.062 22 5.61 17.523 2 12 2Zm-3.5 9.8H7.1a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.4a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31Zm3.72 0h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31ZM14.9 11.8a.31.31 0 0 1-.31.31h-.001a.307.307 0 0 1-.248-.125l-1.767-2.386v2.2a.31.31 0 0 1-.31.31h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001c.098 0 .19.048.248.125l1.767 2.386v-2.2a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31Zm3.09-3.166h-1.63v.71h1.63a.31.31 0 1 1 0 .62h-1.63v.71h1.63a.31.31 0 1 1 0 .619h-1.94a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.94a.31.31 0 1 1 0 .619Z" />
-          </svg>
-        </span>
+        <GoogleMiniIcon />
+        <LineMiniIcon />
         Google・LINEでサクッと10秒登録！
       </div>
       <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
+    </div>
+  );
+}
+
+// ヘッダー（常時sticky表示、ページ最上部）の「無料登録」ボタン用の吹き出し。
+// ヘッダーの上には画面の外（ビューポート外）しか無くボタンの真上には出せないため、
+// ボタンの下にしっぽを上向きにして吊り下げる形にする（スクロール位置に関わらず必ず画面内に収まる）。
+// ボタンが画面右端に寄っているため、はみ出さないよう右揃え（right-0）で配置する。
+function HeaderRegisterBubble() {
+  return (
+    <div
+      aria-hidden
+      className="animate-float-gentle pointer-events-none absolute right-0 top-full z-20 mt-2.5 w-max"
+    >
+      <div className="absolute -top-1.5 right-4 h-0 w-0 border-x-[5px] border-b-[6px] border-x-transparent border-b-white" />
+      <div className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-800 shadow-xl ring-1 ring-gray-200">
+        <GoogleMiniIcon className="h-3.5 w-3.5" />
+        <LineMiniIcon className="h-3.5 w-3.5" />
+        Google・LINEでサクッと登録！
+      </div>
     </div>
   );
 }
@@ -280,12 +315,15 @@ export default function Home() {
             >
               ログイン
             </Link>
-            <Link
-              href="/register"
-              className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
-            >
-              無料登録
-            </Link>
+            <div className="relative">
+              <HeaderRegisterBubble />
+              <Link
+                href="/register"
+                className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
+              >
+                無料登録
+              </Link>
+            </div>
           </div>
         </div>
       </header>
