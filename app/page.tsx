@@ -208,6 +208,55 @@ const JSON_LD = {
   ],
 };
 
+// メインの無料登録ボタンの直上に添える、心理的ハードルを下げるための吹き出し。
+// 登録ボタンをrelativeでラップした親要素の中で使う（このコンポーネント自身がabsolute配置）。
+// アニメーションはapp/globals.cssのanimate-float-gentle（画面右下シェアボタンの吹き出しと共通）を再利用する。
+function RegisterCtaBubble() {
+  return (
+    <div
+      aria-hidden
+      className="animate-float-gentle pointer-events-none absolute -top-14 left-1/2 z-20 w-max -translate-x-1/2"
+    >
+      <div className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-gray-800 shadow-xl ring-1 ring-gray-200">
+        <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 48 48" aria-hidden="true">
+          <path
+            fill="#FFC107"
+            d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
+            c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24
+            c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
+          />
+          <path
+            fill="#FF3D00"
+            d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039
+            l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+          />
+          <path
+            fill="#4CAF50"
+            d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36
+            c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+          />
+          <path
+            fill="#1976D2"
+            d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571
+            c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24
+            C44,22.659,43.862,21.35,43.611,20.083z"
+          />
+        </svg>
+        <span
+          className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full"
+          style={{ backgroundColor: "#06C755" }}
+        >
+          <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 5.61 2 10.062c0 3.99 3.548 7.33 8.345 7.962.325.07.767.215.879.494.101.253.066.65.033.906l-.142.858c-.043.253-.2.99.868.54 1.067-.45 5.76-3.393 7.858-5.81C21.29 13.37 22 11.79 22 10.062 22 5.61 17.523 2 12 2Zm-3.5 9.8H7.1a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.4a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31Zm3.72 0h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31ZM14.9 11.8a.31.31 0 0 1-.31.31h-.001a.307.307 0 0 1-.248-.125l-1.767-2.386v2.2a.31.31 0 0 1-.31.31h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001c.098 0 .19.048.248.125l1.767 2.386v-2.2a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31Zm3.09-3.166h-1.63v.71h1.63a.31.31 0 1 1 0 .62h-1.63v.71h1.63a.31.31 0 1 1 0 .619h-1.94a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.94a.31.31 0 1 1 0 .619Z" />
+          </svg>
+        </span>
+        Google・LINEでサクッと10秒登録！
+      </div>
+      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
+    </div>
+  );
+}
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -275,12 +324,15 @@ export default function Home() {
             に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
           </p>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
-            <Link
-              href="/register"
-              className="whitespace-nowrap rounded-full bg-white px-6 py-4 text-sm font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:px-8 sm:text-base"
-            >
-              【完全無料】今すぐ対策を始める
-            </Link>
+            <div className="relative">
+              <RegisterCtaBubble />
+              <Link
+                href="/register"
+                className="whitespace-nowrap rounded-full bg-white px-6 py-4 text-sm font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:px-8 sm:text-base"
+              >
+                【完全無料】今すぐ対策を始める
+              </Link>
+            </div>
             <Link
               href="/login"
               className="rounded-full border-2 border-white/70 px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-white/10"
@@ -742,12 +794,15 @@ export default function Home() {
           <h2 className="text-balance text-2xl font-bold text-white sm:text-3xl">
             対策も、スカウトも。すべて無料ではじめよう。
           </h2>
-          <Link
-            href="/register"
-            className="rounded-full bg-white px-10 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            完全無料でWebテスト対策を始める
-          </Link>
+          <div className="relative">
+            <RegisterCtaBubble />
+            <Link
+              href="/register"
+              className="rounded-full bg-white px-10 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              完全無料でWebテスト対策を始める
+            </Link>
+          </div>
         </FadeInSection>
       </section>
 
