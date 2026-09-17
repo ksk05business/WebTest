@@ -399,6 +399,146 @@ export default function Home() {
         </FadeInSection>
       </section>
 
+      {/* 利用イメージ（学習画面モックアップ） */}
+      <section className="border-y border-gray-100 bg-gray-50 px-6 py-20 sm:py-24">
+        <FadeInSection className="mx-auto max-w-6xl">
+          <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-3 text-center">
+            <span className="flex w-fit items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+              <Smartphone className="h-3.5 w-3.5" />
+              実際の画面イメージ
+            </span>
+            <h2 className="text-balance text-2xl font-bold text-gray-900 sm:text-3xl">
+              登録すると、こんな画面で対策できます
+            </h2>
+            <p className="text-balance text-sm text-gray-500 sm:text-base">
+              問題演習から成績分析まで、迷わず使えるシンプルなUIです。
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* モック1: 問題演習・解答解説 */}
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+              <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+                <span className="h-2.5 w-2.5 rounded-full bg-green-300" />
+                <span className="ml-2 text-xs font-medium text-gray-400">練習問題</span>
+              </div>
+              <div className="flex flex-col gap-4 p-5 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                    非言語 - 損益算
+                  </span>
+                  <span className="text-xs font-medium text-gray-400">問12 / 全35問</span>
+                </div>
+                <p className="text-balance text-sm font-bold leading-relaxed text-gray-900 sm:text-base">
+                  定価1,200円の商品を2割引で販売した。販売価格として正しいものはどれか。
+                </p>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { label: "A", text: "960円", correct: true },
+                    { label: "B", text: "980円" },
+                    { label: "C", text: "1,000円" },
+                    { label: "D", text: "1,020円" },
+                    { label: "E", text: "1,040円" },
+                  ].map((choice) => (
+                    <div
+                      key={choice.label}
+                      className={`flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm ${
+                        choice.correct
+                          ? "border-green-300 bg-green-50 font-semibold text-green-800"
+                          : "border-gray-200 text-gray-600"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+                          choice.correct ? "bg-green-600 text-white" : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {choice.label}
+                      </span>
+                      {choice.text}
+                      {choice.correct && <CheckCircle2 className="ml-auto h-4 w-4 flex-shrink-0 text-green-600" />}
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3.5 text-xs leading-relaxed text-blue-900 sm:text-sm">
+                  <p className="mb-1 font-bold text-blue-700">解説</p>
+                  定価1,200円の2割引は、1,200×(1−0.2)＝1,200×0.8＝<strong className="font-bold">960円</strong>。
+                  よって正解はAです。
+                </div>
+              </div>
+            </div>
+
+            {/* モック2: 成績・分析グラフ */}
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+              <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+                <span className="h-2.5 w-2.5 rounded-full bg-green-300" />
+                <span className="ml-2 text-xs font-medium text-gray-400">成績分析</span>
+              </div>
+              <div className="flex flex-col gap-5 p-5 sm:p-6">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-gray-500">総合偏差値</p>
+                    <p className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-extrabold text-transparent">
+                      65.4
+                    </p>
+                  </div>
+                  <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
+                    <TrendingUp className="h-3.5 w-3.5" />
+                    +3.2 先月比
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {[
+                    { label: "言語", score: 78 },
+                    { label: "非言語", score: 62 },
+                    { label: "英語", score: 71 },
+                    { label: "構造的把握", score: 55 },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center gap-3">
+                      <span className="w-20 flex-shrink-0 text-xs font-medium text-gray-600 sm:w-24 sm:text-sm">
+                        {row.label}
+                      </span>
+                      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+                          style={{ width: `${row.score}%` }}
+                        />
+                      </div>
+                      <span className="w-8 flex-shrink-0 text-right text-xs font-bold text-gray-700 sm:text-sm">
+                        {row.score}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+                  <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
+                    得意：言語・英語
+                  </span>
+                  <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                    要復習：構造的把握
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-center">
+            <Link
+              href="/register"
+              className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:text-base"
+            >
+              無料登録してこの画面を使ってみる
+            </Link>
+          </div>
+        </FadeInSection>
+      </section>
+
       {/* 忘却曲線グラフ */}
       <section className="border-y border-purple-100 bg-purple-50/40 px-6 py-20 sm:py-24">
         <FadeInSection className="mx-auto max-w-5xl">
