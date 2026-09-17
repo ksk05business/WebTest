@@ -22,6 +22,7 @@ import { TEST_TYPES } from "@/src/data/testTypes";
 import { BusinessLink } from "@/src/components/BusinessLink";
 import { FadeInSection } from "@/src/components/FadeInSection";
 import { ForgettingCurveChart } from "@/src/components/ForgettingCurveChart";
+import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
 import { ShareButtons } from "@/src/components/ShareButtons";
 import { SmoothScroll } from "@/src/components/SmoothScroll";
 import { SupportChatWidget } from "@/src/components/SupportChatWidget";
@@ -51,7 +52,7 @@ const FEATURES = [
   {
     icon: BarChart3,
     title: "本番想定の高精度Webテスト模試",
-    description: "偏差値・順位をリアルタイムに算出し、カテゴリ別の苦手分野を分析グラフで可視化します。",
+    description: "正答率をリアルタイムに算出し、カテゴリ別の苦手分野を分析グラフで可視化します。",
   },
   {
     icon: Brain,
@@ -118,13 +119,43 @@ const STEPS = [
   {
     icon: FileText,
     title: "模試",
-    description: "本番形式の模試で偏差値・順位を判定",
+    description: "本番形式の模試で正答率を判定",
   },
   {
     icon: Mail,
     title: "スカウト",
     description: "模試成績やMBTIを見た優良企業から特別オファー",
   },
+];
+
+// 利用イメージセクションのモック1（問題演習・解答解説）用データ。
+// src/components/HighlightedText.tsx（実際の練習画面で使っている対象語句ハイライト機能）を
+// そのまま流用して描画するため、本物の問題データと同じ「【対象語句】」記法で用意する。
+const DEMO_QUESTION_TEXT = "あれから10年が【たつ】。";
+const DEMO_CHOICES = [
+  { text: "会議で席をたつ。", correct: false },
+  { text: "鳥肌がたつ。", correct: false },
+  { text: "彼の腕は役にたつ。", correct: false },
+  { text: "卒業して3年がたつ。", correct: true },
+];
+const DEMO_EXPLANATION =
+  "「たつ」は時間が経過するという意味。A〜Cは「その場を離れる／生じる／役立つ」と別の意味で使われており、Dのみ問題文と同じ意味です。";
+
+// モック2（スマート復習ダッシュボード）用データ。エビングハウスの忘却曲線に基づく
+// 1日後・3日後・7日後の復習キューをイメージしたダミーデータ。
+const DEMO_REVIEW_QUEUE = [
+  { due: "1日後", urgency: "urgent" as const, subject: "非言語 - 推論", count: 4 },
+  { due: "3日後", urgency: "soon" as const, subject: "言語 - 語彙", count: 6 },
+  { due: "7日後", urgency: "later" as const, subject: "英語 - 長文読解", count: 3 },
+];
+
+// モック3（正答率ベースの弱点分析）用データ。偏差値は一切使わず、すべて「正答率(%)」で表現する。
+const DEMO_ACCURACY_OVERALL = 78;
+const DEMO_ACCURACY_BY_CATEGORY = [
+  { label: "言語", score: 88 },
+  { label: "非言語", score: 62 },
+  { label: "英語", score: 81 },
+  { label: "構造的把握", score: 70 },
 ];
 
 const JSON_LD = {
@@ -411,12 +442,12 @@ export default function Home() {
               登録すると、こんな画面で対策できます
             </h2>
             <p className="text-balance text-sm text-gray-500 sm:text-base">
-              問題演習から成績分析まで、迷わず使えるシンプルなUIです。
+              問題演習から自動復習・弱点分析まで、迷わず使えるシンプルなUIです。
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* モック1: 問題演習・解答解説 */}
+            {/* モック1: 問題演習・解答解説（対象語句の【】ハイライトを実装コンポーネントそのままで再現） */}
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
               <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
@@ -427,23 +458,18 @@ export default function Home() {
               <div className="flex flex-col gap-4 p-5 sm:p-6">
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                    非言語 - 損益算
+                    言語 - 語句の用法
                   </span>
-                  <span className="text-xs font-medium text-gray-400">問12 / 全35問</span>
+                  <span className="text-xs font-medium text-gray-400">問18 / 全35問</span>
                 </div>
                 <p className="text-balance text-sm font-bold leading-relaxed text-gray-900 sm:text-base">
-                  定価1,200円の商品を2割引で販売した。販売価格として正しいものはどれか。
+                  <HighlightedText text={DEMO_QUESTION_TEXT} targets={extractBracketTargets(DEMO_QUESTION_TEXT)} />
+                  {" "}と同じ意味・用法のものを選びなさい。
                 </p>
                 <div className="flex flex-col gap-2">
-                  {[
-                    { label: "A", text: "960円", correct: true },
-                    { label: "B", text: "980円" },
-                    { label: "C", text: "1,000円" },
-                    { label: "D", text: "1,020円" },
-                    { label: "E", text: "1,040円" },
-                  ].map((choice) => (
+                  {DEMO_CHOICES.map((choice, i) => (
                     <div
-                      key={choice.label}
+                      key={choice.text}
                       className={`flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm ${
                         choice.correct
                           ? "border-green-300 bg-green-50 font-semibold text-green-800"
@@ -455,50 +481,102 @@ export default function Home() {
                           choice.correct ? "bg-green-600 text-white" : "bg-gray-100 text-gray-500"
                         }`}
                       >
-                        {choice.label}
+                        {String.fromCharCode(65 + i)}
                       </span>
-                      {choice.text}
+                      <HighlightedText text={choice.text} targets={extractBracketTargets(DEMO_QUESTION_TEXT)} />
                       {choice.correct && <CheckCircle2 className="ml-auto h-4 w-4 flex-shrink-0 text-green-600" />}
                     </div>
                   ))}
                 </div>
                 <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3.5 text-xs leading-relaxed text-blue-900 sm:text-sm">
                   <p className="mb-1 font-bold text-blue-700">解説</p>
-                  定価1,200円の2割引は、1,200×(1−0.2)＝1,200×0.8＝<strong className="font-bold">960円</strong>。
-                  よって正解はAです。
+                  {DEMO_EXPLANATION}
                 </div>
               </div>
             </div>
 
-            {/* モック2: 成績・分析グラフ */}
+            {/* モック2: スマート復習ダッシュボード（忘却曲線に基づく1日後・3日後・7日後の復習キュー） */}
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
               <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
                 <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
                 <span className="h-2.5 w-2.5 rounded-full bg-green-300" />
-                <span className="ml-2 text-xs font-medium text-gray-400">成績分析</span>
+                <span className="ml-2 text-xs font-medium text-gray-400">復習リマインダー</span>
               </div>
-              <div className="flex flex-col gap-5 p-5 sm:p-6">
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-500">総合偏差値</p>
-                    <p className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-4xl font-extrabold text-transparent">
-                      65.4
-                    </p>
-                  </div>
-                  <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
-                    <TrendingUp className="h-3.5 w-3.5" />
-                    +3.2 先月比
+              <div className="flex flex-col gap-4 p-5 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <p className="flex items-center gap-1.5 text-sm font-bold text-gray-900">
+                    <Clock className="h-4 w-4 text-purple-600" />
+                    今日の復習タスク
+                  </p>
+                  <span className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700">
+                    計{DEMO_REVIEW_QUEUE.reduce((sum, r) => sum + r.count, 0)}問
                   </span>
                 </div>
+                <div className="flex flex-col gap-2.5">
+                  {DEMO_REVIEW_QUEUE.map((row) => {
+                    const urgencyStyle =
+                      row.urgency === "urgent"
+                        ? "bg-red-50 text-red-700 border-red-200"
+                        : row.urgency === "soon"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-blue-50 text-blue-700 border-blue-200";
+                    return (
+                      <div
+                        key={row.due}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3"
+                      >
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <span
+                            className={`flex-shrink-0 rounded-full border px-2 py-1 text-[11px] font-bold ${urgencyStyle}`}
+                          >
+                            {row.due}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-gray-800">{row.subject}</p>
+                            <p className="text-xs text-gray-500">{row.count}問を復習</p>
+                          </div>
+                        </div>
+                        <span className="flex flex-shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-3 py-1.5 text-xs font-semibold text-white">
+                          <Repeat2 className="h-3.5 w-3.5" />
+                          復習する
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="rounded-lg border border-purple-100 bg-purple-50/60 px-3 py-2 text-[11px] leading-relaxed text-purple-800">
+                  エビングハウスの忘却曲線に基づき、間違えた問題だけを最適なタイミングで自動的に出題します。
+                </p>
+              </div>
+            </div>
+          </div>
 
+          {/* モック3: 正答率ベースの弱点分析（偏差値は使わず正答率のみで表現） */}
+          <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+            <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+              <span className="h-2.5 w-2.5 rounded-full bg-green-300" />
+              <span className="ml-2 text-xs font-medium text-gray-400">弱点分析</span>
+            </div>
+            <div className="flex flex-col items-center gap-6 p-5 sm:flex-row sm:items-center sm:p-6">
+              <div className="relative h-32 w-32 flex-shrink-0">
+                <div
+                  className="h-full w-full rounded-full"
+                  style={{
+                    background: `conic-gradient(#2563eb 0% ${DEMO_ACCURACY_OVERALL}%, #e5e7eb ${DEMO_ACCURACY_OVERALL}% 100%)`,
+                  }}
+                />
+                <div className="absolute inset-2 flex flex-col items-center justify-center rounded-full bg-white">
+                  <span className="text-2xl font-extrabold text-gray-900">{DEMO_ACCURACY_OVERALL}%</span>
+                  <span className="text-[10px] text-gray-500">総合正答率</span>
+                </div>
+              </div>
+
+              <div className="flex w-full flex-1 flex-col gap-4">
                 <div className="flex flex-col gap-3">
-                  {[
-                    { label: "言語", score: 78 },
-                    { label: "非言語", score: 62 },
-                    { label: "英語", score: 71 },
-                    { label: "構造的把握", score: 55 },
-                  ].map((row) => (
+                  {DEMO_ACCURACY_BY_CATEGORY.map((row) => (
                     <div key={row.label} className="flex items-center gap-3">
                       <span className="w-20 flex-shrink-0 text-xs font-medium text-gray-600 sm:w-24 sm:text-sm">
                         {row.label}
@@ -509,19 +587,18 @@ export default function Home() {
                           style={{ width: `${row.score}%` }}
                         />
                       </div>
-                      <span className="w-8 flex-shrink-0 text-right text-xs font-bold text-gray-700 sm:text-sm">
-                        {row.score}
+                      <span className="w-10 flex-shrink-0 text-right text-xs font-bold text-gray-700 sm:text-sm">
+                        {row.score}%
                       </span>
                     </div>
                   ))}
                 </div>
-
                 <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
                   <span className="flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
                     得意：言語・英語
                   </span>
                   <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                    要復習：構造的把握
+                    要復習：非言語
                   </span>
                 </div>
               </div>
