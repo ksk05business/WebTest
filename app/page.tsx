@@ -29,7 +29,6 @@ import { SupportChatWidget } from "@/src/components/SupportChatWidget";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/src/lib/site";
 
 const BADGES = [
-  { icon: Clock, text: "登録3分" },
   { icon: Smartphone, text: "スマホ / PC対応" },
   { icon: ShieldCheck, text: "2段階開示で安心" },
 ];
@@ -377,24 +376,6 @@ export default function Home() {
                   {b.pitch}
                 </span>
               </Link>
-            ))}
-          </div>
-        </FadeInSection>
-      </section>
-
-      {/* 安心感バナー */}
-      <section className="border-y border-gray-100 bg-blue-50/60 px-6 py-10">
-        <FadeInSection className="mx-auto flex max-w-4xl flex-col items-center gap-5 text-center">
-          <p className="text-balance text-xl font-extrabold text-blue-900 sm:text-2xl">学生は完全無料</p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {BADGES.map((b) => (
-              <span
-                key={b.text}
-                className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-white px-4 py-1.5 text-xs font-medium text-blue-700 sm:text-sm"
-              >
-                <b.icon className="h-4 w-4" />
-                {b.text}
-              </span>
             ))}
           </div>
         </FadeInSection>
