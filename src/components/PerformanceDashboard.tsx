@@ -24,12 +24,12 @@ import {
 } from "recharts";
 
 // 科目（模試のパート、例: SPIの「基礎能力試験」「英語」「構造把握」）ごとに割り当てるテーマカラー。
-// 偏差値推移グラフの各ラインと、レーダーチャートの軸配色・ポリゴン塗り分け（colorForPart）の両方で共通して使う。
+// 正解率推移グラフの各ラインと、レーダーチャートの軸配色・ポリゴン塗り分け（colorForPart）の両方で共通して使う。
 const SUBJECT_COLORS = ["#2563eb", "#16a34a", "#ea580c", "#9333ea", "#dc2626", "#0d9488", "#db2777", "#ca8a04"];
 
 // questions.category（大分類、レーダーチャートの単元がどれに属するか）→ 模試パート（test_type）の対応表。
 // SPIはcategoryとパートの対応が一意に定まる（例: non_verbal/verbalはどちらも「基礎能力試験」に統合されて
-// 出題される）ため、レーダーチャートの軸色を偏差値推移グラフのパート別カラーと連動させられる。
+// 出題される）ため、レーダーチャートの軸色を正解率推移グラフのパート別カラーと連動させられる。
 // TG-WEBも従来型・新型の言語/非言語＋英語の5パートにそれぞれcategoryが1対1で対応するため同様に定義する
 // （tgweb_verbal_reading＝共通・言語の長文読解のみ、本番模試の独立パートが無いため対応表から除外し、
 // デフォルト色のまま表示する）。GAB/C-GABも言語・計数・英語の3パートにそれぞれcategoryが1対1で
@@ -167,10 +167,11 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-// 特定のテスト種別（testType、例: "tamatebako"）に絞った成績サマリー（最高/直近偏差値・
-// 受検回数・偏差値推移グラフ・カテゴリ別分析）を表示する。試験別専用ページ（/dashboard/[testId]）
-// 専用のコンポーネントで、メインダッシュボードには表示しない（成績・偏差値表示は
-// 各試験の専用ページに一本化したため）。
+// 特定のテスト種別（testType、例: "tamatebako"）に絞った成績サマリー（最高/直近正解率・
+// 受検回数・正解率推移グラフ・カテゴリ別分析）を表示する。試験別専用ページ（/dashboard/[testId]）
+// 専用のコンポーネントで、メインダッシュボードには表示しない（成績表示は各試験の専用ページに
+// 一本化したため）。偏差値はAPI（GET /api/exam-results）が引き続き算出・返却しているが
+// （企業側のスカウト機能等で利用するため）、学生向けのこの画面では表示しない。
 export function PerformanceDashboard({ email, testType }: { email: string; testType: string }) {
   const router = useRouter();
   const [examData, setExamData] = useState<ExamData | null>(null);
@@ -201,10 +202,17 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
       ) : (
         <>
           <div className="grid grid-cols-3 gap-3">
-            <SummaryCard label="最高偏差値" value={examData.bestDeviationScore?.toFixed(1) ?? "-"} />
             <SummaryCard
-              label="直近偏差値"
-              value={examData.latestDeviationScore?.toFixed(1) ?? "-"}
+              label="最高正解率"
+              value={examData.bestAccuracyRate !== null ? `${Math.round(examData.bestAccuracyRate * 100)}%` : "-"}
+            />
+            <SummaryCard
+              label="直近正解率"
+              value={
+                examData.history[0]
+                  ? `${Math.round(examData.history[0].accuracyRate * 100)}%`
+                  : "-"
+              }
             />
             <SummaryCard label="受検回数" value={`${examData.attemptCount}回`} />
           </div>
@@ -212,29 +220,27 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
           {(() => {
             // パート（test_type）ごとに独立したラインを描画するため、まずテスト種別（testTypeFamily）
             // が持つパート一覧を取得する（複数パート方式のテストのみ。SCOA等の単一パート方式は
-            // 便宜上「偏差値」という1本のラインとして扱う）。
+            // 便宜上「正解率」という1本のラインとして扱う）。
             const parts: readonly ExamPartInfo[] = MULTI_PART_EXAM_PARTS[examData.testTypeFamily] ?? [
-              { id: examData.testTypeFamily, label: "偏差値" },
+              { id: examData.testTypeFamily, label: "正解率" },
             ];
             const partColor = new Map(parts.map((p, i) => [p.id, SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
 
-            // 月×パートごとに受験結果をグルーピングする。同月に複数回受験した場合は平均偏差値を
+            // 月×パートごとに受験結果をグルーピングする。同月に複数回受験した場合は平均正解率を
             // ラインの値としてプロットし、個々の受験日・点数はentriesとして保持してツールチップで見せる
-            // （偏差値は50+10*(rate-mean)/stddevで計算するため小数点以下が長くなりがちなので、
-            // 平均値もここで小数点第1位に丸めておく。DB保存値自体は変更しない）。
+            // （平均値もここでパーセント・小数点第1位に丸めておく。DB保存値自体は変更しない）。
             const monthlyMap = new Map<
               string,
               Map<string, { sum: number; entries: { takenAt: string; score: number; total: number }[] }>
             >();
             for (const h of examData.history) {
-              if (h.deviationScore === null) continue;
               const d = new Date(h.takenAt);
               const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
               if (!monthlyMap.has(monthKey)) monthlyMap.set(monthKey, new Map());
               const partsMap = monthlyMap.get(monthKey)!;
               if (!partsMap.has(h.testType)) partsMap.set(h.testType, { sum: 0, entries: [] });
               const bucket = partsMap.get(h.testType)!;
-              bucket.sum += h.deviationScore;
+              bucket.sum += h.accuracyRate * 100;
               bucket.entries.push({ takenAt: h.takenAt, score: h.score, total: h.total });
             }
 
@@ -274,7 +280,7 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                             style={{ backgroundColor: entry.color }}
                           />
                           <span className="font-medium text-gray-800">{partLabel}</span>
-                          <span className="text-gray-500">偏差値 {Number(entry.value).toFixed(1)}</span>
+                          <span className="text-gray-500">正解率 {Number(entry.value).toFixed(1)}%</span>
                         </div>
                         {bucket?.entries.map((e, i) => (
                           <p key={i} className="ml-3.5 text-gray-400">
@@ -291,16 +297,16 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
 
             return (
               <div className="rounded-lg border border-gray-200 bg-white p-4">
-                <p className="mb-2 text-sm font-semibold text-gray-800">偏差値推移（科目別）</p>
+                <p className="mb-2 text-sm font-semibold text-gray-800">正解率推移（科目別）</p>
                 <div style={{ width: "100%", height: 240 }}>
                   <ResponsiveContainer>
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="monthLabel" tick={{ fontSize: 12 }} />
                       <YAxis
-                        domain={["dataMin - 5", "dataMax + 5"]}
+                        domain={[0, 100]}
                         tick={{ fontSize: 12 }}
-                        tickFormatter={(v: number) => v.toFixed(1)}
+                        tickFormatter={(v: number) => `${v}%`}
                       />
                       <Tooltip content={ChartTooltip} />
                       <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -345,8 +351,7 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                         })}
                       </span>
                       <span className="text-gray-500">
-                        {h.score}/{h.total}問
-                        {h.deviationScore !== null && `　偏差値 ${h.deviationScore.toFixed(1)}`}
+                        {h.score}/{h.total}問　正解率 {Math.round(h.accuracyRate * 100)}%
                       </span>
                     </Link>
                   ))}
@@ -376,9 +381,7 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                         <span className="font-medium text-gray-800">{c.label}</span>
                         <span>
                           {c.total > 0
-                            ? `正解率 ${Math.round((c.accuracyRate ?? 0) * 100)}% ／偏差値 ${
-                                c.deviationScore?.toFixed(1) ?? "-"
-                              }`
+                            ? `正解率 ${Math.round((c.accuracyRate ?? 0) * 100)}%`
                             : "データなし"}
                         </span>
                       </div>
@@ -422,11 +425,11 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
               groups.set(item.category, list);
             }
 
-            // 偏差値推移グラフと同じパート別カラーを、レーダーチャートの軸ラベル・データポイント・
+            // 正解率推移グラフと同じパート別カラーを、レーダーチャートの軸ラベル・データポイント・
             // ポリゴンの塗り分けにも適用する（CATEGORY_TO_PART_ID/SUBCATEGORY_TO_PART_IDに対応表が
             // ある場合のみ。無い場合は全軸を1つの"その他"パートとして扱い、従来通り単色の1ポリゴンで表示する）。
             const radarParts: readonly ExamPartInfo[] = MULTI_PART_EXAM_PARTS[examData.testTypeFamily] ?? [
-              { id: examData.testTypeFamily, label: "偏差値" },
+              { id: examData.testTypeFamily, label: "正解率" },
             ];
             const radarPartColor = new Map(radarParts.map((p, i) => [p.id, SUBJECT_COLORS[i % SUBJECT_COLORS.length]]));
             const categoryToPart = CATEGORY_TO_PART_ID[examData.testTypeFamily];
@@ -590,9 +593,7 @@ export function PerformanceDashboard({ email, testType }: { email: string; testT
                                   </div>
                                   <p className="mt-0.5 text-xs text-gray-500">
                                     {hasData
-                                      ? `正解率 ${Math.round((item.accuracyRate ?? 0) * 100)}%（${item.correct}/${item.total}問） ／偏差値 ${
-                                          item.deviationScore?.toFixed(1) ?? "-"
-                                        }`
+                                      ? `正解率 ${Math.round((item.accuracyRate ?? 0) * 100)}%（${item.correct}/${item.total}問）`
                                       : "データなし"}
                                   </p>
                                 </div>
