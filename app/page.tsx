@@ -208,7 +208,7 @@ const JSON_LD = {
   ],
 };
 
-// Google/LINE登録訴求の吹き出し（RegisterCtaBubble・HeaderRegisterBubble）で共通利用するミニロゴ。
+// ヘッダーのGoogle/LINE登録訴求吹き出し（HeaderRegisterBubble）で使うミニロゴ。
 // GoogleLoginButton.tsx/LineLoginButton.tsxと同じSVGパスデータを使い、実際のログインボタンの
 // ロゴと完全に一致させる。
 function GoogleMiniIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -250,25 +250,6 @@ function LineMiniIcon({ className = "h-4 w-4" }: { className?: string }) {
         <path d="M12 2C6.477 2 2 5.61 2 10.062c0 3.99 3.548 7.33 8.345 7.962.325.07.767.215.879.494.101.253.066.65.033.906l-.142.858c-.043.253-.2.99.868.54 1.067-.45 5.76-3.393 7.858-5.81C21.29 13.37 22 11.79 22 10.062 22 5.61 17.523 2 12 2Zm-3.5 9.8H7.1a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.4a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31Zm3.72 0h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31v3.857a.31.31 0 0 1-.31.31ZM14.9 11.8a.31.31 0 0 1-.31.31h-.001a.307.307 0 0 1-.248-.125l-1.767-2.386v2.2a.31.31 0 0 1-.31.31h-.001a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h.001c.098 0 .19.048.248.125l1.767 2.386v-2.2a.31.31 0 0 1 .31-.31h.001a.31.31 0 0 1 .31.31Zm3.09-3.166h-1.63v.71h1.63a.31.31 0 1 1 0 .62h-1.63v.71h1.63a.31.31 0 1 1 0 .619h-1.94a.31.31 0 0 1-.31-.31V7.633a.31.31 0 0 1 .31-.31h1.94a.31.31 0 1 1 0 .619Z" />
       </svg>
     </span>
-  );
-}
-
-// メインの無料登録ボタンの直上に添える、心理的ハードルを下げるための吹き出し。
-// 登録ボタンをrelativeでラップした親要素の中で使う（このコンポーネント自身がabsolute配置）。
-// アニメーションはapp/globals.cssのanimate-float-gentle（画面右下シェアボタンの吹き出しと共通）を再利用する。
-function RegisterCtaBubble() {
-  return (
-    <div
-      aria-hidden
-      className="animate-float-gentle pointer-events-none absolute -top-14 left-1/2 z-20 w-max -translate-x-1/2"
-    >
-      <div className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-gray-800 shadow-xl ring-1 ring-gray-200">
-        <GoogleMiniIcon />
-        <LineMiniIcon />
-        Google・LINEでサクッと10秒登録！
-      </div>
-      <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
-    </div>
   );
 }
 
@@ -362,15 +343,12 @@ export default function Home() {
             に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
           </p>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
-            <div className="relative">
-              <RegisterCtaBubble />
-              <Link
-                href="/register"
-                className="whitespace-nowrap rounded-full bg-white px-6 py-4 text-sm font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:px-8 sm:text-base"
-              >
-                【完全無料】今すぐ対策を始める
-              </Link>
-            </div>
+            <Link
+              href="/register"
+              className="whitespace-nowrap rounded-full bg-white px-6 py-4 text-sm font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:px-8 sm:text-base"
+            >
+              【完全無料】今すぐ対策を始める
+            </Link>
             <Link
               href="/login"
               className="rounded-full border-2 border-white/70 px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-white/10"
@@ -832,15 +810,12 @@ export default function Home() {
           <h2 className="text-balance text-2xl font-bold text-white sm:text-3xl">
             対策も、スカウトも。すべて無料ではじめよう。
           </h2>
-          <div className="relative">
-            <RegisterCtaBubble />
-            <Link
-              href="/register"
-              className="rounded-full bg-white px-10 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
-            >
-              完全無料でWebテスト対策を始める
-            </Link>
-          </div>
+          <Link
+            href="/register"
+            className="rounded-full bg-white px-10 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            完全無料でWebテスト対策を始める
+          </Link>
         </FadeInSection>
       </section>
 
