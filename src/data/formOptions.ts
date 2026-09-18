@@ -21,7 +21,7 @@ export type IndustryGroup = { group: string; items: readonly string[] };
 export const INDUSTRY_GROUPS: readonly IndustryGroup[] = [
   {
     group: "コンサル・M&A",
-    items: ["戦略コンサル", "外資系総合コンサル", "日系総合コンサル", "M&A"],
+    items: ["戦略コンサル", "外資系総合コンサル", "日系総合コンサル", "M&A/FAS"],
   },
   {
     group: "金融",

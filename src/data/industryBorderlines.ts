@@ -8,7 +8,7 @@ export const INDUSTRY_BORDERLINE_DEVIATION: Record<string, number> = {
   戦略コンサル: 65,
   外資系総合コンサル: 63,
   日系総合コンサル: 58,
-  "M&A": 64,
+  "M&A/FAS": 64,
   // 金融
   外資系金融: 64,
   メガバンク: 58,
