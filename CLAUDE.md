@@ -22,6 +22,7 @@
 | 会員登録フォーム、大学名・希望職種・志望業界の選択肢とマッピング | `student-registration` |
 | D1スキーマ変更・本番マイグレーション、Pages Functionsのルーティング、メール送信設定 | `cloudflare-pages-gotchas` |
 | SEOブログ（/blog）記事の新規作成・編集、MDXカスタムコンポーネント追加 | `seo-blog-authoring` |
+| SNSショート動画（TikTok/Shorts/Reels）の構成・台本作成 | `generate-short-script` |
 
 # 応答・進め方のルール
 
