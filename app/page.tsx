@@ -208,7 +208,7 @@ const JSON_LD = {
   ],
 };
 
-// ヘッダーのGoogle/LINE登録訴求吹き出し（HeaderRegisterBubble）で使うミニロゴ。
+// ヘッダーの「無料登録」ボタン内に埋め込むGoogle/LINEのミニロゴ。
 // GoogleLoginButton.tsx/LineLoginButton.tsxと同じSVGパスデータを使い、実際のログインボタンの
 // ロゴと完全に一致させる。
 function GoogleMiniIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -253,26 +253,6 @@ function LineMiniIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
-// ヘッダー（常時sticky表示、ページ最上部）の「無料登録」ボタン用の吹き出し。
-// ヘッダーの上には画面の外（ビューポート外）しか無くボタンの真上には出せないため、
-// ボタンの下にしっぽを上向きにして吊り下げる形にする（スクロール位置に関わらず必ず画面内に収まる）。
-// ボタンが画面右端に寄っているため、はみ出さないよう右揃え（right-0）で配置する。
-function HeaderRegisterBubble() {
-  return (
-    <div
-      aria-hidden
-      className="animate-float-gentle pointer-events-none absolute right-0 top-full z-20 mt-2.5 w-max"
-    >
-      <div className="absolute -top-1.5 right-4 h-0 w-0 border-x-[5px] border-b-[6px] border-x-transparent border-b-white" />
-      <div className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-800 shadow-xl ring-1 ring-gray-200">
-        <GoogleMiniIcon className="h-3.5 w-3.5" />
-        <LineMiniIcon className="h-3.5 w-3.5" />
-        Google・LINEでサクッと登録！
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -296,15 +276,16 @@ export default function Home() {
             >
               ログイン
             </Link>
-            <div className="relative">
-              <HeaderRegisterBubble />
-              <Link
-                href="/register"
-                className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
-              >
-                無料登録
-              </Link>
-            </div>
+            <Link
+              href="/register"
+              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 pl-3 pr-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
+            >
+              <span className="flex items-center -space-x-1">
+                <GoogleMiniIcon className="h-4 w-4 rounded-full bg-white p-0.5" />
+                <LineMiniIcon className="h-4 w-4" />
+              </span>
+              無料登録
+            </Link>
           </div>
         </div>
       </header>
