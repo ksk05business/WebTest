@@ -157,6 +157,9 @@ export function CompanyBorderEditModal({
                     {t.name}
                   </option>
                 ))}
+                {/* 企業独自のWebテスト（既存の6種別に当てはまらないもの）用のラベル。
+                    受験導線を持たないTEST_TYPESには含めず、ここにだけ追加する。 */}
+                <option value="独自形式">独自形式</option>
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm">

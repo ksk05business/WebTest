@@ -172,6 +172,9 @@ export default function BordersPage() {
             <p className="text-sm leading-relaxed text-gray-500 sm:text-base">
               志望企業の適性検査ボーダーライン目安を検索できます。企業名・業界・検査種別で絞り込み、対策の優先順位を決める参考にしてください。
             </p>
+            <p className="text-xs text-gray-400">
+              ※掲載している検査種別・ボーダー難易度は過去の公開情報をもとにした目安です。年度や採用状況により変更されている場合があるため、あくまで参考情報としてご利用ください。
+            </p>
           </div>
 
           {/* 検索・フィルターパネル */}
@@ -243,20 +246,22 @@ export default function BordersPage() {
               <div className="flex flex-1 flex-col gap-1.5">
                 <span className="text-xs font-semibold text-gray-500">検査種別で絞り込み</span>
                 <div className="flex flex-wrap gap-2">
-                  {TEST_TYPES.map((t) => {
-                    const active = selectedTestTypes.includes(t.name);
+                  {/* 「独自形式」はTEST_TYPES（/test配下の受験導線）には含まれない、
+                      企業ボーダー一覧専用のラベルのためここに1件だけ追加する。 */}
+                  {[...TEST_TYPES.map((t) => t.name), "独自形式"].map((name) => {
+                    const active = selectedTestTypes.includes(name);
                     return (
                       <button
-                        key={t.id}
+                        key={name}
                         type="button"
-                        onClick={() => toggleTestType(t.name)}
+                        onClick={() => toggleTestType(name)}
                         className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                           active
                             ? "border-blue-600 bg-blue-600 text-white"
                             : "border-gray-300 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
                         }`}
                       >
-                        {t.name}
+                        {name}
                       </button>
                     );
                   })}

@@ -5,7 +5,11 @@ import { TEST_TYPES } from "../../src/data/testTypes";
 // functions/api/admin/company-borders.ts（一覧取得・新規登録）と
 // functions/api/admin/company-borders/[id].ts（個別編集・削除）の両方から使う。
 const VALID_INDUSTRIES = new Set<string>(INDUSTRIES);
-const VALID_TEST_TYPES = new Set<string>(TEST_TYPES.map((t) => t.name));
+// 「独自形式」は実際の受験導線（TEST_TYPES、/test配下のルーティング）を持たない、
+// 企業ボーダー一覧専用のラベルのため、TEST_TYPESには追加せずここにだけ加える
+// （TEST_TYPESに足すとダッシュボード・模試選択モーダル等、受験系の全画面に受験不可能な
+// 選択肢として波及してしまうため）。
+const VALID_TEST_TYPES = new Set<string>([...TEST_TYPES.map((t) => t.name), "独自形式"]);
 const VALID_BORDER_LEVELS = new Set(["S", "A", "B", "C", "D"]);
 // 五十音順ソート（company_name_kana ASC）が正しく機能するよう、ふりがなは全てひらがなで
 // 統一することを強制する（カタカナ・漢字・英数字が混在すると/bordersのソート順が崩れるため）。
