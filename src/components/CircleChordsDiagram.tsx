@@ -51,16 +51,19 @@ const LABELS_4: Point[] = [
 
 const CHORD_COLORS = ["#dc2626", "#2563eb", "#16a34a", "#f97316"]; // 赤・青・緑・オレンジ
 
-export function CircleChordsDiagram({ lines }: { lines: 3 | 4 }) {
-  const chords = lines === 4 ? [...CHORDS_3, CHORD_4] : CHORDS_3;
-  const labels = lines === 4 ? LABELS_4 : LABELS_3;
+export function CircleChordsDiagram({ lines }: { lines: 3 | 4 | "3" | "4" }) {
+  // MDX（next-mdx-remote/rsc）経由で使う場合、`lines={4}`のような数値のJSX式は
+  // propsに正しく渡らず undefined になる不具合があるため、文字列（"4"）でも受け付ける。
+  const linesNum = Number(lines) as 3 | 4;
+  const chords = linesNum === 4 ? [...CHORDS_3, CHORD_4] : CHORDS_3;
+  const labels = linesNum === 4 ? LABELS_4 : LABELS_3;
 
   return (
     <svg
       viewBox="0 0 200 200"
       className="mx-auto my-2 h-56 w-56"
       role="img"
-      aria-label={`円に弦を${lines}本引いて${labels.length}個の領域に分けた図`}
+      aria-label={`円に弦を${linesNum}本引いて${labels.length}個の領域に分けた図`}
     >
       <circle cx={100} cy={100} r={90} stroke="#374151" strokeWidth={2} fill="none" />
       {chords.map((chord, i) => (
