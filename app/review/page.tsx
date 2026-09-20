@@ -7,6 +7,7 @@ import type { Question } from "@/src/data/questions";
 import { getCategoryMeta } from "@/src/data/categoryMeta";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
+import { ExplanationStep } from "@/src/components/ExplanationStep";
 
 type ReviewItem = {
   reviewId: number;
@@ -331,7 +332,9 @@ export default function ReviewPage() {
             <p className="mb-1 font-semibold text-gray-800">解説</p>
             <ol className="list-decimal space-y-1 pl-5 text-sm text-gray-700">
               {question.explanation.map((step, i) => (
-                <li key={i}>{step}</li>
+                <li key={i}>
+                  <ExplanationStep step={step} />
+                </li>
               ))}
             </ol>
             <p className="mt-2 text-xs text-gray-500">

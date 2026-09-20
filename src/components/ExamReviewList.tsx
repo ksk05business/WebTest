@@ -1,6 +1,7 @@
 import type { ExamReviewEntry } from "@/src/data/questions";
 import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
+import { ExplanationStep } from "@/src/components/ExplanationStep";
 
 // 試験終了直後の結果画面（/result）と、過去の受験結果の詳細画面（/result/history）の
 // 両方で使う「解答一覧」の共通レンダリング。問題文・選択肢（正誤色分け）・解説・解答時間を表示する。
@@ -115,7 +116,9 @@ export function ExamReviewList({ review }: { review: ExamReviewEntry[] }) {
             <p className="mb-1 text-xs font-bold text-gray-500">解説</p>
             <ol className="list-decimal space-y-1 pl-5 text-xs leading-relaxed text-gray-700">
               {entry.explanation.map((step, si) => (
-                <li key={si}>{step}</li>
+                <li key={si}>
+                  <ExplanationStep step={step} />
+                </li>
               ))}
             </ol>
 
