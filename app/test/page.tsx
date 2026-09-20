@@ -164,11 +164,16 @@ const TGWEB_NEW_NONVERBAL_SECTION: ExamSection = {
     { category: "tgweb_new_math", subCategory: "図表の読み取り", limit: 6 },
   ],
 };
-// TG-WEB英語: 従来型・新型で共有する長文問題プールから出題（単独で受験可能な1セクション）。
+// TG-WEB英語: 従来型・新型で共有する長文問題10問＋空欄補充5問の計15問（単独で受験可能な1セクション）。
+// 空欄補充は2026-09-21に練習問題プールから15問（3回分）を模試専用へ振り替えて追加した
+// （制限時間はセクション全体の持ち時間制のため、出題数を10→15に増やしても15分のまま変更していない）。
 const TGWEB_ENGLISH_SECTION: ExamSection = {
   label: "英語（従来型・新型共通）",
   timeLimitSec: 15 * 60,
-  subParts: [{ category: "tgweb_english", subCategory: "長文問題", limit: 10 }],
+  subParts: [
+    { category: "tgweb_english", subCategory: "長文問題", limit: 10 },
+    { category: "tgweb_english", subCategory: "空欄補充", limit: 5 },
+  ],
 };
 
 // 玉手箱・計数: 四則計算50/9分・図表読取29/15分・表推測20/20分（各単独で受験可能な1セクション）。

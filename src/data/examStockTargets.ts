@@ -39,6 +39,7 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "tgweb_new_math", subCategory: "四則演算", sectionLabel: "新型・非言語", perCycle: 30 },
   { category: "tgweb_new_math", subCategory: "図表の読み取り", sectionLabel: "新型・非言語", perCycle: 6 },
   { category: "tgweb_english", subCategory: "長文問題", sectionLabel: "英語（共通）", perCycle: 10 },
+  { category: "tgweb_english", subCategory: "空欄補充", sectionLabel: "英語（共通）", perCycle: 5 },
 
   // GAB/C-GAB
   { category: "gab_verbal", subCategory: "論理的読解", sectionLabel: "言語理解", perCycle: 32 },
