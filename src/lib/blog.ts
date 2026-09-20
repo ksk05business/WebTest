@@ -12,6 +12,7 @@ export type BlogFrontmatter = {
   description: string;
   date: string;
   tags: string[];
+  draft?: boolean;
 };
 
 export type BlogPost = BlogFrontmatter & {
@@ -25,16 +26,16 @@ function getAllSlugsFromDisk(): string[] {
     .map((f) => f.replace(/\.mdx$/, ""));
 }
 
-// フロントマターのdateが未来（ビルド時点の現在日時より後）の記事は「予約公開」扱いとし、
-// 公開日時を迎えるまで一覧・詳細ページとも一切出力しない（静的サイト出力のため、実際に
-// サイトへ反映されるのはこの判定を行うビルド・デプロイのタイミングになる）。
-function isPublished(date: string): boolean {
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return true;
-  return d.getTime() <= Date.now();
+// 記事の公開/非公開は、管理画面「ブログ記事管理」タブのトグルが更新するフロントマターの
+// draftフラグのみで判定する（draft: trueの間は一覧・詳細ページとも一切出力しない）。
+// dateは表示用・SEO用（JSON-LDのdatePublished等）に独立して使うだけで、公開判定には
+// 使わない。以前はdateが未来かどうかで「予約公開」を判定していたが、管理画面から
+// ワンクリックで公開/非公開を切り替えられるようになったため、この方式に一本化した。
+function isPublished(draft: boolean | undefined): boolean {
+  return draft !== true;
 }
 
-// generateStaticParams等で使う。予約公開中（未来日付）の記事のスラッグは除外し、
+// generateStaticParams等で使う。draft: trueの記事のスラッグは除外し、
 // 該当ページ自体が静的サイトに生成されないようにする。
 export function getAllBlogSlugs(): string[] {
   return getAllSlugsFromDisk().filter((slug) => {
@@ -42,7 +43,7 @@ export function getAllBlogSlugs(): string[] {
     try {
       const raw = readFileSync(filePath, "utf-8");
       const { data } = matter(raw);
-      return isPublished(data.date);
+      return isPublished(data.draft);
     } catch {
       return false;
     }
@@ -54,13 +55,14 @@ export function getBlogPost(slug: string): BlogPost | null {
   try {
     const raw = readFileSync(filePath, "utf-8");
     const { data, content } = matter(raw);
-    if (!isPublished(data.date)) return null;
+    if (!isPublished(data.draft)) return null;
     return {
       slug,
       title: data.title,
       description: data.description,
       date: data.date,
       tags: data.tags ?? [],
+      draft: data.draft === true,
       content,
     };
   } catch {

@@ -8,6 +8,10 @@ export type BlogFrontmatter = {
   description: string;
   date: string;
   tags: string[];
+  // 管理画面の公開/非公開トグル用フラグ。true の間は getAllBlogSlugs() 等から除外され、
+  // /blog・sitemap・マイページのいずれにも一切表示されない（dateの過去/未来は判定に使わない。
+  // dateは表示用・SEO用のまま独立させておくため、下書き中に日付をいじる必要がない）。
+  draft: boolean;
 };
 
 export type ParsedBlogMdx = BlogFrontmatter & { content: string };
@@ -42,6 +46,7 @@ export function parseBlogMdx(raw: string): ParsedBlogMdx | null {
     description: fm.description,
     date: fm.date,
     tags,
+    draft: fm.draft === "true",
     content: body.replace(/^\r?\n/, ""),
   };
 }
@@ -51,11 +56,13 @@ function escapeYamlDoubleQuoted(s: string): string {
 }
 
 export function serializeBlogMdx(fm: BlogFrontmatter, content: string): string {
+  // draft: false（既定値）の記事ではdraft行自体を出力しない（既存記事との差分を最小限にするため）。
+  const draftLine = fm.draft ? `\ndraft: true` : "";
   return `---
 title: "${escapeYamlDoubleQuoted(fm.title)}"
 description: "${escapeYamlDoubleQuoted(fm.description)}"
 date: "${fm.date}"
-tags: ${JSON.stringify(fm.tags)}
+tags: ${JSON.stringify(fm.tags)}${draftLine}
 ---
 
 ${content.trim()}

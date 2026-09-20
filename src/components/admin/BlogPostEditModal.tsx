@@ -12,6 +12,7 @@ export function BlogPostEditModal({
   post,
   initialContent,
   initialSha,
+  initialDraft,
   adminToken,
   onClose,
   onSaved,
@@ -20,6 +21,7 @@ export function BlogPostEditModal({
   post: AdminBlogPostListItem | null;
   initialContent: string;
   initialSha: string | null;
+  initialDraft: boolean;
   adminToken: string;
   onClose: () => void;
   onSaved: () => void;
@@ -57,6 +59,9 @@ export function BlogPostEditModal({
         date: date.trim(),
         tags,
         content,
+        // このモーダルには公開/非公開を切り替えるUIを置かない（一覧のトグルで行う）ため、
+        // 開いたときの値をそのまま書き戻し、本文編集だけでは公開状態が変わらないようにする。
+        draft: initialDraft,
         ...(isEditing ? { sha: initialSha } : { slug: slug.trim() }),
       };
       const res = await fetch(
@@ -96,6 +101,7 @@ export function BlogPostEditModal({
         <p className="mb-4 text-xs text-gray-500">
           保存するとGitHubへコミットされ、Cloudflare
           Pagesの自動ビルドを経て本番サイトへ反映されます（反映まで数分〜十数分かかります）。
+          {!isEditing && "新規作成した記事は既定で非公開になります。公開する際は一覧のトグルで切り替えてください。"}
         </p>
 
         <div className="flex flex-col gap-4">

@@ -59,12 +59,18 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   const tags = Array.isArray(body.tags) ? body.tags.filter((t): t is string => typeof t === "string") : [];
   const content = typeof body.content === "string" ? body.content : "";
   const sha = typeof body.sha === "string" ? body.sha : "";
+  // 一覧の公開/非公開トグルも本文全体を含むこのPUTを流用するため、trueを明示的に送ってきた
+  // 場合のみdraft扱いにする（省略時に誤って非公開へ倒れないよう、falseを既定にする）。
+  const draft = body.draft === true;
   if (!title || !description || !date || !content.trim() || !sha) {
     return Response.json({ error: "title・description・date・content・shaは必須です" }, { status: 400 });
   }
 
-  const raw = serializeBlogMdx({ title, description, date, tags }, content);
-  const result = await githubPutFile(token, `${BLOG_DIR}/${slug}.mdx`, raw, `fix: ブログ記事を更新（${slug}）`, sha);
+  const raw = serializeBlogMdx({ title, description, date, tags, draft }, content);
+  const message = typeof body.commitMessage === "string" && body.commitMessage.trim()
+    ? body.commitMessage.trim()
+    : `fix: ブログ記事を更新（${slug}）`;
+  const result = await githubPutFile(token, `${BLOG_DIR}/${slug}.mdx`, raw, message, sha);
   if (result === "conflict") {
     return Response.json(
       { error: "他の変更と競合しました。ページを再読み込みしてから編集し直してください。" },

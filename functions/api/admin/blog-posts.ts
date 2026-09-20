@@ -16,6 +16,7 @@ type BlogPostListItem = {
   description: string;
   date: string;
   tags: string[];
+  draft: boolean;
   sha: string;
 };
 
@@ -48,6 +49,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         description: parsed.description,
         date: parsed.date,
         tags: parsed.tags,
+        draft: parsed.draft,
         sha: e.sha,
       };
     })
@@ -88,6 +90,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const date = typeof body.date === "string" ? body.date.trim() : "";
   const tags = Array.isArray(body.tags) ? body.tags.filter((t): t is string => typeof t === "string") : [];
   const content = typeof body.content === "string" ? body.content : "";
+  // 新規作成時はdraft指定を省略した場合、事故公開を避けるため既定で非公開（draft: true）にする。
+  // 管理画面の一覧トグルで、書き終えてから明示的に「公開」に切り替える運用を想定している。
+  const draft = body.draft === false ? false : true;
   if (!title || !description || !date || !content.trim()) {
     return Response.json({ error: "title・description・date・contentは必須です" }, { status: 400 });
   }
@@ -98,7 +103,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return Response.json({ error: "同じslugの記事が既に存在します" }, { status: 409 });
   }
 
-  const raw = serializeBlogMdx({ title, description, date, tags }, content);
+  const raw = serializeBlogMdx({ title, description, date, tags, draft }, content);
   const result = await githubPutFile(token, path, raw, `feat: ブログ記事を新規追加（${slug}）`);
   if (!result) {
     return Response.json({ error: "GitHubへの保存に失敗しました" }, { status: 502 });
