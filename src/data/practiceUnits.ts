@@ -161,7 +161,10 @@ const TGWEB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
     category: "tgweb_english",
     groupLabel: "共通・英語",
-    units: [{ id: "tgweb_common_reading_en", subCategory: "長文問題", label: "長文問題" }],
+    units: [
+      { id: "tgweb_common_reading_en", subCategory: "長文問題", label: "長文問題" },
+      { id: "tgweb_common_fillblank_en", subCategory: "空欄補充", label: "空欄補充" },
+    ],
   },
 ];
 
