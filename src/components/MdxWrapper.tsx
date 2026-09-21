@@ -8,6 +8,7 @@ import { PointBox } from "@/src/components/PointBox";
 import { CheckList, CheckItem } from "@/src/components/CheckList";
 import { CarrollDiagram } from "@/src/components/CarrollDiagram";
 import { CircleChordsDiagram } from "@/src/components/CircleChordsDiagram";
+import { DiceStateDiagram } from "@/src/components/DiceStateDiagram";
 import { TileDiagonalDiagram } from "@/src/components/TileDiagonalDiagram";
 import { DodecahedronNetDiagram } from "@/src/components/DodecahedronNetDiagram";
 
@@ -16,7 +17,7 @@ import { DodecahedronNetDiagram } from "@/src/components/DodecahedronNetDiagram"
 // admin/MdxLivePreview.tsx（管理画面のリアルタイムプレビュー）でも全く同じ描画結果にするため、
 // このコンポーネント一覧とremark/rehypeプラグイン設定をここから共有エクスポートする
 // （2箇所で別々に保守すると設定がドリフトする恐れがあるため、必ずここを唯一の情報源とすること）。
-export const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem, CarrollDiagram, CircleChordsDiagram, TileDiagonalDiagram, DodecahedronNetDiagram };
+export const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem, CarrollDiagram, CircleChordsDiagram, DiceStateDiagram, TileDiagonalDiagram, DodecahedronNetDiagram };
 export const MDX_REMARK_PLUGINS = [remarkGfm, remarkMath];
 export const MDX_REHYPE_PLUGINS = [rehypeKatex];
 

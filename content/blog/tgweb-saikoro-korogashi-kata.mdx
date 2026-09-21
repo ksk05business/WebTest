@@ -44,6 +44,8 @@ $$
 \text{上：A} \quad \text{下：F} \quad \text{北：B} \quad \text{南：E} \quad \text{東：C} \quad \text{西：D}
 $$
 
+<DiceStateDiagram up="A" down="F" north="B" south="E" east="C" west="D" caption="初期状態" />
+
 ### ステップ2：「東に転がる」動きを、動く4面の輪の入れ替えとして処理する
 
 東に転がると、南北（B・E）は動かず、上・東・下・西の4面が「上→西→下→東→上」の順（＝転がる方向と逆向きに玉突きで動く）に入れ替わります。
@@ -58,6 +60,8 @@ $$
 \text{新：上＝D、東＝A、下＝C、西＝F（北Bと南Eはそのまま）}
 $$
 
+<DiceStateDiagram up="D" down="C" north="B" south="E" east="A" west="F" axis="ns" caption="1回目：東に転がした後（北B・南Eは固定）" />
+
 ### ステップ3：同じ操作を「東」「北」の順に繰り返す
 
 2回目も同じく東に転がります。
@@ -65,6 +69,8 @@ $$
 $$
 \text{新：上＝F、東＝D、下＝A、西＝C（北Bと南Eはそのまま）}
 $$
+
+<DiceStateDiagram up="F" down="A" north="B" south="E" east="D" west="C" axis="ns" caption="2回目：東に転がした後（北B・南Eは固定）" />
 
 3回目は北に転がるので、今度は東西（D・C）が動かず、上・北・下・南の4面が入れ替わります。
 
@@ -75,6 +81,8 @@ $$
 $$
 \text{新：上＝E、下＝B、北＝F、南＝A（東Dと西Cはそのまま）}
 $$
+
+<DiceStateDiagram up="E" down="B" north="F" south="A" east="D" west="C" axis="ew" caption="3回目：北に転がした後（東D・西Cは固定）＝最終状態" />
 
 よって、転がした後の上面は **E** です。
 
