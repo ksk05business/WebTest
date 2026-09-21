@@ -5,6 +5,31 @@ import type { AdminBlogPostListItem } from "./BlogPostsTab";
 import { MdxLivePreview } from "./MdxLivePreview";
 import { TagTaxonomyPicker } from "./TagTaxonomyPicker";
 
+// <input type="datetime-local">はタイムゾーンを持たない"YYYY-MM-DDTHH:mm"形式でしか
+// 値をやり取りできない。運営者は日本時間で運用している前提のため、表示・保存とも
+// Asia/Tokyo（+09:00固定、サマータイム無し）に統一して変換する。
+function toDatetimeLocalValue(dateStr: string): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return `${dateStr}T00:00`;
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+}
+
+function fromDatetimeLocalValue(value: string): string {
+  if (!value) return "";
+  return `${value}:00+09:00`;
+}
+
 // 新規作成・編集どちらもこのモーダルを使う。post が null なら新規作成、値があれば編集。
 // 編集時はGET /api/admin/blog-posts/{slug} で本文とshaを取得してからこのモーダルを開く想定
 // （一覧レスポンスには本文を含まないため）。
@@ -47,7 +72,7 @@ export function BlogPostEditModal({
       return;
     }
     if (!title.trim() || !description.trim() || !date.trim() || !content.trim()) {
-      setError("タイトル・説明文・公開日・本文は必須です");
+      setError("タイトル・説明文・公開日時・本文は必須です");
       return;
     }
 
@@ -141,13 +166,17 @@ export function BlogPostEditModal({
           </label>
 
           <label className="flex flex-col gap-1 text-sm sm:max-w-xs">
-            <span className="font-semibold text-gray-700">公開日</span>
+            <span className="font-semibold text-gray-700">公開日時</span>
             <input
-              type="date"
-              value={date.slice(0, 10)}
-              onChange={(e) => setDate(e.target.value)}
+              type="datetime-local"
+              value={toDatetimeLocalValue(date)}
+              onChange={(e) => setDate(fromDatetimeLocalValue(e.target.value))}
               className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
+            <span className="text-xs text-gray-500">
+              日本時間で指定してください。未来の日時にすると、トグルが「公開」でもその日時まで
+              「予約公開」として一覧・sitemap等には表示されません（過去日時にすると即座に公開対象になります）。
+            </span>
           </label>
 
           <div className="flex flex-col gap-1.5">

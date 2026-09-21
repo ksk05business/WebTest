@@ -17,6 +17,37 @@ export type AdminBlogPostListItem = {
 
 type EditingState = { post: AdminBlogPostListItem | null; content: string; sha: string | null } | null;
 
+// draft（管理画面トグル）とdate（公開日時）の組み合わせから、一覧カードに出す3状態を求める。
+// 判定ロジック自体はsrc/lib/blog.tsのisPublished()と必ず一致させること（二重管理を避けたいが、
+// 一方はNode.jsのビルド時専用モジュール、他方はブラウザで動くクライアントコンポーネントのため
+// 共有できない。ロジックを変更したら両方を直すこと）。
+type PostStatus = "published" | "scheduled" | "draft";
+
+function getPostStatus(p: AdminBlogPostListItem): PostStatus {
+  if (p.draft) return "draft";
+  const d = new Date(p.date);
+  if (!Number.isNaN(d.getTime()) && d.getTime() > Date.now()) return "scheduled";
+  return "published";
+}
+
+// 予約公開バッジ表示用。管理者は日本時間で運用している前提のため、実行環境のタイムゾーンに
+// 関わらずAsia/Tokyoで固定フォーマットする。
+function formatScheduledAt(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  const parts = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((part) => part.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
+}
+
 // /blog（学生向けSEOブログ）記事の管理タブ。実体はGitHubリポジトリのcontent/blog/*.mdxのため、
 // 保存操作はGitHubへのコミットとして行われ、Cloudflare Pagesの自動ビルドを経て本番へ反映される
 // （即時反映ではない）。詳細はfunctions/_lib/githubContent.tsのコメント参照。
@@ -170,7 +201,16 @@ export function BlogPostsTab({
       }
 
       setPosts((prev) => prev?.map((p) => (p.slug === post.slug ? { ...p, draft: nextDraft } : p)) ?? prev);
-      showToast("success", `「${post.title}」を${nextDraft ? "非公開" : "公開"}にしました（GitHubへコミット済み）`);
+      // draftをfalseにしても、dateが未来のままなら実際には「予約公開」状態になる
+      // （まだ本番には出ない）ため、トースト文言もそれに合わせて出し分ける。
+      const nextDate = new Date(post.date);
+      const willBeScheduled = !nextDraft && !Number.isNaN(nextDate.getTime()) && nextDate.getTime() > Date.now();
+      const statusLabel = nextDraft
+        ? "非公開"
+        : willBeScheduled
+          ? `予約公開（${formatScheduledAt(post.date)}に公開予定）`
+          : "公開";
+      showToast("success", `「${post.title}」を${statusLabel}にしました（GitHubへコミット済み）`);
     } catch {
       showToast("error", "通信エラーが発生しました。時間をおいて再度お試しください。");
     } finally {
@@ -197,6 +237,8 @@ export function BlogPostsTab({
       <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
         保存・削除操作はGitHubへのコミットとして実行され、Cloudflare
         Pagesの自動ビルドを経て本番サイトへ反映されます（反映まで数分〜十数分かかります）。
+        編集画面で公開日時を未来に設定すると「予約公開」になり、その日時を過ぎたあとに
+        次のビルドが走った時点で公開されます。
       </p>
 
       {loadError && <p className="text-sm font-medium text-red-600">{loadError}</p>}
@@ -208,7 +250,9 @@ export function BlogPostsTab({
         <p className="text-sm text-gray-500">記事がありません。</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {posts.map((p) => (
+          {posts.map((p) => {
+            const status = getPostStatus(p);
+            return (
             <div key={p.slug} className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
@@ -216,10 +260,18 @@ export function BlogPostsTab({
                     <p className="font-bold text-gray-900">{p.title}</p>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        p.draft ? "bg-gray-200 text-gray-600" : "bg-green-100 text-green-700"
+                        status === "draft"
+                          ? "bg-gray-200 text-gray-600"
+                          : status === "scheduled"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-green-100 text-green-700"
                       }`}
                     >
-                      {p.draft ? "非公開" : "公開"}
+                      {status === "draft"
+                        ? "非公開"
+                        : status === "scheduled"
+                          ? `${formatScheduledAt(p.date)}に公開予定`
+                          : "公開"}
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-gray-400">
@@ -277,7 +329,8 @@ export function BlogPostsTab({
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

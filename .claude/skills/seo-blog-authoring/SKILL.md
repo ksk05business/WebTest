@@ -34,16 +34,24 @@ description: SEOブログ（/blog、content/blog/*.mdx）の新規記事作成�
 - MDXレンダリング: `src/components/MdxWrapper.tsx`（`next-mdx-remote/rsc`のServer Component。`remark-gfm`+`remark-math`+`rehype-katex`で表・数式、`components`にカスタムコンポーネントを登録）。**新しいMDXカスタムコンポーネントを作ったら、このファイルの`MDX_COMPONENTS`に必ず追加すること**（登録し忘れると本文中で`<MyComponent />`と書いてもただのテキストとして出力される）。
 - **Markdownの表記法（`| a | b |`）を使うには`remark-gfm`が必須**。標準のMDX/CommonMarkにはテーブル記法が含まれておらず、`remark-gfm`を`remarkPlugins`に追加していないと`| a | b |`はただの地の文としてそのまま出力される（実際にこの不具合が発生し、`MdxWrapper.tsx`に追加して解決した実例がある）。表を使う記事を書いたら、ビルド後に`out/blog/<slug>.html`で`<table>`タグが実際に出力されているか必ず確認すること。
 - サイトマップ: `app/sitemap.ts`が`getAllBlogPosts()`を使って`/blog`配下を自動列挙する（新しい記事を追加するだけで自動的にサイトマップに載る、手動追記不要）。
-- 公開日時: フロントマターの`date`は`"2026-09-09"`のような日付のみ、`"2026-09-11T17:00:00+09:00"`のような日時+タイムゾーン付きの両方に対応する。一覧・詳細ページの表示には`formatBlogDate()`（`src/lib/blog.ts`）で人間が読みやすい形式（例: 2026年9月11日）に変換してから表示する。JSON-LDの`datePublished`・OGPの`publishedTime`には生の文字列をそのまま渡す（ISO8601形式の方がSEO上正確なため）。**dateは表示用・SEO用のみで、公開/非公開の判定には使わない**（次項の`draft`参照）。
+- 公開日時: フロントマターの`date`は`"2026-09-09"`のような日付のみ、`"2026-09-11T17:00:00+09:00"`のような日時+タイムゾーン付きの両方に対応する。一覧・詳細ページの表示には`formatBlogDate()`（`src/lib/blog.ts`）で人間が読みやすい形式（例: 2026年9月11日）に変換してから表示する。JSON-LDの`datePublished`・OGPの`publishedTime`には生の文字列をそのまま渡す（ISO8601形式の方がSEO上正確なため）。**dateは表示用・SEO用だけでなく、`draft`と並ぶ公開判定の条件でもある**（次項参照）。
 
-## 公開/非公開は`draft`フラグで管理する（`date`では判定しない）
+## 公開判定は「`draft`フラグ」と「`date`（公開日時）」のANDで決まる
 
-`src/lib/blog.ts`の`isPublished()`は、フロントマターの`draft`フラグ（`draft: true`なら非公開）だけで判定する。`/admin/dashboard`「ブログ記事管理」タブの記事一覧にある公開/非公開トグルが、GitHubへのコミットを通じてこの`draft`フィールドを書き換える（`src/components/admin/BlogPostsTab.tsx`の`handleToggleDraft()`、`functions/api/admin/blog-posts/[slug].ts`のPUT）。`draft: true`の間は`/blog`一覧・記事詳細ページ・`sitemap.xml`・学生マイページの「おすすめ記事」枠（`app/dashboard/layout.tsx`→`BlogSummaryProvider`）のいずれからも一切出力されない。
+`src/lib/blog.ts`の`isPublished(draft, date)`は、**`draft !== true` かつ `date`がビルド時点の現在時刻以前**の両方を満たしたときだけ`true`を返す。これにより記事は3状態を取り得る。
 
-**新規記事を作成するときの方針**: `POST /api/admin/blog-posts`はdraft指定を省略すると既定で`draft: true`（非公開）を付ける。そのため、**新しく記事を書くときはdateを当日にしてよく、運営者に事前確認する必要はない**（以前はdateの未来/過去で予約公開を判定していたためdateの確認が必須だったが、この方式に一本化してからは不要になった）。運営者が実際に読んで問題なければ、`/admin/dashboard`の「ブログ記事管理」タブでトグルを1クリックするだけで公開できる。dateは「表示上いつの記事に見えるか」だけを左右するので、正確な投稿日付にしたい場合は編集モーダルから合わせて調整するよう伝えるとよい。
+| draft | date | 状態 |
+| --- | --- | --- |
+| `true` | 任意 | 非公開 |
+| `false` | 未来 | 予約公開（まだ非表示） |
+| `false` | 過去/現在 | 公開 |
+
+`draft`は`/admin/dashboard`「ブログ記事管理」タブの一覧トグルが即座に切り替える（`src/components/admin/BlogPostsTab.tsx`の`handleToggleDraft()`→`functions/api/admin/blog-posts/[slug].ts`のPUT）。`date`（＝公開日時）は同タブの編集モーダルの「公開日時」欄（`<input type="datetime-local">`、日本時間固定）で設定し、保存すると`YYYY-MM-DDTHH:mm:00+09:00`形式でコミットされる。一覧カードには`getPostStatus()`が算出した3状態のバッジ（非公開＝グレー／予約公開＝アンバーで「YYYY-MM-DD HH:mmに公開予定」／公開＝緑）を表示する。**判定ロジックは`src/lib/blog.ts`（ビルド時・Node）と`src/components/admin/BlogPostsTab.tsx`（クライアント）の2箇所に同じ条件を個別実装しているため、変更する際は両方を直すこと**（モジュール系統が違うため共有関数にできない）。この判定は`/blog`一覧・記事詳細・`sitemap.xml`・学生マイページの「おすすめ記事」枠（`app/dashboard/layout.tsx`→`BlogSummaryProvider`）のすべてに`getAllBlogPosts()`/`getAllBlogSlugs()`経由で一律に適用される。
+
+**新規記事を作成するときの方針**: `POST /api/admin/blog-posts`はdraft指定を省略すると既定で`draft: true`（非公開）を付ける。**新しく記事を書くときはdateを当日（現在時刻より前）にしてよく、運営者に事前確認する必要はない**（`draft: true`により、`date`の値に関わらずどのみち非公開のため）。運営者が実際に読んで問題なければ、トグルを公開にするか、編集モーダルで`date`を将来の公開日時に設定してから公開にする。dateを未来にしたまま公開トグルをONにすると「予約公開」になる。
 
 **運用の注意点（静的サイト特有）**:
-- このプロジェクトは`output: "export"`の静的サイトのため、公開/非公開トグルの変更自体はGitHubへ即座にコミットされるが、実際に`/blog`等の静的ページへ反映されるのはCloudflare Pagesの自動ビルド・デプロイが完了した後（数分〜十数分後）になる。
+- このプロジェクトは`output: "export"`の静的サイトのため、公開判定は「ビルドを実行した瞬間」の日時で決まる。`draft`トグルの変更自体はGitHubへ即座にコミットされ、Cloudflare Pagesの自動ビルド・デプロイ後（数分〜十数分後）に反映される。一方、**予約公開の`date`が到来しても、それだけでは自動的にサイトへ反映されない**（その日時を過ぎたあとに何らかの新しいコミット・デプロイが走って初めて公開状態になる）。厳密な時刻公開が必要な場合は、その日時以降に空コミットやCronで再ビルドをトリガーする仕組みが別途必要になる点を運営者に伝えること（現状は未実装）。
 - `date`は`"2026-09-09"`のような日付のみ、または`"2026-09-11T17:00:00+09:00"`のような時刻・タイムゾーン付きの両方を受け付ける。
 
 ## 記事の型（構成テンプレート）
