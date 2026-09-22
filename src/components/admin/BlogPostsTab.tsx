@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, ExternalLink, List, Pencil, Plus, Trash2 } from "lucide-react";
 import { BlogPostEditModal } from "./BlogPostEditModal";
+import { BlogCalendarView } from "./BlogCalendarView";
 import { Switch } from "./Switch";
 
 export type AdminBlogPostListItem = {
@@ -21,20 +22,20 @@ type EditingState = { post: AdminBlogPostListItem | null; content: string; sha: 
 // 判定ロジック自体はsrc/lib/blog.tsのisPublished()と必ず一致させること（二重管理を避けたいが、
 // 一方はNode.jsのビルド時専用モジュール、他方はブラウザで動くクライアントコンポーネントのため
 // 共有できない。ロジックを変更したら両方を直すこと）。
-type PostStatus = "published" | "scheduled" | "draft";
+export type PostStatus = "published" | "scheduled" | "draft";
 
-function getPostStatus(p: AdminBlogPostListItem): PostStatus {
+export function getPostStatus(p: AdminBlogPostListItem): PostStatus {
   if (p.draft) return "draft";
   const d = new Date(p.date);
   if (!Number.isNaN(d.getTime()) && d.getTime() > Date.now()) return "scheduled";
   return "published";
 }
 
-// 予約公開バッジ表示用。管理者は日本時間で運用している前提のため、実行環境のタイムゾーンに
-// 関わらずAsia/Tokyoで固定フォーマットする。
-function formatScheduledAt(dateStr: string): string {
+// 管理者は日本時間で運用している前提のため、実行環境のタイムゾーンに関わらず
+// Asia/Tokyoで固定して年月日時分を取り出す（カレンダー表示の日付バケット分けにも使う）。
+export function getTokyoDateParts(dateStr: string): { year: string; month: string; day: string; hour: string; minute: string } | null {
   const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
+  if (Number.isNaN(d.getTime())) return null;
   const parts = new Intl.DateTimeFormat("ja-JP", {
     timeZone: "Asia/Tokyo",
     year: "numeric",
@@ -45,7 +46,14 @@ function formatScheduledAt(dateStr: string): string {
     hour12: false,
   }).formatToParts(d);
   const get = (t: string) => parts.find((part) => part.type === t)?.value ?? "";
-  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
+  return { year: get("year"), month: get("month"), day: get("day"), hour: get("hour"), minute: get("minute") };
+}
+
+// 予約公開バッジ表示用。
+export function formatScheduledAt(dateStr: string): string {
+  const p = getTokyoDateParts(dateStr);
+  if (!p) return dateStr;
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
 }
 
 // /blog（学生向けSEOブログ）記事の管理タブ。実体はGitHubリポジトリのcontent/blog/*.mdxのため、
@@ -65,6 +73,7 @@ export function BlogPostsTab({
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const [togglingSlug, setTogglingSlug] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditingState>(null);
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -224,14 +233,38 @@ export function BlogPostsTab({
         <p className="text-sm text-gray-600">
           全<span className="font-bold text-gray-900">{posts?.length ?? 0}</span>記事
         </p>
-        <button
-          type="button"
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          記事を新規作成
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-full border border-gray-200 bg-white p-0.5">
+            <button
+              type="button"
+              onClick={() => setViewMode("list")}
+              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                viewMode === "list" ? "bg-blue-600 text-white" : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <List className="h-3.5 w-3.5" />
+              リスト
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("calendar")}
+              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                viewMode === "calendar" ? "bg-blue-600 text-white" : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <CalendarDays className="h-3.5 w-3.5" />
+              カレンダー
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={openCreate}
+            className="flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            記事を新規作成
+          </button>
+        </div>
       </div>
 
       <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
@@ -246,6 +279,8 @@ export function BlogPostsTab({
 
       {!posts ? (
         <p className="text-sm text-gray-500">読み込み中...</p>
+      ) : viewMode === "calendar" ? (
+        <BlogCalendarView posts={posts} onSelectPost={openEdit} />
       ) : posts.length === 0 ? (
         <p className="text-sm text-gray-500">記事がありません。</p>
       ) : (
