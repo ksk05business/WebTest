@@ -74,6 +74,7 @@ export function BlogPostsTab({
   const [togglingSlug, setTogglingSlug] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditingState>(null);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -227,11 +228,33 @@ export function BlogPostsTab({
     }
   }
 
+  // タグ（記事のパターン）ごとの件数を集計し、出現数の多い順に並べる。
+  // 記事一覧の絞り込みチップと、各カードのタグクリックからの絞り込みの両方で使う。
+  const tagCounts = new Map<string, number>();
+  for (const p of posts ?? []) {
+    for (const t of p.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+  }
+  const sortedTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const filteredPosts = selectedTag ? (posts ?? []).filter((p) => p.tags.includes(selectedTag)) : posts;
+
+  function toggleTag(tag: string) {
+    setSelectedTag((prev) => (prev === tag ? null : tag));
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-gray-600">
-          全<span className="font-bold text-gray-900">{posts?.length ?? 0}</span>記事
+          {selectedTag ? (
+            <>
+              「{selectedTag}」<span className="font-bold text-gray-900">{filteredPosts?.length ?? 0}</span>件
+              <span className="text-gray-400"> / 全{posts?.length ?? 0}記事</span>
+            </>
+          ) : (
+            <>
+              全<span className="font-bold text-gray-900">{posts?.length ?? 0}</span>記事
+            </>
+          )}
         </p>
         <div className="flex items-center gap-2">
           <div className="flex rounded-full border border-gray-200 bg-white p-0.5">
@@ -267,6 +290,32 @@ export function BlogPostsTab({
         </div>
       </div>
 
+      {sortedTags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setSelectedTag(null)}
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+              selectedTag === null ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            すべて
+          </button>
+          {sortedTags.map(([tag, count]) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => toggleTag(tag)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                selectedTag === tag ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {tag} <span className={selectedTag === tag ? "text-blue-100" : "text-gray-400"}>{count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
         保存・削除操作はGitHubへのコミットとして実行され、Cloudflare
         Pagesの自動ビルドを経て本番サイトへ反映されます（反映まで数分〜十数分かかります）。
@@ -280,12 +329,14 @@ export function BlogPostsTab({
       {!posts ? (
         <p className="text-sm text-gray-500">読み込み中...</p>
       ) : viewMode === "calendar" ? (
-        <BlogCalendarView posts={posts} onSelectPost={openEdit} />
-      ) : posts.length === 0 ? (
-        <p className="text-sm text-gray-500">記事がありません。</p>
+        <BlogCalendarView posts={filteredPosts ?? []} onSelectPost={openEdit} />
+      ) : (filteredPosts?.length ?? 0) === 0 ? (
+        <p className="text-sm text-gray-500">
+          {selectedTag ? `「${selectedTag}」に一致する記事がありません。` : "記事がありません。"}
+        </p>
       ) : (
         <div className="flex flex-col gap-3">
-          {posts.map((p) => {
+          {filteredPosts!.map((p) => {
             const status = getPostStatus(p);
             return (
             <div key={p.slug} className="rounded-lg border border-gray-200 bg-white p-4">
@@ -357,9 +408,18 @@ export function BlogPostsTab({
               {p.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {p.tags.map((t) => (
-                    <span key={t} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTag(t)}
+                      className={`rounded-full px-2 py-0.5 text-xs transition-colors ${
+                        selectedTag === t
+                          ? "bg-blue-600 font-semibold text-white"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
                       {t}
-                    </span>
+                    </button>
                   ))}
                 </div>
               )}
