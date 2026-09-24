@@ -2,6 +2,7 @@ import type { ExamReviewEntry } from "@/src/data/questions";
 import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
 import { ExplanationStep } from "@/src/components/ExplanationStep";
+import { QuestionImage, QuestionTables } from "@/src/components/exam/QuestionMedia";
 
 // 試験終了直後の結果画面（/result）と、過去の受験結果の詳細画面（/result/history）の
 // 両方で使う「解答一覧」の共通レンダリング。問題文・選択肢（正誤色分け）・解説・解答時間を表示する。
@@ -39,53 +40,14 @@ export function ExamReviewList({ review }: { review: ExamReviewEntry[] }) {
           </p>
 
           {entry.imageDataUri && (
-            <div className="mt-2 overflow-x-auto">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={entry.imageDataUri}
-                alt="設問のグラフ"
-                className="mx-auto max-w-full rounded-lg border border-gray-200"
-              />
+            <div className="mt-2">
+              <QuestionImage src={entry.imageDataUri} />
             </div>
           )}
 
           {entry.tables && (
-            <div className="mt-2 flex flex-col gap-4">
-              {entry.tables.map((table, ti) => (
-                <div key={ti} className="overflow-x-auto">
-                  {table.title && (
-                    <p className="mb-1 text-sm font-semibold text-gray-700">{table.title}</p>
-                  )}
-                  <table className="w-full min-w-max border-collapse text-sm">
-                    <thead>
-                      <tr>
-                        {table.headers.map((header, hi) => (
-                          <th
-                            key={hi}
-                            className="border border-gray-300 bg-gray-100 px-3 py-1.5 text-center font-semibold text-gray-800"
-                          >
-                            {header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {table.rows.map((row, ri) => (
-                        <tr key={ri}>
-                          {row.map((cell, ci) => (
-                            <td
-                              key={ci}
-                              className="border border-gray-300 px-3 py-1.5 text-center text-gray-700"
-                            >
-                              {cell}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ))}
+            <div className="mt-2">
+              <QuestionTables tables={entry.tables} />
             </div>
           )}
 

@@ -10,15 +10,11 @@ import { CATEGORY_TO_TEST_ID, DEFAULT_TEST_ID } from "@/src/data/practiceUnits";
 import { getTargetTimeSeconds } from "@/src/data/targetTimes";
 import { redirectToLogin } from "@/src/lib/authRedirect";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
+import { formatDurationMmSs as formatElapsed } from "@/src/lib/formatDate";
 import { ProfileRequiredModal } from "@/src/components/ProfileRequiredModal";
 import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
 import { ExplanationStep } from "@/src/components/ExplanationStep";
-
-function formatElapsed(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
+import { QuestionHeader } from "@/src/components/exam/QuestionHeader";
 
 function getUserEmail(): string | null {
   const raw = localStorage.getItem("spiUser");
@@ -462,70 +458,7 @@ function PracticePageInner() {
         </span>
       </div>
 
-      {question.questionCode && (
-        <span className="w-fit rounded-full bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-400">
-          問ID: {question.questionCode}
-        </span>
-      )}
-
-      {question.title && (
-        <p className="text-sm font-semibold text-blue-700">{question.title}</p>
-      )}
-
-      <p className="whitespace-pre-wrap text-lg font-medium text-gray-900">
-        <HighlightedText text={question.text} targets={highlightTargets} />
-      </p>
-
-      {question.imageDataUri && (
-        <div className="overflow-x-auto">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={question.imageDataUri}
-            alt="設問のグラフ"
-            className="mx-auto max-w-full rounded-lg border border-gray-200"
-          />
-        </div>
-      )}
-
-      {question.tables && (
-        <div className="flex flex-col gap-4">
-          {question.tables.map((table, ti) => (
-            <div key={ti} className="overflow-x-auto">
-              {table.title && (
-                <p className="mb-1 text-sm font-semibold text-gray-700">{table.title}</p>
-              )}
-              <table className="w-full min-w-max border-collapse text-sm">
-                <thead>
-                  <tr>
-                    {table.headers.map((header, hi) => (
-                      <th
-                        key={hi}
-                        className="border border-gray-300 bg-gray-100 px-3 py-1.5 text-center font-semibold text-gray-800"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {table.rows.map((row, ri) => (
-                    <tr key={ri}>
-                      {row.map((cell, ci) => (
-                        <td
-                          key={ci}
-                          className="border border-gray-300 px-3 py-1.5 text-center text-gray-700"
-                        >
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
-        </div>
-      )}
+      <QuestionHeader question={question} highlightTargets={highlightTargets} />
 
       <div className="flex flex-col gap-3">
         {question.choices.map((choice) => {
