@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CalendarDays, ChevronRight, ExternalLink, List, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, ExternalLink, List, Pencil, Plus, Trash2 } from "lucide-react";
 import { BlogPostEditModal } from "./BlogPostEditModal";
 import { BlogCalendarView } from "./BlogCalendarView";
 import { Switch } from "./Switch";
+import { BLOG_CATEGORY_ORDER, getBlogCategoryLabel, getBlogSubtags } from "@/src/data/tagTaxonomy";
+
+// 折りたたみ前に表示するサブタグの最大数（超える場合は「もっと見る」で全件表示に切り替える）。
+const SUBTAG_COLLAPSE_LIMIT = 20;
 
 export type AdminBlogPostListItem = {
   slug: string;
@@ -74,9 +78,11 @@ export function BlogPostsTab({
   const [togglingSlug, setTogglingSlug] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditingState>(null);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-  // タグを「TG-WEB」→「図形問題」→「立方体の切断面」のように順番に選び、階層を掘り下げて
-  // 記事を絞り込んでいくためのパス。空配列＝ルート（絞り込みなし）。
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  // 第1階層（メインカテゴリー）。デフォルトは常に「すべて」。
+  const [category, setCategory] = useState("すべて");
+  // 第2階層（サブタグ）。カテゴリーを切り替えたら必ずリセットする。
+  const [subtag, setSubtag] = useState<string | null>(null);
+  const [showAllSubtags, setShowAllSubtags] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -230,41 +236,39 @@ export function BlogPostsTab({
     }
   }
 
-  // selectedTags（例: ["TG-WEB","図形問題"]）を満たす記事だけに絞り込む（AND条件）。
-  const filteredPosts = (posts ?? []).filter((p) => selectedTags.every((t) => p.tags.includes(t)));
+  // 第1階層：選択中のメインカテゴリー配下の記事だけに絞り込む。
+  const postsInCategory = (posts ?? []).filter(
+    (p) => category === "すべて" || getBlogCategoryLabel(p.tags) === category,
+  );
 
-  // 「次の階層」で選べるタグを、今の絞り込み結果の中だけで集計する（すでに選択済みのタグは除く）。
-  // これにより、「TG-WEB」を選ぶとTG-WEB記事に実際に付いているタグだけが次の候補として出てくる、
-  // という階層的なドリルダウンになる。件数の多い順に並べる。
-  const nextLevelCounts = new Map<string, number>();
-  for (const p of filteredPosts) {
-    for (const t of p.tags) {
-      if (selectedTags.includes(t)) continue;
-      nextLevelCounts.set(t, (nextLevelCounts.get(t) ?? 0) + 1);
-    }
+  // 第2階層：選択中カテゴリー配下の記事だけから、サブタグ候補を使用頻度順に集計する。
+  const subtags = getBlogSubtags(postsInCategory, category);
+  const visibleSubtags = showAllSubtags ? subtags : subtags.slice(0, SUBTAG_COLLAPSE_LIMIT);
+
+  // 第2階層（サブタグ）でさらに絞り込む。
+  const filteredPosts = subtag ? postsInCategory.filter((p) => p.tags.includes(subtag)) : postsInCategory;
+
+  function handleCategoryChange(next: string) {
+    setCategory(next);
+    setSubtag(null);
+    setShowAllSubtags(false);
   }
-  const nextLevelTags = [...nextLevelCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
-  // パンくず・記事カードのタグ・次階層チップ、すべてこの1つの関数でタグ選択を操作する。
-  // すでに選択済みのタグをクリックした場合：末尾（現在地）なら1段階だけ戻る、途中の階層なら
-  // そこまで一気に戻る（パンくずと同じ動き）。未選択のタグなら、現在のパスの末尾に追加して
-  // 1段階掘り下げる。
-  function selectTag(tag: string) {
-    const idx = selectedTags.indexOf(tag);
-    if (idx === -1) {
-      setSelectedTags([...selectedTags, tag]);
-    } else if (idx === selectedTags.length - 1) {
-      setSelectedTags(selectedTags.slice(0, idx));
-    } else {
-      setSelectedTags(selectedTags.slice(0, idx + 1));
-    }
+  // 記事カードのタグをクリックしたときのショートカット。そのタグを含む記事のtags全体から
+  // 所属カテゴリーを判定して第1階層を切り替え、クリックしたタグ自体をカテゴリーのエイリアス
+  // （"TG-WEB"等）以外なら第2階層（サブタグ）として選択する。
+  function selectTagFromCard(postTags: string[], tag: string) {
+    const tagCategory = getBlogCategoryLabel(postTags);
+    setCategory(tagCategory);
+    setSubtag(getBlogCategoryLabel([tag]) === tagCategory ? null : tag);
+    setShowAllSubtags(false);
   }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-gray-600">
-          {selectedTags.length > 0 ? (
+          {category !== "すべて" || subtag ? (
             <>
               <span className="font-bold text-gray-900">{filteredPosts.length}</span>件
               <span className="text-gray-400"> / 全{posts?.length ?? 0}記事</span>
@@ -310,47 +314,55 @@ export function BlogPostsTab({
       </div>
 
       <div className="flex flex-col gap-2">
-        {/* パンくず：ルート（すべて）→選択したタグを順にたどる。途中のタグをクリックすると
-            そこまで一気に戻れる。 */}
-        <div className="flex flex-wrap items-center gap-1 text-sm">
-          <button
-            type="button"
-            onClick={() => setSelectedTags([])}
-            className={`rounded-full px-2.5 py-1 font-semibold transition-colors ${
-              selectedTags.length === 0 ? "bg-gray-800 text-white" : "text-gray-500 hover:bg-gray-100"
-            }`}
-          >
-            すべて
-          </button>
-          {selectedTags.map((tag, i) => (
-            <span key={tag} className="flex items-center gap-1">
-              <ChevronRight className="h-3.5 w-3.5 text-gray-300" />
-              <button
-                type="button"
-                onClick={() => selectTag(tag)}
-                className={`rounded-full px-2.5 py-1 font-semibold transition-colors ${
-                  i === selectedTags.length - 1 ? "bg-blue-600 text-white" : "text-blue-600 hover:bg-blue-50"
-                }`}
-              >
-                {tag}
-              </button>
-            </span>
+        {/* 第1階層：メインカテゴリー（固定9種）。選択中はダーク、非選択は薄いグレー。 */}
+        <div className="flex flex-wrap items-center gap-1.5 text-sm">
+          {["すべて", ...BLOG_CATEGORY_ORDER].map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => handleCategoryChange(c)}
+              className={`rounded-full px-3 py-1 font-semibold transition-colors ${
+                category === c ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {c}
+            </button>
           ))}
         </div>
 
-        {/* 次の階層のタグ候補：今の絞り込み結果の中だけに登場するタグを件数順に表示する。 */}
-        {nextLevelTags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            {nextLevelTags.map(([tag, count]) => (
+        {/* 第2階層：選択中カテゴリー配下のサブタグ候補を使用頻度順に表示する。 */}
+        {subtags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 border-l-2 border-blue-100 pl-3">
+            <button
+              type="button"
+              onClick={() => setSubtag(null)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                subtag === null ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              すべて
+            </button>
+            {visibleSubtags.map(({ tag, count }) => (
               <button
                 key={tag}
                 type="button"
-                onClick={() => selectTag(tag)}
-                className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-200"
+                onClick={() => setSubtag(tag)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                  subtag === tag ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
               >
-                {tag} <span className="text-gray-400">{count}</span>
+                {tag} <span className={subtag === tag ? "text-blue-100" : "text-gray-400"}>{count}</span>
               </button>
             ))}
+            {!showAllSubtags && subtags.length > SUBTAG_COLLAPSE_LIMIT && (
+              <button
+                type="button"
+                onClick={() => setShowAllSubtags(true)}
+                className="rounded-full px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+              >
+                もっと見る（+{subtags.length - SUBTAG_COLLAPSE_LIMIT}）
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -371,7 +383,7 @@ export function BlogPostsTab({
         <BlogCalendarView posts={filteredPosts} onSelectPost={openEdit} />
       ) : filteredPosts.length === 0 ? (
         <p className="text-sm text-gray-500">
-          {selectedTags.length > 0 ? "この階層に一致する記事がありません。" : "記事がありません。"}
+          {category !== "すべて" || subtag ? "この絞り込みに一致する記事がありません。" : "記事がありません。"}
         </p>
       ) : (
         <div className="flex flex-col gap-3">
@@ -450,9 +462,9 @@ export function BlogPostsTab({
                     <button
                       key={t}
                       type="button"
-                      onClick={() => selectTag(t)}
+                      onClick={() => selectTagFromCard(p.tags, t)}
                       className={`rounded-full px-2 py-0.5 text-xs transition-colors ${
-                        selectedTags.includes(t)
+                        t === subtag || (subtag === null && t === category)
                           ? "bg-blue-600 font-semibold text-white"
                           : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       }`}

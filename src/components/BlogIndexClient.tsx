@@ -4,9 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { SITE_NAME } from "@/src/lib/site";
-import { BLOG_CATEGORY_ORDER, getBlogCategoryLabel, getBlogUnitLabel } from "@/src/data/tagTaxonomy";
+import { BLOG_CATEGORY_ORDER, getBlogCategoryLabel, getBlogSubtags } from "@/src/data/tagTaxonomy";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { BackLink } from "@/src/components/BackLink";
+
+// 折りたたみ前に表示するサブタグの最大数（超える場合は「もっと見る」で全件表示に切り替える）。
+const SUBTAG_COLLAPSE_LIMIT = 16;
 
 type BlogListItem = {
   slug: string;
@@ -26,47 +29,43 @@ function formatDate(date: string): string {
 
 export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
   const [loggedIn, setLoggedIn] = useState(false);
+  // 第1階層（メインカテゴリー）。デフォルトは常に「すべて」。
   const [category, setCategory] = useState("すべて");
-  // カテゴリー（テスト種類）を切り替えたら、以前選んでいた単元の絞り込みは必ずリセットする
-  // （切り替え後のカテゴリーにその単元が存在せず、記事が0件のまま表示され続けるのを防ぐため）。
-  const [unit, setUnit] = useState<string | null>(null);
+  // 第2階層（サブタグ）。カテゴリーを切り替えたら必ずリセットする
+  // （切り替え後のカテゴリーにそのサブタグが存在せず、記事が0件のまま表示され続けるのを防ぐため）。
+  const [subtag, setSubtag] = useState<string | null>(null);
+  const [showAllSubtags, setShowAllSubtags] = useState(false);
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem("spiUser"));
   }, []);
 
+  // 一覧はgetAllBlogPosts()（src/lib/blog.ts）の時点で公開日時の降順（最新順）にソート済みで、
+  // ここでは並び順を変えずにそのまま使う。
   const latestPosts = posts.slice(0, 3);
 
-  // 実際に記事が存在するカテゴリーだけをチップとして表示する（0件のカテゴリーを出さない）。
-  const categories = useMemo(() => {
-    const present = new Set(posts.map((p) => getBlogCategoryLabel(p.tags)));
-    return ["すべて", ...BLOG_CATEGORY_ORDER.filter((c) => present.has(c))];
-  }, [posts]);
+  // 第1階層は「すべて」＋固定9カテゴリー（BLOG_CATEGORY_ORDER）を常に表示する。
+  // 現時点で該当記事が0件のカテゴリーがあっても、今後追加される前提のタクソノミーとして出しておく。
+  const categories = ["すべて", ...BLOG_CATEGORY_ORDER];
 
   const postsInCategory = useMemo(
     () => (category === "すべて" ? posts : posts.filter((p) => getBlogCategoryLabel(p.tags) === category)),
     [posts, category],
   );
 
-  // 特定のテスト種類を選んだときだけ、その配下の単元（暗号・図形問題・推論など）でさらに
-  // 絞り込めるようにする。単元が2種類未満（全部同じ単元、または単元タグ自体がない）場合は
-  // チップを出しても意味がないため非表示にする。
-  const units = useMemo(() => {
-    if (category === "すべて") return [];
-    const found = new Set(
-      postsInCategory.map((p) => getBlogUnitLabel(p.tags, category)).filter((u): u is string => u !== null),
-    );
-    return found.size >= 2 ? Array.from(found) : [];
-  }, [postsInCategory, category]);
+  // 第2階層（サブタグ）。選択中カテゴリー配下の記事だけから、使用頻度順にタグ候補を集計する。
+  const subtags = useMemo(() => getBlogSubtags(postsInCategory, category), [postsInCategory, category]);
+  const visibleSubtags = showAllSubtags ? subtags : subtags.slice(0, SUBTAG_COLLAPSE_LIMIT);
 
   const filteredPosts = useMemo(
-    () => (unit ? postsInCategory.filter((p) => getBlogUnitLabel(p.tags, category) === unit) : postsInCategory),
-    [postsInCategory, unit, category],
+    () => (subtag ? postsInCategory.filter((p) => p.tags.includes(subtag)) : postsInCategory),
+    [postsInCategory, subtag],
   );
 
   function handleCategoryChange(next: string) {
     setCategory(next);
-    setUnit(null);
+    setSubtag(null);
+    setShowAllSubtags(false);
   }
 
   return (
@@ -126,7 +125,7 @@ export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
 
           <section>
             <h2 className="mb-4 text-base font-bold text-gray-900 sm:text-lg">カテゴリーから探す</h2>
-            <div className={`flex flex-wrap gap-2 ${units.length > 0 ? "mb-3" : "mb-5"}`}>
+            <div className={`flex flex-wrap gap-2 ${subtags.length > 0 ? "mb-3" : "mb-5"}`}>
               {categories.map((c) => (
                 <button
                   key={c}
@@ -135,7 +134,7 @@ export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
                   className={
                     category === c
                       ? "rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white"
-                      : "rounded-full border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                      : "rounded-full bg-gray-100 px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-200"
                   }
                 >
                   {c}
@@ -143,33 +142,42 @@ export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
               ))}
             </div>
 
-            {units.length > 0 && (
-              <div className="mb-5 flex flex-wrap gap-1.5 border-l-2 border-blue-100 pl-3">
+            {subtags.length > 0 && (
+              <div className="mb-5 flex flex-wrap items-center gap-1.5 border-l-2 border-blue-100 pl-3">
                 <button
                   type="button"
-                  onClick={() => setUnit(null)}
+                  onClick={() => setSubtag(null)}
                   className={
-                    unit === null
+                    subtag === null
                       ? "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
                       : "rounded-full px-3 py-1 text-xs font-medium text-gray-500 hover:bg-gray-50"
                   }
                 >
                   すべて
                 </button>
-                {units.map((u) => (
+                {visibleSubtags.map(({ tag, count }) => (
                   <button
-                    key={u}
+                    key={tag}
                     type="button"
-                    onClick={() => setUnit(u)}
+                    onClick={() => setSubtag(tag)}
                     className={
-                      unit === u
+                      subtag === tag
                         ? "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
                         : "rounded-full px-3 py-1 text-xs font-medium text-gray-500 hover:bg-gray-50"
                     }
                   >
-                    {u}
+                    {tag} <span className="text-gray-400">{count}</span>
                   </button>
                 ))}
+                {!showAllSubtags && subtags.length > SUBTAG_COLLAPSE_LIMIT && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllSubtags(true)}
+                    className="rounded-full px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                  >
+                    もっと見る（+{subtags.length - SUBTAG_COLLAPSE_LIMIT}）
+                  </button>
+                )}
               </div>
             )}
 

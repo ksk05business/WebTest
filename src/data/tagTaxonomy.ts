@@ -83,42 +83,56 @@ const COMPANY_BRANCH: TagNode = {
 
 export const TAG_TAXONOMY: TagNode[] = [WEBTEST_BRANCH, COMPANY_BRANCH, { label: "その他" }];
 
-// /blogのカテゴリー絞り込み（BlogIndexClient.tsx）用。TAG_TAXONOMYの第1階層（Webテスト対策/企業/その他）
-// だけでは記事のほぼ全てが「Webテスト対策」に一括りにされ絞り込みの意味をなさないため、
-// 第2階層（テスト種類）単位で分類する。ただし記事のtagsフロントマターは過去に自由入力で
+// /blog（一般向け）・/admin/dashboard「ブログ記事管理」タブ共通の2階層フィルター用。
+// 第1階層は固定9カテゴリー（すべて＋テスト種類8区分）で、TAG_TAXONOMYの第1階層
+// （Webテスト対策/企業/その他）だけでは記事のほぼ全てが「Webテスト対策」に一括りにされて
+// 絞り込みの意味をなさないため、こちらを使う。記事のtagsフロントマターは過去に自由入力で
 // 付けられてきた経緯があり、"SPI"と"SPI3"、"GAB"と"C-GAB"のように表記揺れがある
-// （TEST_TYPES.nameと厳密一致しない）。新記事を書くたびに過去記事のtagsを一括修正するのは
-// リスクが高いため、代わりにここでテスト種類ごとの別名（エイリアス）を吸収する。
-const TEST_TYPE_TAG_ALIASES: { label: string; aliases: string[] }[] = [
-  { label: "SPI3", aliases: ["SPI", "SPI3"] },
+// （TEST_TYPES.nameと厳密一致しない）ため、カテゴリーごとに別名（エイリアス）を吸収する。
+// 新記事を書くたびに過去記事のtagsを一括修正するリスクを避けるための対応。
+const BLOG_CATEGORY_ALIASES: { label: string; aliases: string[] }[] = [
+  { label: "SPI", aliases: ["SPI", "SPI3"] },
   { label: "玉手箱", aliases: ["玉手箱"] },
   { label: "TG-WEB", aliases: ["TG-WEB"] },
-  { label: "GAB / C-GAB", aliases: ["GAB", "C-GAB"] },
-  { label: "Web-CAB", aliases: ["CAB", "Web-CAB"] },
+  { label: "GAB", aliases: ["GAB", "C-GAB", "GAB / C-GAB"] },
+  { label: "CAB", aliases: ["CAB", "Web-CAB"] },
   { label: "SCOA", aliases: ["SCOA"] },
+  { label: "企業", aliases: ["企業"] },
 ];
 
-// 記事のtagsから、/blogのカテゴリーチップに表示する1つのラベルを決める。
-// テスト種類のエイリアスに一致すればそのテスト種類名、"企業"タグがあれば"企業"、
-// どちらでもなければ"その他"に倒す。
+// 第1階層チップの固定の並び順（"すべて"はUI側で別途先頭に足す）。
+export const BLOG_CATEGORY_ORDER: string[] = [...BLOG_CATEGORY_ALIASES.map((c) => c.label), "その他"];
+
+// 記事のtagsから、フィルターの第1階層チップに表示する1つのラベルを決める。
+// いずれのエイリアスにも一致しなければ「その他」に倒す。
 export function getBlogCategoryLabel(tags: string[]): string {
-  const testTypeMatch = TEST_TYPE_TAG_ALIASES.find((t) => t.aliases.some((alias) => tags.includes(alias)));
-  if (testTypeMatch) return testTypeMatch.label;
-  if (tags.includes("企業")) return "企業";
-  return "その他";
+  const match = BLOG_CATEGORY_ALIASES.find((c) => c.aliases.some((alias) => tags.includes(alias)));
+  return match?.label ?? "その他";
 }
 
-export const BLOG_CATEGORY_ORDER: string[] = [...TEST_TYPE_TAG_ALIASES.map((t) => t.label), "企業", "その他"];
+// 第2階層（サブタグ）のチップから除外する、どのカテゴリーにも属さない汎用タグ。
+// これらは記事の中身を区別する情報を持たない（ほぼ全記事に付いている）ため、
+// サブタグとして出しても絞り込みの役に立たない。
+const BLOG_SUBTAG_NOISE = new Set(["Webテスト対策", "無料", "非言語", "言語", "従来型", "新型"]);
 
-// 選択中のテスト種類カテゴリー配下で、記事をさらに単元（暗号・図形問題・推論など）単位で
-// 絞り込むための2階層目ラベルを求める。TAG_TAXONOMYの第4階層（単元）ラベルのうち、
-// 記事のtagsに含まれるものをそのまま使う（unit.labelは表記揺れがないため別名は不要）。
-export function getBlogUnitLabel(tags: string[], categoryLabel: string): string | null {
-  const testTypeNode = WEBTEST_BRANCH.children?.find((t) => t.label === categoryLabel);
-  if (!testTypeNode?.children) return null;
-  for (const group of testTypeNode.children) {
-    const unit = group.children?.find((u) => tags.includes(u.label));
-    if (unit) return unit.label;
+// 指定カテゴリー配下の記事群から、第2階層（サブタグ）の候補を使用頻度順に集計する。
+// カテゴリー自身を表すタグ（"TG-WEB"や、そのエイリアスである"SPI3"等）は、選んでも
+// 絞り込みが変化せず無意味なので候補から除く。"すべて"のときは全カテゴリー名も含めて
+// 汎用ノイズタグだけを除外する（テスト種類の判別に使えるタグとして残す）。
+export function getBlogSubtags(
+  posts: { tags: string[] }[],
+  category: string,
+): { tag: string; count: number }[] {
+  const excludeAsCategorySelf =
+    category === "すべて" ? new Set<string>() : new Set(BLOG_CATEGORY_ALIASES.find((c) => c.label === category)?.aliases ?? [category]);
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    for (const tag of post.tags) {
+      if (BLOG_SUBTAG_NOISE.has(tag) || excludeAsCategorySelf.has(tag)) continue;
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
   }
-  return null;
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 }
