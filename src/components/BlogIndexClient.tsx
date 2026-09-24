@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { SITE_NAME } from "@/src/lib/site";
-import { TAG_TAXONOMY } from "@/src/data/tagTaxonomy";
+import { BLOG_CATEGORY_ORDER, getBlogCategoryLabel, getBlogUnitLabel } from "@/src/data/tagTaxonomy";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { BackLink } from "@/src/components/BackLink";
 
@@ -16,8 +16,6 @@ type BlogListItem = {
   tags: string[];
 };
 
-const CATEGORIES = ["すべて", ...TAG_TAXONOMY.map((n) => n.label)];
-
 // src/lib/blog.tsのformatBlogDate()と同じロジック。blog.tsはnode:fsに依存しており
 // クライアントコンポーネントからimportするとビルドが壊れるため、この関数だけこちらに複製する。
 function formatDate(date: string): string {
@@ -26,27 +24,50 @@ function formatDate(date: string): string {
   return new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "long", day: "numeric" }).format(d);
 }
 
-// 記事のタグにタクソノミーの第1階層ラベル（Webテスト対策/企業/その他）がそのまま
-// 含まれていればそれをカテゴリーとする。管理画面のTagTaxonomyPickerで選んだ記事は
-// 必ず第1階層ラベルもタグに含むため一致する。どれとも一致しなければ「その他」に倒す。
-function getPostCategory(tags: string[]): string {
-  const match = TAG_TAXONOMY.find((branch) => tags.includes(branch.label));
-  return match?.label ?? "その他";
-}
-
 export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [category, setCategory] = useState("すべて");
+  // カテゴリー（テスト種類）を切り替えたら、以前選んでいた単元の絞り込みは必ずリセットする
+  // （切り替え後のカテゴリーにその単元が存在せず、記事が0件のまま表示され続けるのを防ぐため）。
+  const [unit, setUnit] = useState<string | null>(null);
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem("spiUser"));
   }, []);
 
   const latestPosts = posts.slice(0, 3);
-  const filteredPosts = useMemo(
-    () => (category === "すべて" ? posts : posts.filter((p) => getPostCategory(p.tags) === category)),
+
+  // 実際に記事が存在するカテゴリーだけをチップとして表示する（0件のカテゴリーを出さない）。
+  const categories = useMemo(() => {
+    const present = new Set(posts.map((p) => getBlogCategoryLabel(p.tags)));
+    return ["すべて", ...BLOG_CATEGORY_ORDER.filter((c) => present.has(c))];
+  }, [posts]);
+
+  const postsInCategory = useMemo(
+    () => (category === "すべて" ? posts : posts.filter((p) => getBlogCategoryLabel(p.tags) === category)),
     [posts, category],
   );
+
+  // 特定のテスト種類を選んだときだけ、その配下の単元（暗号・図形問題・推論など）でさらに
+  // 絞り込めるようにする。単元が2種類未満（全部同じ単元、または単元タグ自体がない）場合は
+  // チップを出しても意味がないため非表示にする。
+  const units = useMemo(() => {
+    if (category === "すべて") return [];
+    const found = new Set(
+      postsInCategory.map((p) => getBlogUnitLabel(p.tags, category)).filter((u): u is string => u !== null),
+    );
+    return found.size >= 2 ? Array.from(found) : [];
+  }, [postsInCategory, category]);
+
+  const filteredPosts = useMemo(
+    () => (unit ? postsInCategory.filter((p) => getBlogUnitLabel(p.tags, category) === unit) : postsInCategory),
+    [postsInCategory, unit, category],
+  );
+
+  function handleCategoryChange(next: string) {
+    setCategory(next);
+    setUnit(null);
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -105,12 +126,12 @@ export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
 
           <section>
             <h2 className="mb-4 text-base font-bold text-gray-900 sm:text-lg">カテゴリーから探す</h2>
-            <div className="mb-5 flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
+            <div className={`flex flex-wrap gap-2 ${units.length > 0 ? "mb-3" : "mb-5"}`}>
+              {categories.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  onClick={() => setCategory(c)}
+                  onClick={() => handleCategoryChange(c)}
                   className={
                     category === c
                       ? "rounded-full bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white"
@@ -121,6 +142,36 @@ export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
                 </button>
               ))}
             </div>
+
+            {units.length > 0 && (
+              <div className="mb-5 flex flex-wrap gap-1.5 border-l-2 border-blue-100 pl-3">
+                <button
+                  type="button"
+                  onClick={() => setUnit(null)}
+                  className={
+                    unit === null
+                      ? "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
+                      : "rounded-full px-3 py-1 text-xs font-medium text-gray-500 hover:bg-gray-50"
+                  }
+                >
+                  すべて
+                </button>
+                {units.map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    onClick={() => setUnit(u)}
+                    className={
+                      unit === u
+                        ? "rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
+                        : "rounded-full px-3 py-1 text-xs font-medium text-gray-500 hover:bg-gray-50"
+                    }
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="flex flex-col gap-3">
               {filteredPosts.length === 0 && (

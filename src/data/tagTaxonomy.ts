@@ -82,3 +82,43 @@ const COMPANY_BRANCH: TagNode = {
 };
 
 export const TAG_TAXONOMY: TagNode[] = [WEBTEST_BRANCH, COMPANY_BRANCH, { label: "その他" }];
+
+// /blogのカテゴリー絞り込み（BlogIndexClient.tsx）用。TAG_TAXONOMYの第1階層（Webテスト対策/企業/その他）
+// だけでは記事のほぼ全てが「Webテスト対策」に一括りにされ絞り込みの意味をなさないため、
+// 第2階層（テスト種類）単位で分類する。ただし記事のtagsフロントマターは過去に自由入力で
+// 付けられてきた経緯があり、"SPI"と"SPI3"、"GAB"と"C-GAB"のように表記揺れがある
+// （TEST_TYPES.nameと厳密一致しない）。新記事を書くたびに過去記事のtagsを一括修正するのは
+// リスクが高いため、代わりにここでテスト種類ごとの別名（エイリアス）を吸収する。
+const TEST_TYPE_TAG_ALIASES: { label: string; aliases: string[] }[] = [
+  { label: "SPI3", aliases: ["SPI", "SPI3"] },
+  { label: "玉手箱", aliases: ["玉手箱"] },
+  { label: "TG-WEB", aliases: ["TG-WEB"] },
+  { label: "GAB / C-GAB", aliases: ["GAB", "C-GAB"] },
+  { label: "Web-CAB", aliases: ["CAB", "Web-CAB"] },
+  { label: "SCOA", aliases: ["SCOA"] },
+];
+
+// 記事のtagsから、/blogのカテゴリーチップに表示する1つのラベルを決める。
+// テスト種類のエイリアスに一致すればそのテスト種類名、"企業"タグがあれば"企業"、
+// どちらでもなければ"その他"に倒す。
+export function getBlogCategoryLabel(tags: string[]): string {
+  const testTypeMatch = TEST_TYPE_TAG_ALIASES.find((t) => t.aliases.some((alias) => tags.includes(alias)));
+  if (testTypeMatch) return testTypeMatch.label;
+  if (tags.includes("企業")) return "企業";
+  return "その他";
+}
+
+export const BLOG_CATEGORY_ORDER: string[] = [...TEST_TYPE_TAG_ALIASES.map((t) => t.label), "企業", "その他"];
+
+// 選択中のテスト種類カテゴリー配下で、記事をさらに単元（暗号・図形問題・推論など）単位で
+// 絞り込むための2階層目ラベルを求める。TAG_TAXONOMYの第4階層（単元）ラベルのうち、
+// 記事のtagsに含まれるものをそのまま使う（unit.labelは表記揺れがないため別名は不要）。
+export function getBlogUnitLabel(tags: string[], categoryLabel: string): string | null {
+  const testTypeNode = WEBTEST_BRANCH.children?.find((t) => t.label === categoryLabel);
+  if (!testTypeNode?.children) return null;
+  for (const group of testTypeNode.children) {
+    const unit = group.children?.find((u) => tags.includes(u.label));
+    if (unit) return unit.label;
+  }
+  return null;
+}
