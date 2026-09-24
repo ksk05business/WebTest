@@ -7,12 +7,18 @@ import matter from "gray-matter";
 // 直接埋め込みたいという要件のため、実ファイルのMDX+フロントマター方式を採用している。
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
+export type BlogFaqItem = { q: string; a: string };
+
 export type BlogFrontmatter = {
   title: string;
   description: string;
   date: string;
   tags: string[];
   draft?: boolean;
+  // 記事末尾の「よくある質問」セクション用。指定するとFAQPageのJSON-LDが自動付与され、
+  // Google検索のリッチリザルトとAI回答エンジン双方からの引用可能性が上がる（GEO/AIO/LLMO対策）。
+  // MDX本文側にも同じ内容を見出しとして書くこと（構造化データと表示内容を一致させる）。
+  faq?: BlogFaqItem[];
 };
 
 export type BlogPost = BlogFrontmatter & {
@@ -68,6 +74,7 @@ export function getBlogPost(slug: string): BlogPost | null {
       date: data.date,
       tags: data.tags ?? [],
       draft: data.draft === true,
+      faq: data.faq ?? undefined,
       content,
     };
   } catch {
