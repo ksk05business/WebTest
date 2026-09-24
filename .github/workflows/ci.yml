@@ -1,0 +1,45 @@
+name: CI
+
+# push（mainへの直接pushを含む）・pull_requestの両方で実行する。
+# このリポジトリは基本的にmainへ直接pushする運用だが、CIの結果はコミットのステータスとして
+# 残るため、あとから「どの変更でビルドが壊れたか」を追跡できる。PRを使う場合はマージ前の
+# チェックとしてもそのまま機能する。
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # アプリ本体（app/・src/）の型チェック。next buildはトランスパイルのみで型エラーを
+      # 見逃すことがあるため、tscを別途走らせる。
+      - name: Type check (app)
+        run: npx tsc --noEmit
+
+      # Cloudflare Pages Functions（functions/）はapp/・src/とは別のtsconfigを使うため、
+      # 個別に型チェックする（CLAUDE.mdの「応答・進め方のルール」と同じ理由）。
+      - name: Type check (functions)
+        run: npx tsc --noEmit -p functions/tsconfig.json
+
+      - name: Build
+        run: npm run build
+
+      # lintは現時点でリポジトリ全体に既存の指摘（主にreact-hooks系）が多数残っており、
+      # 有効化するとほぼ常に赤くなってしまう。今は「壊れていないか気づける」参考情報として
+      # 出力するだけに留め、CI全体を失敗させない。既存の指摘を解消し次第、continue-on-errorを
+      # 外してブロッキングに格上げする。
+      - name: Lint (non-blocking)
+        run: npm run lint
+        continue-on-error: true

@@ -29,8 +29,9 @@
 - ユーザーへの応答は常に日本語で行う。
 - **トークン節約を最優先**する。目的達成に不要なファイル・コンポーネント・ドキュメントは作らない。
 - 既存ファイルの編集で済む場合は新規ファイルを作らない（Edit優先、Write/新規作成は最小限に）。
-- 変更後は `npx next build` で型エラー・ビルドエラーが無いことを確認してから完了報告する。`functions/` を変更した場合は `npx tsc --noEmit -p functions/tsconfig.json` も実行する。
+- 変更後は `npx next build` で型エラー・ビルドエラーが無いことを確認してから完了報告する。`functions/` を変更した場合は `npx tsc --noEmit -p functions/tsconfig.json` も実行する。ローカルでのこの確認は省略しない（下記CIはpush後の保険であり、事前確認の代わりにはしない）。
 - `/register` や `/login` などAPI呼び出しを伴う変更は、`npm run pages:dev` でローカルD1に対して実際に登録・ログインを試し、動作確認してから完了報告する（`next build`だけでは不十分。理由は`cloudflare-pages-gotchas`スキル参照）。
+- `.github/workflows/ci.yml`でGitHub Actions CIを実行している（push/pull_request時、`tsc --noEmit`×2・`next build`・lintは既存の指摘が多いため`continue-on-error`で非ブロッキング）。CIはpush後にコミットのステータスとして結果が残るだけで、マージやデプロイを止める仕組みではない（Cloudflare Pagesの自動デプロイとは独立）。
 
 # アーキテクチャ制約（変更時は必ず守る）
 
