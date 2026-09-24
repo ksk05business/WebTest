@@ -26,6 +26,17 @@ description: SEOブログ（/blog、content/blog/*.mdx）の新規記事作成�
 - サイトのドメインパワーが育ってきた段階（他記事からの内部リンクが増え、外部からの評価も得られるようになった後）で、初めてビッグキーワードでの記事にも挑戦する、という段階的な方針で進める。
 - frontmatterの`tags`もロングテールの構成要素（単元名・症状名）をそのまま反映させ、`getRelatedPosts()`のスコアリングにも活用できるようにする。
 
+## タイトルの【】プレフィックス規約（2026-09-24改訂）
+
+記事タイトル冒頭の【】には、**テスト名だけでなく、読者が一覧やSNSでひと目で内容を判別できる粒度**まで入れる。「【TG-WEB暗号】」「【TG-WEB図形】」のようにテスト名＋単元名だけでは、TG-WEBに「従来型」と「新型」で出題内容が全く異なる2形式が存在する事実が読者に伝わらない（同じ【TG-WEB図形】でも従来型の図形問題と新型の図表読み取りは別物）。必ず**テスト名＋形式（該当する場合）＋単元名**を1つの【】にまとめること。
+
+- ✅ 【TG-WEB従来型暗号】【TG-WEB従来型図形】【TG-WEB従来型推論】（暗号・図形問題・推論は`src/data/practiceUnits.ts`のtgweb_traditional_math配下にしかない、従来型専用の単元）
+- ✅ 【TG-WEB新型図表】（図表の読み取りはtgweb_new_math配下にしかない、新型専用の単元。「新型図形」ではなく実際の単元名である「図表」を使うこと——図形問題と図表の読み取りは別の単元なので混同しない）
+- ✅ 【TG-WEB英語】（tgweb_english、従来型・新型で共通の単元のため形式を付けない。付けると誤って「その形式専用」であるかのような誤情報になる）
+- ❌ 避ける: 【TG-WEB暗号】【TG-WEB図形】【TG-WEB推論】【TG-WEB新型】のような、形式または単元のどちらかしか書かれていないもの
+
+どの単元がどちらの形式（または共通）に属するかは、新しい記事を書く前に必ず`src/data/practiceUnits.ts`のTGWEB_PRACTICE_UNIT_GROUPS（`tgweb_traditional_verbal`/`tgweb_traditional_math`/`tgweb_new_verbal`/`tgweb_new_math`/`tgweb_verbal_reading`/`tgweb_english`の各category）で裏取りすること。他のテスト種別（SPI・玉手箱・GAB/C-GAB・SCOA等）はこのような形式分岐が無いため、従来通り「テスト名＋単元名」のみでよい。
+
 ## アーキテクチャ
 
 - 記事本体: `content/blog/<slug>.mdx`（1ファイル=1記事、フロントマター必須: `title, description, date, tags`）。
