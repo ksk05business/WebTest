@@ -11,6 +11,12 @@ description: D1の questions テーブル（問題バンク）を扱う作業向
 
 選択肢ラベル（A〜E）はAPI側（`functions/_lib/questionFormat.ts`の`toClientQuestion()`）でインデックス順に付与する。DBには`options`をラベル無しJSON配列として保持する。
 
+## クライアント側TypeScript型の規約
+
+- `src/data/questions.ts` の `Question` / `TableBlock` 型を正とし、`GET /api/questions` のレスポンス（およびクライアント側の型）はこの型に準拠させる。
+- 選択肢ラベルは `"A" | "B" | "C" | "D" | "E"` のUnion型で管理する（`string`型で緩めない）。D1の`options`はラベル無しのJSON配列で保持し、API側でインデックス順にA〜Eを付与する（上記の通り）。
+- `any` は使わない。表データ（`TableBlock.rows`）のセル値は `string | number` とする。
+
 ## category / sub_category の命名規則（テスト種別ごと）
 
 `src/data/practiceUnits.ts` の `PRACTICE_UNIT_GROUPS_BY_TEST` が唯一の正とする定義。新しい問題を追加する前に必ずこのファイルで対象の `category`/`subCategory` を確認すること（**この値と1文字でもズレるとその問題はUIに一切表示されない**）。
