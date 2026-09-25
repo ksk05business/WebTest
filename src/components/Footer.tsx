@@ -66,7 +66,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-gray-400">
-              参考書を買わずに、SPI3・玉手箱・TG-WEBなど主要Webテストを完全無料で対策できる就活生向け模試プラットフォーム。
+              参考書を買わずに、SPI・玉手箱・TG-WEBなど主要Webテストを完全無料で対策できる就活生向け模試プラットフォーム。
               スマホひとつで、スキマ時間に本番形式の練習ができます。
             </p>
           </div>

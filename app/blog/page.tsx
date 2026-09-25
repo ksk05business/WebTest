@@ -4,7 +4,7 @@ import { BlogIndexClient } from "@/src/components/BlogIndexClient";
 
 export const metadata: Metadata = {
   title: "Webテスト対策ブログ",
-  description: "SPI3・玉手箱など主要Webテストの解き方・対策のコツを解説する記事一覧です。",
+  description: "SPI・玉手箱など主要Webテストの解き方・対策のコツを解説する記事一覧です。",
   alternates: { canonical: "/blog" },
 };
 

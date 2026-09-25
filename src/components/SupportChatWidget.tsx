@@ -27,7 +27,7 @@ const FAQ_ITEMS: { question: string; answer: string }[] = [
   },
   {
     question: "対応しているテストは？",
-    answer: "SPI3をはじめ、玉手箱、TG-WEB、GAB/C-GAB、CAB、SCOAなど、主要なWebテストを幅広く網羅しています。",
+    answer: "SPIをはじめ、玉手箱、TG-WEB、GAB/C-GAB、CAB、SCOAなど、主要なWebテストを幅広く網羅しています。",
   },
 ];
 

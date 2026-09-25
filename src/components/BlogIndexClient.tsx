@@ -99,7 +99,7 @@ export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
           <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-3 text-center">
             <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">ブログ / コラム</h1>
             <p className="text-sm leading-relaxed text-gray-500 sm:text-base">
-              {SITE_NAME}が発信する、SPI3・玉手箱等の解き方・対策のコツをまとめた記事です。
+              {SITE_NAME}が発信する、SPI・玉手箱等の解き方・対策のコツをまとめた記事です。
             </p>
           </div>
 

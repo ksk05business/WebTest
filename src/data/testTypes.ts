@@ -6,7 +6,7 @@ export type TestType = {
 };
 
 export const TEST_TYPES: TestType[] = [
-  { id: "spi", name: "SPI3", href: "/test", available: true },
+  { id: "spi", name: "SPI", href: "/test", available: true },
   // 玉手箱・TG-WEB・GAB/C-GABはいずれも形式・セクションごとに個別選択して受験する複数パート方式
   // （SPIと同様、hrefは使わずExamModeSelectModal.tsxのisMultiPart分岐でMULTI_PART_EXAM_PARTSを
   // 参照してルーティングする。app/test/page.tsxのEXAM_PARTS参照）。

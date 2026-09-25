@@ -27,7 +27,7 @@ export function PracticeUnitSelector({ testId = DEFAULT_TEST_ID }: { testId?: st
   const [dueReviewLoading, setDueReviewLoading] = useState(true);
 
   const groups = PRACTICE_UNIT_GROUPS_BY_TEST[testId] ?? PRACTICE_UNIT_GROUPS_BY_TEST[DEFAULT_TEST_ID];
-  const testName = TEST_TYPES.find((t) => t.id === testId)?.name ?? "SPI3";
+  const testName = TEST_TYPES.find((t) => t.id === testId)?.name ?? "SPI";
 
   useEffect(() => {
     fetchWithRetry("/api/question-units")

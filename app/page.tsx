@@ -34,7 +34,7 @@ const BADGES = [
 ];
 
 const TEST_BRAND_DETAILS: { id: string; slug: string; displayName: string; subjects: string; pitch: string }[] = [
-  { id: "spi", slug: "spi", displayName: "SPI3", subjects: "言語・非言語・構造的把握・英語", pitch: "Webテストの代名詞" },
+  { id: "spi", slug: "spi", displayName: "SPI", subjects: "言語・非言語・構造的把握・英語", pitch: "Webテストの代名詞" },
   { id: "tamatebako", slug: "tamatebako", displayName: "玉手箱", subjects: "言語・計数・英語", pitch: "大企業・大手企業で圧倒的採用" },
   { id: "tgweb", slug: "tg-web", displayName: "TG-WEB", subjects: "従来型・新型", pitch: "PwC・三菱地所などのトップ企業が採用" },
   { id: "gab_cgab", slug: "gab", displayName: "C-GAB / Web-GAB", subjects: "言語・計数・英語", pitch: "総合商社・インフラ業界等で頻出" },
@@ -90,7 +90,7 @@ const FAQS = [
   },
   {
     question: "対応しているWebテストの種類を教えてください。",
-    answer: "SPI3をはじめ、玉手箱、TG-WEB、GAB/C-GAB、CAB、SCOAなど、主要なWebテストを幅広く網羅しています。",
+    answer: "SPIをはじめ、玉手箱、TG-WEB、GAB/C-GAB、CAB、SCOAなど、主要なWebテストを幅広く網羅しています。",
   },
   {
     question: "問題のクオリティや難易度はどのくらいですか？",
@@ -320,7 +320,7 @@ export default function Home() {
             模試 ✕ スカウト
           </h1>
           <p className="text-balance text-base leading-relaxed text-blue-50 sm:text-lg">
-            SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA
+            SPI・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA
             に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
           </p>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">

@@ -5,7 +5,7 @@
 // 数値はいずれも一般的な体感目安の仮の秒数（知識再生系は短め、計算・読解系は長め）。
 
 const CATEGORY_DEFAULT_SECONDS: Record<string, number> = {
-  // SPI3
+  // SPI
   verbal: 20,
   non_verbal: 60,
   english: 20,
@@ -35,7 +35,7 @@ const CATEGORY_DEFAULT_SECONDS: Record<string, number> = {
 
 // "category::sub_category" 単位の個別指定。同じcategory内でも単元の性質が大きく異なる場合に使う。
 const SUBCATEGORY_OVERRIDE_SECONDS: Record<string, number> = {
-  // SPI3 言語（語彙等の知識再生は短め、長文読解は長め）。
+  // SPI 言語（語彙等の知識再生は短め、長文読解は長め）。
   // SPI基礎能力試験（言語39問・非言語30問の固定ロースター、app/test/page.tsxのBasicExamFlow）は
   // 35分（2100秒）固定のタイムボックス制。ここの秒数はSPI_VERBAL_SUBPARTS/SPI_NON_VERBAL_SUBPARTS
   // の出題数配分と掛け合わせた合計が、言語=900秒・非言語=1200秒（計2100秒=35分）にちょうど
@@ -47,7 +47,7 @@ const SUBCATEGORY_OVERRIDE_SECONDS: Record<string, number> = {
   "verbal::語句の用法": 15,
   "verbal::文の並べ替え": 30,
   "verbal::長文読解": 70,
-  // SPI3 非言語（上と同じ理由で、非言語20分＝1200秒ちょうどになるよう逆算済み）
+  // SPI 非言語（上と同じ理由で、非言語20分＝1200秒ちょうどになるよう逆算済み）
   "non_verbal::推論": 42,
   "non_verbal::損益算": 42,
   "non_verbal::場合の数・確率": 42,
@@ -58,7 +58,7 @@ const SUBCATEGORY_OVERRIDE_SECONDS: Record<string, number> = {
   "non_verbal::割合・比": 30,
   "non_verbal::濃度算": 42,
   "non_verbal::分割払い": 30,
-  // SPI3 英語
+  // SPI 英語
   "english::語意（同意語・反意語）": 15,
   "english::空欄補充": 20,
   "english::英英辞典": 20,

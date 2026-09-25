@@ -77,7 +77,7 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "scoa_common_sense", subCategory: "社会", sectionLabel: "常識", perCycle: 13 },
   { category: "scoa_common_sense", subCategory: "理科", sectionLabel: "常識", perCycle: 12 },
 
-  // SPI3（2026-09-02改修。言語39問＋非言語30問＋英語29問＋構造把握20問＝計118問/回。
+  // SPI（2026-09-02改修。言語39問＋非言語30問＋英語29問＋構造把握20問＝計118問/回。
   // 同日中に他テスト（GAB/TG-WEB等）と同じ「模試専用プール分離」方式へ完全移行したため、
   // sharesPoolWithPracticeフラグは撤去済み＝他テストと同じmockCount基準で在庫判定される）。
   // 言語（計39問/回。長文読解は3問1組のpassage_group_id単位でしか選出されないため、本来の

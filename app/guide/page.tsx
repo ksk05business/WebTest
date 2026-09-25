@@ -7,7 +7,7 @@ import { SITE_NAME } from "@/src/lib/site";
 export const metadata: Metadata = {
   title: "Webテスト単元別 解き方ガイド一覧",
   description:
-    "SPI3・玉手箱の各単元（推論、四則逆算、論理的読解など）ごとの解き方・対策のコツをまとめた無料ガイド一覧です。",
+    "SPI・玉手箱の各単元（推論、四則逆算、論理的読解など）ごとの解き方・対策のコツをまとめた無料ガイド一覧です。",
   alternates: { canonical: "/guide" },
 };
 

@@ -19,7 +19,7 @@ export function TermsContent() {
         <h2 className="text-lg font-semibold text-gray-900">第2条（本サービスの内容）</h2>
         <p className="text-sm text-gray-700">本サービスは、以下の機能から構成されます。</p>
         <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
-          <li>SPI3・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA等の適性検査対策のためのWebテスト模試・練習問題の提供</li>
+          <li>SPI・玉手箱・TG-WEB・GAB/C-GAB・CAB・SCOA等の適性検査対策のためのWebテスト模試・練習問題の提供</li>
           <li>
             学生ユーザーが個別に明示的な同意をした場合に限り、その制限された属性データ・成績データを提携企業に公開し、企業からのスカウトメッセージを受け取れる「2段階開示型スカウトサービス」（第7条）
           </li>

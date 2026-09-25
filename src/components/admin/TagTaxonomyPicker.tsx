@@ -8,7 +8,7 @@ function findNode(nodes: TagNode[], label: string): TagNode | undefined {
   return nodes.find((n) => n.label === label);
 }
 
-// カスケード選択で辿った現在のパス（例: ["Webテスト対策","SPI3","非言語"]）から、
+// カスケード選択で辿った現在のパス（例: ["Webテスト対策","SPI","非言語"]）から、
 // 次に選択可能な階層のノード一覧を返す。パスの末端（それ以上children無し）に達したらnullを返す。
 function childrenAtPath(path: string[]): TagNode[] | null {
   let nodes: TagNode[] = TAG_TAXONOMY;
@@ -22,8 +22,8 @@ function childrenAtPath(path: string[]): TagNode[] | null {
 
 // src/data/tagTaxonomy.tsの4階層タクソノミーに基づく、連動型（カスケード）のタグ選択UI。
 // 自由入力を廃止し、階層を1段ずつドロップダウンで辿って「追加」した際に、選択パス上の
-// 全階層のラベルをフラットなタグ配列へまとめて追加する（例: Webテスト対策>SPI3>非言語>推論を
-// 選んで追加すると、tagsに"Webテスト対策""SPI3""非言語""推論"の4つが追加される）。
+// 全階層のラベルをフラットなタグ配列へまとめて追加する（例: Webテスト対策>SPI>非言語>推論を
+// 選んで追加すると、tagsに"Webテスト対策""SPI""非言語""推論"の4つが追加される）。
 export function TagTaxonomyPicker({
   tags,
   onChange,

@@ -6,7 +6,7 @@ import { redirectToLogin } from "@/src/lib/authRedirect";
 import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 import { MemorizationTestSelectModal, type MemorizationBreakdownItem } from "@/src/components/MemorizationTestSelectModal";
 
-// 全テスト種別（SPI3・玉手箱・TG-WEB・SCOA等）を横断した「直近の解答が不正解のまま」の
+// 全テスト種別（SPI・玉手箱・TG-WEB・SCOA等）を横断した「直近の解答が不正解のまま」の
 // 言語・英語の暗記系単元（語彙・語句・文法等、長文読解・論理的読解等は除く）の問題数を
 // ダッシュボード上部に表示する。メインダッシュボードの簡易化（成績・偏差値表示は試験別専用ページへ
 // 移動）後も、この横断復習機能だけは特定のテストに属さないためメインダッシュボードに残す。

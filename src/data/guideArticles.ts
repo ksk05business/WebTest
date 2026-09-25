@@ -19,18 +19,18 @@ export type GuideArticle = {
 };
 
 export const GUIDE_ARTICLES: GuideArticle[] = [
-  // ==================== SPI3 / 非言語（能力） ====================
+  // ==================== SPI / 非言語（能力） ====================
   {
     slug: "spi-inference",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "非言語（能力）",
     unitLabel: "推論",
     category: "non_verbal",
     subCategory: "推論",
     title: "SPI「推論」の解き方｜頻出パターンと対策のコツ",
     metaDescription:
-      "SPI3の非言語「推論」の解き方を解説。順序関係・対応関係・整数条件など頻出パターン別の攻略法と、時間内に正解率を上げるコツを紹介します。",
+      "SPIの非言語「推論」の解き方を解説。順序関係・対応関係・整数条件など頻出パターン別の攻略法と、時間内に正解率を上げるコツを紹介します。",
     intro:
       "推論はSPI非言語の中でも配点比重が高く、対策効果の出やすい分野です。「順序」「対応」「位置関係」「整数の性質」など、与えられた条件をすべて満たす組み合わせを絞り込んでいく問題が中心で、慣れれば短時間で解けるパターンが多いのが特徴です。",
     tips: [
@@ -47,14 +47,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-profit-loss",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "非言語（能力）",
     unitLabel: "損益計算",
     category: "non_verbal",
     subCategory: "損益算",
     title: "SPI「損益算」の解き方｜原価・定価・利益の公式と計算のコツ",
     metaDescription:
-      "SPI3の損益算（損益計算）を解説。原価・定価・売価・利益の関係式や割引・利益率の計算パターンを、公式と具体例つきで整理します。",
+      "SPIの損益算（損益計算）を解説。原価・定価・売価・利益の関係式や割引・利益率の計算パターンを、公式と具体例つきで整理します。",
     intro:
       "損益算は「原価」「定価」「売価（実売価格）」「利益」の4つの数字の関係を正しく式に落とし込めるかがすべてです。用語の意味を取り違えると計算そのものは合っていても不正解になるため、まず用語整理から始めましょう。",
     tips: [
@@ -67,14 +67,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-sets",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "非言語（能力）",
     unitLabel: "集合",
     category: "non_verbal",
     subCategory: "集合",
     title: "SPI「集合」の解き方｜ベン図・キャロル表の使い分け",
     metaDescription:
-      "SPI3の集合問題の解き方を解説。2つの条件はベン図、3つ以上の条件はキャロル表（線分図）で整理する使い分けと計算のコツを紹介します。",
+      "SPIの集合問題の解き方を解説。2つの条件はベン図、3つ以上の条件はキャロル表（線分図）で整理する使い分けと計算のコツを紹介します。",
     intro:
       "集合は「Aだけを満たす人数」「AとB両方を満たす人数」といった条件から、重なりを考慮して人数を求める分野です。条件が2つならベン図、3つ以上ならキャロル表（表形式）で整理すると圧倒的にミスが減ります。",
     tips: [
@@ -87,14 +87,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-ratio",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "非言語（能力）",
     unitLabel: "割合・比",
     category: "non_verbal",
     subCategory: "割合・比",
     title: "SPI「割合・比」の解き方｜比の変形と分配算のコツ",
     metaDescription:
-      "SPI3の割合・比の解き方を解説。比の性質を使った変形テクニックや、全体量から按分する分配算の考え方を整理します。",
+      "SPIの割合・比の解き方を解説。比の性質を使った変形テクニックや、全体量から按分する分配算の考え方を整理します。",
     intro:
       "割合・比は分数・小数の変換と「比の性質」を組み合わせて処理する分野です。実際の数量が分からなくても、比の変形だけで解ける問題が多いため、実数に頼らず比のまま計算する練習が有効です。",
     tips: [
@@ -107,14 +107,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-probability",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "非言語（能力）",
     unitLabel: "場合の数・確率",
     category: "non_verbal",
     subCategory: "場合の数・確率",
     title: "SPI「場合の数・確率」の解き方｜順列・組み合わせの使い分け",
     metaDescription:
-      "SPI3の場合の数・確率の解き方を解説。順列（並べる）と組み合わせ（選ぶ）の使い分け、条件付き確率の考え方を整理します。",
+      "SPIの場合の数・確率の解き方を解説。順列（並べる）と組み合わせ（選ぶ）の使い分け、条件付き確率の考え方を整理します。",
     intro:
       "場合の数・確率は「順序を区別するか（順列）」「区別しないか（組み合わせ）」の判断が最初の分岐点です。この判断さえ間違えなければ、公式への当てはめは機械的に処理できます。",
     tips: [
@@ -127,14 +127,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-speed",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "非言語（能力）",
     unitLabel: "速さ・時間・距離",
     category: "non_verbal",
     subCategory: "速さ・時間・距離",
     title: "SPI「速さ・時間・距離」の解き方｜公式と旅人算のコツ",
     metaDescription:
-      "SPI3の速さ・時間・距離の解き方を解説。基本公式の使い分けと、出会い算・追いかけ算（旅人算）の整理方法を紹介します。",
+      "SPIの速さ・時間・距離の解き方を解説。基本公式の使い分けと、出会い算・追いかけ算（旅人算）の整理方法を紹介します。",
     intro:
       "速さ・時間・距離は「みはじ（き・は・じ）」の関係を式にできれば土台は完成です。ここに複数人・複数区間が絡む旅人算が加わるため、状況を図（線分図）に起こす習慣が得点力に直結します。",
     tips: [
@@ -147,14 +147,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-table-reading",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "非言語（能力）",
     unitLabel: "表の読み取り",
     category: "non_verbal",
     subCategory: "資料の読み取り",
     title: "SPI「資料の読み取り（表の読み取り）」の解き方",
     metaDescription:
-      "SPI3の資料の読み取り（表の読み取り）問題の解き方を解説。表の構造把握と計算量を減らすコツを紹介します。",
+      "SPIの資料の読み取り（表の読み取り）問題の解き方を解説。表の構造把握と計算量を減らすコツを紹介します。",
     intro:
       "資料の読み取りは、表やグラフに示された数値から必要な情報だけを抜き出し、四則演算で答えを導く分野です。計算自体は複雑ではないため、表の構造（行・列・単位）を素早く把握できるかが勝負です。",
     tips: [
@@ -165,18 +165,18 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     ],
   },
 
-  // ==================== SPI3 / 言語（能力） ====================
+  // ==================== SPI / 言語（能力） ====================
   {
     slug: "spi-word-relation",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "言語（能力）",
     unitLabel: "二語の関係",
     category: "verbal",
     subCategory: "二語の関係",
     title: "SPI「二語の関係」の解き方｜関係性のパターン一覧",
     metaDescription:
-      "SPI3の二語の関係の解き方を解説。同義語・対義語・包含関係・原材料と製品など頻出の関係性パターンを整理します。",
+      "SPIの二語の関係の解き方を解説。同義語・対義語・包含関係・原材料と製品など頻出の関係性パターンを整理します。",
     intro:
       "二語の関係は、例として示された1組の単語の「関係性」を見抜き、同じ関係になる選択肢を選ぶ問題です。関係性のパターンをあらかじめ知っておくと、判断のスピードが大きく上がります。",
     tips: [
@@ -189,14 +189,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-idiom-structure",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "言語（能力）",
     unitLabel: "熟語の成り立ち",
     category: "verbal",
     subCategory: "熟語の成り立ち",
     title: "SPI「熟語の成り立ち」の解き方｜漢字の構成パターン",
     metaDescription:
-      "SPI3の熟語の成り立ちの解き方を解説。似た意味を重ねる、反対の意味を重ねる、主語と述語の関係など構成パターンを整理します。",
+      "SPIの熟語の成り立ちの解き方を解説。似た意味を重ねる、反対の意味を重ねる、主語と述語の関係など構成パターンを整理します。",
     intro:
       "熟語の成り立ちは、2字熟語を構成する漢字同士の関係を問う分野です。パターンの種類はある程度限られているため、代表例を覚えておくと初見の熟語でも構成を推測しやすくなります。",
     tips: [
@@ -209,14 +209,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-vocabulary",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "言語（能力）",
     unitLabel: "語彙・意味",
     category: "verbal",
     subCategory: "語彙",
     title: "SPI「語彙・意味」の解き方｜対策と語彙の増やし方",
     metaDescription:
-      "SPI3の語彙・意味問題の解き方を解説。語句の意味を正確に選ぶコツと、短期間で語彙力を底上げする学習方法を紹介します。",
+      "SPIの語彙・意味問題の解き方を解説。語句の意味を正確に選ぶコツと、短期間で語彙力を底上げする学習方法を紹介します。",
     intro:
       "語彙・意味は、示された語句に最も近い意味の選択肢を選ぶ、知識依存度の高い分野です。応用力よりも語彙のストックがそのまま得点に直結するため、練習問題を繰り返し解いて知らない語句を都度潰していくのが最も効率的な対策です。",
     tips: [
@@ -229,14 +229,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-word-usage",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "言語（能力）",
     unitLabel: "語句の用法",
     category: "verbal",
     subCategory: "語句の用法",
     title: "SPI「語句の用法」の解き方｜多義語の識別のコツ",
     metaDescription:
-      "SPI3の語句の用法の解き方を解説。同じ語句が複数の意味・品詞で使われる多義語問題を見分けるコツを紹介します。",
+      "SPIの語句の用法の解き方を解説。同じ語句が複数の意味・品詞で使われる多義語問題を見分けるコツを紹介します。",
     intro:
       "語句の用法は、例文中で使われている語句と「同じ意味・使い方」をしている選択肢を選ぶ問題です。同じ語句でも文脈によって意味が変わる多義語が頻出のため、例文の中でその語句がどの意味で使われているかを正確に読み取ることが出発点になります。",
     tips: [
@@ -249,14 +249,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-fill-blank-reorder",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "言語（能力）",
     unitLabel: "空欄補充・文の並べ替え",
     category: "verbal",
     subCategory: "空欄補充・文の並べ替え",
     title: "SPI「空欄補充・文の並べ替え」の解き方",
     metaDescription:
-      "SPI3の空欄補充・文の並べ替えの解き方を解説。接続詞や指示語に注目した文章構成の見抜き方を紹介します。",
+      "SPIの空欄補充・文の並べ替えの解き方を解説。接続詞や指示語に注目した文章構成の見抜き方を紹介します。",
     intro:
       "空欄補充・文の並べ替えは、文章全体の論理的なつながりを把握する力が問われる分野です。接続詞（しかし、そのため等）や指示語（これ、その等）が文と文をつなぐ手がかりになるため、これらに注目すると正解の型が見えやすくなります。",
     tips: [
@@ -269,14 +269,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-reading-comprehension",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "言語（能力）",
     unitLabel: "長文読解",
     category: "verbal",
     subCategory: "長文読解",
     title: "SPI「長文読解」の解き方｜設問先読みのテクニック",
     metaDescription:
-      "SPI3の長文読解の解き方を解説。設問を先に読んでから本文を読む「先読み」のテクニックと根拠箇所の探し方を紹介します。",
+      "SPIの長文読解の解き方を解説。設問を先に読んでから本文を読む「先読み」のテクニックと根拠箇所の探し方を紹介します。",
     intro:
       "SPIの長文読解は、時間内に本文の要点を掴み、設問の根拠となる箇所を素早く特定する力が問われます。全文を精読する時間はないため、設問を先に確認してから本文を読む「先読み」が最も効果的な時短テクニックです。",
     tips: [
@@ -287,18 +287,18 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     ],
   },
 
-  // ==================== SPI3 / 構造的把握力 ====================
+  // ==================== SPI / 構造的把握力 ====================
   {
     slug: "spi-text-structure",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "構造的把握力",
     unitLabel: "文章の構造化",
     category: "structural",
     subCategory: "文章の構造化",
     title: "SPI「構造的把握力（文章の構造化）」の解き方",
     metaDescription:
-      "SPI3の構造的把握力（文章の構造化）の解き方を解説。文と文の論理的な関係（因果・対比・具体例）を見抜くコツを紹介します。",
+      "SPIの構造的把握力（文章の構造化）の解き方を解説。文と文の論理的な関係（因果・対比・具体例）を見抜くコツを紹介します。",
     intro:
       "構造的把握力は、複数の文の「論理的な役割（主張・理由・具体例など）」の共通点をグループ分けする、やや特殊な分野です。内容の正誤ではなく「文の構造」だけに注目するのがポイントです。",
     tips: [
@@ -311,14 +311,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-classification",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "構造的把握力",
     unitLabel: "分類・グループ化",
     category: "structural",
     subCategory: "分類・グループ化",
     title: "SPI「構造的把握力（分類・グループ化）」の解き方",
     metaDescription:
-      "SPI3の構造的把握力（分類・グループ化）の解き方を解説。複数の文や物事を共通の基準でグループ分けするコツを紹介します。",
+      "SPIの構造的把握力（分類・グループ化）の解き方を解説。複数の文や物事を共通の基準でグループ分けするコツを紹介します。",
     intro:
       "分類・グループ化は、複数の短い文や事柄を、内容の意味的な近さではなく「構造上の共通点」で仲間分けする問題です。焦って内容の類似性だけで判断すると誤答しやすいため注意が必要です。",
     tips: [
@@ -329,18 +329,18 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     ],
   },
 
-  // ==================== SPI3 / 英語（能力） ====================
+  // ==================== SPI / 英語（能力） ====================
   {
     slug: "spi-english-vocab",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "英語（能力）",
     unitLabel: "語意（同意語・反意語）",
     category: "english",
     subCategory: "語意（同意語・反意語）",
     title: "SPI英語「語意（同意語・反意語）」の解き方",
     metaDescription:
-      "SPI3英語の語意（同意語・反意語）問題の解き方を解説。頻出単語の覚え方と選択肢の絞り込み方を紹介します。",
+      "SPI英語の語意（同意語・反意語）問題の解き方を解説。頻出単語の覚え方と選択肢の絞り込み方を紹介します。",
     intro:
       "SPI英語の語意問題は、示された単語と同じ意味（同意語）または反対の意味（反意語）を選ぶ、語彙力がそのまま得点になる分野です。基本的な語彙をどれだけ知っているかが勝負を分けます。",
     tips: [
@@ -353,14 +353,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-english-dictionary",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "英語（能力）",
     unitLabel: "英英辞典",
     category: "english",
     subCategory: "英英辞典",
     title: "SPI英語「英英辞典」形式の解き方",
     metaDescription:
-      "SPI3英語の英英辞典形式問題の解き方を解説。英語の定義文から単語を推測するコツを紹介します。",
+      "SPI英語の英英辞典形式問題の解き方を解説。英語の定義文から単語を推測するコツを紹介します。",
     intro:
       "英英辞典形式は、英語で書かれた「定義文」から、それが説明している単語を選択肢の中から選ぶ問題です。定義文中のキーワードとなる英単語を正確に読み取れるかがポイントです。",
     tips: [
@@ -373,14 +373,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-english-fill-blank",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "英語（能力）",
     unitLabel: "空欄補充",
     category: "english",
     subCategory: "空欄補充",
     title: "SPI英語「空欄補充」の解き方｜文法・語法のチェックポイント",
     metaDescription:
-      "SPI3英語の空欄補充問題の解き方を解説。時制・前置詞・接続詞など文法的な判断ポイントを整理します。",
+      "SPI英語の空欄補充問題の解き方を解説。時制・前置詞・接続詞など文法的な判断ポイントを整理します。",
     intro:
       "SPI英語の空欄補充は、英文中の空欄に文法的・意味的に適切な語句を選ぶ問題です。単語の意味だけでなく、時制・品詞・前置詞の使い方など文法知識が問われます。",
     tips: [
@@ -393,14 +393,14 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
   {
     slug: "spi-english-reading",
     testId: "spi",
-    testLabel: "SPI3",
+    testLabel: "SPI",
     groupLabel: "英語（能力）",
     unitLabel: "長文読解（英語）",
     category: "english",
     subCategory: "長文読解（英語）",
     title: "SPI英語「長文読解」の解き方｜時間内に読み切るコツ",
     metaDescription:
-      "SPI3英語の長文読解の解き方を解説。全訳せずに設問の根拠を探す読み方と、時間配分のコツを紹介します。",
+      "SPI英語の長文読解の解き方を解説。全訳せずに設問の根拠を探す読み方と、時間配分のコツを紹介します。",
     intro:
       "SPI英語の長文読解は、限られた時間で英文を読み、設問に答える必要があります。すべてを日本語に訳そうとすると時間が足りなくなるため、設問に関係する部分を重点的に読む「スキャニング」が有効です。",
     tips: [

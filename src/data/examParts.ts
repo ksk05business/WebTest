@@ -32,7 +32,7 @@ export type ExamPartConfig = {
   sections?: readonly ExamSection[];
 };
 
-// SPI3: 2026-09-02改修。言語39問＋非言語30問＋英語29問＋構造把握20問＝計118問/回
+// SPI: 2026-09-02改修。言語39問＋非言語30問＋英語29問＋構造把握20問＝計118問/回
 // （src/data/examStockTargets.tsのSPIエントリと完全に一致させること）。同日中に他テスト
 // （GAB/TG-WEB等）と同じ「模試専用プール分離」方式へ完全移行し、EXAM_PARTSのmockOnlyを
 // trueにしたため、以下のsubPartsはis_mock_only=1（模試専用に振り替え済みの問題）のみを
@@ -75,7 +75,7 @@ const SPI_STRUCTURAL_SUBPARTS: readonly ExamSubPart[] = [
   { category: "structural", subCategory: "分類・グループ化", limit: 10 },
 ];
 
-// 英語・構造把握は、以前は1問ごとに60秒の制限時間を設けていたが、SPI3本番の実際の形式
+// 英語・構造把握は、以前は1問ごとに60秒の制限時間を設けていたが、SPI本番の実際の形式
 // （セクション全体で持ち時間が決まっており、問題間で残り時間がリセットされない）に合わせて、
 // セクション全体で20分（1200秒）の通し時間制へ変更した（2026-09-11改修）。
 const SPI_ENGLISH_SECTION: ExamSection = { label: "英語", timeLimitSec: 20 * 60, subParts: SPI_ENGLISH_SUBPARTS };
