@@ -335,7 +335,7 @@ CREATE TABLE IF NOT EXISTS company_borders (
   company_name TEXT NOT NULL,
   company_name_kana TEXT NOT NULL DEFAULT '', -- ひらがな検索・五十音順ソート用のふりがな（全てひらがなで統一）
   industry TEXT NOT NULL,
-  test_type TEXT NOT NULL, -- 例: 'SPI3' | '玉手箱' | 'TG-WEB' | 'GAB / C-GAB' | 'CAB' | 'SCOA'
+  test_type TEXT NOT NULL, -- 例: 'SPI' | '玉手箱' | 'TG-WEB' | 'GAB / C-GAB' | 'CAB' | 'SCOA'
   border_level TEXT NOT NULL, -- ボーダー難易度ランク。例: 'S' | 'A' | 'B' | 'C' | 'D'
   selection_timing TEXT NOT NULL, -- 選考時期の目安。例: '3月〜6月（本選考）'（現在フロントエンドでは非表示）
   description TEXT NOT NULL, -- 詳細解説（対策のポイント等）
