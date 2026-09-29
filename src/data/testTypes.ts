@@ -7,13 +7,13 @@ export type TestType = {
 
 export const TEST_TYPES: TestType[] = [
   { id: "spi", name: "SPI", href: "/test", available: true },
-  // 玉手箱・TG-WEB・GAB/C-GABはいずれも形式・セクションごとに個別選択して受験する複数パート方式
-  // （SPIと同様、hrefは使わずExamModeSelectModal.tsxのisMultiPart分岐でMULTI_PART_EXAM_PARTSを
-  // 参照してルーティングする。app/test/page.tsxのEXAM_PARTS参照）。
+  // 玉手箱・TG-WEB・GAB/C-GAB・Web-CABはいずれも形式・セクションごとに個別選択して受験する
+  // 複数パート方式（SPIと同様、hrefは使わずExamModeSelectModal.tsxのisMultiPart分岐で
+  // MULTI_PART_EXAM_PARTSを参照してルーティングする。app/test/page.tsxのEXAM_PARTS参照）。
   { id: "tamatebako", name: "玉手箱", href: "/test", available: true },
   { id: "tgweb", name: "TG-WEB", href: "/test", available: true },
   { id: "gab_cgab", name: "GAB / C-GAB", href: "/test", available: true },
-  { id: "cab", name: "Web-CAB", href: "/test", available: false },
+  { id: "cab", name: "Web-CAB", href: "/test", available: true },
   // SCOAの本番模試は、言語・数理・論理・常識・英語の全分野を横断する単一の統合模試として提供する
   // （app/test/page.tsxのEXAM_PARTS.scoa参照、全120問・60分）。出題対象は練習問題プールとは別に
   // 確保した本番模試専用の問題プール（questions.is_mock_only=1）のみで、各分野からランダム抽出済み。
@@ -58,6 +58,14 @@ export const GAB_EXAM_PARTS: readonly ExamPartInfo[] = [
   { id: "gab_english_exam", label: "英語（24問/10分）" },
 ];
 
+// 暗号は問題データが未投入のため、在庫が揃うまでここには含めない
+// （src/data/examParts.tsのCAB_CALCULATION_SECTION等のコメント参照）。
+export const CAB_EXAM_PARTS: readonly ExamPartInfo[] = [
+  { id: "cab_calculation", label: "暗算（50問/9分）" },
+  { id: "cab_pattern", label: "法則性（30問/12分）" },
+  { id: "cab_instruction", label: "命令表（36問/15分）" },
+];
+
 // TestType.id → その複数パートのtest_type一覧。単一パートのテスト種別（scoa等）はここに含まれず、
 // TestType.idそのものがtest_typeとして扱われる。
 export const MULTI_PART_EXAM_PARTS: Record<string, readonly ExamPartInfo[]> = {
@@ -65,4 +73,5 @@ export const MULTI_PART_EXAM_PARTS: Record<string, readonly ExamPartInfo[]> = {
   tamatebako: TAMATEBAKO_EXAM_PARTS,
   tgweb: TGWEB_EXAM_PARTS,
   gab_cgab: GAB_EXAM_PARTS,
+  cab: CAB_EXAM_PARTS,
 };

@@ -234,6 +234,26 @@ const GAB_ENGLISH_SECTION: ExamSection = {
   subParts: [{ category: "gab_english", subCategory: "長文読解", limit: 24 }],
 };
 
+// Web-CAB: 暗算50問/9分・法則性30問/12分・命令表36問/15分（各単独で受験可能な1セクション）。
+// src/data/testExplainers.tsの「マークシート式との比較」表の問題数・制限時間と一致させている。
+// 暗号は2026-09-29時点で問題データが未投入のため、在庫が揃うまでEXAM_PARTS・CAB_EXAM_PARTS
+// （src/data/testTypes.ts）のいずれにも含めない。
+const CAB_CALCULATION_SECTION: ExamSection = {
+  label: "暗算",
+  timeLimitSec: 9 * 60,
+  subParts: [{ category: "cab_ability", subCategory: "暗算", limit: 50 }],
+};
+const CAB_PATTERN_SECTION: ExamSection = {
+  label: "法則性",
+  timeLimitSec: 12 * 60,
+  subParts: [{ category: "cab_ability", subCategory: "法則性", limit: 30 }],
+};
+const CAB_INSTRUCTION_SECTION: ExamSection = {
+  label: "命令表",
+  timeLimitSec: 15 * 60,
+  subParts: [{ category: "cab_ability", subCategory: "命令表", limit: 36 }],
+};
+
 // SCOA: 言語・数理・論理・常識・英語の全分野を横断する単一の統合模試。
 // 2026-09-02に5科目18単元構成へ改修（src/data/examStockTargets.ts参照）。ただし
 // SectionedExamFlowは1つのsubPartでも0件だとセクション全体を「出題できる問題がありません」で
@@ -293,6 +313,10 @@ export const EXAM_PARTS = {
   gab_verbal_exam: { sections: [GAB_VERBAL_SECTION], label: "GAB/C-GAB・言語理解", mockOnly: true },
   gab_quantitative_exam: { sections: [GAB_QUANTITATIVE_SECTION], label: "GAB/C-GAB・計数理解", mockOnly: true },
   gab_english_exam: { sections: [GAB_ENGLISH_SECTION], label: "GAB/C-GAB・英語", mockOnly: true },
+
+  cab_calculation: { sections: [CAB_CALCULATION_SECTION], label: "Web-CAB・暗算", mockOnly: true },
+  cab_pattern: { sections: [CAB_PATTERN_SECTION], label: "Web-CAB・法則性", mockOnly: true },
+  cab_instruction: { sections: [CAB_INSTRUCTION_SECTION], label: "Web-CAB・命令表", mockOnly: true },
 } satisfies Record<string, ExamPartConfig>;
 
 export type ExamPartId = keyof typeof EXAM_PARTS;

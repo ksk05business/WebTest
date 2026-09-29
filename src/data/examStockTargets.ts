@@ -46,6 +46,11 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "gab_quantitative", subCategory: "資料の読み取り", sectionLabel: "計数理解", perCycle: 29 },
   { category: "gab_english", subCategory: "長文読解", sectionLabel: "英語", perCycle: 24 },
 
+  // Web-CAB（暗号は問題データ未投入のため対象外。在庫が揃い次第追加すること）
+  { category: "cab_ability", subCategory: "暗算", sectionLabel: "暗算", perCycle: 50 },
+  { category: "cab_ability", subCategory: "法則性", sectionLabel: "法則性", perCycle: 30 },
+  { category: "cab_ability", subCategory: "命令表", sectionLabel: "命令表", perCycle: 36 },
+
   // SCOA（全13単元が同じ1つの統合模試を構成する。2026-09-02に5科目18単元構成へ改修、
   // 既存問題データもDB上でこの構成へ再振り分け済み。同日中に言語の「漢字・語句の意味」と
   // 「熟語・ことわざ・慣用句」を1単元へ統合し17単元に、さらに同日中に「類義語・対義語」

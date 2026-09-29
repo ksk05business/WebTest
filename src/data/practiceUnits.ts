@@ -263,8 +263,9 @@ const GAB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
 ];
 
 // CABは「暗算」「法則性」「命令表」「暗号」の4科目構成（Web-CABの概要説明・testExplainers.tsの
-// 解説と対応）。2026-09-15時点で実データがあるのは「法則性」のみ。他の3科目は単元一覧に
-// 先行して掲載し、未投入の間はPracticeUnitSelector.tsxの「収録0問→準備中バッジ+トースト」表示に任せる。
+// 解説と対応）。2026-09-29時点で実データがあるのは「暗算」「法則性」「命令表」（本番模試も公開済み、
+// src/data/examParts.ts・testTypes.tsのCAB_EXAM_PARTS参照）。「暗号」は単元一覧に先行して掲載し、
+// 未投入の間はPracticeUnitSelector.tsxの「収録0問→準備中バッジ+トースト」表示に任せる。
 const CAB_PRACTICE_UNIT_GROUPS: PracticeUnitGroup[] = [
   {
     category: "cab_ability",
