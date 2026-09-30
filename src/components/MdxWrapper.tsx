@@ -17,13 +17,16 @@ import { NuriwakeDiagram } from "@/src/components/NuriwakeDiagram";
 import { TsumikiDiagram } from "@/src/components/TsumikiDiagram";
 import { KumiawaseDiagram } from "@/src/components/KumiawaseDiagram";
 import { KoudoNuriwakeDiagram } from "@/src/components/KoudoNuriwakeDiagram";
+import { ChainDiagram } from "@/src/components/ChainDiagram";
+import { SeatingDiagram } from "@/src/components/SeatingDiagram";
+import { VennDiagram } from "@/src/components/VennDiagram";
 
 // MDX本文中から直接呼び出せるコンポーネント一覧。新しいカスタムコンポーネントを
 // MDX記事内で使いたい場合はここに追加すること。
 // admin/MdxLivePreview.tsx（管理画面のリアルタイムプレビュー）でも全く同じ描画結果にするため、
 // このコンポーネント一覧とremark/rehypeプラグイン設定をここから共有エクスポートする
 // （2箇所で別々に保守すると設定がドリフトする恐れがあるため、必ずここを唯一の情報源とすること）。
-export const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem, CarrollDiagram, CircleChordsDiagram, DiceStateDiagram, TileDiagonalDiagram, DodecahedronNetDiagram, CubeCrossSectionDiagram, BlockComboDiagram, NuriwakeDiagram, TsumikiDiagram, KumiawaseDiagram, KoudoNuriwakeDiagram };
+export const MDX_COMPONENTS = { CallToActionCTA, ChatBubble, PointBox, CheckList, CheckItem, CarrollDiagram, CircleChordsDiagram, DiceStateDiagram, TileDiagonalDiagram, DodecahedronNetDiagram, CubeCrossSectionDiagram, BlockComboDiagram, NuriwakeDiagram, TsumikiDiagram, KumiawaseDiagram, KoudoNuriwakeDiagram, ChainDiagram, SeatingDiagram, VennDiagram };
 export const MDX_REMARK_PLUGINS = [remarkGfm, remarkMath];
 export const MDX_REHYPE_PLUGINS = [rehypeKatex];
 
