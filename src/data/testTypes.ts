@@ -61,7 +61,7 @@ export const GAB_EXAM_PARTS: readonly ExamPartInfo[] = [
 // 暗号は問題データが未投入のため、在庫が揃うまでここには含めない
 // （src/data/examParts.tsのCAB_CALCULATION_SECTION等のコメント参照）。
 export const CAB_EXAM_PARTS: readonly ExamPartInfo[] = [
-  { id: "cab_calculation", label: "暗算（50問/9分）" },
+  { id: "cab_calculation", label: "四則逆算（50問/9分）" },
   { id: "cab_pattern", label: "法則性（30問/12分）" },
   { id: "cab_instruction", label: "命令表（36問/15分）" },
 ];

@@ -47,7 +47,7 @@ export const EXAM_STOCK_TARGETS: readonly ExamStockTarget[] = [
   { category: "gab_english", subCategory: "長文読解", sectionLabel: "英語", perCycle: 24 },
 
   // Web-CAB（暗号は問題データ未投入のため対象外。在庫が揃い次第追加すること）
-  { category: "cab_ability", subCategory: "暗算", sectionLabel: "暗算", perCycle: 50 },
+  { category: "cab_ability", subCategory: "四則逆算", sectionLabel: "四則逆算", perCycle: 50 },
   { category: "cab_ability", subCategory: "法則性", sectionLabel: "法則性", perCycle: 30 },
   { category: "cab_ability", subCategory: "命令表", sectionLabel: "命令表", perCycle: 36 },
 

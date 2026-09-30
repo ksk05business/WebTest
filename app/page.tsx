@@ -38,7 +38,7 @@ const TEST_BRAND_DETAILS: { id: string; slug: string; displayName: string; subje
   { id: "tamatebako", slug: "tamatebako", displayName: "玉手箱", subjects: "言語・計数・英語", pitch: "大企業・大手企業で圧倒的採用" },
   { id: "tgweb", slug: "tg-web", displayName: "TG-WEB", subjects: "従来型・新型", pitch: "PwC・三菱地所などのトップ企業が採用" },
   { id: "gab_cgab", slug: "gab", displayName: "C-GAB / Web-GAB", subjects: "言語・計数・英語", pitch: "総合商社・インフラ業界等で頻出" },
-  { id: "cab", slug: "cab", displayName: "CAB", subjects: "暗算・法則性・命令表・暗号", pitch: "IT・システムエンジニア職向け" },
+  { id: "cab", slug: "cab", displayName: "CAB", subjects: "四則逆算・法則性・命令表・暗号", pitch: "IT・システムエンジニア職向け" },
   { id: "scoa", slug: "scoa", displayName: "SCOA", subjects: "言語・数理・論理・常識・英語", pitch: "公務員・地方銀行等で頻出" },
 ];
 

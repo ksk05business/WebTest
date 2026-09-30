@@ -2,7 +2,7 @@
 
 # プロジェクト概要
 
-サービス名「Webテストナビ」。「本を買わない就活生向けのWebテスト模試アプリ」。SPI3・玉手箱・TG-WEB・GAB/C-GAB・SCOAに加え、2026-09-29にWeb-CAB（暗算・法則性・命令表の3科目、暗号は問題データ未投入のため対象外）も本番模試に対応した。`src/data/testTypes.ts`の`TEST_TYPES`は全件`available: true`（`href`は全テスト共通で`/test`。SPI・玉手箱・TG-WEB・GAB/C-GAB・CABは形式・セクションごとに個別受験する複数パート方式で`MULTI_PART_EXAM_PARTS`を参照、SCOAのみ単一の統合模試）。新しいテスト種別・科目を追加する際は`src/data/examParts.ts`（出題数・制限時間）と`src/data/examStockTargets.ts`（模試専用プールの在庫目標）の両方を必ず同期させること。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
+サービス名「Webテストナビ」。「本を買わない就活生向けのWebテスト模試アプリ」。SPI3・玉手箱・TG-WEB・GAB/C-GAB・SCOAに加え、2026-09-29にWeb-CAB（四則逆算・法則性・命令表の3科目、暗号は問題データ未投入のため対象外）も本番模試に対応した。`src/data/testTypes.ts`の`TEST_TYPES`は全件`available: true`（`href`は全テスト共通で`/test`。SPI・玉手箱・TG-WEB・GAB/C-GAB・CABは形式・セクションごとに個別受験する複数パート方式で`MULTI_PART_EXAM_PARTS`を参照、SCOAのみ単一の統合模試）。新しいテスト種別・科目を追加する際は`src/data/examParts.ts`（出題数・制限時間）と`src/data/examStockTargets.ts`（模試専用プールの在庫目標）の両方を必ず同期させること。Next.js (App Router, `output: "export"`静的サイト) + TypeScript + Tailwind CSS + Cloudflare Pages Functions（`functions/`）+ D1。
 
 画面は `/`（トップ）、`/register`（会員登録）、`/login`（ログイン）、`/dashboard`（ログイン後のホーム、ログイン必須）、`/test`（試験実行、ログイン必須）、`/result`（結果表示）。登録・ログインに成功すると`localStorage`の`spiUser`にセットし、そのまま`/dashboard`へ遷移する（別途ログインを挟まない）。
 
