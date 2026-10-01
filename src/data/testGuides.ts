@@ -290,12 +290,12 @@ export const TEST_GUIDES: TestGuide[] = [
       {
         question: "Webテストナビ でCABは練習できますか？",
         answer:
-          "「法則性」の練習問題を公開済みです。四則逆算・命令表・暗号は準備中のため、公開までは対応済みのSPI・玉手箱で基礎的な処理速度・論理的思考力を鍛えておくことをおすすめします。",
+          "「四則逆算」「法則性」「命令表」「暗号」の4科目すべての練習問題を公開中です。無料で繰り返し練習できます。",
       },
     ],
     practiceAvailable: true,
     practiceHref: "/practice?testType=cab",
-    practiceNote: "「法則性」の練習問題を無料で公開中です。他の科目は準備中のため、公開までは対応済みのSPI・玉手箱で対策を進めましょう。",
+    practiceNote: "「四則逆算」「法則性」「命令表」「暗号」の4科目すべての練習問題を無料で公開中です。",
   },
   {
     slug: "scoa",
