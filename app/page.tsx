@@ -1,3 +1,4 @@
+import { TrackedLink } from "@/src/components/TrackedLink";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -276,7 +277,8 @@ export default function Home() {
             >
               ログイン
             </Link>
-            <Link
+            <TrackedLink
+              location="header"
               href="/register"
               className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 pl-3 pr-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
             >
@@ -285,7 +287,7 @@ export default function Home() {
                 <LineMiniIcon className="h-4 w-4" />
               </span>
               無料登録
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </header>
@@ -324,12 +326,13 @@ export default function Home() {
             に幅広く対応。高精度模試、忘却曲線に基づく復習機能、特別スカウト獲得まで、学生は【完全無料】で利用できます。
           </p>
           <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
-            <Link
+            <TrackedLink
+              location="hero"
               href="/register"
               className="whitespace-nowrap rounded-full bg-white px-6 py-4 text-sm font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:px-8 sm:text-base"
             >
               【完全無料】今すぐ対策を始める
-            </Link>
+            </TrackedLink>
             <Link
               href="/login"
               className="rounded-full border-2 border-white/70 px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-white/10"
@@ -379,12 +382,13 @@ export default function Home() {
           <p className="text-balance text-sm leading-relaxed text-gray-300 sm:text-base">
             選考の最初の壁であるWebテスト。対策を後回しにしていると「足切り」に遭い、自分自身の強みや思いをアピールする面接の場にすらたどり着けません。ライバルが対策を始める前に、今すぐスコアを底上げしましょう。
           </p>
-          <Link
+          <TrackedLink
+            location="warning"
             href="/register"
             className="mt-2 rounded-full bg-gradient-to-r from-red-500 to-amber-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-red-900/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
           >
             手遅れになる前に【無料】で対策を始める
-          </Link>
+          </TrackedLink>
         </FadeInSection>
       </section>
 
@@ -636,12 +640,13 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex justify-center">
-            <Link
+            <TrackedLink
+              location="dashboard_demo"
               href="/register"
               className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:text-base"
             >
               無料登録してこの画面を使ってみる
-            </Link>
+            </TrackedLink>
           </div>
         </FadeInSection>
       </section>
@@ -669,12 +674,13 @@ export default function Home() {
                 <TrendingUp className="mt-0.5 h-4 w-4 flex-shrink-0" />
                 参考書を1周して終わりにせず、間違えた問題だけを効率よく繰り返せるから、限られた時間でも着実にスコアが伸びます。
               </div>
-              <Link
+              <TrackedLink
+                location="review"
                 href="/register"
                 className="mt-1 w-fit rounded-full bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/10 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:text-base"
               >
                 無料で復習機能を試してみる
-              </Link>
+              </TrackedLink>
             </div>
             <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
               <ForgettingCurveChart />
@@ -791,12 +797,13 @@ export default function Home() {
           <h2 className="text-balance text-2xl font-bold text-white sm:text-3xl">
             対策も、スカウトも。すべて無料ではじめよう。
           </h2>
-          <Link
+          <TrackedLink
+            location="footer"
             href="/register"
             className="rounded-full bg-white px-10 py-4 text-base font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
           >
             完全無料でWebテスト対策を始める
-          </Link>
+          </TrackedLink>
         </FadeInSection>
       </section>
 

@@ -1,3 +1,4 @@
+import { TrackedLink } from "@/src/components/TrackedLink";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -84,12 +85,13 @@ export default async function TestCategoryPage({ params }: PageProps) {
           <Link href="/" className="text-lg font-bold text-blue-700">
             Webテスト<span className="text-gray-900">ナビ</span>
           </Link>
-          <Link
+          <TrackedLink
+            location="header"
             href="/register"
             className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
           >
             無料登録
-          </Link>
+          </TrackedLink>
         </div>
       </header>
 
@@ -115,12 +117,13 @@ export default async function TestCategoryPage({ params }: PageProps) {
           </h1>
           <p className="text-balance text-sm leading-relaxed text-blue-50 sm:text-base">{guide.heroCopy}</p>
           <div className="mt-1 flex flex-col items-center gap-3 sm:flex-row">
-            <Link
+            <TrackedLink
+              location="hero"
               href="/register"
               className="rounded-full bg-white px-7 py-3.5 text-sm font-bold text-blue-700 shadow-lg shadow-blue-900/20 transition-all hover:-translate-y-0.5 hover:shadow-xl sm:text-base"
             >
               【完全無料】今すぐ会員登録して対策を始める
-            </Link>
+            </TrackedLink>
             <Link
               href={guide.practiceHref}
               className="rounded-full border-2 border-white/70 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:text-base"
@@ -240,12 +243,13 @@ export default async function TestCategoryPage({ params }: PageProps) {
               登録3分・完全無料。忘却曲線に基づく復習機能で、間違えた問題を効率よく定着させられます。
             </p>
             <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Link
+              <TrackedLink
+                location="bottom"
                 href="/register"
                 className="rounded-full bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
                 無料登録して対策を始める
-              </Link>
+              </TrackedLink>
               <Link
                 href={guide.practiceHref}
                 className="rounded-full border-2 border-white/70 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"

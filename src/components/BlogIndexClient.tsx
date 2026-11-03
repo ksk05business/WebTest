@@ -1,5 +1,6 @@
 "use client";
 
+import { TrackedLink } from "@/src/components/TrackedLink";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -78,12 +79,13 @@ export function BlogIndexClient({ posts }: { posts: BlogListItem[] }) {
             <Link href="/" className="text-lg font-bold text-blue-700">
               Webテスト<span className="text-gray-900">ナビ</span>
             </Link>
-            <Link
+            <TrackedLink
+              location="header"
               href="/register"
               className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
             >
               無料登録
-            </Link>
+            </TrackedLink>
           </div>
         </header>
       )}
