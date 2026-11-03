@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedLink } from "@/src/components/TrackedLink";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CheckCircle2, ChevronLeft, TriangleAlert } from "lucide-react";
@@ -78,12 +79,13 @@ export default async function GuideArticlePage({ params }: PageProps) {
           <Link href="/" className="text-lg font-bold text-blue-700">
             Webテスト<span className="text-gray-900">ナビ</span>
           </Link>
-          <Link
+          <TrackedLink
+            location="header"
             href="/register"
             className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
           >
             無料登録
-          </Link>
+          </TrackedLink>
         </div>
       </header>
 
@@ -165,18 +167,20 @@ export default async function GuideArticlePage({ params }: PageProps) {
               Webテストナビは登録3分・完全無料。忘却曲線に基づく復習機能で、間違えた問題を効率よく定着させられます。
             </p>
             <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Link
+              <TrackedLink
+                location="bottom_register"
                 href="/register"
                 className="rounded-full bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
                 無料登録して対策を始める
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
+                location="bottom_practice"
                 href={practiceHref}
                 className="rounded-full border-2 border-white/70 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
               >
                 「{article.unitLabel}」の練習問題を見る
-              </Link>
+              </TrackedLink>
             </div>
           </section>
         </div>
