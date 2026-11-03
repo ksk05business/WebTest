@@ -10,6 +10,7 @@ export const dynamic = "force-static";
 const DISALLOWED_PATHS = [
   "/admin",
   "/dashboard",
+  "/practice",
   "/mypage",
   "/result",
   "/review",
