@@ -34,7 +34,7 @@ description: app/配下の各ページの役割分担・データ授受・Tailwi
 
 ## GA4カスタムイベント
 - 送信は `src/lib/analytics.ts` の `trackEvent(name, params)` に統一する（直接 `gtag` を呼ばない）。
-- 現在のイベント: `cta_click`（記事内CallToActionCTA、および/guide・/blog記事ヘッダーの登録ボタン等=`TrackedLink`の`location`付き。`page_path`付き）、`sign_up`（メール登録成功、`method`）、`exam_complete`（模試完走、`test_type`/`score`/`total`）。
+- 現在のイベント: `cta_click`（記事内CallToActionCTA、および/guide・/blog記事ヘッダーの登録ボタン等=`TrackedLink`の`location`付き。`page_path`付き）、`sign_up`（メール/Google/LINEの新規登録成功、`method`=email|google|line。Google/LINEは同意画面 `/auth/*-signup` の成功時に送る。既存ユーザーのログインでは送らない）、`exam_complete`（模試完走、`test_type`/`score`/`total`）。
 - GA管理画面でこれらを「キーイベント」に指定して初めてコンバージョンとして集計される（コードだけでは未設定）。
 
 ## /guide の例題（example）

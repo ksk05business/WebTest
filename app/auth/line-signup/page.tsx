@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { AuthLayout } from "@/src/components/AuthLayout";
+import { trackEvent } from "@/src/lib/analytics";
 import { TermsAgreementModal } from "@/src/components/TermsAgreementModal";
 
 // functions/api/auth/line-callback.ts が「未登録」と判定した場合に遷移してくる画面。
@@ -64,6 +65,7 @@ export default function LineSignupPage() {
       }
       // セッションCookieはこの時点で発行済み。/auth/callback で /api/me を叩き、
       // 既存のログインと同じ形でspiUserをlocalStorageへ保存してから/dashboardへ渡す。
+      trackEvent("sign_up", { method: "line" });
       router.replace("/auth/callback");
     } catch {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");
