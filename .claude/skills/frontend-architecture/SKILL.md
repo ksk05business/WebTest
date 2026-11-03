@@ -31,3 +31,8 @@ description: app/配下の各ページの役割分担・データ授受・Tailwi
 - ボタン・カードは `rounded-lg` / `rounded-full`、余白は `px-4 py-3` 程度の既存トーンに合わせる。
 - 表（`<table>`）を追加する場合は横幅オーバーフロー対策として親要素に `overflow-x-auto` を付ける。
 - 過剰な装飾・アニメーション・抽象化は避け、MVPとして機能することを最優先する。
+
+## GA4カスタムイベント
+- 送信は `src/lib/analytics.ts` の `trackEvent(name, params)` に統一する（直接 `gtag` を呼ばない）。
+- 現在のイベント: `cta_click`（記事内CallToActionCTA、`page_path`付き）、`sign_up`（メール登録成功、`method`）、`exam_complete`（模試完走、`test_type`/`score`/`total`）。
+- GA管理画面でこれらを「キーイベント」に指定して初めてコンバージョンとして集計される（コードだけでは未設定）。

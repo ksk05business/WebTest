@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/src/lib/analytics";
 import { Lock, Mail } from "lucide-react";
 import { AuthLayout } from "@/src/components/AuthLayout";
 import { IconInput } from "@/src/components/IconInput";
@@ -76,6 +77,7 @@ export default function RegisterPage() {
         return;
       }
       localStorage.setItem("spiUser", JSON.stringify({ name: data.name, email }));
+      trackEvent("sign_up", { method: "email" });
       router.push("/dashboard");
     } catch {
       setError("通信エラーが発生しました。時間をおいて再度お試しください。");

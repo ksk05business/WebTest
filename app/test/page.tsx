@@ -9,6 +9,7 @@ import { fetchWithRetry } from "@/src/lib/fetchWithRetry";
 import { ProfileRequiredModal } from "@/src/components/ProfileRequiredModal";
 import { HighlightedText, extractBracketTargets } from "@/src/components/HighlightedText";
 import { QuestionHeader } from "@/src/components/exam/QuestionHeader";
+import { trackEvent } from "@/src/lib/analytics";
 import {
   BASIC_EXAM_TOTAL_SEC,
   EXAM_PARTS,
@@ -143,6 +144,8 @@ async function finalizeExam(
   } catch {
     // D1保存に失敗してもlocalStorageには結果があるため、結果表示自体は継続する
   }
+
+  trackEvent("exam_complete", { test_type: partId, score, total });
 
   // 完走したので中断データが残っていれば削除する（残したままだと次回開始時に誤って
   // 「前回の続きから再開」の対象として扱われてしまう）。
