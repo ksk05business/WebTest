@@ -358,7 +358,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "語意（同意語・反意語）",
     category: "english",
     subCategory: "語意（同意語・反意語）",
-    title: "SPI英語「語意（同意語・反意語）」の解き方",
+    title: "SPI英語の語意（同意語・反意語）の解き方｜消去法と接頭辞で初見の単語に対応",
     metaDescription:
       "SPI英語の語意（同意語・反意語）問題の解き方を解説。頻出単語の覚え方と選択肢の絞り込み方を紹介します。",
     intro:
@@ -424,7 +424,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "長文読解（英語）",
     category: "english",
     subCategory: "長文読解（英語）",
-    title: "SPI英語「長文読解」の解き方｜時間内に読み切るコツ",
+    title: "SPI英語の長文読解｜設問先読みと大意把握で時間内に読み切るコツ",
     metaDescription:
       "SPI英語の長文読解の解き方を解説。全訳せずに設問の根拠を探す読み方と、時間配分のコツを紹介します。",
     intro:
@@ -594,7 +594,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "長文読解（IMAGES形式）",
     category: "tamatebako_english",
     subCategory: "長文読解（IMAGES形式）",
-    title: "玉手箱英語「長文読解（IMAGES形式）」の解き方",
+    title: "玉手箱英語の長文読解（IMAGES形式）の解き方｜キーワード検索で該当文を探すコツ",
     metaDescription:
       "玉手箱の英語「長文読解（IMAGES形式）」の解き方を解説。英語の長文から設問の根拠箇所を素早く見つけるコツを紹介します。",
     intro:
