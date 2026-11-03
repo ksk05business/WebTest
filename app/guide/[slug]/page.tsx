@@ -122,6 +122,24 @@ export default async function GuideArticlePage({ params }: PageProps) {
             </ul>
           </section>
 
+          {article.example && (
+            <section className="mt-8">
+              <h2 className="text-lg font-bold text-gray-900 sm:text-xl">例題で確認</h2>
+              <div className="mt-4 rounded-xl border border-gray-200 bg-white p-5 text-sm leading-relaxed text-gray-700 shadow-sm">
+                <p className="whitespace-pre-line">{article.example.problem}</p>
+                {article.example.choices && (
+                  <ul className="mt-3 flex flex-col gap-1">
+                    {article.example.choices.map((choice) => (
+                      <li key={choice}>{choice}</li>
+                    ))}
+                  </ul>
+                )}
+                <p className="mt-4 font-bold text-blue-700">正解：{article.example.answer}</p>
+                <p className="mt-1">{article.example.explanation}</p>
+              </div>
+            </section>
+          )}
+
           {article.commonMistakes && article.commonMistakes.length > 0 && (
             <section className="mt-8">
               <h2 className="text-lg font-bold text-gray-900 sm:text-xl">よくあるミス</h2>

@@ -36,3 +36,7 @@ description: app/配下の各ページの役割分担・データ授受・Tailwi
 - 送信は `src/lib/analytics.ts` の `trackEvent(name, params)` に統一する（直接 `gtag` を呼ばない）。
 - 現在のイベント: `cta_click`（記事内CallToActionCTA、`page_path`付き）、`sign_up`（メール登録成功、`method`）、`exam_complete`（模試完走、`test_type`/`score`/`total`）。
 - GA管理画面でこれらを「キーイベント」に指定して初めてコンバージョンとして集計される（コードだけでは未設定）。
+
+## /guide の例題（example）
+- `src/data/guideArticles.ts` の `GuideArticle.example`（problem/choices/answer/explanation）を設定すると、ガイドページに「例題で確認」が描画される。順位10〜20位で伸び悩む単元ページの内容を厚くする用途。問題文の改行は文字列内の `
+`（`whitespace-pre-line`で表示）。問題はオリジナルで作り、解説の根拠が正しいか確認すること。

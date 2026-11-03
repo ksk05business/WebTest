@@ -16,6 +16,8 @@ export type GuideArticle = {
   intro: string;
   tips: string[];
   commonMistakes?: string[];
+  // 解き方の実演用の例題（オリジナル問題）。「例題で確認」セクションとして描画される。
+  example?: { problem: string; choices?: string[]; answer: string; explanation: string };
 };
 
 export const GUIDE_ARTICLES: GuideArticle[] = [
@@ -174,7 +176,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "二語の関係",
     category: "verbal",
     subCategory: "二語の関係",
-    title: "SPI「二語の関係」の解き方｜関係性のパターン一覧",
+    title: "SPI二語の関係の解き方｜同義・包含・原材料など関係性パターン一覧と例題",
     metaDescription:
       "SPIの二語の関係の解き方を解説。同義語・対義語・包含関係・原材料と製品など頻出の関係性パターンを整理します。",
     intro:
@@ -185,6 +187,12 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       "包含関係は方向（AがBを含むのか、BがAを含むのか）を間違えやすいため、矢印の向きを意識して統一する。",
       "選択肢を1つずつ確実に検証する時間がない場合は、明らかに関係性が異なる選択肢から先に消去する。",
     ],
+    example: {
+      problem: "最初に示された二語と同じ関係になる組み合わせを選びなさい。\n【例】ペン：筆記用具",
+      choices: ["ア　犬：動物", "イ　米：パン", "ウ　机：椅子", "エ　医者：病院"],
+      answer: "ア",
+      explanation: "例の二語は「ペンは筆記用具の一種である」という包含関係です。同じ文型に当てはめると、「犬は動物の一種である」が成り立つアが正解です。イ（米は原材料、パンは製品）は原材料と製品、ウは同じ家具の仲間、エは職業と職場の関係なので、いずれも文型が成り立ちません。",
+    },
   },
   {
     slug: "spi-idiom-structure",
@@ -274,7 +282,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "長文読解",
     category: "verbal",
     subCategory: "長文読解",
-    title: "SPI「長文読解」の解き方｜設問先読みのテクニック",
+    title: "SPI長文読解の解き方｜設問先読みで根拠箇所を素早く探す手順と例題",
     metaDescription:
       "SPIの長文読解の解き方を解説。設問を先に読んでから本文を読む「先読み」のテクニックと根拠箇所の探し方を紹介します。",
     intro:
@@ -285,6 +293,12 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       "選択肢は本文の表現をそのまま言い換えていることが多いため、微妙に意味が変わっている（誇張・逆の内容になっている）選択肢を見抜く。",
       "「本文に書かれていない」内容は、一般常識やありそうな話であっても正解にはならない。必ず本文中に根拠があるかを確認する。",
     ],
+    example: {
+      problem: "【本文】Aさんの会社では昨年、在宅勤務を週2日まで認める制度を導入した。導入当初は連絡の遅れを懸念する声が多かったが、チャットツールを併用した結果、半年後の社員アンケートでは約8割が「業務効率が上がった」と回答した。一方で、新入社員からは「相談しづらい」という声が今も残っている。\n【設問】本文の内容と合致するものはどれか。",
+      choices: ["ア　在宅勤務は週5日まで認められている", "イ　導入当初は連絡の遅れを懸念する声が多かった", "ウ　社員の約8割が今も相談しづらいと感じている", "エ　新入社員は在宅勤務で効率が上がったと答えた"],
+      answer: "イ",
+      explanation: "先に選択肢を読み、「在宅勤務の日数」「導入当初の声」「約8割」「新入社員」の4点を探す対象にします。本文では日数は「週2日まで」なのでアは誤り。「約8割」は「業務効率が上がった」と答えた割合でウは誤り。新入社員は「相談しづらい」と答えているのでエも誤り。「導入当初は連絡の遅れを懸念する声が多かった」と書かれているイが正解です。",
+    },
   },
 
   // ==================== SPI / 構造的把握力 ====================
@@ -296,7 +310,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "文章の構造化",
     category: "structural",
     subCategory: "文章の構造化",
-    title: "SPI「構造的把握力（文章の構造化）」の解き方",
+    title: "SPI構造的把握力（文章の構造化）の解き方｜因果・具体例の型で分類する例題つき",
     metaDescription:
       "SPIの構造的把握力（文章の構造化）の解き方を解説。文と文の論理的な関係（因果・対比・具体例）を見抜くコツを紹介します。",
     intro:
@@ -307,6 +321,12 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       "「AだからB」「AなのでB」のような因果関係を示す文型を見つけたら、その型に注目して他の文と比較する。",
       "内容の面白さや正しさに引きずられず、あくまで文の「型」だけを見る意識を持つ。",
     ],
+    example: {
+      problem: "次の4つの文を、文の構造が同じもの同士で2つのグループに分けなさい。\nA　雨が降ったので、試合が中止になった。\nB　睡眠不足だったため、授業中に集中力が続かなかった。\nC　この町には、パン屋や花屋など小さな店が多い。\nD　円安が進むと、輸入品の価格が上がる。",
+      choices: ["ア　{A, B, D} と {C}", "イ　{A, C} と {B, D}", "ウ　{A, B} と {C, D}", "エ　{A, D} と {B, C}"],
+      answer: "ア",
+      explanation: "話題（天気・睡眠・町・為替）はバラバラなので、内容ではなく文の「型」だけを見ます。A・B・Dは「原因→結果」の形です。Cは「全体の傾向（店が多い）」を「パン屋や花屋」という具体例で示す形で、型が異なります。よって{A, B, D}と{C}に分けるアが正解です。",
+    },
   },
   {
     slug: "spi-classification",
@@ -378,7 +398,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "空欄補充",
     category: "english",
     subCategory: "空欄補充",
-    title: "SPI英語「空欄補充」の解き方｜文法・語法のチェックポイント",
+    title: "SPI英語の空欄補充｜品詞・時制・前置詞の判断ポイントと例題",
     metaDescription:
       "SPI英語の空欄補充問題の解き方を解説。時制・前置詞・接続詞など文法的な判断ポイントを整理します。",
     intro:
@@ -389,6 +409,12 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
       "前置詞問題は、直前直後の単語との「セットで覚えている表現（熟語）」がないか思い出す。",
       "文全体を読んでから空欄を埋める。空欄の前後だけで判断すると、文全体の意味と矛盾する語を選んでしまうことがある。",
     ],
+    example: {
+      problem: "空欄に入る最も適切な語を選びなさい。\nShe has been studying English ( ) three years.",
+      choices: ["ア　since", "イ　for", "ウ　during", "エ　from"],
+      answer: "イ",
+      explanation: "空欄の後ろの「three years」は期間の長さを表します。現在完了（進行）形で期間の長さを示すときは for を使い、sinceは「起点（2020年から、など）」を示す語の前に置きます。duringは特定の出来事の最中を表す語の前、fromは起点を示す語なので不適切で、イが正解です。",
+    },
   },
   {
     slug: "spi-english-reading",
