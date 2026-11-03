@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ChevronLeft } from "lucide-react";
 import { formatBlogDate, getAllBlogSlugs, getBlogPost, getRelatedPosts } from "@/src/lib/blog";
+import { TrackedLink } from "@/src/components/TrackedLink";
 import { MdxWrapper } from "@/src/components/MdxWrapper";
 import { RelatedArticles } from "@/src/components/RelatedArticles";
 import { SITE_NAME, SITE_OGP_IMAGE, SITE_URL } from "@/src/lib/site";
@@ -90,12 +91,13 @@ export default async function BlogPostPage({ params }: PageProps) {
           <Link href="/" className="text-lg font-bold text-blue-700">
             Webテスト<span className="text-gray-900">ナビ</span>
           </Link>
-          <Link
+          <TrackedLink
+            location="header"
             href="/register"
             className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow hover:shadow-md"
           >
             無料登録
-          </Link>
+          </TrackedLink>
         </div>
       </header>
 
