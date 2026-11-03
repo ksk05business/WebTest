@@ -28,7 +28,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "推論",
     category: "non_verbal",
     subCategory: "推論",
-    title: "SPI「推論」の解き方｜頻出パターンと対策のコツ",
+    title: "SPI推論の解き方｜順序・対応・整数条件のパターン別攻略法",
     metaDescription:
       "SPIの非言語「推論」の解き方を解説。順序関係・対応関係・整数条件など頻出パターン別の攻略法と、時間内に正解率を上げるコツを紹介します。",
     intro:
@@ -52,7 +52,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "損益計算",
     category: "non_verbal",
     subCategory: "損益算",
-    title: "SPI「損益算」の解き方｜原価・定価・利益の公式と計算のコツ",
+    title: "SPI損益算の公式一覧｜原価・定価・割引・利益率の計算をパターン別に解説",
     metaDescription:
       "SPIの損益算（損益計算）を解説。原価・定価・売価・利益の関係式や割引・利益率の計算パターンを、公式と具体例つきで整理します。",
     intro:
@@ -72,7 +72,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "集合",
     category: "non_verbal",
     subCategory: "集合",
-    title: "SPI「集合」の解き方｜ベン図・キャロル表の使い分け",
+    title: "SPI集合問題の解き方｜ベン図とキャロル表の使い分けと計算のコツ",
     metaDescription:
       "SPIの集合問題の解き方を解説。2つの条件はベン図、3つ以上の条件はキャロル表（線分図）で整理する使い分けと計算のコツを紹介します。",
     intro:
@@ -152,7 +152,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "表の読み取り",
     category: "non_verbal",
     subCategory: "資料の読み取り",
-    title: "SPI「資料の読み取り（表の読み取り）」の解き方",
+    title: "SPI資料の読み取り（表）の解き方｜概算で時短して正答率を上げるコツ",
     metaDescription:
       "SPIの資料の読み取り（表の読み取り）問題の解き方を解説。表の構造把握と計算量を減らすコツを紹介します。",
     intro:
@@ -194,7 +194,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
     unitLabel: "熟語の成り立ち",
     category: "verbal",
     subCategory: "熟語の成り立ち",
-    title: "SPI「熟語の成り立ち」の解き方｜漢字の構成パターン",
+    title: "SPI熟語の成り立ち｜似た意味・反対・主述の構成パターンと見分け方",
     metaDescription:
       "SPIの熟語の成り立ちの解き方を解説。似た意味を重ねる、反対の意味を重ねる、主語と述語の関係など構成パターンを整理します。",
     intro:
