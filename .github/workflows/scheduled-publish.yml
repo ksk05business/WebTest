@@ -1,0 +1,29 @@
+name: Scheduled blog publish
+
+# 静的サイト(output: "export")のため、ブログの予約公開(draft:false + 未来のdate)は
+# date到来後にビルドが走って初めて反映される。毎朝7:10(JST)に、その日公開予定の記事が
+# あるときだけ空コミットをpushしてCloudflare Pagesの自動デプロイを起動する。
+on:
+  schedule:
+    - cron: "10 22 * * *" # 07:10 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push empty commit if an article is scheduled for today (JST)
+        run: |
+          today=$(TZ=Asia/Tokyo date +%F)
+          if grep -lE "^date: \"${today}T" content/blog/*.mdx >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "chore: 予約公開記事を反映するための日次デプロイ (${today})"
+            git push
+          else
+            echo "No article scheduled for ${today}; skipping."
+          fi
