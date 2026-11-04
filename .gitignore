@@ -46,3 +46,6 @@ next-env.d.ts
 
 # 管理画面アクセス手順（運営者専用メモ、公開リポジトリに含めない）
 /ADMIN_ACCESS.md
+
+# 一時作業用のスクラッチファイル
+/scratch_*.json
