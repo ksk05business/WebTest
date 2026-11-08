@@ -17,7 +17,7 @@ type PutBody = QuestionInput & { isReviewed?: unknown };
 // 問題検品機能：1件分の問題内容（問題文・選択肢・正解・解説等）とレビュー完了フラグを更新する。
 // 編集モーダルから、その問題の全フィールドを毎回送ってもらう想定（部分更新は行わない）。
 export const onRequestPut: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const id = parseId(context.params.id as string | undefined);
@@ -75,7 +75,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 // 問題検品機能：不適切・誤作動の問題を削除する。関連する復習キュー・解答履歴も合わせて削除する
 // （外部キー制約があるため、questionsを削除する前に依存レコードを削除する必要がある）。
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const id = parseId(context.params.id as string | undefined);

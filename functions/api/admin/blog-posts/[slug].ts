@@ -17,7 +17,7 @@ function parseSlug(raw: string | undefined): string | null {
 
 // 編集モーダル用に、本文を含む記事全体とGitHub上のsha（更新時の楽観的ロックに必須）を返す。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
   const token = context.env.GITHUB_CONTENT_TOKEN;
   if (!token) return Response.json({ error: "GitHub連携が設定されていません" }, { status: 503 });
@@ -38,7 +38,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 // リクエストのshaが取得時から変わっていた場合（他で先に更新された等）はGitHubが409/422を
 // 返すため、409で呼び出し元に伝える。
 export const onRequestPut: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
   const token = context.env.GITHUB_CONTENT_TOKEN;
   if (!token) return Response.json({ error: "GitHub連携が設定されていません" }, { status: 503 });
@@ -86,7 +86,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
 // 記事の削除。GitHub Contents APIの仕様上、削除にも対象ファイルの現在のshaが必須。
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
   const token = context.env.GITHUB_CONTENT_TOKEN;
   if (!token) return Response.json({ error: "GitHub連携が設定されていません" }, { status: 503 });

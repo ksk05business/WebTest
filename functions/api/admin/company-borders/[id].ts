@@ -15,7 +15,7 @@ function parseId(raw: string | undefined): number | null {
 // 企業ボーダー情報1件分の更新API。編集モーダルから全フィールドを毎回送ってもらう想定
 // （questions/[id].tsと同様、部分更新は行わない）。
 export const onRequestPut: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const id = parseId(context.params.id as string | undefined);
@@ -64,7 +64,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
 // 企業ボーダー情報1件分の削除API。
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const id = parseId(context.params.id as string | undefined);

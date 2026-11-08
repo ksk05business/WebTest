@@ -25,7 +25,7 @@ type BlogPostListItem = {
 // 不要で、記事数・本文量が増えるとレスポンスが重くなるため。本文は個別記事取得
 // GET /api/admin/blog-posts/{slug} で取得する）。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
   const token = context.env.GITHUB_CONTENT_TOKEN;
   if (!token) return Response.json({ error: "GitHub連携が設定されていません" }, { status: 503 });
@@ -66,7 +66,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 // GitHubへのコミットが行われるだけで、実際に本番の/blogページへ反映されるまでには
 // Cloudflare Pagesの自動ビルド・デプロイの時間（数分〜十数分）がかかる点に注意。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
   const token = context.env.GITHUB_CONTENT_TOKEN;
   if (!token) return Response.json({ error: "GitHub連携が設定されていません" }, { status: 503 });

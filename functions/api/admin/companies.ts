@@ -26,7 +26,7 @@ type CompanyApplicationRow = {
 
 // 申請・資料請求の一覧取得。?status= ?requestType= で絞り込み可能（デフォルトは全件）。管理API共通のx-admin-token認証。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const url = new URL(context.request.url);
@@ -86,7 +86,7 @@ const VALID_ACTIONS = ["approve", "reject", "mark_handled", "mark_received"] as 
 //   （一度きり、この応答以外には残さない）。
 //   mark_handled/mark_received: request_type='document_request' の資料請求のみ有効。アカウントは発行しない、対応状況のトグル。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   let body: ReviewBody;

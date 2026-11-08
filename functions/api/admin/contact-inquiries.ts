@@ -18,7 +18,7 @@ type ContactInquiryRow = {
 
 // お問い合わせ一覧取得。?status= で絞り込み可能（デフォルトは全件）。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const status = new URL(context.request.url).searchParams.get("status");
@@ -57,7 +57,7 @@ type UpdateBody = {
 
 // 対応ステータスの更新（未対応 <-> 対応済み）。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   let body: UpdateBody;

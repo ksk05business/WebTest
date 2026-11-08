@@ -34,3 +34,9 @@ description: ログイン・セッション認証・本人確認・管理者ト�
 ## 動作検証パターン
 
 セッション周りを変更したら、被害者役・攻撃者役の2つのテストアカウントを作り、「攻撃者のセッションCookieのまま、リクエストボディ/クエリに被害者の識別子を指定してAPIを叩く」攻撃シナリオで再現し、**攻撃者自身のデータにのみ作用し被害者のデータに影響しないこと**を確認する。あわせてCookie無しアクセスの401、ログアウト後の旧Cookie失効も確認する。検証用アカウントは本番から必ず削除すること。
+
+## 総当たり対策（2026-11-08追加）
+
+- `functions/_lib/rateLimit.ts`の`enforceRateLimit(kv, request, name, limit, windowSeconds)`をエンドポイント冒頭で呼ぶ（超過で429）。適用済み: `login`・`company/login`（15分10回）、`register`・`reset-password`（1時間10回）、`company/apply`・`contact`（1時間5回）、`forgot-password`（1時間5回）。公開の書き込み系・認証系APIを新設するときは同様に付けること。
+- `checkAdminAuth`は**async**（呼び出し側は必ず`await`）。SHA-256ダイジェストの定数時間比較で、同一IPの認証失敗が15分で10回に達すると正しいトークンでも429で拒否する。
+- `public/_headers`で`X-Frame-Options`・`nosniff`・`Referrer-Policy`・HSTS等を付与。CSPはNext.js静的エクスポートのインラインスクリプトと衝突するため未導入（導入するならnonce/hash対応が必要）。

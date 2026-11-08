@@ -1,9 +1,11 @@
+import { enforceRateLimit } from "../_lib/rateLimit";
 import { hashPassword } from "../_lib/password";
 import { buildPlaceholderProfile } from "../_lib/placeholderProfile";
 import { createSession, sessionCookieHeader } from "../_lib/session";
 
 interface Env {
   DB: D1Database;
+  RATE_LIMIT_KV?: KVNamespace;
 }
 
 type RegisterBody = {
@@ -20,6 +22,9 @@ type RegisterBody = {
 // （functions/api/me.ts参照）。この仮登録の枠組みはGoogleログインでの新規作成
 // （functions/api/auth/google-signup.ts）と共通。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const limited = await enforceRateLimit(context.env.RATE_LIMIT_KV, context.request, "register", 10, 3600);
+  if (limited) return limited;
+
   let body: RegisterBody;
   try {
     body = await context.request.json();

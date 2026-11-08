@@ -1,5 +1,7 @@
+import { enforceRateLimit } from "../_lib/rateLimit";
 interface Env {
   DB: D1Database;
+  RATE_LIMIT_KV?: KVNamespace;
 }
 
 type ContactBody = {
@@ -11,6 +13,9 @@ type ContactBody = {
 // お問い合わせフォームの送信。未ログインの公開エンドポイント。/company/apply と同様、
 // メール送信機能は未設定のためD1へ保存するのみ（自動返信・通知メールは送らない）。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const limited = await enforceRateLimit(context.env.RATE_LIMIT_KV, context.request, "contact", 5, 3600);
+  if (limited) return limited;
+
   let body: ContactBody;
   try {
     body = await context.request.json();

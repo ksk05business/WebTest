@@ -18,7 +18,7 @@ const TEST_NAME_BY_ID: Record<string, string> = Object.fromEntries(
 // テスト種別・単元単位に整形し、模試専用プール（is_mock_only=1）の在庫目標（3回分、
 // src/data/examStockTargets.ts）に対する達成状況を付加して返す。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const rows = await context.env.DB.prepare(

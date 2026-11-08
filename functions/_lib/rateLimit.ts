@@ -32,3 +32,19 @@ export async function checkRateLimit(
 export function getClientIp(request: Request): string {
   return request.headers.get("CF-Connecting-IP") ?? "unknown";
 }
+
+// エンドポイント冒頭で呼ぶ共通ヘルパー。上限超過なら429のResponseを返し、問題なければnullを返す。
+export async function enforceRateLimit(
+  kv: KVNamespace | undefined,
+  request: Request,
+  name: string,
+  limit: number,
+  windowSeconds: number
+): Promise<Response | null> {
+  const result = await checkRateLimit(kv, `${name}:${getClientIp(request)}`, limit, windowSeconds);
+  if (result.allowed) return null;
+  return Response.json(
+    { error: "リクエストが多すぎます。しばらく時間をおいて再度お試しください。" },
+    { status: 429 }
+  );
+}

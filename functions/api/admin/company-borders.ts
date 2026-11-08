@@ -40,7 +40,7 @@ function toAdminCompanyBorder(row: CompanyBorderRow) {
 // 異なり検査種別未設定（空欄）の企業も含め全件を対象にでき、企業名・ふりがなの部分一致検索、
 // 業界フィルタ、「検査種別未設定のみ」フィルタに対応する。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const params = new URL(context.request.url).searchParams;
@@ -90,7 +90,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
 // 企業ボーダー情報の新規登録API。x-admin-tokenヘッダー必須。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   let body: CompanyBorderInput;

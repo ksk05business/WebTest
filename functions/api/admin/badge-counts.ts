@@ -15,7 +15,7 @@ interface Env {
 // - ボーダー企業: /bordersに掲載中で検査種別（test_type）が未設定（空欄）の企業数。運営が
 //   情報を埋めるべき残件数として表示する。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const db = context.env.DB;

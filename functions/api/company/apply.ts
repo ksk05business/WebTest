@@ -1,7 +1,9 @@
+import { enforceRateLimit } from "../../_lib/rateLimit";
 import { isFreeEmailDomain } from "../../_lib/freeEmailDomains";
 
 interface Env {
   DB: D1Database;
+  RATE_LIMIT_KV?: KVNamespace;
 }
 
 type ApplyBody = {
@@ -36,6 +38,9 @@ function isValidUrl(value: string): boolean {
 // accountType='agency'（人材紹介・エージェント事業者）の申請自体は受け付けるが、原則利用不可のため
 // 管理画面側（CompanyManagementPanel）で警告バッジを表示し、審査担当者の却下判断を促す。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const limited = await enforceRateLimit(context.env.RATE_LIMIT_KV, context.request, "company-apply", 5, 3600);
+  if (limited) return limited;
+
   let body: ApplyBody;
   try {
     body = await context.request.json();

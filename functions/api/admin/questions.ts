@@ -77,7 +77,7 @@ function toAdminQuestion(row: QuestionRow) {
 //   search（問題文・タイトルの部分一致キーワード検索）
 //   limit（デフォルト50、最大200）, offset（デフォルト0）
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const params = new URL(context.request.url).searchParams;
@@ -150,7 +150,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 // リクエストボディにも対応する。x-admin-token ヘッダーが ADMIN_API_TOKEN と一致しない限り拒否する
 // （このアプリには管理者ログイン機構が無いため、共有シークレットによる簡易ゲートとした）。
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   let body: unknown;

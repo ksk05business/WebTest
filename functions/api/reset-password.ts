@@ -1,7 +1,9 @@
+import { enforceRateLimit } from "../_lib/rateLimit";
 import { hashPassword, verifyPassword } from "../_lib/password";
 
 interface Env {
   DB: D1Database;
+  RATE_LIMIT_KV?: KVNamespace;
 }
 
 type ResetPasswordBody = {
@@ -19,6 +21,9 @@ type OtpRow = {
 const GENERIC_ERROR = "コードが正しくないか、有効期限が切れています。もう一度やり直してください。";
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const limited = await enforceRateLimit(context.env.RATE_LIMIT_KV, context.request, "reset-password", 10, 3600);
+  if (limited) return limited;
+
   let body: ResetPasswordBody;
   try {
     body = await context.request.json();

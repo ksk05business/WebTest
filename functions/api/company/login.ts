@@ -1,8 +1,10 @@
+import { enforceRateLimit } from "../../_lib/rateLimit";
 import { verifyPassword } from "../../_lib/password";
 import { createSession, sessionCookieHeader } from "../../_lib/session";
 
 interface Env {
   DB: D1Database;
+  RATE_LIMIT_KV?: KVNamespace;
 }
 
 type LoginBody = {
@@ -20,6 +22,9 @@ type CompanyRow = {
 };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const limited = await enforceRateLimit(context.env.RATE_LIMIT_KV, context.request, "company-login", 10, 900);
+  if (limited) return limited;
+
   let body: LoginBody;
   try {
     body = await context.request.json();

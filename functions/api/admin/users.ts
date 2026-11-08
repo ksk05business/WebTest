@@ -25,7 +25,7 @@ type UserRow = {
 
 // 登録済み学生の一覧取得（最大500件、新しい順）。検索・フィルターはクライアント側で行う想定の簡易実装。
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const authError = checkAdminAuth(context);
+  const authError = await checkAdminAuth(context);
   if (authError) return authError;
 
   const rows = await context.env.DB.prepare(
